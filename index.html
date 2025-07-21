@@ -9,14 +9,24 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
-        body { line-height: 1.6; }
+
+        body {
+            line-height: 1.6;
+            background: #f5f7fa;
+        }
+
         header {
-            background: #004aad;
+            background: linear-gradient(90deg, #004aad, #0066cc);
             color: white;
             padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+
         nav {
             display: flex;
             justify-content: space-between;
@@ -24,58 +34,206 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+
         .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
+
         nav ul {
             list-style: none;
             display: flex;
-            gap: 1rem;
+            gap: 1.5rem;
         }
+
         nav ul li a {
             color: white;
             text-decoration: none;
             padding: 0.5rem 1rem;
+            font-size: 1rem;
+            transition: background 0.3s ease;
         }
+
         nav ul li a.active, nav ul li a:hover {
             background: #003087;
             border-radius: 5px;
         }
+
         .hero {
+            background: linear-gradient(rgba(0, 74, 173, 0.8), rgba(0, 102, 204, 0.8)), url('https://images.unsplash.com/photo-1516321310765-79de1b74a164?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
             text-align: center;
-            padding: 4rem 1rem;
-            background: #f4f4f4;
+            padding: 6rem 1rem;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
+
         .hero h1 {
-            font-size: 2.5rem;
+            font-size: 3.5rem;
             margin-bottom: 1rem;
+            animation: fadeInDown 1s ease-out;
         }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin-bottom: 2rem;
+        }
+
         .cta {
             display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: #004aad;
+            padding: 1rem 2rem;
+            background: #ff6f61;
             color: white;
             text-decoration: none;
-            border-radius: 5px;
-            margin-top: 1rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        main {
+
+        .cta:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .modules-section {
             max-width: 1200px;
-            margin: 2rem auto;
+            margin: 3rem auto;
             padding: 0 1rem;
         }
-        h2 { margin-bottom: 1rem; }
-        footer {
+
+        .modules-section h2 {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 2rem;
+            color: #004aad;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .module-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .module-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .module-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .module-card-content {
+            padding: 1.5rem;
+        }
+
+        .module-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #004aad;
+        }
+
+        .module-card p {
+            color: #555;
+            margin-bottom: 1rem;
+        }
+
+        .announcements {
+            background: #fff;
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .announcements h2 {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            color: #004aad;
+        }
+
+        .carousel {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .carousel-items {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .carousel-item {
+            min-width: 100%;
             text-align: center;
             padding: 1rem;
-            background: #f4f4f4;
-            margin-top: 2rem;
+            font-size: 1.1rem;
+            color: #333;
         }
+
+        .carousel-controls {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+        }
+
+        .carousel-controls button {
+            background: #004aad;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        footer {
+            background: #004aad;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .social-links a {
+            color: white;
+            margin: 0 1rem;
+            font-size: 1.2rem;
+            text-decoration: none;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
             nav { flex-direction: column; gap: 1rem; }
             nav ul { flex-direction: column; align-items: center; }
-            .hero h1 { font-size: 1.8rem; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1rem; }
+            .module-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -96,24 +254,46 @@
     </header>
     <main>
         <section class="hero">
-            <h1>Welcome to Data Science Academy</h1>
-            <p>Empowering the next generation of data scientists.</p>
+            <h1>Launch Your Data Science Journey</h1>
+            <p>Join our cutting-edge programs to master data science, machine learning, and AI.</p>
             <a href="application.html" class="cta">Apply Now</a>
+        </section>
+        <section class="modules-section">
+            <h2>Explore Our Modules</h2>
+            <div class="module-grid" id="moduleGrid"></div>
         </section>
         <section class="announcements">
             <h2>Latest Announcements</h2>
-            <p>New Data Science module starting January 2026!</p>
+            <div class="carousel">
+                <div class="carousel-items" id="carouselItems">
+                    <div class="carousel-item">New Data Science module starts January 2026!</div>
+                    <div class="carousel-item">Application deadline: December 15, 2025</div>
+                    <div class="carousel-item">Join our free webinar on AI trends!</div>
+                </div>
+                <div class="carousel-controls">
+                    <button id="prevBtn">&larr;</button>
+                    <button id="nextBtn">&rarr;</button>
+                </div>
+            </div>
         </section>
     </main>
     <footer>
         <p>© 2025 Data Science Academy. All rights reserved.</p>
+        <div class="social-links">
+            <a href="#">Twitter</a>
+            <a href="#">LinkedIn</a>
+            <a href="#">Instagram</a>
+        </div>
     </footer>
     <script>
+        // Authentication
         const loginBtn = document.getElementById('loginBtn');
         let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
         function updateLoginStatus() {
             loginBtn.textContent = isLoggedIn ? 'Logout' : 'Login';
         }
+
         loginBtn.addEventListener('click', () => {
             if (isLoggedIn) {
                 localStorage.removeItem('isLoggedIn');
@@ -131,6 +311,64 @@
             updateLoginStatus();
         });
         updateLoginStatus();
+
+        // Module Data
+        const modules = [
+            {
+                id: 1,
+                title: 'Introduction to Data Science',
+                description: 'Learn the fundamentals of data analysis and visualization.',
+                image: 'https://images.unsplash.com/photo-1551288049-b1f3a0c3f3e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80'
+            },
+            {
+                id: 2,
+                title: 'Machine Learning',
+                description: 'Master advanced ML techniques and model building.',
+                image: 'https://images.unsplash.com/photo-1516321310765-79de1b74a164?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80'
+            }
+        ];
+
+        // Populate Modules
+        const moduleGrid = document.getElementById('moduleGrid');
+        modules.forEach(module => {
+            const card = document.createElement('div');
+            card.className = 'module-card';
+            card.innerHTML = `
+                <img src="${module.image}" alt="${module.title}">
+                <div class="module-card-content">
+                    <h3>${module.title}</h3>
+                    <p>${module.description}</p>
+                    <a href="module-details.html?id=${module.id}" class="cta">View Details</a>
+                </div>
+            `;
+            moduleGrid.appendChild(card);
+        });
+
+        // Carousel Functionality
+        const carouselItems = document.getElementById('carouselItems');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        let currentIndex = 0;
+
+        function updateCarousel() {
+            carouselItems.style.transform = `translateX(-${currentIndex * 100}%)`;
+        }
+
+        nextBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex + 1) % carouselItems.children.length;
+            updateCarousel();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            currentIndex = (currentIndex - 1 + carouselItems.children.length) % carouselItems.children.length;
+            updateCarousel();
+        });
+
+        // Auto-scroll carousel
+        setInterval(() => {
+            currentIndex = (currentIndex + 1) % carouselItems.children.length;
+            updateCarousel();
+        }, 5000);
     </script>
 </body>
 </html>
