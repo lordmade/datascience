@@ -15,6 +15,8 @@
         body {
             line-height: 1.6;
             background: #f5f7fa;
+            display: flex;
+            min-height: 100vh;
         }
 
         header {
@@ -60,82 +62,90 @@
             background: #003087;
         }
 
-        nav.bottom-nav {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+        .sidebar {
+            width: 200px;
             background: #004aad;
-            padding: 0.6rem 0;
-            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
+            color: white;
+            position: sticky;
+            top: 64px;
+            height: calc(100vh - 64px);
+            padding: 1rem 0;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 900;
         }
 
-        nav.bottom-nav ul {
-            display: flex;
-            justify-content: space-around;
+        .sidebar ul {
             list-style: none;
         }
 
-        nav.bottom-nav ul li a {
+        .sidebar ul li {
+            margin: 0.5rem 0;
+        }
+
+        .sidebar ul li a {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 1.5rem;
             color: white;
             text-decoration: none;
-            font-size: 0.8rem;
-            text-align: center;
-            padding: 0.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.3rem;
-            border-radius: 5px;
+            font-size: 1rem;
             transition: background 0.2s ease;
-            min-width: 60px;
         }
 
-        nav.bottom-nav ul li a.active, nav.bottom-nav ul li a:hover {
-            background: #003087;
+        .sidebar ul li a.active, .sidebar ul li a:hover {
+            background: #ff6f61;
         }
 
-        nav.bottom-nav svg {
+        .sidebar ul li a svg {
             width: 24px;
             height: 24px;
             fill: white;
         }
 
-        .dashboard-section {
+        .content {
+            flex: 1;
+            padding: 2rem;
             max-width: 1200px;
-            margin: 2rem auto;
-            padding: 1.5rem;
+            margin: 0 auto;
+        }
+
+        .tab-content {
+            display: none;
             background: white;
+            padding: 1.5rem;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             animation: fadeIn 1s ease-out;
         }
 
-        .dashboard-section h2 {
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-content h2 {
             font-size: 1.8rem;
             color: #004aad;
             margin-bottom: 1rem;
         }
 
-        .dashboard-section h3 {
+        .tab-content h3 {
             font-size: 1.5rem;
             color: #004aad;
             margin: 1.5rem 0 1rem;
         }
 
-        .dashboard-section p {
+        .tab-content p {
             color: #333;
             margin-bottom: 1rem;
         }
 
         .profile-form {
-            margin-bottom: 2rem;
             display: flex;
             flex-wrap: wrap;
             gap: 1rem;
             align-items: center;
+            margin-bottom: 2rem;
         }
 
         .profile-form input {
@@ -327,6 +337,49 @@
             height: 100%;
         }
 
+        nav.bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #004aad;
+            padding: 0.6rem 0;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        nav.bottom-nav ul {
+            display: flex;
+            justify-content: space-around;
+            list-style: none;
+        }
+
+        nav.bottom-nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.8rem;
+            text-align: center;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+            border-radius: 5px;
+            transition: background 0.2s ease;
+            min-width: 60px;
+        }
+
+        nav.bottom-nav ul li a.active, nav.bottom-nav ul li a:hover {
+            background: #ff6f61;
+        }
+
+        nav.bottom-nav svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
         footer {
             background: #004aad;
             color: white;
@@ -359,21 +412,23 @@
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .sidebar {
+                display: none;
+            }
             nav.top-nav {
                 display: none;
             }
             nav.bottom-nav {
                 display: block;
             }
-            .dashboard-section {
-                margin: 1rem;
+            .content {
                 padding: 1rem;
             }
-            .dashboard-section h2 {
-                font-size: 1.5rem;
-            }
-            .stats-grid, .applications-grid, .progress-grid {
-                grid-template-columns: 1fr;
+            .tab-content {
+                padding: 1rem;
             }
             .profile-form {
                 flex-direction: column;
@@ -411,21 +466,21 @@
         </nav>
         <nav class="bottom-nav">
             <ul>
-                <li><a href="index.html">
-                    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                    Home
+                <li><a href="#" data-tab="profile" class="tab-link">
+                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    Profile
                 </a></li>
-                <li><a href="modules.html">
-                    <svg viewBox="0 0 24 24"><path d="M4 6h18V4H4v2zM4 11h18v-2H4v2zM4 16h18v-2H4v2zM4 21h18v-2H4v2z"/></svg>
-                    Modules
+                <li><a href="#" data-tab="statistics" class="tab-link">
+                    <svg viewBox="0 0 24 24"><path d="M4 9h4V5H4v4zm6 0h4V5h-4v4zm6 0h4V5h-4v4zM4 14h4v-4H4v4zm6 0h4v-4h-4v4zm6 0h4v-4h-4v4zM4 19h4v-4H4v4zm6 0h4v-4h-4v4zm6 0h4v-4h-4v4z"/></svg>
+                    Statistics
                 </a></li>
-                <li><a href="application.html">
+                <li><a href="#" data-tab="applications" class="tab-link">
                     <svg viewBox="0 0 24 24"><path d="M3 3v18h18V3H3zm16 16H5V5h14v14zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/></svg>
-                    Apply
+                    Applications
                 </a></li>
-                <li><a href="contact.html">
-                    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zM12 11L4 6h16l-8 5z"/></svg>
-                    Contact
+                <li><a href="#" data-tab="progress" class="tab-link">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    Progress
                 </a></li>
                 <li><a href="#" id="mobileLogoutBtn" aria-label="Logout">
                     <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10z"/></svg>
@@ -434,22 +489,47 @@
             </ul>
         </nav>
     </header>
-    <main>
-        <section class="dashboard-section">
+    <aside class="sidebar">
+        <ul>
+            <li><a href="#" data-tab="profile" class="tab-link active" aria-label="Profile">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                Profile
+            </a></li>
+            <li><a href="#" data-tab="statistics" class="tab-link" aria-label="Statistics">
+                <svg viewBox="0 0 24 24"><path d="M4 9h4V5H4v4zm6 0h4V5h-4v4zm6 0h4V5h-4v4zM4 14h4v-4H4v4zm6 0h4v-4h-4v4zm6 0h4v-4h-4v4zM4 19h4v-4H4v4zm6 0h4v-4h-4v4zm6 0h4v-4h-4v4z"/></svg>
+                Statistics
+            </a></li>
+            <li><a href="#" data-tab="applications" class="tab-link" aria-label="Applications">
+                <svg viewBox="0 0 24 24"><path d="M3 3v18h18V3H3zm16 16H5V5h14v14zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/></svg>
+                Applications
+            </a></li>
+            <li><a href="#" data-tab="progress" class="tab-link" aria-label="Progress">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                Progress
+            </a></li>
+        </ul>
+    </aside>
+    <main class="content">
+        <section id="profile" class="tab-content active">
             <h2>Welcome, <span id="userName"></span></h2>
             <p>Email: <span id="userEmail"></span></p>
             <div class="profile-form">
                 <input type="text" id="displayNameInput" placeholder="Update your name" aria-label="Update display name">
                 <button id="updateProfileBtn" aria-label="Update profile">Update Name</button>
             </div>
-            <p>Explore your learning journey below.</p>
-            <h3>Statistics</h3>
-            <div class="stats-grid" id="statsGrid"></div>
-            <h3>Your Applications</h3>
-            <div class="applications-grid" id="applicationsGrid"></div>
-            <h3>Your Progress</h3>
-            <div class="progress-grid" id="progressGrid"></div>
             <button class="logout-btn" id="logoutBtnSecondary" aria-label="Logout">Logout</button>
+        </section>
+        <section id="statistics" class="tab-content">
+            <h2>Statistics</h2>
+            <div class="stats-grid" id="statsGrid"></div>
+        </section>
+        <section id="applications" class="tab-content">
+            <h2>Your Applications</h2>
+            <div class="applications-grid" id="applicationsGrid"></div>
+        </section>
+        <section id="progress" class="tab-content">
+            <h2>Your Progress</h2>
+            <div class="progress-grid" id="progressGrid"></div>
         </section>
         <div id="custom-alert" class="custom-alert">
             <button class="close-btn" onclick="hideAlert()" aria-label="Close alert">
@@ -498,6 +578,8 @@
         const logoutBtnSecondary = document.getElementById('logoutBtnSecondary');
         const customAlert = document.getElementById('custom-alert');
         const alertMessage = document.getElementById('alert-message');
+        const tabLinks = document.querySelectorAll('.tab-link');
+        const tabContents = document.querySelectorAll('.tab-content');
 
         // Alert Functions
         function showAlert(message, autoHide = true) {
@@ -511,6 +593,29 @@
         function hideAlert() {
             customAlert.classList.remove('active');
         }
+
+        // Tab Switching
+        function switchTab(tabId) {
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+                if (content.id === tabId) {
+                    content.classList.add('active');
+                }
+            });
+            tabLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('data-tab') === tabId) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        tabLinks.forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                switchTab(link.getAttribute('data-tab'));
+            });
+        });
 
         // Authentication
         function handleLogout() {
@@ -534,12 +639,11 @@
 
             const user = auth.currentUser;
             if (user) {
-                // Update Firebase Authentication
                 user.updateProfile({ displayName: newName }).then(() => {
-                    // Update Realtime Database
                     db.ref(`users/${user.uid}`).update({ displayName: newName }).then(() => {
                         userName.textContent = newName;
                         displayNameInput.value = '';
+                        displayNameInput.placeholder = newName;
                         showAlert('Profile updated successfully.', true);
                     }).catch(error => {
                         showAlert('Failed to update database: ' + error.message, false);
