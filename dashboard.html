@@ -728,7 +728,7 @@
           showAlert(`Welcome, ${data.name}!`, true);
         } else {
           showAlert('No registration found for this email. Please create an account.', false);
-          setTimeout(() => window.location.href = "create-account.html", 3000);
+          setTimeout(() => window.location.href = "account.html", 3000);
           hideSpinner();
           return;
         }
@@ -930,7 +930,7 @@
       } else {
         showSpinner();
         showAlert('You are not logged in. Redirecting to login...', true);
-        setTimeout(() => window.location.href = "signin.html", 1500);
+        setTimeout(() => window.location.href = "signup.html", 1500);
       }
     });
 
@@ -940,7 +940,7 @@
         showSpinner();
         await signOut(auth);
         showAlert('Logged out successfully.', true);
-        setTimeout(() => window.location.href = "signin.html", 1500);
+        setTimeout(() => window.location.href = "signup.html", 1500);
       } catch (error) {
         console.error("Logout error:", error);
         showAlert(`Error: ${error.message}`, false);
