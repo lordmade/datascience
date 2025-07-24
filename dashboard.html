@@ -119,9 +119,45 @@
             margin-bottom: 1rem;
         }
 
+        .dashboard-section h3 {
+            font-size: 1.5rem;
+            color: #004aad;
+            margin: 1.5rem 0 1rem;
+        }
+
         .dashboard-section p {
             color: #333;
             margin-bottom: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+            animation-delay: calc(0.1s * var(--card-index));
+        }
+
+        .stat-card h4 {
+            font-size: 1.2rem;
+            color: #004aad;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ff6f61;
         }
 
         .applications-grid {
@@ -149,6 +185,47 @@
         .application-card p {
             font-size: 0.9rem;
             color: #555;
+        }
+
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .progress-card {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0;
+            animation-delay: calc(0.1s * var(--card-index));
+        }
+
+        .progress-card h3 {
+            font-size: 1.3rem;
+            color: #004aad;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-card p {
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 5px;
+            height: 10px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background: #ff6f61;
+            height: 100%;
+            transition: width 0.5s ease;
         }
 
         .logout-btn {
@@ -215,7 +292,7 @@
             .dashboard-section h2 {
                 font-size: 1.5rem;
             }
-            .applications-grid {
+            .stats-grid, .applications-grid, .progress-grid {
                 grid-template-columns: 1fr;
             }
             footer {
@@ -238,7 +315,7 @@
                 <li><a href="application.html">Apply</a></li>
                 <li><a href="contact.html">Contact</a></li>
                 <li><a href="privacy.html">Privacy</a></li>
-                <li><a href="#" id="logoutBtn">Logout</a></li>
+                <li><a href="#" id="logoutBtn" aria-label="Logout">Logout</a></li>
             </ul>
         </nav>
         <nav class="bottom-nav">
@@ -259,21 +336,27 @@
                     <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zM12 11L4 6h16l-8 5z"/></svg>
                     Contact
                 </a></li>
-                <li><a href="#" id="mobileLogoutBtn">
+                <li><a href="#" id="mobileLogoutBtn" aria-label="Logout">
                     <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10z"/></svg>
                     Logout
                 </a></li>
             </ul>
+        </navСпасибо
+
         </nav>
     </header>
     <main>
         <section class="dashboard-section">
             <h2>Welcome, <span id="userName">User</span></h2>
             <p>Email: <span id="userEmail">user@example.com</span></p>
-            <p>Manage your applications and explore your learning journey below.</p>
+            <p>Explore your learning journey below.</p>
+            <h3>Statistics</h3>
+            <div class="stats-grid" id="statsGrid"></div>
             <h3>Your Applications</h3>
             <div class="applications-grid" id="applicationsGrid"></div>
-            <button class="logout-btn" id="logoutBtnSecondary">Logout</button>
+            <h3>Your Progress</h3>
+            <div class="progress-grid" id="progressGrid"></div>
+            <button class="logout-btn" id="logoutBtnSecondary" aria-label="Logout">Logout</button>
         </section>
     </main>
     <footer>
@@ -303,7 +386,9 @@
         // Elements
         const userName = document.getElementById('userName');
         const userEmail = document.getElementById('userEmail');
+        const statsGrid = document.getElementById('statsGrid');
         const applicationsGrid = document.getElementById('applicationsGrid');
+        const progressGrid = document.getElementById('progressGrid');
         const logoutBtn = document.getElementById('logoutBtn');
         const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
         const logoutBtnSecondary = document.getElementById('logoutBtnSecondary');
@@ -323,19 +408,57 @@
                 window.location.href = 'signup.html';
                 return;
             }
+
             // Display user info
             userName.textContent = user.displayName || 'User';
             userEmail.textContent = user.email || 'user@example.com';
 
+            // Fetch user statistics
+            const stats = {
+                totalApplications: 0,
+                pending: 0,
+                approved: 0,
+                rejected: 0
+            };
+
+            db.ref('applications').orderByChild('studentId').equalTo(user.uid).once('value', snapshot => {
+                snapshot.forEach(child => {
+                    const app = child.val();
+                    stats.totalApplications++;
+                    if (app.status === 'Pending') stats.pending++;
+                    else if (app.status === 'Approved') stats.approved++;
+                    else if (app.status === 'Rejected') stats.rejected++;
+                });
+
+                statsGrid.innerHTML = `
+                    <div class="stat-card" style="--card-index: 0;">
+                        <h4>Total Applications</h4>
+                        <p>${stats.totalApplications}</p>
+                    </div>
+                    <div class="stat-card" style="--card-index: 1;">
+                        <h4>Pending</h4>
+                        <p>${stats.pending}</p>
+                    </div>
+                    <div class="stat-card" style="--card-index: 2;">
+                        <h4>Approved</h4>
+                        <p>${stats.approved}</p>
+                    </div>
+                    <div class="stat-card" style="--card-index: 3;">
+                        <h4>Rejected</h4>
+                        <p>${stats.rejected}</p>
+                    </div>
+                `;
+            });
+
             // Fetch applications
             db.ref('applications').orderByChild('studentId').equalTo(user.uid).on('value', snapshot => {
-                applicationsGrid.innerHTML = '';
+                applicationsGrid.innerHTML = snapshot.exists() ? '' : '<p>No applications submitted yet.</p>';
                 let cardIndex = 0;
                 snapshot.forEach(child => {
                     const app = child.val();
                     db.ref(`modules/${app.moduleId}`).once('value', moduleSnapshot => {
                         const module = moduleSnapshot.val();
-                        const card = document.createElement('div');
+                        const card = document.createElement('ONJIN
                         card.className = 'application-card';
                         card.style.setProperty('--card-index', cardIndex++);
                         card.innerHTML = `
@@ -344,6 +467,33 @@
                             <p>Submitted: ${new Date(app.submittedAt).toLocaleDateString()}</p>
                         `;
                         applicationsGrid.appendChild(card);
+                    });
+                });
+            });
+
+            // Fetch module progress
+            db.ref(`progress/${user.uid}`).on('value', snapshot => {
+                progressGrid.innerHTML = snapshot.exists() ? '' : '<p>No progress data available.</p>';
+                let cardIndex = 0;
+                snapshot.forEach(child => {
+                    const progress = child.val();
+                    db.ref(`modules/${child.key}`).once('value', moduleSnapshot => {
+                        const module = moduleSnapshot.val();
+                        const percentage = module && progress.completedLessons && module.totalLessons
+                            ? Math.round((progress.completedLessons / module.totalLessons) * 100)
+                            : 0;
+                        const card = document.createElement('div');
+                        card.className = 'progress-card';
+                        card.style.setProperty('--card-index', cardIndex++);
+                        card.innerHTML = `
+                            <h3>${module ? module.title : 'Unknown Module'}</h3>
+                            <p>Progress: ${percentage}%</p>
+                            <div class="progress-bar">
+                                <div class="progress-bar-fill" style="width: ${percentage}%"></div>
+                            </div>
+                            <p>Last Updated: ${progress.lastUpdated ? new Date(progress.lastUpdated).toLocaleDateString() : 'N/A'}</p>
+                        `;
+                        progressGrid.appendChild(card);
                     });
                 });
             });
