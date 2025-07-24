@@ -247,6 +247,53 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
+        .custom-alert {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            color: #1a202c;
+            font-weight: 500;
+            text-align: center;
+            max-width: 90%;
+            width: 320px;
+            animation: fadeIn 0.3s ease-out forwards;
+            border: 1px solid #0066cc;
+        }
+
+        .custom-alert.active {
+            display: block;
+        }
+
+        .custom-alert .close-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            width: 24px;
+            height: 24px;
+            background: none;
+            border: none;
+            color: #ff6f61;
+            cursor: pointer;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .custom-alert .close-btn:hover {
+            transform: scale(1.2);
+            color: #e65a50;
+        }
+
+        .custom-alert .close-btn svg {
+            width: 100%;
+            height: 100%;
+        }
+
         footer {
             background: #004aad;
             color: white;
@@ -298,6 +345,10 @@
             footer {
                 display: none;
             }
+            .custom-alert {
+                width: 85%;
+                padding: 1rem;
+            }
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js"></script>
@@ -341,14 +392,12 @@
                     Logout
                 </a></li>
             </ul>
-        </navСпасибо
-
         </nav>
     </header>
     <main>
         <section class="dashboard-section">
-            <h2>Welcome, <span id="userName">User</span></h2>
-            <p>Email: <span id="userEmail">user@example.com</span></p>
+            <h2>Welcome, <span id="userName"></span></h2>
+            <p>Email: <span id="userEmail"></span></p>
             <p>Explore your learning journey below.</p>
             <h3>Statistics</h3>
             <div class="stats-grid" id="statsGrid"></div>
@@ -358,6 +407,15 @@
             <div class="progress-grid" id="progressGrid"></div>
             <button class="logout-btn" id="logoutBtnSecondary" aria-label="Logout">Logout</button>
         </section>
+        <div id="custom-alert" class="custom-alert">
+            <button class="close-btn" onclick="hideAlert()" aria-label="Close alert">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <p id="alert-message">An error occurred. Please try again later.</p>
+        </div>
     </main>
     <footer>
         <p>© 2025 Data Science Academy. All rights reserved.</p>
@@ -392,14 +450,31 @@
         const logoutBtn = document.getElementById('logoutBtn');
         const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
         const logoutBtnSecondary = document.getElementById('logoutBtnSecondary');
+        const customAlert = document.getElementById('custom-alert');
+        const alertMessage = document.getElementById('alert-message');
+
+        // Alert Functions
+        function showAlert(message, autoHide = true) {
+            alertMessage.textContent = message;
+            customAlert.classList.add('active');
+            if (autoHide) {
+                setTimeout(hideAlert, 5000);
+            }
+        }
+
+        function hideAlert() {
+            customAlert.classList.remove('active');
+        }
 
         // Authentication
         function handleLogout() {
             auth.signOut().then(() => {
-                alert('Logged out successfully.');
-                window.location.href = 'signup.html';
+                showAlert('Logged out successfully.', true);
+                setTimeout(() => {
+                    window.location.href = 'signup.html';
+                }, 1500);
             }).catch(error => {
-                alert('Logout failed: ' + error.message);
+                showAlert('Logout failed: ' + error.message, false);
             });
         }
 
@@ -409,9 +484,19 @@
                 return;
             }
 
-            // Display user info
-            userName.textContent = user.displayName || 'User';
-            userEmail.textContent = user.email || 'user@example.com';
+            // Fetch user data
+            userEmail.textContent = user.email || 'N/A';
+            if (user.displayName) {
+                userName.textContent = user.displayName;
+            } else {
+                // Fallback to Realtime Database
+                db.ref(`users/${user.uid}/displayName`).once('value', snapshot => {
+                    userName.textContent = snapshot.exists() ? snapshot.val() : 'User';
+                }).catch(error => {
+                    showAlert('Failed to fetch username: ' + error.message, false);
+                    userName.textContent = 'User';
+                });
+            }
 
             // Fetch user statistics
             const stats = {
@@ -430,7 +515,7 @@
                     else if (app.status === 'Rejected') stats.rejected++;
                 });
 
-                statsGrid.innerHTML = `
+                statsGrid.innerHTML = stats.totalApplications > 0 ? `
                     <div class="stat-card" style="--card-index: 0;">
                         <h4>Total Applications</h4>
                         <p>${stats.totalApplications}</p>
@@ -447,7 +532,10 @@
                         <h4>Rejected</h4>
                         <p>${stats.rejected}</p>
                     </div>
-                `;
+                ` : '<p>No applications submitted yet.</p>';
+            }).catch(error => {
+                showAlert('Failed to fetch statistics: ' + error.message, false);
+                statsGrid.innerHTML = '<p>Unable to load statistics.</p>';
             });
 
             // Fetch applications
@@ -458,7 +546,7 @@
                     const app = child.val();
                     db.ref(`modules/${app.moduleId}`).once('value', moduleSnapshot => {
                         const module = moduleSnapshot.val();
-                        const card = document.createElement('ONJIN
+                        const card = document.createElement('div');
                         card.className = 'application-card';
                         card.style.setProperty('--card-index', cardIndex++);
                         card.innerHTML = `
@@ -467,8 +555,13 @@
                             <p>Submitted: ${new Date(app.submittedAt).toLocaleDateString()}</p>
                         `;
                         applicationsGrid.appendChild(card);
+                    }).catch(error => {
+                        showAlert('Failed to fetch module data: ' + error.message, false);
                     });
                 });
+            }).catch(error => {
+                showAlert('Failed to fetch applications: ' + error.message, false);
+                applicationsGrid.innerHTML = '<p>Unable to load applications.</p>';
             });
 
             // Fetch module progress
@@ -494,8 +587,13 @@
                             <p>Last Updated: ${progress.lastUpdated ? new Date(progress.lastUpdated).toLocaleDateString() : 'N/A'}</p>
                         `;
                         progressGrid.appendChild(card);
+                    }).catch(error => {
+                        showAlert('Failed to fetch module progress: ' + error.message, false);
                     });
                 });
+            }).catch(error => {
+                showAlert('Failed to fetch progress: ' + error.message, false);
+                progressGrid.innerHTML = '<p>Unable to load progress data.</p>';
             });
         });
 
