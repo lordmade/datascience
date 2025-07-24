@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Science Academy - Home</title>
+    <title>Data Science Academy - Welcome</title>
     <style>
         * {
             margin: 0;
@@ -13,487 +13,108 @@
         }
 
         body {
-            line-height: 1.6;
-            background: #f5f7fa;
-        }
-
-        /* Top Navigation (Desktop) */
-        header {
-            background: linear-gradient(90deg, #004aad, #0066cc);
-            color: white;
-            padding: 0.8rem;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        nav.top-nav {
+            background: linear-gradient(135deg, #004aad, #0066cc);
+            height: 100vh;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            max-width: 1200px;
+            overflow: hidden;
+        }
+
+        .splash-container {
+            text-align: center;
+            color: white;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        .splash-logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            animation: scaleIn 1s ease-out;
+        }
+
+        .splash-tagline {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #ff6f61;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
             margin: 0 auto;
         }
 
-        .logo {
-            font-size: 1.6rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        nav.top-nav ul {
-            list-style: none;
-            display: flex;
-            gap: 1rem;
-        }
-
-        nav.top-nav ul li a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            font-size: 0.95rem;
-            border-radius: 5px;
-            transition: background 0.2s ease;
-        }
-
-        nav.top-nav ul li a.active, nav.top-nav ul li a:hover {
-            background: #003087;
-        }
-
-        /* Bottom Navigation (Mobile) */
-        nav.bottom-nav {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #004aad;
-            padding: 0.6rem 0;
-            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
-
-        nav.bottom-nav ul {
-            display: flex;
-            justify-content: space-around;
-            list-style: none;
-        }
-
-        nav.bottom-nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-size: 0.8rem;
-            text-align: center;
-            padding: 0.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.3rem;
-            border-radius: 5px;
-            transition: background 0.2s ease;
-            min-width: 60px;
-        }
-
-        nav.bottom-nav ul li a.active, nav.bottom-nav ul li a:hover {
-            background: #003087;
-        }
-
-        nav.bottom-nav svg {
-            width: 24px;
-            height: 24px;
-            fill: white;
-        }
-
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(rgba(0, 74, 173, 0.8), rgba(0, 102, 204, 0.8)), url('https://images.unsplash.com/photo-1516321310765-79de1b74a164?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            color: white;
-            text-align: center;
-            padding: 4rem 1rem;
-            min-height: 60vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .hero h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            animation: fadeInDown 1s ease-out;
-        }
-
-        .hero p {
-            font-size: 1.1rem;
-            max-width: 500px;
-            margin-bottom: 1.5rem;
-        }
-
-        .cta {
-            display: inline-block;
-            padding: 0.8rem 1.8rem;
-            background: #ff6f61;
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            touch-action: manipulation;
-        }
-
-        .cta:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Modules Section */
-        .modules-section {
-            max-width: 1200px;
-            margin: 2rem auto 5rem;
-            padding: 0 1rem;
-        }
-
-        .modules-section h2 {
-            text-align: center;
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-            color: #004aad;
-        }
-
-        .module-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .module-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-
-        .module-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .module-card img {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-        }
-
-        .module-card-content {
-            padding: 1rem;
-        }
-
-        .module-card h3 {
-            font-size: 1.3rem;
-            margin-bottom: 0.5rem;
-            color: #004aad;
-        }
-
-        .module-card p {
-            color: #555;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        /* Announcements Section */
-        .announcements {
-            background: #fff;
-            max-width: 1200px;
-            margin: 2rem auto 5rem;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .announcements h2 {
-            text-align: center;
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            color: #004aad;
-        }
-
-        .carousel {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .carousel-items {
-            display: flex;
-            transition: transform 0.5s ease;
-        }
-
-        .carousel-item {
-            min-width: 100%;
-            text-align: center;
-            padding: 1rem;
-            font-size: 1rem;
-            color: #333;
-        }
-
-        .carousel-controls {
-            position: absolute;
-            top: 50%;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            transform: translateY(-50%);
-        }
-
-        .carousel-controls button {
-            background: #004aad;
-            color: white;
-            border: none;
-            padding: 0.4rem;
-            cursor: pointer;
-            border-radius: 50%;
-            font-size: 0.9rem;
-        }
-
-        /* Footer (Desktop Only) */
-        footer {
-            background: #004aad;
-            color: white;
-            text-align: center;
-            padding: 1.5rem;
-        }
-
-        .social-links a {
-            color: white;
-            margin: 0 0.8rem;
-            font-size: 1.1rem;
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .social-links a:hover {
-            color: #ff6f61;
-        }
-
         /* Animations */
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Mobile Optimization */
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
-            nav.top-nav {
-                display: none;
+            .splash-logo {
+                font-size: 2rem;
             }
-            nav.bottom-nav {
-                display: block;
+            .splash-tagline {
+                font-size: 1rem;
             }
-            .hero {
-                min-height: 50vh;
-                padding: 3rem 1rem;
-            }
-            .hero h1 {
-                font-size: 1.8rem;
-            }
-            .hero p {
-                font-size: 0.9rem;
-                max-width: 90%;
-            }
-            .cta {
-                padding: 0.7rem 1.5rem;
-                font-size: 0.9rem;
-            }
-            .modules-section h2, .announcements h2 {
-                font-size: 1.5rem;
-            }
-            .module-grid {
-                grid-template-columns: 1fr;
-            }
-            .module-card img {
-                height: 100px;
-            }
-            .module-card h3 {
-                font-size: 1.2rem;
-            }
-            .module-card p {
-                font-size: 0.85rem;
-            }
-            .carousel-item {
-                font-size: 0.9rem;
-            }
-            footer {
-                display: none;
+            .loader {
+                width: 40px;
+                height: 40px;
             }
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
 </head>
 <body>
-    <header>
-        <nav class="top-nav">
-            <div class="logo">Data Science Academy</div>
-            <ul>
-                <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="modules.html">Modules</a></li>
-                <li><a href="application.html">Apply</a></li>
-                <li><a href="contact.html">Contact</a></li>
-                <li><a href="privacy.html">Privacy</a></li>
-                <li><a href="#" id="loginBtn">Login</a></li>
-            </ul>
-        </nav>
-        <nav class="bottom-nav">
-            <ul>
-                <li><a href="index.html" class="active">
-                    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                    Home
-                </a></li>
-                <li><a href="modules.html">
-                    <svg viewBox="0 0 24 24"><path d="M4 6h18V4H4v2zM4 11h18v-2H4v2zM4 16h18v-2H4v2zM4 21h18v-2H4v2z"/></svg>
-                    Modules
-                </a></li>
-                <li><a href="application.html">
-                    <svg viewBox="0 0 24 24"><path d="M3 3v18h18V3H3zm16 16H5V5h14v14zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/></svg>
-                    Apply
-                </a></li>
-                <li><a href="contact.html">
-                    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zM12 11L4 6h16l-8 5z"/></svg>
-                    Contact
-                </a></li>
-                <li><a href="#" id="mobileLoginBtn">
-                    <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10z"/></svg>
-                    <span id="mobileLoginText">Login</span>
-                </a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <section class="hero">
-            <h1>Launch Your Data Science Journey</h1>
-            <p>Join our cutting-edge programs to master data science, machine learning, and AI.</p>
-            <a href="application.html" class="cta">Apply Now</a>
-        </section>
-        <section class="modules-section">
-            <h2>Explore Our Modules</h2>
-            <div class="module-grid" id="moduleGrid"></div>
-        </section>
-        <section class="announcements">
-            <h2>Latest Announcements</h2>
-            <div class="carousel">
-                <div class="carousel-items" id="carouselItems">
-                    <div class="carousel-item">New Data Science module starts January 2026!</div>
-                    <div class="carousel-item">Application deadline: December 15, 2025</div>
-                    <div class="carousel-item">Join our free webinar on AI trends!</div>
-                </div>
-                <div class="carousel-controls">
-                    <button id="prevBtn">←</button>
-                    <button id="nextBtn">→</button>
-                </div>
-            </div>
-        </section>
-    </main>
-    <footer>
-        <p>© 2025 Data Science Academy. All rights reserved.</p>
-        <div class="social-links">
-            <a href="#">Twitter</a>
-            <a href="#">LinkedIn</a>
-            <a href="#">Instagram</a>
-        </div>
-    </footer>
+    <div class="splash-container">
+        <h1 class="splash-logo">Data Science Academy</h1>
+        <p class="splash-tagline">Empowering the Future of Data Science</p>
+        <div class="loader"></div>
+    </div>
     <script>
-        // Authentication
-        const loginBtn = document.getElementById('loginBtn');
-        const mobileLoginBtn = document.getElementById('mobileLoginBtn');
-        const mobileLoginText = document.getElementById('mobileLoginText');
-        let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
 
-        function updateLoginStatus() {
-            const text = isLoggedIn ? 'Logout' : 'Login';
-            loginBtn.textContent = text;
-            mobileLoginText.textContent = text;
-        }
-
-        function handleLogin() {
-            if (isLoggedIn) {
-                localStorage.removeItem('isLoggedIn');
-                isLoggedIn = false;
-                alert('Logged out successfully.');
-            } else {
-                const email = prompt('Enter email:');
-                const password = prompt('Enter password:');
-                if (email && password) {
-                    localStorage.setItem('isLoggedIn', 'true');
-                    isLoggedIn = true;
-                    alert('Logged in successfully.');
+        // Check Authentication Status
+        auth.onAuthStateChanged(user => {
+            setTimeout(() => {
+                if (user) {
+                    // Redirect to dashboard if authenticated
+                    window.location.href = 'dashboard.html';
+                } else {
+                    // Redirect to signup if not authenticated
+                    window.location.href = 'signup.html';
                 }
-            }
-            updateLoginStatus();
-        }
-
-        loginBtn.addEventListener('click', handleLogin);
-        mobileLoginBtn.addEventListener('click', handleLogin);
-        updateLoginStatus();
-
-        // Module Data
-        const modules = [
-            {
-                id: 1,
-                title: 'Introduction to Data Science',
-                description: 'Learn the fundamentals of data analysis and visualization.',
-                image: 'https://www.freepik.com/free-photo/representation-user-experience-interface-design_94963707.htm#fromView=keyword&page=1&position=0&uuid=017071bf-b2b5-4874-8605-53dd18e5eaed&query=Data+Science'
-            },
-            {
-                id: 2,
-                title: 'Machine Learning',
-                description: 'Master advanced ML techniques and model building.',
-                image: 'https://www.freepik.com/free-photo/representation-user-experience-interface-design_94963707.htm#fromView=keyword&page=1&position=0&uuid=017071bf-b2b5-4874-8605-53dd18e5eaed&query=Data+Science'
-            }
-        ];
-
-        // Populate Modules
-        const moduleGrid = document.getElementById('moduleGrid');
-        modules.forEach(module => {
-            const card = document.createElement('div');
-            card.className = 'module-card';
-            card.innerHTML = `
-                <img src="${module.image}" alt="${module.title}">
-                <div class="module-card-content">
-                    <h3>${module.title}</h3>
-                    <p>${module.description}</p>
-                    <a href="module-details.html?id=${module.id}" class="cta">View Details</a>
-                </div>
-            `;
-            moduleGrid.appendChild(card);
+            }, 2000); // 2-second delay for UX
         });
-
-        // Carousel Functionality
-        const carouselItems = document.getElementById('carouselItems');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        let currentIndex = 0;
-
-        function updateCarousel() {
-            carouselItems.style.transform = `translateX(-${currentIndex * 100}%)`;
-        }
-
-        nextBtn.addEventListener('click', () => {
-            currentIndex = (currentIndex + 1) % carouselItems.children.length;
-            updateCarousel();
-        });
-
-        prevBtn.addEventListener('click', () => {
-            currentIndex = (currentIndex - 1 + carouselItems.children.length) % carouselItems.children.length;
-            updateCarousel();
-        });
-
-        // Auto-scroll carousel
-        setInterval(() => {
-            currentIndex = (currentIndex + 1) % carouselItems.children.length;
-            updateCarousel();
-        }, 5000);
     </script>
 </body>
 </html>
