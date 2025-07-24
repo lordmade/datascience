@@ -4,24 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Science Academy - Welcome</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --lms-blue-dark: #004aad;
-            --lms-blue-light: #0066cc;
-            --lms-accent: #ff6f61;
-            --text-dark: #1a202c;
-            --text-light: #4a5568;
-            --white: #ffffff;
-            --background: #f5f7fa;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, var(--lms-blue-dark), var(--lms-blue-light));
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
+            background: linear-gradient(135deg, #004aad, #0066cc);
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -35,65 +28,36 @@
 
         .splash-container {
             text-align: center;
+            color: white;
+            animation: fadeIn 1.5s ease-out;
             position: relative;
             z-index: 10;
         }
 
-        .logo-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-            margin: 0 auto;
+        .splash-logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            animation: scaleIn 1s ease-out;
         }
 
-        .lms-logo {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-            animation: fadeInScale 1.2s ease-out forwards;
+        .splash-tagline {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease-out 0.5s forwards;
+            opacity: 0;
         }
 
         .loader {
-            display: flex;
-            gap: 8px;
-        }
-
-        .dot {
-            width: 12px;
-            height: 12px;
-            background: var(--lms-accent);
+            width: 50px;
+            height: 50px;
+            border: 5px solid #ff6f61;
+            border-top-color: transparent;
             border-radius: 50%;
-            animation: pulse 1.2s ease-in-out infinite;
-        }
-
-        .dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 0.8;
-            }
-            50% {
-                transform: scale(1.5);
-                opacity: 0.4;
-            }
-        }
-
-        @keyframes fadeInScale {
-            0% { opacity: 0; transform: scale(0.7); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes fadeInUp {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
         }
 
         .custom-alert {
@@ -102,18 +66,18 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: var(--white);
+            background: white;
             padding: 1.5rem 2rem;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1000;
-            color: var(--text-dark);
+            color: #1a202c;
             font-weight: 500;
             text-align: center;
             max-width: 90%;
             width: 320px;
-            animation: fadeInUp 0.3s ease-out forwards;
-            border: 1px solid var(--lms-blue-light);
+            animation: fadeIn 0.3s ease-out forwards;
+            border: 1px solid #0066cc;
         }
 
         .custom-alert.active {
@@ -128,7 +92,7 @@
             height: 24px;
             background: none;
             border: none;
-            color: var(--lms-accent);
+            color: #ff6f61;
             cursor: pointer;
             transition: transform 0.2s ease, color 0.2s ease;
         }
@@ -146,8 +110,8 @@
         .custom-alert .retry-btn {
             margin-top: 1rem;
             padding: 0.5rem 1rem;
-            background: var(--lms-accent);
-            color: var(--white);
+            background: #ff6f61;
+            color: white;
             border: none;
             border-radius: 20px;
             font-weight: 600;
@@ -160,64 +124,48 @@
             transform: scale(1.05);
         }
 
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Responsive Design */
-        @media (max-width: 640px) {
-            .logo-container {
-                gap: 0.75rem;
+        @media (max-width: 768px) {
+            .splash-logo {
+                font-size: 2rem;
             }
-
-            .lms-logo {
-                width: 60px;
-                height: 60px;
+            .splash-tagline {
+                font-size: 1rem;
             }
-
             .loader {
-                gap: 6px;
+                width: 40px;
+                height: 40px;
             }
-
-            .dot {
-                width: 10px;
-                height: 10px;
-            }
-
             .custom-alert {
                 width: 85%;
                 padding: 1rem;
             }
-
             .custom-alert .retry-btn {
                 padding: 0.4rem 0.8rem;
                 font-size: 0.9rem;
             }
         }
     </style>
-</head>
-<body>
-    <div class="splash-container">
-        <div class="logo-container">
-            <img src="https://via.placeholder.com/80?text=DSA" alt="Data Science Academy Logo" class="lms-logo">
-            <div class="loader">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-            </div>
-        </div>
-        <p class="text-dark text-xl font-bold tracking-wide animate-[fadeInUp_1s_ease-out_0.5s_forwards] opacity-0">
-            Empowering the Future of Data Science
-        </p>
-    </div>
-
-    <div id="custom-alert" class="custom-alert">
-        <button class="close-btn" onclick="hideAlert()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-        </button>
-        <p id="alert-message">An error occurred. Please try again later.</p>
-        <button class="retry-btn" onclick="retryAuth()">Retry</button>
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-auth.js";
@@ -306,5 +254,23 @@
             checkAuthState();
         });
     </script>
+</head>
+<body>
+    <div class="splash-container">
+        <h1 class="splash-logo">Data Science Academy</h1>
+        <p class="splash-tagline">Empowering the Future of Data Science</p>
+        <div class="loader"></div>
+    </div>
+
+    <div id="custom-alert" class="custom-alert">
+        <button class="close-btn" onclick="hideAlert()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+        <p id="alert-message">An error occurred. Please try again later.</p>
+        <button class="retry-btn" onclick="retryAuth()">Retry</button>
+    </div>
 </body>
 </html>
