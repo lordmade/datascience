@@ -130,6 +130,39 @@
             margin-bottom: 1rem;
         }
 
+        .profile-form {
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .profile-form input {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .profile-form button {
+            background: #ff6f61;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .profile-form button:hover {
+            background: #e65a50;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -342,6 +375,13 @@
             .stats-grid, .applications-grid, .progress-grid {
                 grid-template-columns: 1fr;
             }
+            .profile-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .profile-form input {
+                min-width: auto;
+            }
             footer {
                 display: none;
             }
@@ -398,6 +438,10 @@
         <section class="dashboard-section">
             <h2>Welcome, <span id="userName"></span></h2>
             <p>Email: <span id="userEmail"></span></p>
+            <div class="profile-form">
+                <input type="text" id="displayNameInput" placeholder="Update your name" aria-label="Update display name">
+                <button id="updateProfileBtn" aria-label="Update profile">Update Name</button>
+            </div>
             <p>Explore your learning journey below.</p>
             <h3>Statistics</h3>
             <div class="stats-grid" id="statsGrid"></div>
@@ -444,6 +488,8 @@
         // Elements
         const userName = document.getElementById('userName');
         const userEmail = document.getElementById('userEmail');
+        const displayNameInput = document.getElementById('displayNameInput');
+        const updateProfileBtn = document.getElementById('updateProfileBtn');
         const statsGrid = document.getElementById('statsGrid');
         const applicationsGrid = document.getElementById('applicationsGrid');
         const progressGrid = document.getElementById('progressGrid');
@@ -478,6 +524,34 @@
             });
         }
 
+        // Update Profile
+        function updateProfile() {
+            const newName = displayNameInput.value.trim();
+            if (!newName) {
+                showAlert('Please enter a valid name.', false);
+                return;
+            }
+
+            const user = auth.currentUser;
+            if (user) {
+                // Update Firebase Authentication
+                user.updateProfile({ displayName: newName }).then(() => {
+                    // Update Realtime Database
+                    db.ref(`users/${user.uid}`).update({ displayName: newName }).then(() => {
+                        userName.textContent = newName;
+                        displayNameInput.value = '';
+                        showAlert('Profile updated successfully.', true);
+                    }).catch(error => {
+                        showAlert('Failed to update database: ' + error.message, false);
+                    });
+                }).catch(error => {
+                    showAlert('Failed to update profile: ' + error.message, false);
+                });
+            } else {
+                showAlert('No user is signed in.', false);
+            }
+        }
+
         auth.onAuthStateChanged(user => {
             if (!user) {
                 window.location.href = 'signup.html';
@@ -488,13 +562,16 @@
             userEmail.textContent = user.email || 'N/A';
             if (user.displayName) {
                 userName.textContent = user.displayName;
+                displayNameInput.placeholder = user.displayName;
             } else {
-                // Fallback to Realtime Database
                 db.ref(`users/${user.uid}/displayName`).once('value', snapshot => {
-                    userName.textContent = snapshot.exists() ? snapshot.val() : 'User';
+                    const dbName = snapshot.exists() ? snapshot.val() : 'User';
+                    userName.textContent = dbName;
+                    displayNameInput.placeholder = dbName;
                 }).catch(error => {
                     showAlert('Failed to fetch username: ' + error.message, false);
                     userName.textContent = 'User';
+                    displayNameInput.placeholder = 'User';
                 });
             }
 
@@ -506,7 +583,12 @@
                 rejected: 0
             };
 
-            db.ref('applications').orderByChild('studentId').equalTo(user.uid).once('value', snapshot => {
+            db.ref('applications').orderByChild('studentId').equalTo(user.uid).on('value', snapshot => {
+                stats.totalApplications = 0;
+                stats.pending = 0;
+                stats.approved = 0;
+                stats.rejected = 0;
+
                 snapshot.forEach(child => {
                     const app = child.val();
                     stats.totalApplications++;
@@ -533,7 +615,7 @@
                         <p>${stats.rejected}</p>
                     </div>
                 ` : '<p>No applications submitted yet.</p>';
-            }).catch(error => {
+            }, error => {
                 showAlert('Failed to fetch statistics: ' + error.message, false);
                 statsGrid.innerHTML = '<p>Unable to load statistics.</p>';
             });
@@ -559,7 +641,7 @@
                         showAlert('Failed to fetch module data: ' + error.message, false);
                     });
                 });
-            }).catch(error => {
+            }, error => {
                 showAlert('Failed to fetch applications: ' + error.message, false);
                 applicationsGrid.innerHTML = '<p>Unable to load applications.</p>';
             });
@@ -584,6 +666,7 @@
                             <div class="progress-bar">
                                 <div class="progress-bar-fill" style="width: ${percentage}%"></div>
                             </div>
+                            <p>Lessons Completed: ${progress.completedLessons || 0} / ${module ? module.totalLessons : 'N/A'}</p>
                             <p>Last Updated: ${progress.lastUpdated ? new Date(progress.lastUpdated).toLocaleDateString() : 'N/A'}</p>
                         `;
                         progressGrid.appendChild(card);
@@ -591,16 +674,17 @@
                         showAlert('Failed to fetch module progress: ' + error.message, false);
                     });
                 });
-            }).catch(error => {
+            }, error => {
                 showAlert('Failed to fetch progress: ' + error.message, false);
                 progressGrid.innerHTML = '<p>Unable to load progress data.</p>';
             });
         });
 
-        // Event listeners for logout
+        // Event listeners
         logoutBtn.addEventListener('click', handleLogout);
         mobileLogoutBtn.addEventListener('click', handleLogout);
         logoutBtnSecondary.addEventListener('click', handleLogout);
+        updateProfileBtn.addEventListener('click', updateProfile);
     </script>
 </body>
 </html>
