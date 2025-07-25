@@ -16,16 +16,31 @@
       </button>
     </div>
 
+    <!-- Programs -->
     <div class="mb-8">
       <h2 class="text-2xl font-semibold mb-2">Your Enrolled Programs</h2>
       <div id="programs-container" class="grid gap-4 md:grid-cols-2"></div>
     </div>
 
+    <!-- Progress Chart -->
     <div class="mb-8">
       <h2 class="text-2xl font-semibold mb-2">Progress Overview</h2>
       <canvas id="progressChart" class="bg-white rounded shadow p-4"></canvas>
     </div>
 
+    <!-- Assignment Submission -->
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-2">Submit Assignment (PDF)</h2>
+      <form id="assignment-form" class="bg-white p-4 rounded shadow space-y-4">
+        <input type="file" id="pdf-file" accept="application/pdf" class="border p-2 w-full rounded" required />
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+          Upload Assignment
+        </button>
+        <p id="upload-status" class="text-sm text-gray-700"></p>
+      </form>
+    </div>
+
+    <!-- Info Cards -->
     <div class="grid gap-4 md:grid-cols-3">
       <div class="bg-white p-4 shadow rounded">
         <h3 class="text-xl font-bold mb-2">Grants</h3>
@@ -45,7 +60,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getDatabase, ref, get, set, push } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -57,6 +72,9 @@
       appId: "1:658673187627:web:6e4c29af661785f0afa36e"
     };
 
+    const cloudName = "your_cloud_name"; // 👈 Replace with your Cloudinary cloud name
+    const uploadPreset = "your_unsigned_preset"; // 👈 Replace with your unsigned preset
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
@@ -64,6 +82,11 @@
     const emailSpan = document.getElementById("user-email");
     const programsContainer = document.getElementById("programs-container");
     const signOutBtn = document.getElementById("signout-btn");
+    const assignmentForm = document.getElementById("assignment-form");
+    const pdfFileInput = document.getElementById("pdf-file");
+    const uploadStatus = document.getElementById("upload-status");
+
+    let currentUserId = null;
 
     function renderPrograms(programs) {
       programsContainer.innerHTML = "";
@@ -112,6 +135,7 @@
     }
 
     async function loadDashboard(uid) {
+      currentUserId = uid;
       const userRef = ref(db, `users/${uid}`);
       const snapshot = await get(userRef);
 
@@ -125,6 +149,43 @@
       const programs = userData.enrolledPrograms || {};
       renderPrograms(programs);
     }
+
+    assignmentForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = pdfFileInput.files[0];
+      if (!file || !currentUserId) return;
+
+      uploadStatus.textContent = "Uploading assignment...";
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", uploadPreset);
+
+      try {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+
+        if (data.secure_url) {
+          const assignmentRef = push(ref(db, `assignments/${currentUserId}`));
+          await set(assignmentRef, {
+            fileUrl: data.secure_url,
+            fileName: file.name,
+            status: "pending",
+            timestamp: Date.now()
+          });
+          uploadStatus.textContent = "✅ Assignment uploaded successfully.";
+          assignmentForm.reset();
+        } else {
+          uploadStatus.textContent = "❌ Failed to upload file.";
+        }
+      } catch (err) {
+        console.error("Upload failed", err);
+        uploadStatus.textContent = "❌ Error uploading file.";
+      }
+    });
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
