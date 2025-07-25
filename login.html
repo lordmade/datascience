@@ -2,106 +2,84 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login - Data Science Academy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CETA LMS - Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f5f7fa;
+      background: #f5f8fa;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       margin: 0;
-      padding: 0;
+      padding: 1rem;
     }
-
-    .login-container {
+    .container {
+      background: white;
+      padding: 2rem 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
       max-width: 400px;
-      margin: 4rem auto;
-      background: #fff;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      animation: fadeIn 0.7s ease;
-    }
-
-    h2 {
-      text-align: center;
-      color: #004aad;
-      margin-bottom: 1.5rem;
-    }
-
-    label {
-      display: block;
-      margin: 0.5rem 0 0.2rem;
-      color: #004aad;
-      font-weight: 600;
-    }
-
-    input {
       width: 100%;
-      padding: 0.7rem;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1rem;
     }
-
-    button {
-      width: 100%;
-      background: #ff6f61;
+    .custom-alert {
+      display: none;
+      background: #e53e3e;
       color: white;
-      border: none;
-      padding: 0.8rem;
-      border-radius: 50px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    button:hover {
-      background: #e0524d;
-    }
-
-    p {
-      text-align: center;
-      margin-top: 1rem;
-      color: #555;
-    }
-
-    a {
-      color: #004aad;
-      text-decoration: none;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
       font-weight: 600;
+      text-align: center;
     }
-
-    a:hover {
-      text-decoration: underline;
+    .custom-alert.active {
+      display: block;
     }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
   </style>
-
-  <!-- Firebase compat SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 </head>
 <body>
-  <div class="login-container">
-    <h2>Login to Your Account</h2>
-    <form id="loginForm">
-      <label for="email">Email</label>
-      <input type="email" id="email" required />
-      <label for="password">Password</label>
-      <input type="password" id="password" required />
-      <button type="submit">Login</button>
-      <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
-    </form>
-  </div>
+  <main class="container" role="main" aria-label="Login form">
+    <h1 class="text-2xl font-bold text-center mb-6 text-gray-800">Log In to Your Account</h1>
 
-  <script>
-    // Firebase Config
+    <div id="alert" class="custom-alert" role="alert"></div>
+
+    <form id="login-form" class="space-y-5" novalidate>
+      <div>
+        <label for="email" class="block mb-1 font-semibold text-gray-700">Email</label>
+        <input id="email" type="email" autocomplete="email" required
+          class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-twitter-blue" />
+      </div>
+
+      <div>
+        <label for="password" class="block mb-1 font-semibold text-gray-700">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required minlength="6"
+          class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-twitter-blue" />
+      </div>
+
+      <button id="submit-btn" type="submit"
+        class="w-full bg-twitter-blue text-white font-semibold py-2 rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 flex justify-center items-center gap-2">
+        <span>Log In</span>
+        <svg id="loading-spinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+      </button>
+    </form>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
@@ -110,28 +88,83 @@
       storageBucket: "fire-b-a8878.firebasestorage.app",
       messagingSenderId: "658673187627",
       appId: "1:658673187627:web:6e4c29af661785f0afa36e",
-      measurementId: "G-V4W97VMSKL"
     };
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-    // Login Handler
-    const loginForm = document.getElementById('loginForm');
-    loginForm.addEventListener('submit', async (e) => {
+    const form = document.getElementById("login-form");
+    const alertBox = document.getElementById("alert");
+    const submitBtn = document.getElementById("submit-btn");
+    const loadingSpinner = document.getElementById("loading-spinner");
+
+    function showAlert(message, isError = true) {
+      alertBox.textContent = message;
+      alertBox.style.backgroundColor = isError ? "#e53e3e" : "#38a169"; // red or green
+      alertBox.classList.add("active");
+      setTimeout(() => alertBox.classList.remove("active"), 5000);
+    }
+
+    function setLoading(isLoading) {
+      submitBtn.disabled = isLoading;
+      if (isLoading) {
+        loadingSpinner.classList.remove("hidden");
+      } else {
+        loadingSpinner.classList.add("hidden");
+      }
+    }
+
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
+
+      const email = form.email.value.trim();
+      const password = form.password.value;
+
+      if (!email || !password) {
+        showAlert("Please fill all fields.");
+        return;
+      }
+
+      setLoading(true);
 
       try {
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        console.log("Login successful", userCredential.user); // Debug log
-        alert("Login successful!");
-        window.location.href = 'dashboard.html'; // Redirect
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Fetch user role from Realtime Database
+        const userRef = ref(db, `users/${user.uid}`);
+        const snapshot = await get(userRef);
+
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          showAlert("Login successful! Redirecting...", false);
+
+          setTimeout(() => {
+            if (userData.role === "admin") {
+              window.location.replace("program.html");
+            } else {
+              window.location.replace("dashboard.html");
+            }
+          }, 1500);
+        } else {
+          showAlert("User data not found. Redirecting to signup...", true);
+          setTimeout(() => {
+            window.location.replace("signup.html");
+          }, 1500);
+        }
       } catch (error) {
-        console.error("Login error", error); // Debug log
-        alert('Login failed: ' + error.message);
+        let message = "Login failed. Please try again.";
+        if (error.code === "auth/user-not-found") {
+          message = "User not found. Please sign up.";
+        } else if (error.code === "auth/wrong-password") {
+          message = "Incorrect password.";
+        } else if (error.code === "auth/invalid-email") {
+          message = "Invalid email address.";
+        }
+        showAlert(message);
+      } finally {
+        setLoading(false);
       }
     });
   </script>
