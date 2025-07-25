@@ -5,42 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CETA Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Simple tab styles */
+    .tab-btn {
+      @apply px-4 py-2 font-semibold border-b-2 border-transparent cursor-pointer;
+    }
+    .tab-btn.active {
+      @apply border-blue-600 text-blue-600;
+    }
+  </style>
 </head>
 <body class="bg-gray-100 text-gray-800 min-h-screen">
-  <div class="container mx-auto p-6 space-y-8">
+  <div class="container mx-auto p-6 space-y-6">
     <h1 class="text-3xl font-bold mb-4">CETA Admin Dashboard</h1>
 
-    <!-- Filters & Export -->
-    <div class="flex gap-4 flex-wrap items-center">
-      <select id="programFilter" class="border p-2 rounded">
-        <option value="">All Programs</option>
-      </select>
-      <select id="regionFilter" class="border p-2 rounded">
-        <option value="">All Regions</option>
-      </select>
-      <button onclick="exportCSV()" class="bg-blue-600 text-white px-4 py-2 rounded whitespace-nowrap">Export CSV</button>
+    <!-- Tabs -->
+    <div class="flex space-x-4 border-b mb-6">
+      <button class="tab-btn active" data-tab="learners">Learners</button>
+      <button class="tab-btn" data-tab="courses">Courses</button>
+      <button class="tab-btn" data-tab="enrollment">Enrollment</button>
     </div>
 
-    <!-- Learners Table -->
-    <div class="overflow-x-auto bg-white shadow rounded">
-      <table class="min-w-full table-auto">
-        <thead class="bg-gray-200">
-          <tr>
-            <th class="p-3 border">Name</th>
-            <th class="p-3 border">Email</th>
-            <th class="p-3 border">Program</th>
-            <th class="p-3 border">Region</th>
-            <th class="p-3 border">Progress (%)</th>
-            <th class="p-3 border">Approved</th>
-            <th class="p-3 border">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="learnerTable"></tbody>
-      </table>
-    </div>
+    <!-- Learners Content -->
+    <section id="learners" class="tab-content block">
+      <div class="flex gap-4 flex-wrap items-center mb-4">
+        <select id="programFilter" class="border p-2 rounded">
+          <option value="">All Programs</option>
+        </select>
+        <select id="regionFilter" class="border p-2 rounded">
+          <option value="">All Regions</option>
+        </select>
+        <button onclick="exportCSV()" class="bg-blue-600 text-white px-4 py-2 rounded whitespace-nowrap">Export CSV</button>
+      </div>
 
-    <!-- Course Management -->
-    <section>
+      <div class="overflow-x-auto bg-white shadow rounded">
+        <table class="min-w-full table-auto">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="p-3 border">Name</th>
+              <th class="p-3 border">Email</th>
+              <th class="p-3 border">Program</th>
+              <th class="p-3 border">Region</th>
+              <th class="p-3 border">Progress (%)</th>
+              <th class="p-3 border">Approved</th>
+              <th class="p-3 border">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="learnerTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Courses Content -->
+    <section id="courses" class="tab-content hidden">
       <h2 class="text-2xl font-bold mb-4">Course Management</h2>
 
       <form id="courseForm" class="mb-6 space-y-3 max-w-md">
@@ -81,8 +98,8 @@
       </div>
     </section>
 
-    <!-- Enrollment Section -->
-    <section>
+    <!-- Enrollment Content -->
+    <section id="enrollment" class="tab-content hidden">
       <h2 class="text-2xl font-bold mb-4">Enroll Learners</h2>
 
       <form id="enrollForm" class="flex flex-wrap items-end gap-4 max-w-md mb-6">
@@ -112,7 +129,6 @@
       set,
       remove,
       get,
-      child,
     } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -128,35 +144,35 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // DOM Elements
+    // Tabs logic
+    const tabs = document.querySelectorAll(".tab-btn");
+    const tabContents = document.querySelectorAll(".tab-content");
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const target = tab.getAttribute("data-tab");
+
+        tabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+
+        tabContents.forEach((content) => {
+          content.id === target
+            ? content.classList.remove("hidden")
+            : content.classList.add("hidden");
+        });
+      });
+    });
+
+    // --- USERS SECTION ---
+
     const learnerTable = document.getElementById("learnerTable");
     const programFilter = document.getElementById("programFilter");
     const regionFilter = document.getElementById("regionFilter");
-
-    // Course management elements
-    const coursesTable = document.getElementById("coursesTable");
-    const courseForm = document.getElementById("courseForm");
-    const courseTitleInput = document.getElementById("courseTitle");
-    const courseDescriptionInput = document.getElementById("courseDescription");
-    const courseRegionInput = document.getElementById("courseRegion");
-    const courseFormBtnText = document.getElementById("courseFormBtnText");
-    const cancelEditBtn = document.getElementById("cancelEditBtn");
-    const editCourseIdInput = document.getElementById("editCourseId");
-
-    // Enrollment elements
     const selectLearner = document.getElementById("selectLearner");
-    const selectCourse = document.getElementById("selectCourse");
-    const enrollForm = document.getElementById("enrollForm");
-    const enrollmentStatus = document.getElementById("enrollmentStatus");
 
     let allUsers = [];
-    let allCourses = {};
 
-    // Load users and courses from Firebase
     const usersRef = ref(db, "users");
-    const coursesRef = ref(db, "courses");
-
-    // --- USERS SECTION ---
 
     onValue(usersRef, (snapshot) => {
       const data = snapshot.val() || {};
@@ -259,6 +275,19 @@
 
     // --- COURSES SECTION ---
 
+    const coursesTable = document.getElementById("coursesTable");
+    const courseForm = document.getElementById("courseForm");
+    const courseTitleInput = document.getElementById("courseTitle");
+    const courseDescriptionInput = document.getElementById("courseDescription");
+    const courseRegionInput = document.getElementById("courseRegion");
+    const courseFormBtnText = document.getElementById("courseFormBtnText");
+    const cancelEditBtn = document.getElementById("cancelEditBtn");
+    const editCourseIdInput = document.getElementById("editCourseId");
+
+    const coursesRef = ref(db, "courses");
+
+    let allCourses = {};
+
     onValue(coursesRef, (snapshot) => {
       const data = snapshot.val() || {};
       allCourses = data;
@@ -308,11 +337,9 @@
       }
 
       if (editCourseId) {
-        // Update existing course
         await update(ref(db, `courses/${editCourseId}`), { title, description, region });
         alert("Course updated!");
       } else {
-        // Add new course
         const newCourseRef = push(coursesRef);
         await set(newCourseRef, { title, description, region });
         alert("Course added!");
@@ -353,6 +380,10 @@
 
     // --- ENROLLMENT SECTION ---
 
+    const selectCourse = document.getElementById("selectCourse");
+    const enrollForm = document.getElementById("enrollForm");
+    const enrollmentStatus = document.getElementById("enrollmentStatus");
+
     enrollForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       enrollmentStatus.textContent = "";
@@ -366,7 +397,6 @@
       }
 
       try {
-        // Check if learner already enrolled
         const enrolledRef = ref(db, `users/${learnerId}/enrolledPrograms/${courseId}`);
         const snapshot = await get(enrolledRef);
 
@@ -375,7 +405,6 @@
           return;
         }
 
-        // Enroll learner with initial progress 0
         await set(enrolledRef, { progress: 0 });
 
         enrollmentStatus.textContent = "Enrollment successful!";
