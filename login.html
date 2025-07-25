@@ -83,9 +83,9 @@
     }
   </style>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <!-- Firebase compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 </head>
 <body>
   <div class="login-container">
@@ -117,7 +117,7 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // Login Form Handler
+    // Login Handler
     const loginForm = document.getElementById('loginForm');
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -125,10 +125,12 @@
       const password = document.getElementById('password').value;
 
       try {
-        await auth.signInWithEmailAndPassword(email, password);
-        alert('Login successful!');
-        window.location.href = 'dashboard.html';
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        console.log("Login successful", userCredential.user); // Debug log
+        alert("Login successful!");
+        window.location.href = 'dashboard.html'; // Redirect
       } catch (error) {
+        console.error("Login error", error); // Debug log
         alert('Login failed: ' + error.message);
       }
     });
