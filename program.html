@@ -2,80 +2,80 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CETA Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .tab-content { display: none; }
+    .tab-active { display: block; }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-800 min-h-screen">
-
+<body class="bg-gray-100 text-gray-800 font-sans">
   <div class="container mx-auto p-6">
     <h1 class="text-3xl font-bold mb-6">CETA Admin Dashboard</h1>
-
-    <!-- Tabs -->
-    <div class="mb-6">
-      <nav class="flex space-x-4 border-b">
-        <button id="tab-learners-btn" class="pb-2 border-b-4 border-blue-600 font-semibold text-blue-600">Learners</button>
-        <button id="tab-courses-btn" class="pb-2 border-b-4 border-transparent hover:border-blue-600 font-semibold">Courses</button>
-      </nav>
+    <div class="mb-4">
+      <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded mr-2" data-tab="courses">Courses</button>
+      <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded mr-2" data-tab="assign">Assign Learners</button>
+      <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded" data-tab="learners">Learners</button>
     </div>
 
-    <!-- Learners Tab Content -->
-    <section id="tab-learners" class="">
-      <div class="flex gap-4 mb-4">
-        <select id="programFilter" class="border p-2 rounded">
-          <option value="">All Programs</option>
-        </select>
-        <select id="regionFilter" class="border p-2 rounded">
-          <option value="">All Regions</option>
-        </select>
-        <button onclick="exportLearnersCSV()" class="bg-blue-600 text-white px-4 py-2 rounded">Export Learners CSV</button>
+    <!-- Courses Tab -->
+    <div id="courses" class="tab-content tab-active">
+      <div class="mb-4">
+        <h2 class="text-xl font-semibold mb-2">Manage Courses</h2>
+        <div class="flex gap-2 mb-2">
+          <input type="text" id="courseName" placeholder="Course Name" class="border p-2 rounded w-1/3" />
+          <button onclick="addCourse()" class="bg-green-600 text-white px-4 py-2 rounded">Add Course</button>
+        </div>
       </div>
+      <table class="min-w-full bg-white shadow rounded">
+        <thead class="bg-gray-200">
+          <tr><th class="p-3">Course Name</th><th class="p-3">Actions</th></tr>
+        </thead>
+        <tbody id="courseTable"></tbody>
+      </table>
+    </div>
 
+    <!-- Assign Learners Tab -->
+    <div id="assign" class="tab-content">
+      <h2 class="text-xl font-semibold mb-4">Assign Learners to Courses</h2>
+      <div class="mb-4 flex gap-2">
+        <select id="assignCourse" class="border p-2 rounded"></select>
+        <select id="assignLearner" class="border p-2 rounded"></select>
+        <button onclick="assignLearner()" class="bg-blue-600 text-white px-4 py-2 rounded">Assign</button>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold">Enrolled Learners</h3>
+        <ul id="enrolledLearners" class="list-disc pl-5 mt-2 text-gray-700"></ul>
+      </div>
+    </div>
+
+    <!-- Learners Tab -->
+    <div id="learners" class="tab-content">
+      <h2 class="text-xl font-semibold mb-2">Learner Management</h2>
+      <div class="flex gap-2 mb-4">
+        <select id="programFilter" class="border p-2 rounded"><option value="">All Programs</option></select>
+        <select id="regionFilter" class="border p-2 rounded"><option value="">All Regions</option></select>
+        <button onclick="exportCSV()" class="bg-blue-600 text-white px-4 py-2 rounded">Export CSV</button>
+      </div>
       <div class="overflow-x-auto">
-        <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-          <thead>
-            <tr class="bg-gray-200 text-left">
-              <th class="p-3">Name</th>
-              <th class="p-3">Email</th>
-              <th class="p-3">Program</th>
-              <th class="p-3">Region</th>
-              <th class="p-3">Progress (%)</th>
-              <th class="p-3">Approved</th>
-              <th class="p-3">Actions</th>
+        <table class="min-w-full bg-white shadow-md rounded">
+          <thead class="bg-gray-200 text-left">
+            <tr>
+              <th class="p-3">Name</th><th class="p-3">Email</th><th class="p-3">Program</th><th class="p-3">Region</th>
+              <th class="p-3">Progress (%)</th><th class="p-3">Approved</th><th class="p-3">Actions</th>
             </tr>
           </thead>
           <tbody id="learnerTable"></tbody>
         </table>
       </div>
-    </section>
-
-    <!-- Courses Tab Content -->
-    <section id="tab-courses" class="hidden">
-      <div class="mb-4 flex justify-between items-center">
-        <h2 class="text-xl font-bold">Courses</h2>
-        <button onclick="addNewCourse()" class="bg-green-600 text-white px-4 py-2 rounded">Add New Course</button>
-      </div>
-      <div class="overflow-x-auto">
-        <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-          <thead>
-            <tr class="bg-gray-200 text-left">
-              <th class="p-3">Course ID</th>
-              <th class="p-3">Title</th>
-              <th class="p-3">Description</th>
-              <th class="p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="courseTable"></tbody>
-        </table>
-      </div>
-    </section>
-
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, onValue, update, push, remove } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getDatabase, ref, onValue, update, push, remove, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -84,215 +84,141 @@
       projectId: "fire-b-a8878",
       storageBucket: "fire-b-a8878.appspot.com",
       messagingSenderId: "658673187627",
-      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e"
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getDatabase(app);
+    const auth = getAuth();
 
-    // Elements
-    const tabLearnersBtn = document.getElementById("tab-learners-btn");
-    const tabCoursesBtn = document.getElementById("tab-courses-btn");
-    const tabLearners = document.getElementById("tab-learners");
-    const tabCourses = document.getElementById("tab-courses");
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        alert("Unauthorized. Redirecting...");
+        window.location.href = "login.html";
+      }
+    });
 
+    // Tab switching
+    document.querySelectorAll(".tab-button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("tab-active"));
+        document.getElementById(btn.dataset.tab).classList.add("tab-active");
+      });
+    });
+
+    const courseRef = ref(db, "courses");
+    const userRef = ref(db, "users");
+    const courseTable = document.getElementById("courseTable");
+    const assignCourse = document.getElementById("assignCourse");
+    const assignLearner = document.getElementById("assignLearner");
+    const enrolledList = document.getElementById("enrolledLearners");
     const programFilter = document.getElementById("programFilter");
     const regionFilter = document.getElementById("regionFilter");
-
     const learnerTable = document.getElementById("learnerTable");
-    const courseTable = document.getElementById("courseTable");
 
-    // Data holders
-    let allUsers = [];
-    let allCourses = [];
+    let courses = {}, learners = [];
 
-    // Switch tabs
-    tabLearnersBtn.addEventListener("click", () => {
-      tabLearners.classList.remove("hidden");
-      tabCourses.classList.add("hidden");
-      tabLearnersBtn.classList.add("border-blue-600", "text-blue-600");
-      tabCoursesBtn.classList.remove("border-blue-600", "text-blue-600");
-    });
-
-    tabCoursesBtn.addEventListener("click", () => {
-      tabCourses.classList.remove("hidden");
-      tabLearners.classList.add("hidden");
-      tabCoursesBtn.classList.add("border-blue-600", "text-blue-600");
-      tabLearnersBtn.classList.remove("border-blue-600", "text-blue-600");
-    });
-
-    // Authentication & admin check
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
-      }
-
-      // Check if user is admin
-      const userRef = ref(db, `users/${user.uid}`);
-      onValue(userRef, (snapshot) => {
-        const data = snapshot.val();
-        if (!data || data.role !== "admin") {
-          alert("Access denied: Admins only.");
-          signOut(auth).then(() => window.location.href = "login.html");
-          return;
+    function loadCourses() {
+      onValue(courseRef, snap => {
+        courses = snap.val() || {};
+        courseTable.innerHTML = "";
+        assignCourse.innerHTML = "";
+        for (const id in courses) {
+          const c = courses[id];
+          courseTable.innerHTML += `<tr><td class="p-3">${c.name}</td>
+            <td class="p-3">
+              <button onclick="editCourse('${id}')" class="text-blue-600 mr-2">Edit</button>
+              <button onclick="deleteCourse('${id}')" class="text-red-600">Delete</button>
+            </td></tr>`;
+          assignCourse.innerHTML += `<option value="${id}">${c.name}</option>`;
         }
+      });
+    }
 
-        // Load data after admin verified
-        loadLearners();
-        loadCourses();
-      }, { onlyOnce: true });
-    });
-
-    // Load learners data
     function loadLearners() {
-      const usersRef = ref(db, "users");
-      onValue(usersRef, (snapshot) => {
-        const data = snapshot.val() || {};
-        allUsers = [];
-        const programs = new Set();
-        const regions = new Set();
-
+      onValue(userRef, snap => {
+        learners = [];
+        const data = snap.val();
+        learnerTable.innerHTML = "";
+        assignLearner.innerHTML = "";
+        const programs = new Set(), regions = new Set();
         for (const uid in data) {
-          const user = data[uid];
-          if (user.role === "learner") {
-            allUsers.push({ ...user, uid });
-            if (user.program) programs.add(user.program);
-            if (user.region) regions.add(user.region);
+          const u = data[uid];
+          if (u.role === "learner") {
+            learners.push({ uid, ...u });
+            programs.add(u.program);
+            regions.add(u.region);
+            assignLearner.innerHTML += `<option value="${uid}">${u.fullName || u.email}</option>`;
+            learnerTable.innerHTML += `
+              <tr>
+                <td class="p-3">${u.fullName || "-"}</td>
+                <td class="p-3">${u.email}</td>
+                <td class="p-3">${u.program || "-"}</td>
+                <td class="p-3">${u.region || "-"}</td>
+                <td class="p-3"><input type="number" value="${u.progress || 0}" min="0" max="100"
+                  onchange="updateProgress('${uid}', this.value)"
+                  class="w-16 border p-1 rounded text-center" /></td>
+                <td class="p-3">${u.approved ? "✅" : "❌"}</td>
+                <td class="p-3">${!u.approved ? `<button class="bg-green-600 text-white px-3 py-1 rounded" onclick="approveUser('${uid}')">Approve</button>` : ""}</td>
+              </tr>
+            `;
           }
         }
-
-        populateFilters(programs, regions);
-        renderLearnersTable(allUsers);
+        programFilter.innerHTML = `<option value="">All Programs</option>` + Array.from(programs).map(p => `<option>${p}</option>`).join("");
+        regionFilter.innerHTML = `<option value="">All Regions</option>` + Array.from(regions).map(r => `<option>${r}</option>`).join("");
       });
     }
 
-    function populateFilters(programs, regions) {
-      programFilter.innerHTML = `<option value="">All Programs</option>`;
-      Array.from(programs).forEach(p => {
-        programFilter.innerHTML += `<option value="${p}">${p}</option>`;
-      });
-
-      regionFilter.innerHTML = `<option value="">All Regions</option>`;
-      Array.from(regions).forEach(r => {
-        regionFilter.innerHTML += `<option value="${r}">${r}</option>`;
-      });
-    }
-
-    function renderLearnersTable(users) {
-      const filtered = users.filter(user =>
-        (programFilter.value === "" || user.program === programFilter.value) &&
-        (regionFilter.value === "" || user.region === regionFilter.value)
-      );
-
-      learnerTable.innerHTML = filtered.map(user => `
-        <tr class="border-t">
-          <td class="p-3">${user.fullName || "-"}</td>
-          <td class="p-3">${user.email}</td>
-          <td class="p-3">${user.program || "-"}</td>
-          <td class="p-3">${user.region || "-"}</td>
-          <td class="p-3">
-            <input type="number" value="${user.progress || 0}" 
-              min="0" max="100"
-              onchange="updateProgress('${user.uid}', this.value)"
-              class="w-16 border p-1 rounded text-center" />
-          </td>
-          <td class="p-3">${user.approved ? "✅" : "❌"}</td>
-          <td class="p-3">
-            ${!user.approved ? `<button class="bg-green-500 text-white px-3 py-1 rounded" onclick="approveUser('${user.uid}')">Approve</button>` : ""}
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    // Load courses data
-    function loadCourses() {
-      const coursesRef = ref(db, "courses");
-      onValue(coursesRef, (snapshot) => {
-        const data = snapshot.val() || {};
-        allCourses = [];
-        courseTable.innerHTML = "";
-
-        for (const courseId in data) {
-          const course = data[courseId];
-          allCourses.push({ ...course, courseId });
-
-          const row = document.createElement("tr");
-          row.className = "border-t";
-          row.innerHTML = `
-            <td class="p-3">${courseId}</td>
-            <td class="p-3"><input type="text" value="${course.title || ''}" onchange="updateCourseTitle('${courseId}', this.value)" class="border rounded p-1 w-full" /></td>
-            <td class="p-3"><input type="text" value="${course.description || ''}" onchange="updateCourseDescription('${courseId}', this.value)" class="border rounded p-1 w-full" /></td>
-            <td class="p-3">
-              <button onclick="deleteCourse('${courseId}')" class="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
-            </td>
-          `;
-          courseTable.appendChild(row);
-        }
-      });
-    }
-
-    // Update learner progress
-    window.updateProgress = async (uid, value) => {
-      await update(ref(db, `users/${uid}`), { progress: parseInt(value) });
+    window.addCourse = () => {
+      const name = document.getElementById("courseName").value.trim();
+      if (name) push(courseRef, { name });
     };
 
-    // Approve learner
-    window.approveUser = async (uid) => {
-      await update(ref(db, `users/${uid}`), { approved: true });
+    window.editCourse = (id) => {
+      const newName = prompt("Edit course name:", courses[id].name);
+      if (newName) update(ref(db, `courses/${id}`), { name: newName });
     };
 
-    // Update course title
-    window.updateCourseTitle = async (courseId, title) => {
-      await update(ref(db, `courses/${courseId}`), { title });
+    window.deleteCourse = (id) => {
+      if (confirm("Delete this course?")) remove(ref(db, `courses/${id}`));
     };
 
-    // Update course description
-    window.updateCourseDescription = async (courseId, description) => {
-      await update(ref(db, `courses/${courseId}`), { description });
-    };
-
-    // Delete course
-    window.deleteCourse = async (courseId) => {
-      if (confirm("Are you sure you want to delete this course?")) {
-        await remove(ref(db, `courses/${courseId}`));
+    window.assignLearner = () => {
+      const courseId = assignCourse.value;
+      const learnerId = assignLearner.value;
+      if (courseId && learnerId) {
+        set(ref(db, `courses/${courseId}/learners/${learnerId}`), true);
       }
     };
 
-    // Add new course
-    window.addNewCourse = async () => {
-      const newCourseRef = push(ref(db, "courses"));
-      await newCourseRef.set({
-        title: "New Course",
-        description: "Course description",
+    assignCourse.addEventListener("change", () => {
+      const cid = assignCourse.value;
+      enrolledList.innerHTML = "";
+      onValue(ref(db, `courses/${cid}/learners`), snap => {
+        const data = snap.val();
+        enrolledList.innerHTML = "";
+        for (const lid in data) {
+          const learner = learners.find(l => l.uid === lid);
+          if (learner) enrolledList.innerHTML += `<li>${learner.fullName || learner.email}</li>`;
+        }
       });
-    };
+    });
 
-    // Export learners CSV
-    window.exportLearnersCSV = () => {
-      const headers = ["Name", "Email", "Program", "Region", "Progress", "Approved"];
-      const rows = allUsers.map(u => [
-        `"${u.fullName || ''}"`,
-        `"${u.email || ''}"`,
-        `"${u.program || ''}"`,
-        `"${u.region || ''}"`,
-        `"${u.progress || 0}"`,
-        `"${u.approved ? "Yes" : "No"}"`,
-      ]);
-      let csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map(e => e.join(",")).join("\n");
+    window.updateProgress = (uid, val) => update(ref(db, `users/${uid}`), { progress: parseInt(val) });
+    window.approveUser = (uid) => update(ref(db, `users/${uid}`), { approved: true });
+
+    window.exportCSV = () => {
+      const rows = [["Name","Email","Program","Region","Progress","Approved"]];
+      learners.forEach(l => rows.push([l.fullName, l.email, l.program, l.region, l.progress || 0, l.approved ? "Yes" : "No"]));
+      const csv = rows.map(r => r.map(cell => `"${cell}"`).join(",")).join("\\n");
       const link = document.createElement("a");
-      link.setAttribute("href", encodeURI(csvContent));
-      link.setAttribute("download", "ceta_learners.csv");
-      document.body.appendChild(link);
+      link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+      link.download = "learners.csv";
       link.click();
-      document.body.removeChild(link);
     };
 
-    // Filters change handlers
-    programFilter.addEventListener("change", () => renderLearnersTable(allUsers));
-    regionFilter.addEventListener("change", () => renderLearnersTable(allUsers));
-
+    loadCourses();
+    loadLearners();
   </script>
 </body>
 </html>
