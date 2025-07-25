@@ -10,6 +10,7 @@
     .sidebar { transition: width 0.3s ease; }
     .sidebar-hidden { width: 0; overflow: hidden; }
     .main-content { transition: margin-left 0.3s ease; }
+    .high-contrast { background: #000; color: #fff; }
     @media (max-width: 768px) {
       .sidebar { width: 0; overflow: hidden; }
       .sidebar-open { width: 256px; }
@@ -32,14 +33,23 @@
       <nav>
         <ul class="space-y-2">
           <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="overview">Overview</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="courses">Courses</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="assign">Assign Learners</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="learners">Learners</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="assignments">Assignments</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="users">User Management</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="courses">Program Management</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="assessments">Assessments</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="certifications">Certifications</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="accreditations">Accreditations</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="grants">Grants</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="bursaries">Bursaries</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="projects">Special Projects</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="wsp_atr">WSP/ATR</button></li>
           <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="notices">Notice Board</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="analytics">Analytics</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="helpdesk">Helpdesk</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="audit_logs">Audit Logs</button></li>
         </ul>
       </nav>
       <div class="mt-auto">
+        <button id="toggle-contrast" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded mb-2" aria-label="Toggle high contrast mode">Toggle High Contrast</button>
         <button id="signout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" aria-label="Sign out of admin account">Sign Out</button>
       </div>
     </div>
@@ -49,7 +59,7 @@
       <!-- Overview Section -->
       <div id="overview" class="section">
         <h2 class="text-2xl font-semibold mb-4">Dashboard Overview</h2>
-        <div class="grid gap-4 md:grid-cols-3">
+        <div class="grid gap-4 md:grid-cols-4">
           <div class="bg-white p-4 rounded shadow">
             <h3 class="text-lg font-semibold">Total Learners</h3>
             <p id="total-learners" class="text-3xl font-bold text-blue-600">0</p>
@@ -59,9 +69,17 @@
             <p id="total-courses" class="text-3xl font-bold text-blue-600">0</p>
           </div>
           <div class="bg-white p-4 rounded shadow">
-            <h3 class="text-lg font-semibold">Pending Assignments</h3>
-            <p id="pending-assignments" class="text-3xl font-bold text-blue-600">0</p>
+            <h3 class="text-lg font-semibold">Pending Grants</h3>
+            <p id="pending-grants" class="text-3xl font-bold text-blue-600">0</p>
           </div>
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold">Open Helpdesk Tickets</h3>
+            <p id="open-tickets" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+        </div>
+        <div class="mt-6 bg-white p-4 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Learner Progress</h3>
+          <canvas id="progress-chart" class="w-full h-64"></canvas>
         </div>
         <div class="mt-6 bg-white p-4 rounded shadow">
           <h3 class="text-lg font-semibold mb-2">Recent Notices</h3>
@@ -69,56 +87,194 @@
         </div>
       </div>
 
-      <!-- Courses Section -->
-      <div id="courses" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Manage Courses</h2>
+      <!-- User Management Section -->
+      <div id="users" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">User Management</h2>
         <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Add/Edit User</h3>
           <div class="flex gap-2 mb-4">
-            <input type="text" id="courseName" placeholder="Course Name" class="border p-2 rounded w-1/3" aria-label="Enter course name" />
-            <button onclick="addCourse()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Course</button>
+            <input type="email" id="userEmail" placeholder="Email" class="border p-2 rounded w-1/3" aria-label="Enter user email" />
+            <input type="text" id="userName" placeholder="Full Name" class="border p-2 rounded w-1/3" aria-label="Enter full name" />
+            <select id="userRole" class="border p-2 rounded" aria-label="Select user role">
+              <option value="learner">Learner</option>
+              <option value="admin">Admin</option>
+              <option value="provider">Training Provider</option>
+              <option value="sdf">SDF</option>
+            </select>
+            <button onclick="addUser()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add User</button>
+          </div>
+          <div class="flex gap-2">
+            <input type="file" id="userImport" accept=".csv,.xlsx" class="border p-2 rounded" aria-label="Import users from CSV/Excel" />
+            <button onclick="importUsers()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Import Users</button>
+            <button onclick="exportUsers()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Export Users</button>
           </div>
         </div>
         <div class="bg-white p-6 rounded shadow">
-          <h3 class="text-lg font-semibold mb-2">Courses</h3>
+          <h3 class="text-lg font-semibold mb-2">Users</h3>
+          <div id="userList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Program Management Section -->
+      <div id="courses" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Program Management</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Add Program</h3>
+          <div class="flex gap-2 mb-4">
+            <input type="text" id="courseName" placeholder="Program Name" class="border p-2 rounded w-1/3" aria-label="Enter program name" />
+            <input type="text" id="courseTags" placeholder="Tags (comma-separated)" class="border p-2 rounded w-1/3" aria-label="Enter tags" />
+            <button onclick="addCourse()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Program</button>
+          </div>
+          <div class="mb-4">
+            <h4 class="text-md font-semibold">Add Content</h4>
+            <select id="contentType" class="border p-2 rounded" aria-label="Select content type">
+              <option value="scorm">SCORM</option>
+              <option value="video">Video</option>
+              <option value="document">Document</option>
+            </select>
+            <input type="text" id="contentUrl" placeholder="Content URL" class="border p-2 rounded w-1/3" aria-label="Enter content URL" />
+            <input type="text" id="contentTitle" placeholder="Content Title" class="border p-2 rounded w-1/3" aria-label="Enter content title" />
+            <button onclick="addContent()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add Content</button>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Programs</h3>
+          <input type="text" id="courseSearch" placeholder="Search programs..." class="border p-2 rounded w-full mb-4" aria-label="Search programs by name or tag" />
           <div id="courseList" class="space-y-4"></div>
         </div>
       </div>
 
-      <!-- Assign Learners Section -->
-      <div id="assign" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Assign Learners to Courses</h2>
+      <!-- Assessments Section -->
+      <div id="assessments" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Assessment Management</h2>
         <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Add Assessment</h3>
           <div class="flex gap-2 mb-4">
-            <select id="assignCourse" class="border p-2 rounded" aria-label="Select course"></select>
-            <select id="assignLearner" class="border p-2 rounded" aria-label="Select learner"></select>
-            <button onclick="assignLearner()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Assign</button>
-          </div>
-          <h3 class="text-lg font-semibold">Enrolled Learners</h3>
-          <ul id="enrolledLearners" class="list-disc pl-5 mt-2 text-gray-700"></ul>
-        </div>
-      </div>
-
-      <!-- Learners Section -->
-      <div id="learners" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Learner Management</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
-          <div class="flex gap-2 mb-4">
-            <select id="programFilter" class="border p-2 rounded" aria-label="Filter by program"><option value="">All Programs</option></select>
-            <select id="regionFilter" class="border p-2 rounded" aria-label="Filter by region"><option value="">All Regions</option></select>
-            <button onclick="exportCSV()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Export CSV</button>
+            <select id="assessmentCourse" class="border p-2 rounded" aria-label="Select course"></select>
+            <input type="text" id="assessmentTitle" placeholder="Assessment Title" class="border p-2 rounded w-1/3" aria-label="Enter assessment title" />
+            <input type="text" id="assessmentTags" placeholder="Tags" class="border p-2 rounded w-1/3" aria-label="Enter tags" />
+            <button onclick="addAssessment()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Assessment</button>
           </div>
         </div>
         <div class="bg-white p-6 rounded shadow">
-          <h3 class="text-lg font-semibold mb-2">Learners</h3>
-          <div id="learnerList" class="space-y-4"></div>
+          <h3 class="text-lg font-semibold mb-2">Assessments</h3>
+          <div id="assessmentList" class="space-y-4"></div>
         </div>
       </div>
 
-      <!-- Assignments Section -->
-      <div id="assignments" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Uploaded Assignments</h2>
+      <!-- Certifications Section -->
+      <div id="certifications" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Certification Management</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Issue Certificate</h3>
+          <div class="flex gap-2 mb-4">
+            <select id="certCourse" class="border p-2 rounded" aria-label="Select course"></select>
+            <select id="certLearner" class="border p-2 rounded" aria-label="Select learner"></select>
+            <input type="text" id="certTemplate" placeholder="Template Name" class="border p-2 rounded w-1/3" aria-label="Enter template name" />
+            <button onclick="issueCertificate()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Issue Certificate</button>
+          </div>
+        </div>
         <div class="bg-white p-6 rounded shadow">
-          <div id="assignmentList" class="space-y-4"></div>
+          <h3 class="text-lg font-semibold mb-2">Certificates</h3>
+          <div id="certificationList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Accreditations Section -->
+      <div id="accreditations" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Accreditation Management</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Add Accreditation</h3>
+          <div class="flex gap-2 mb-4">
+            <select id="accProvider" class="border p-2 rounded" aria-label="Select provider"></select>
+            <input type="text" id="accLetterUrl" placeholder="Letter URL" class="border p-2 rounded w-1/3" aria-label="Enter letter URL" />
+            <button onclick="addAccreditation()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Accreditation</button>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Accreditations</h3>
+          <div id="accreditationList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Grants Section -->
+      <div id="grants" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Grants Management</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Add Grant</h3>
+          <div class="flex gap-2 mb-4">
+            <select id="grantType" class="border p-2 rounded" aria-label="Select grant type">
+              <option value="mandatory">Mandatory</option>
+              <option value="discretionary">Discretionary</option>
+            </select>
+            <input type="number" id="grantAmount" placeholder="Amount" class="border p-2 rounded w-1/3" aria-label="Enter grant amount" />
+            <select id="grantRecipient" class="border p-2 rounded" aria-label="Select recipient"></select>
+            <button onclick="addGrant()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Grant</button>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Grants</h3>
+          <div id="grantList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Bursaries Section -->
+      <div id="bursaries" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Bursary Management</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Manage Bursary</h3>
+          <div class="flex gap-2 mb-4">
+            <select id="bursaryApplicant" class="border p-2 rounded" aria-label="Select applicant"></select>
+            <select id="bursaryProgram" class="border p-2 rounded" aria-label="Select program"></select>
+            <input type="number" id="bursaryAmount" placeholder="Amount" class="border p-2 rounded w-1/3" aria-label="Enter bursary amount" />
+            <button onclick="addBursary()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Bursary</button>
+          </div>
+          <div class="flex gap-2">
+            <input type="file" id="bursaryDoc" accept=".pdf" class="border p-2 rounded" aria-label="Upload supporting document" />
+            <button onclick="uploadBursaryDoc()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Upload Document</button>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Bursaries</h3>
+          <div id="bursaryList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Special Projects Section -->
+      <div id="projects" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Special Projects</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Add Project</h3>
+          <div class="flex gap-2 mb-4">
+            <input type="text" id="projectName" placeholder="Project Name" class="border p-2 rounded w-1/3" aria-label="Enter project name" />
+            <textarea id="projectCharter" placeholder="Project Charter" class="border p-2 rounded w-1/3" rows="4" aria-label="Enter project charter"></textarea>
+            <button onclick="addProject()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Project</button>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Projects</h3>
+          <div id="projectList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- WSP/ATR Section -->
+      <div id="wsp_atr" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">WSP/ATR Management</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Manage WSP/ATR</h3>
+          <div class="flex gap-2 mb-4">
+            <select id="wspEmployer" class="border p-2 rounded" aria-label="Select employer"></select>
+            <select id="wspType" class="border p-2 rounded" aria-label="Select type">
+              <option value="wsp">WSP</option>
+              <option value="atr">ATR</option>
+            </select>
+            <input type="file" id="wspDoc" accept=".pdf" class="border p-2 rounded" aria-label="Upload WSP/ATR document" />
+            <button onclick="uploadWspDoc()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Upload</button>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">WSP/ATR Submissions</h3>
+          <div id="wspList" class="space-y-4"></div>
         </div>
       </div>
 
@@ -140,6 +296,43 @@
         <div class="bg-white p-6 rounded shadow">
           <h3 class="text-lg font-semibold mb-2">Notices</h3>
           <div id="noticeList" class="space-y-4" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <!-- Analytics Section -->
+      <div id="analytics" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Analytics & Reporting</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Generate Report</h3>
+          <div class="flex gap-2 mb-4">
+            <select id="reportType" class="border p-2 rounded" aria-label="Select report type">
+              <option value="learner_progress">Learner Progress</option>
+              <option value="grant_disbursement">Grant Disbursement</option>
+            </select>
+            <button onclick="generateReport()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Generate Report</button>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Reports</h3>
+          <div id="reportList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Helpdesk Section -->
+      <div id="helpdesk" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Helpdesk</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">View Tickets</h3>
+          <div id="ticketList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Audit Logs Section -->
+      <div id="audit_logs" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Audit Logs</h2>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Logs</h3>
+          <div id="auditLogList" class="space-y-4"></div>
         </div>
       </div>
 
@@ -174,42 +367,50 @@
     const auth = getAuth(app);
 
     // DOM elements
+    const userList = document.getElementById("userList");
     const courseList = document.getElementById("courseList");
-    const assignCourse = document.getElementById("assignCourse");
-    const assignLearner = document.getElementById("assignLearner");
-    const enrolledList = document.getElementById("enrolledLearners");
-    const programFilter = document.getElementById("programFilter");
-    const regionFilter = document.getElementById("regionFilter");
-    const learnerList = document.getElementById("learnerList");
-    const assignmentList = document.getElementById("assignmentList");
+    const courseSearch = document.getElementById("courseSearch");
+    const assessmentList = document.getElementById("assessmentList");
+    const certificationList = document.getElementById("certificationList");
+    const accreditationList = document.getElementById("accreditationList");
+    const grantList = document.getElementById("grantList");
+    const bursaryList = document.getElementById("bursaryList");
+    const projectList = document.getElementById("projectList");
+    const wspList = document.getElementById("wspList");
     const noticeList = document.getElementById("noticeList");
     const noticeForm = document.getElementById("notice-form");
     const noticeTitle = document.getElementById("noticeTitle");
     const noticeContent = document.getElementById("noticeContent");
     const noticeExpiry = document.getElementById("noticeExpiry");
     const noticeSearch = document.getElementById("noticeSearch");
+    const reportList = document.getElementById("reportList");
+    const ticketList = document.getElementById("ticketList");
+    const auditLogList = document.getElementById("auditLogList");
     const totalLearners = document.getElementById("total-learners");
     const totalCourses = document.getElementById("total-courses");
-    const pendingAssignments = document.getElementById("pending-assignments");
+    const pendingGrants = document.getElementById("pending-grants");
+    const openTickets = document.getElementById("open-tickets");
     const recentNotices = document.getElementById("recent-notices");
+    const progressChart = document.getElementById("progress-chart").getContext("2d");
     const loadingSpinner = document.getElementById("loading-spinner");
     const sidebar = document.getElementById("sidebar");
     const toggleSidebar = document.getElementById("toggle-sidebar");
+    const toggleContrast = document.getElementById("toggle-contrast");
 
-    let courses = {}, learners = [], notices = [];
+    let users = [], courses = {}, assessments = {}, certifications = {}, accreditations = {}, grants = {}, bursaries = {}, projects = {}, wspAtr = {}, notices = [], analytics = {}, tickets = {}, auditLogs = {};
 
     // Show/hide loading spinner
-    function showSpinner() {
-      loadingSpinner.classList.remove("hidden");
-    }
+    function showSpinner() { loadingSpinner.classList.remove("hidden"); }
+    function hideSpinner() { loadingSpinner.classList.add("hidden"); }
 
-    function hideSpinner() {
-      loadingSpinner.classList.add("hidden");
-    }
-
-    // Sidebar toggle for mobile
+    // Sidebar toggle
     toggleSidebar.addEventListener("click", () => {
       sidebar.classList.toggle("sidebar-open");
+    });
+
+    // High contrast toggle
+    toggleContrast.addEventListener("click", () => {
+      document.body.classList.toggle("high-contrast");
     });
 
     // Section switching
@@ -221,14 +422,16 @@
       });
     });
 
-    // Load overview metrics
+    // Load overview metrics and chart
     function loadOverview() {
       showSpinner();
       onValue(ref(db, "users"), snap => {
         const data = snap.val();
         let learnerCount = 0;
+        users = [];
         for (const uid in data) {
           if (data[uid].role === "learner") learnerCount++;
+          users.push({ uid, ...data[uid] });
         }
         totalLearners.textContent = learnerCount;
       });
@@ -237,15 +440,42 @@
         totalCourses.textContent = Object.keys(snap.val() || {}).length;
       });
 
-      onValue(ref(db, "assignments"), snap => {
+      onValue(ref(db, "grants"), snap => {
         let pendingCount = 0;
         const data = snap.val() || {};
-        for (const learnerUid in data) {
-          for (const assignmentId in data[learnerUid]) {
-            if (data[learnerUid][assignmentId].status === "pending") pendingCount++;
-          }
+        for (const grantId in data) {
+          if (data[grantId].status === "pending") pendingCount++;
         }
-        pendingAssignments.textContent = pendingCount;
+        pendingGrants.textContent = pendingCount;
+      });
+
+      onValue(ref(db, "helpdesk"), snap => {
+        let openCount = 0;
+        const data = snap.val() || {};
+        for (const ticketId in data) {
+          if (data[ticketId].status === "open") openCount++;
+        }
+        openTickets.textContent = openCount;
+      });
+
+      onValue(ref(db, "users"), snap => {
+        const data = snap.val() || {};
+        const progressData = [];
+        for (const uid in data) {
+          if (data[uid].role === "learner") progressData.push(data[uid].progress || 0);
+        }
+        new Chart(progressChart, {
+          type: "bar",
+          data: {
+            labels: progressData.map((_, i) => `Learner ${i + 1}`),
+            datasets: [{
+              label: "Progress (%)",
+              data: progressData,
+              backgroundColor: "#2563eb"
+            }]
+          },
+          options: { scales: { y: { beginAtZero: true, max: 100 } } }
+        });
       });
 
       onValue(ref(db, "notices"), snap => {
@@ -256,7 +486,6 @@
           hideSpinner();
           return;
         }
-
         const recent = Object.entries(data)
           .sort((a, b) => b[1].createdAt - a[1].createdAt)
           .slice(0, 3);
@@ -274,131 +503,236 @@
       });
     }
 
+    // Load users
+    function loadUsers() {
+      showSpinner();
+      onValue(ref(db, "users"), snap => {
+        userList.innerHTML = "";
+        users = [];
+        const data = snap.val();
+        for (const uid in data) {
+          users.push({ uid, ...data[uid] });
+          const userItem = document.createElement("div");
+          userItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          userItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${data[uid].fullName || "-"}</p>
+              <p class="text-sm text-gray-600">${data[uid].email} | Role: ${data[uid].role}</p>
+            </div>
+            <div>
+              <button onclick="editUser('${uid}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit user ${data[uid].email}">Edit</button>
+              <button onclick="deleteUser('${uid}')" class="text-red-600 hover:underline" aria-label="Delete user ${data[uid].email}">Delete</button>
+            </div>
+          `;
+          userList.appendChild(userItem);
+        }
+        hideSpinner();
+      });
+    }
+
     // Load courses
     function loadCourses() {
       showSpinner();
       onValue(ref(db, "courses"), snap => {
         courses = snap.val() || {};
         courseList.innerHTML = "";
-        assignCourse.innerHTML = '<option value="">Select Course</option>';
         for (const id in courses) {
           const c = courses[id];
           const courseItem = document.createElement("div");
           courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
           courseItem.innerHTML = `
-            <span>${c.name}</span>
             <div>
-              <button onclick="editCourse('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit course ${c.name}">Edit</button>
-              <button onclick="deleteCourse('${id}')" class="text-red-600 hover:underline" aria-label="Delete course ${c.name}">Delete</button>
+              <p class="font-semibold">${c.name}</p>
+              <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"}</p>
+            </div>
+            <div>
+              <button onclick="editCourse('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit program ${c.name}">Edit</button>
+              <button onclick="archiveCourse('${id}')" class="text-red-600 hover:underline" aria-label="Archive program ${c.name}">${c.archived ? "Unarchive" : "Archive"}</button>
             </div>
           `;
           courseList.appendChild(courseItem);
-          assignCourse.innerHTML += `<option value="${id}">${c.name}</option>`;
         }
-        hideSpinner();
-      }, err => {
-        console.error("Error loading courses:", err);
-        courseList.innerHTML = "<p class='text-red-600'>Failed to load courses.</p>";
         hideSpinner();
       });
     }
 
-    // Load learners
-    function loadLearners() {
+    // Load assessments
+    function loadAssessments() {
       showSpinner();
-      onValue(ref(db, "users"), snap => {
-        learners = [];
-        const data = snap.val();
-        learnerList.innerHTML = "";
-        assignLearner.innerHTML = '<option value="">Select Learner</option>';
-        const programs = new Set(), regions = new Set();
-        for (const uid in data) {
-          const u = data[uid];
-          if (u.role === "learner") {
-            learners.push({ uid, ...u });
-            programs.add(u.program);
-            regions.add(u.region);
-            assignLearner.innerHTML += `<option value="${uid}">${u.fullName || u.email}</option>`;
-            const learnerItem = document.createElement("div");
-            learnerItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
-            learnerItem.innerHTML = `
-              <div>
-                <p class="font-semibold">${u.fullName || "-"}</p>
-                <p class="text-sm text-gray-600">${u.email}</p>
-                <p class="text-sm text-gray-600">Program: ${u.program || "-"} | Region: ${u.region || "-"}</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <input type="number" value="${u.progress || 0}" min="0" max="100"
-                  onchange="updateProgress('${uid}', this.value)"
-                  class="w-16 border p-1 rounded text-center" aria-label="Update progress for ${u.fullName || u.email}" />
-                <span>${u.approved ? "✅" : "❌"}</span>
-                ${!u.approved ? `<button class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700" onclick="approveUser('${uid}')">Approve</button>` : ""}
-              </div>
-            `;
-            learnerList.appendChild(learnerItem);
-          }
-        }
-        programFilter.innerHTML = `<option value="">All Programs</option>` + Array.from(programs).map(p => `<option>${p}</option>`).join("");
-        regionFilter.innerHTML = `<option value="">All Regions</option>` + Array.from(regions).map(r => `<option>${r}</option>`).join("");
-        hideSpinner();
-      }, err => {
-        console.error("Error loading learners:", err);
-        learnerList.innerHTML = "<p class='text-red-600'>Failed to load learners.</p>";
-        hideSpinner();
-      });
-    }
-
-    // Load assignments
-    function loadAssignments() {
-      showSpinner();
-      onValue(ref(db, "assignments"), snap => {
-        assignmentList.innerHTML = "";
-        const data = snap.val();
-        if (!data) {
-          assignmentList.innerHTML = "<p class='text-gray-600'>No assignments found.</p>";
-          hideSpinner();
-          return;
-        }
-
-        const assignments = [];
-        for (const learnerUid in data) {
-          const learner = learners.find(l => l.uid === learnerUid);
-          const learnerAssignments = data[learnerUid];
-          for (const assignmentId in learnerAssignments) {
-            const assignment = learnerAssignments[assignmentId];
-            assignments.push({
-              learnerUid,
-              assignmentId,
-              ...assignment,
-              learnerEmail: learner ? learner.email : "Unknown"
-            });
-          }
-        }
-
-        assignments.forEach(a => {
-          let courseName = "-";
-          for (const courseId in courses) {
-            if (courses[courseId].learners && courses[courseId].learners[a.learnerUid]) {
-              courseName = courses[courseId].name;
-              break;
-            }
-          }
-          const assignmentItem = document.createElement("div");
-          assignmentItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
-          assignmentItem.innerHTML = `
+      onValue(ref(db, "assessments"), snap => {
+        assessments = snap.val() || {};
+        assessmentList.innerHTML = "";
+        for (const id in assessments) {
+          const a = assessments[id];
+          const assessmentItem = document.createElement("div");
+          assessmentItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          assessmentItem.innerHTML = `
             <div>
-              <p class="font-semibold">${a.fileName}</p>
-              <p class="text-sm text-gray-600">${a.learnerEmail} | Course: ${courseName}</p>
-              <p class="text-sm text-gray-600">Uploaded: ${new Date(a.uploadedAt).toLocaleDateString()} | Status: ${a.status}</p>
+              <p class="font-semibold">${a.title}</p>
+              <p class="text-sm text-gray-600">Course: ${courses[a.courseId]?.name || "-"}</p>
             </div>
-            <a href="${a.url}" target="_blank" class="text-blue-600 hover:underline" aria-label="View assignment ${a.fileName}">View</a>
+            <div>
+              <button onclick="editAssessment('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit assessment ${a.title}">Edit</button>
+              <button onclick="archiveAssessment('${id}')" class="text-red-600 hover:underline" aria-label="Archive assessment ${a.title}">${a.archived ? "Unarchive" : "Archive"}</button>
+            </div>
           `;
-          assignmentList.appendChild(assignmentItem);
-        });
+          assessmentList.appendChild(assessmentItem);
+        }
         hideSpinner();
-      }, err => {
-        console.error("Error loading assignments:", err);
-        assignmentList.innerHTML = "<p class='text-red-600'>Failed to load assignments.</p>";
+      });
+    }
+
+    // Load certifications
+    function loadCertifications() {
+      showSpinner();
+      onValue(ref(db, "certifications"), snap => {
+        certifications = snap.val() || {};
+        certificationList.innerHTML = "";
+        for (const id in certifications) {
+          const c = certifications[id];
+          const certItem = document.createElement("div");
+          certItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          certItem.innerHTML = `
+            <div>
+              <p class="font-semibold">Certificate for ${users.find(u => u.uid === c.learnerId)?.fullName || "-"}</p>
+              <p class="text-sm text-gray-600">Course: ${courses[c.courseId]?.name || "-"} | Issued: ${new Date(c.issuedAt).toLocaleDateString()}</p>
+            </div>
+            <div>
+              <button onclick="viewCertificate('${id}')" class="text-blue-600 hover:underline" aria-label="View certificate">View</button>
+            </div>
+          `;
+          certificationList.appendChild(certItem);
+        }
+        hideSpinner();
+      });
+    }
+
+    // Load accreditations
+    function loadAccreditations() {
+      showSpinner();
+      onValue(ref(db, "accreditations"), snap => {
+        accreditations = snap.val() || {};
+        accreditationList.innerHTML = "";
+        for (const id in accreditations) {
+          const a = accreditations[id];
+          const accItem = document.createElement("div");
+          accItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          accItem.innerHTML = `
+            <div>
+              <p class="font-semibold">Accreditation for ${users.find(u => u.uid === a.providerId)?.fullName || "-"}</p>
+              <p class="text-sm text-gray-600">Status: ${a.status}</p>
+            </div>
+            <div>
+              <button onclick="editAccreditation('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit accreditation">Edit</button>
+              <button onclick="deleteAccreditation('${id}')" class="text-red-600 hover:underline" aria-label="Delete accreditation">Delete</button>
+            </div>
+          `;
+          accreditationList.appendChild(accItem);
+        }
+        hideSpinner();
+      });
+    }
+
+    // Load grants
+    function loadGrants() {
+      showSpinner();
+      onValue(ref(db, "grants"), snap => {
+        grants = snap.val() || {};
+        grantList.innerHTML = "";
+        for (const id in grants) {
+          const g = grants[id];
+          const grantItem = document.createElement("div");
+          grantItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          grantItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${g.type} Grant</p>
+              <p class="text-sm text-gray-600">Amount: R${g.amount} | Status: ${g.status}</p>
+            </div>
+            <div>
+              <button onclick="editGrant('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit grant">Edit</button>
+              <button onclick="deleteGrant('${id}')" class="text-red-600 hover:underline" aria-label="Delete grant">Delete</button>
+            </div>
+          `;
+          grantList.appendChild(grantItem);
+        }
+        hideSpinner();
+      });
+    }
+
+    // Load bursaries
+    function loadBursaries() {
+      showSpinner();
+      onValue(ref(db, "bursaries"), snap => {
+        bursaries = snap.val() || {};
+        bursaryList.innerHTML = "";
+        for (const id in bursaries) {
+          const b = bursaries[id];
+          const bursaryItem = document.createElement("div");
+          bursaryItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          bursaryItem.innerHTML = `
+            <div>
+              <p class="font-semibold">Bursary for ${users.find(u => u.uid === b.applicantId)?.fullName || "-"}</p>
+              <p class="text-sm text-gray-600">Amount: R${b.amount} | Status: ${b.status}</p>
+            </div>
+            <div>
+              <button onclick="editBursary('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit bursary">Edit</button>
+              <button onclick="deleteBursary('${id}')" class="text-red-600 hover:underline" aria-label="Delete bursary">Delete</button>
+            </div>
+          `;
+          bursaryList.appendChild(bursaryItem);
+        }
+        hideSpinner();
+      });
+    }
+
+    // Load projects
+    function loadProjects() {
+      showSpinner();
+      onValue(ref(db, "projects"), snap => {
+        projects = snap.val() || {};
+        projectList.innerHTML = "";
+        for (const id in projects) {
+          const p = projects[id];
+          const projectItem = document.createElement("div");
+          projectItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          projectItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${p.name}</p>
+              <p class="text-sm text-gray-600">Status: ${p.status}</p>
+            </div>
+            <div>
+              <button onclick="editProject('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit project ${p.name}">Edit</button>
+              <button onclick="deleteProject('${id}')" class="text-red-600 hover:underline" aria-label="Delete project ${p.name}">Delete</button>
+            </div>
+          `;
+          projectList.appendChild(projectItem);
+        }
+        hideSpinner();
+      });
+    }
+
+    // Load WSP/ATR
+    function loadWspAtr() {
+      showSpinner();
+      onValue(ref(db, "wsp_atr"), snap => {
+        wspAtr = snap.val() || {};
+        wspList.innerHTML = "";
+        for (const id in wspAtr) {
+          const w = wspAtr[id];
+          const wspItem = document.createElement("div");
+          wspItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          wspItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${w.type.toUpperCase()} by ${users.find(u => u.uid === w.employerId)?.fullName || "-"}</p>
+              <p class="text-sm text-gray-600">Status: ${w.status}</p>
+            </div>
+            <div>
+              <button onclick="reviewWsp('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Review ${w.type}">Review</button>
+              <button onclick="deleteWsp('${id}')" class="text-red-600 hover:underline" aria-label="Delete ${w.type}">Delete</button>
+            </div>
+          `;
+          wspList.appendChild(wspItem);
+        }
         hideSpinner();
       });
     }
@@ -410,10 +744,6 @@
         notices = snap.val() || {};
         renderNotices();
         hideSpinner();
-      }, err => {
-        console.error("Error loading notices:", err);
-        noticeList.innerHTML = "<p class='text-red-600'>Failed to load notices.</p>";
-        hideSpinner();
       });
     }
 
@@ -422,14 +752,12 @@
       const filteredNotices = Object.entries(notices)
         .filter(([_, notice]) => notice.title.toLowerCase().includes(filter.toLowerCase()))
         .sort((a, b) => b[1].createdAt - a[1].createdAt);
-
       if (filteredNotices.length === 0) {
         noticeList.innerHTML = "<p class='text-gray-600'>No notices found.</p>";
         return;
       }
-
       filteredNotices.forEach(([id, n]) => {
-        const creator = learners.find(l => l.uid === n.createdBy) || { email: "Unknown" };
+        const creator = users.find(u => u.uid === n.createdBy) || { email: "Unknown" };
         const expiry = n.expiryDate ? new Date(n.expiryDate).toLocaleDateString() : "-";
         const noticeItem = document.createElement("div");
         noticeItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
@@ -449,9 +777,103 @@
       });
     }
 
+    // Load analytics
+    function loadAnalytics() {
+      showSpinner();
+      onValue(ref(db, "analytics"), snap => {
+        analytics = snap.val() || {};
+        reportList.innerHTML = "";
+        for (const id in analytics) {
+          const a = analytics[id];
+          const reportItem = document.createElement("div");
+          reportItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          reportItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${a.type.replace("_", " ")}</p>
+              <p class="text-sm text-gray-600">Generated: ${new Date(a.createdAt).toLocaleDateString()}</p>
+            </div>
+            <div>
+              <button onclick="viewReport('${id}')" class="text-blue-600 hover:underline" aria-label="View report">View</button>
+            </div>
+          `;
+          reportList.appendChild(reportItem);
+        }
+        hideSpinner();
+      });
+    }
+
+    // Load helpdesk tickets
+    function loadTickets() {
+      showSpinner();
+      onValue(ref(db, "helpdesk"), snap => {
+        tickets = snap.val() || {};
+        ticketList.innerHTML = "";
+        for (const id in tickets) {
+          const t = tickets[id];
+          const ticketItem = document.createElement("div");
+          ticketItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          ticketItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${t.issue}</p>
+              <p class="text-sm text-gray-600">Status: ${t.status} | By: ${users.find(u => u.uid === t.userId)?.email || "-"}</p>
+            </div>
+            <div>
+              <button onclick="resolveTicket('${id}')" class="text-blue-600 hover:underline" aria-label="Resolve ticket">Resolve</button>
+            </div>
+          `;
+          ticketList.appendChild(ticketItem);
+        }
+        hideSpinner();
+      });
+    }
+
+    // Load audit logs
+    function loadAuditLogs() {
+      showSpinner();
+      onValue(ref(db, "audit_logs"), snap => {
+        auditLogs = snap.val() || {};
+        auditLogList.innerHTML = "";
+        for (const id in auditLogs) {
+          const log = auditLogs[id];
+          const logItem = document.createElement("div");
+          logItem.className = "bg-gray-50 p-4 rounded shadow";
+          logItem.innerHTML = `
+            <p class="font-semibold">${log.action}</p>
+            <p class="text-sm text-gray-600">By: ${users.find(u => u.uid === log.userId)?.email || "-"} | ${new Date(log.timestamp).toLocaleString()}</p>
+          `;
+          auditLogList.appendChild(logItem);
+        }
+        hideSpinner();
+      });
+    }
+
     // Search notices
     noticeSearch.addEventListener("input", () => {
       renderNotices(noticeSearch.value);
+    });
+
+    // Search courses
+    courseSearch.addEventListener("input", () => {
+      const filter = courseSearch.value.toLowerCase();
+      courseList.innerHTML = "";
+      for (const id in courses) {
+        const c = courses[id];
+        if (c.name.toLowerCase().includes(filter) || c.metadata?.tags?.some(t => t.toLowerCase().includes(filter))) {
+          const courseItem = document.createElement("div");
+          courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          courseItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${c.name}</p>
+              <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"}</p>
+            </div>
+            <div>
+              <button onclick="editCourse('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit program ${c.name}">Edit</button>
+              <button onclick="archiveCourse('${id}')" class="text-red-600 hover:underline" aria-label="Archive program ${c.name}">${c.archived ? "Unarchive" : "Archive"}</button>
+            </div>
+          `;
+          courseList.appendChild(courseItem);
+        }
+      }
     });
 
     // Authentication check
@@ -461,10 +883,19 @@
         window.location.href = "login.html";
       } else {
         loadOverview();
+        loadUsers();
         loadCourses();
-        loadLearners();
-        loadAssignments();
+        loadAssessments();
+        loadCertifications();
+        loadAccreditations();
+        loadGrants();
+        loadBursaries();
+        loadProjects();
+        loadWspAtr();
         loadNotices();
+        loadAnalytics();
+        loadTickets();
+        loadAuditLogs();
       }
     });
 
@@ -479,117 +910,396 @@
       }
     });
 
-    // Course management
-    window.addCourse = () => {
-      const name = document.getElementById("courseName").value.trim();
-      if (!name) {
-        alert("Please enter a course name.");
-        return;
-      }
-      showSpinner();
-      push(ref(db, "courses"), { name })
-        .then(() => {
-          document.getElementById("courseName").value = "";
-          hideSpinner();
-        })
-        .catch(err => {
-          console.error("Error adding course:", err);
-          alert("Failed to add course.");
-          hideSpinner();
-        });
-    };
-
-    window.editCourse = (id) => {
-      const newName = prompt("Edit course name:", courses[id].name);
-      if (newName) {
-        showSpinner();
-        update(ref(db, `courses/${id}`), { name: newName })
-          .then(() => hideSpinner())
-          .catch(err => {
-            console.error("Error editing course:", err);
-            alert("Failed to edit course.");
-            hideSpinner();
-          });
-      }
-    };
-
-    window.deleteCourse = (id) => {
-      if (confirm("Delete this course?")) {
-        showSpinner();
-        remove(ref(db, `courses/${id}`))
-          .then(() => hideSpinner())
-          .catch(err => {
-            console.error("Error deleting course:", err);
-            alert("Failed to delete course.");
-            hideSpinner();
-          });
-      }
-    };
-
-    // Assign learner to course
-    window.assignLearner = () => {
-      const courseId = assignCourse.value;
-      const learnerId = assignLearner.value;
-      if (!courseId || !learnerId) {
-        alert("Please select a course and a learner.");
-        return;
-      }
-      showSpinner();
-      set(ref(db, `courses/${courseId}/learners/${learnerId}`), true)
-        .then(() => hideSpinner())
-        .catch(err => {
-          console.error("Error assigning learner:", err);
-          alert("Failed to assign learner.");
-          hideSpinner();
-        });
-    };
-
-    // Update learner progress
-    window.updateProgress = (uid, val) => {
-      showSpinner();
-      update(ref(db, `users/${uid}`), { progress: parseInt(val) })
-        .then(() => hideSpinner())
-        .catch(err => {
-          console.error("Error updating progress:", err);
-          alert("Failed to update progress.");
-          hideSpinner();
-        });
-    };
-
-    // Approve learner
-    window.approveUser = (uid) => {
-      showSpinner();
-      update(ref(db, `users/${uid}`), { approved: true })
-        .then(() => hideSpinner())
-        .catch(err => {
-          console.error("Error approving user:", err);
-          alert("Failed to approve user.");
-          hideSpinner();
-        });
-    };
-
-    // Post notice
-    noticeForm.addEventListener("submit", async e => {
-      e.preventDefault();
-      const title = noticeTitle.value.trim();
-      const content = noticeContent.value.trim();
-      const expiry = noticeExpiry.value;
-      if (!title || !content) {
-        alert("Please enter a title and content.");
+    // User management
+    window.addUser = async () => {
+      const email = document.getElementById("userEmail").value.trim();
+      const name = document.getElementById("userName").value.trim();
+      const role = document.getElementById("userRole").value;
+      if (!email || !name) {
+        alert("Please enter email and name.");
         return;
       }
       showSpinner();
       try {
-        const noticeData = {
+        const userData = { email, fullName: name, role, approved: role === "admin" };
+        await set(ref(db, `users/${email.replace(".", "_")}`), userData);
+        logAudit("Added user " + email);
+        document.getElementById("userEmail").value = "";
+        document.getElementById("userName").value = "";
+      } catch (err) {
+        console.error("Error adding user:", err);
+        alert("Failed to add user.");
+      }
+      hideSpinner();
+    };
+
+    window.editUser = async (uid) => {
+      const user = users.find(u => u.uid === uid);
+      const newEmail = prompt("Edit email:", user.email);
+      const newName = prompt("Edit name:", user.fullName);
+      const newRole = prompt("Edit role:", user.role);
+      if (newEmail && newName && newRole) {
+        showSpinner();
+        try {
+          await update(ref(db, `users/${uid}`), { email: newEmail, fullName: newName, role: newRole });
+          logAudit("Edited user " + uid);
+        } catch (err) {
+          console.error("Error editing user:", err);
+          alert("Failed to edit user.");
+        }
+        hideSpinner();
+      }
+    };
+
+    window.deleteUser = async (uid) => {
+      if (confirm("Delete this user?")) {
+        showSpinner();
+        try {
+          await remove(ref(db, `users/${uid}`));
+          logAudit("Deleted user " + uid);
+        } catch (err) {
+          console.error("Error deleting user:", err);
+          alert("Failed to delete user.");
+        }
+        hideSpinner();
+      }
+    };
+
+    window.importUsers = () => {
+      alert("CSV/Excel import placeholder. Parse file and push to Firebase.");
+    };
+
+    window.exportUsers = () => {
+      const rows = [["Email", "Name", "Role"]];
+      users.forEach(u => rows.push([u.email, u.fullName || "-", u.role]));
+      const csv = rows.map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
+      const link = document.createElement("a");
+      link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+      link.download = "users.csv";
+      link.click();
+    };
+
+    // Course management
+    window.addCourse = async () => {
+      const name = document.getElementById("courseName").value.trim();
+      const tags = document.getElementById("courseTags").value.split(",").map(t => t.trim());
+      if (!name) {
+        alert("Please enter a program name.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "courses"), { name, metadata: { tags, version: "1.0" }, createdAt: Date.now(), archived: false });
+        logAudit("Added program " + name);
+        document.getElementById("courseName").value = "";
+        document.getElementById("courseTags").value = "";
+      } catch (err) {
+        console.error("Error adding program:", err);
+        alert("Failed to add program.");
+      }
+      hideSpinner();
+    };
+
+    window.addContent = async () => {
+      const type = document.getElementById("contentType").value;
+      const url = document.getElementById("contentUrl").value.trim();
+      const title = document.getElementById("contentTitle").value.trim();
+      if (!url || !title) {
+        alert("Please enter content URL and title.");
+        return;
+      }
+      showSpinner();
+      try {
+        const courseId = prompt("Enter course ID to add content to:");
+        await push(ref(db, `courses/${courseId}/content`), { type, url, title });
+        logAudit("Added content to program " + courseId);
+        document.getElementById("contentUrl").value = "";
+        document.getElementById("contentTitle").value = "";
+      } catch (err) {
+        console.error("Error adding content:", err);
+        alert("Failed to add content.");
+      }
+      hideSpinner();
+    };
+
+    window.editCourse = async (id) => {
+      const newName = prompt("Edit program name:", courses[id].name);
+      const newTags = prompt("Edit tags (comma-separated):", courses[id].metadata?.tags?.join(", ") || "");
+      if (newName) {
+        showSpinner();
+        try {
+          await update(ref(db, `courses/${id}`), { name: newName, metadata: { tags: newTags.split(",").map(t => t.trim()), version: "1.1" } });
+          logAudit("Edited program " + id);
+        } catch (err) {
+          console.error("Error editing program:", err);
+          alert("Failed to edit program.");
+        }
+        hideSpinner();
+      }
+    };
+
+    window.archiveCourse = async (id) => {
+      const action = courses[id].archived ? "unarchive" : "archive";
+      if (confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} this program?`)) {
+        showSpinner();
+        try {
+          await update(ref(db, `courses/${id}`), { archived: !courses[id].archived });
+          logAudit(`${action.charAt(0).toUpperCase() + action.slice(1)}d program ${id}`);
+        } catch (err) {
+          console.error(`Error ${action}ing program:`, err);
+          alert(`Failed to ${action} program.`);
+        }
+        hideSpinner();
+      }
+    };
+
+    // Assessment management
+    window.addAssessment = async () => {
+      const courseId = document.getElementById("assessmentCourse").value;
+      const title = document.getElementById("assessmentTitle").value.trim();
+      const tags = document.getElementById("assessmentTags").value.split(",").map(t => t.trim());
+      if (!title || !courseId) {
+        alert("Please enter assessment title and select a course.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "assessments"), { courseId, title, metadata: { tags, version: "1.0" }, createdAt: Date.now(), archived: false });
+        logAudit("Added assessment " + title);
+        document.getElementById("assessmentTitle").value = "";
+        document.getElementById("assessmentTags").value = "";
+      } catch (err) {
+        console.error("Error adding assessment:", err);
+        alert("Failed to add assessment.");
+      }
+      hideSpinner();
+    };
+
+    // Certification management
+    window.issueCertificate = async () => {
+      const courseId = document.getElementById("certCourse").value;
+      const learnerId = document.getElementById("certLearner").value;
+      const template = document.getElementById("certTemplate").value.trim();
+      if (!courseId || !learnerId || !template) {
+        alert("Please select course, learner, and enter template name.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "certifications"), { courseId, learnerId, template, issuedAt: Date.now(), metadata: { tags: ["certificate"], version: "1.0" } });
+        logAudit("Issued certificate for learner " + learnerId);
+      } catch (err) {
+        console.error("Error issuing certificate:", err);
+        alert("Failed to issue certificate.");
+      }
+      hideSpinner();
+    };
+
+    // Accreditation management
+    window.addAccreditation = async () => {
+      const providerId = document.getElementById("accProvider").value;
+      const letterUrl = document.getElementById("accLetterUrl").value.trim();
+      if (!providerId || !letterUrl) {
+        alert("Please select provider and enter letter URL.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "accreditations"), { providerId, status: "approved", letterUrl, metadata: { tags: ["accreditation"], version: "1.0" }, createdAt: Date.now() });
+        logAudit("Added accreditation for provider " + providerId);
+        document.getElementById("accLetterUrl").value = "";
+      } catch (err) {
+        console.error("Error adding accreditation:", err);
+        alert("Failed to add accreditation.");
+      }
+      hideSpinner();
+    };
+
+    // Grant management
+    window.addGrant = async () => {
+      const type = document.getElementById("grantType").value;
+      const amount = parseInt(document.getElementById("grantAmount").value);
+      const recipientId = document.getElementById("grantRecipient").value;
+      if (!type || !amount || !recipientId) {
+        alert("Please select grant type, enter amount, and select recipient.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "grants"), { type, amount, status: "pending", recipientId, createdAt: Date.now() });
+        logAudit("Added " + type + " grant for " + recipientId);
+        document.getElementById("grantAmount").value = "";
+      } catch (err) {
+        console.error("Error adding grant:", err);
+        alert("Failed to add grant.");
+      }
+      hideSpinner();
+    };
+
+    // Bursary management
+    window.addBursary = async () => {
+      const applicantId = document.getElementById("bursaryApplicant").value;
+      const programId = document.getElementById("bursaryProgram").value;
+      const amount = parseInt(document.getElementById("bursaryAmount").value);
+      if (!applicantId || !programId || !amount) {
+        alert("Please select applicant, program, and enter amount.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "bursaries"), { applicantId, programId, amount, status: "pending", paymentStatus: "pending", documents: [], createdAt: Date.now() });
+        logAudit("Added bursary for applicant " + applicantId);
+        document.getElementById("bursaryAmount").value = "";
+      } catch (err) {
+        console.error("Error adding bursary:", err);
+        alert("Failed to add bursary.");
+      }
+      hideSpinner();
+    };
+
+    window.uploadBursaryDoc = () => {
+      alert("Document upload placeholder. Implement Firebase Storage integration.");
+    };
+
+    // Project management
+    window.addProject = async () => {
+      const name = document.getElementById("projectName").value.trim();
+      const charter = document.getElementById("projectCharter").value.trim();
+      if (!name || !charter) {
+        alert("Please enter project nameand charter.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "projects"), {
+          name,
+          status: "initiation",
+          charter: { objective: charter, timeline: new Date().toISOString().split("T")[0] },
+          tasks: [],
+          createdAt: Date.now()
+        });
+        logAudit("Added project " + name);
+        document.getElementById("projectName").value = "";
+        document.getElementById("projectCharter").value = "";
+      } catch (err) {
+        console.error("Error adding project:", err);
+        alert("Failed to add project.");
+      }
+      hideSpinner();
+    };
+
+    window.editProject = async (id) => {
+      const project = projects[id];
+      const newName = prompt("Edit project name:", project.name);
+      const newCharter = prompt("Edit project charter:", project.charter.objective);
+      if (newName && newCharter) {
+        showSpinner();
+        try {
+          await update(ref(db, `projects/${id}`), {
+            name: newName,
+            charter: { ...project.charter, objective: newCharter }
+          });
+          logAudit("Edited project " + id);
+        } catch (err) {
+          console.error("Error editing project:", err);
+          alert("Failed to edit project.");
+        }
+        hideSpinner();
+      }
+    };
+
+    window.deleteProject = async (id) => {
+      if (confirm("Delete this project?")) {
+        showSpinner();
+        try {
+          await remove(ref(db, `projects/${id}`));
+          logAudit("Deleted project " + id);
+        } catch (err) {
+          console.error("Error deleting project:", err);
+          alert("Failed to delete project.");
+        }
+        hideSpinner();
+      }
+    };
+
+    // WSP/ATR management
+    window.uploadWspDoc = async () => {
+      const employerId = document.getElementById("wspEmployer").value;
+      const type = document.getElementById("wspType").value;
+      const file = document.getElementById("wspDoc").files[0];
+      if (!employerId || !type || !file) {
+        alert("Please select employer, type, and upload a document.");
+        return;
+      }
+      showSpinner();
+      try {
+        // Placeholder for Firebase Storage upload
+        const docUrl = `https://storage.com/${type}_${employerId}_${Date.now()}.pdf`;
+        await push(ref(db, "wsp_atr"), {
+          employerId,
+          type,
+          status: "pending",
+          documents: [{ id: `doc_${Date.now()}`, url: docUrl }],
+          createdAt: Date.now()
+        });
+        logAudit(`Uploaded ${type} for employer ${employerId}`);
+        document.getElementById("wspDoc").value = "";
+      } catch (err) {
+        console.error("Error uploading WSP/ATR:", err);
+        alert("Failed to upload WSP/ATR.");
+      }
+      hideSpinner();
+    };
+
+    window.reviewWsp = async (id) => {
+      const status = prompt("Enter new status (approved/rejected):", wspAtr[id].status);
+      if (status === "approved" || status === "rejected") {
+        showSpinner();
+        try {
+          await update(ref(db, `wsp_atr/${id}`), { status });
+          logAudit(`Reviewed ${wspAtr[id].type} ${id} as ${status}`);
+        } catch (err) {
+          console.error("Error reviewing WSP/ATR:", err);
+          alert("Failed to review WSP/ATR.");
+        }
+        hideSpinner();
+      }
+    };
+
+    window.deleteWsp = async (id) => {
+      if (confirm("Delete this WSP/ATR?")) {
+        showSpinner();
+        try {
+          await remove(ref(db, `wsp_atr/${id}`));
+          logAudit(`Deleted ${wspAtr[id].type} ${id}`);
+        } catch (err) {
+          console.error("Error deleting WSP/ATR:", err);
+          alert("Failed to delete WSP/ATR.");
+        }
+        hideSpinner();
+      }
+    };
+
+    // Notice management
+    noticeForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const title = noticeTitle.value.trim();
+      const content = noticeContent.value.trim();
+      const expiry = noticeExpiry.value ? new Date(noticeExpiry.value).getTime() : null;
+      if (!title || !content) {
+        alert("Please enter title and content.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "notices"), {
           title,
           content,
           createdAt: Date.now(),
-          createdBy: auth.currentUser.uid
-        };
-        if (expiry) {
-          noticeData.expiryDate = new Date(expiry).getTime();
-        }
-        await push(ref(db, "notices"), noticeData);
+          createdBy: auth.currentUser.uid,
+          expiryDate: expiry
+        });
+        logAudit("Posted notice " + title);
         noticeTitle.value = "";
         noticeContent.value = "";
         noticeExpiry.value = "";
@@ -600,82 +1310,165 @@
       hideSpinner();
     });
 
-    // Edit notice
     window.editNotice = async (id) => {
-      showSpinner();
-      try {
-        const noticeRef = ref(db, `notices/${id}`);
-        const snapshot = await get(noticeRef);
-        if (!snapshot.exists()) {
-          alert("Notice not found.");
-          hideSpinner();
-          return;
-        }
-        const notice = snapshot.val();
-        const newTitle = prompt("Edit notice title:", notice.title);
-        const newContent = prompt("Edit notice content:", notice.content);
-        const newExpiry = prompt("Edit expiry date (YYYY-MM-DD, leave blank to remove):", notice.expiryDate ? new Date(notice.expiryDate).toISOString().split('T')[0] : "");
-        if (newTitle && newContent) {
-          const updates = {
+      const notice = notices[id];
+      const newTitle = prompt("Edit title:", notice.title);
+      const newContent = prompt("Edit content:", notice.content);
+      const newExpiry = prompt("Edit expiry date (YYYY-MM-DD):", notice.expiryDate ? new Date(notice.expiryDate).toISOString().split("T")[0] : "");
+      if (newTitle && newContent) {
+        showSpinner();
+        try {
+          await update(ref(db, `notices/${id}`), {
             title: newTitle,
             content: newContent,
             expiryDate: newExpiry ? new Date(newExpiry).getTime() : null
-          };
-          await update(noticeRef, updates);
+          });
+          logAudit("Edited notice " + id);
+        } catch (err) {
+          console.error("Error editing notice:", err);
+          alert("Failed to edit notice.");
         }
+        hideSpinner();
+      }
+    };
+
+    window.deleteNotice = async (id) => {
+      if (confirm("Delete this notice?")) {
+        showSpinner();
+        try {
+          await remove(ref(db, `notices/${id}`));
+          logAudit("Deleted notice " + id);
+        } catch (err) {
+          console.error("Error deleting notice:", err);
+          alert("Failed to delete notice.");
+        }
+        hideSpinner();
+      }
+    };
+
+    // Analytics management
+    window.generateReport = async () => {
+      const type = document.getElementById("reportType").value;
+      showSpinner();
+      try {
+        const data = type === "learner_progress" ? await generateProgressReport() : await generateGrantReport();
+        await push(ref(db, "analytics"), { type, data, createdAt: Date.now() });
+        logAudit("Generated " + type + " report");
       } catch (err) {
-        console.error("Error editing notice:", err);
-        alert("Failed to edit notice.");
+        console.error("Error generating report:", err);
+        alert("Failed to generate report.");
       }
       hideSpinner();
     };
 
-    // Delete notice
-    window.deleteNotice = (id) => {
-      if (confirm("Delete this notice?")) {
+    async function generateProgressReport() {
+      const snap = await get(ref(db, "users"));
+      const data = snap.val() || {};
+      const progressData = [];
+      for (const uid in data) {
+        if (data[uid].role === "learner") progressData.push(data[uid].progress || 0);
+      }
+      return {
+        labels: progressData.map((_, i) => `Learner ${i + 1}`),
+        datasets: [{
+          label: "Progress (%)",
+          data: progressData,
+          backgroundColor: "#2563eb"
+        }]
+      };
+    }
+
+    async function generateGrantReport() {
+      const snap = await get(ref(db, "grants"));
+      const data = snap.val() || {};
+      const statuses = { pending: 0, disbursed: 0 };
+      for (const id in data) {
+        statuses[data[id].status]++;
+      }
+      return {
+        labels: ["Pending", "Disbursed"],
+        datasets: [{
+          label: "Grants",
+          data: [statuses.pending, statuses.disbursed],
+          backgroundColor: ["#f87171", "#34d399"]
+        }]
+      };
+    }
+
+    window.viewReport = async (id) => {
+      const report = analytics[id];
+      const canvas = document.createElement("canvas");
+      reportList.appendChild(canvas);
+      new Chart(canvas, {
+        type: report.type === "learner_progress" ? "bar" : "pie",
+        data: report.data,
+        options: { scales: report.type === "learner_progress" ? { y: { beginAtZero: true, max: 100 } } : {} }
+      });
+    };
+
+    // Helpdesk management
+    window.resolveTicket = async (id) => {
+      if (confirm("Resolve this ticket?")) {
         showSpinner();
-        remove(ref(db, `notices/${id}`))
-          .then(() => hideSpinner())
-          .catch(err => {
-            console.error("Error deleting notice:", err);
-            alert("Failed to delete notice.");
-            hideSpinner();
-          });
+        try {
+          await update(ref(db, `helpdesk/${id}`), { status: "resolved" });
+          logAudit("Resolved ticket " + id);
+        } catch (err) {
+          console.error("Error resolving ticket:", err);
+          alert("Failed to resolve ticket.");
+        }
+        hideSpinner();
       }
     };
 
-    // Export learners to CSV
-    window.exportCSV = () => {
-      const rows = [["Name","Email","Program","Region","Progress","Approved"]];
-      learners.forEach(l => rows.push([l.fullName || "-", l.email, l.program || "-", l.region || "-", l.progress || 0, l.approved ? "Yes" : "No"]));
-      const csv = rows.map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
-      const link = document.createElement("a");
-      link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-      link.download = "learners.csv";
-      link.click();
-    };
+    // Audit logging
+    async function logAudit(action) {
+      try {
+        await push(ref(db, "audit_logs"), {
+          userId: auth.currentUser.uid,
+          action,
+          timestamp: Date.now()
+        });
+      } catch (err) {
+        console.error("Error logging audit:", err);
+      }
+    }
 
-    // Load enrolled learners for selected course
-    assignCourse.addEventListener("change", () => {
-      const cid = assignCourse.value;
-      enrolledList.innerHTML = "";
-      if (!cid) return;
-      showSpinner();
-      onValue(ref(db, `courses/${cid}/learners`), snap => {
-        const data = snap.val();
-        enrolledList.innerHTML = "";
-        if (data) {
-          for (const lid in data) {
-            const learner = learners.find(l => l.uid === lid);
-            if (learner) enrolledList.innerHTML += `<li>${learner.fullName || learner.email}</li>`;
+    // Populate dropdowns
+    async function populateDropdowns() {
+      const courseSelects = [document.getElementById("assessmentCourse"), document.getElementById("certCourse"), document.getElementById("bursaryProgram")];
+      const userSelects = [document.getElementById("certLearner"), document.getElementById("accProvider"), document.getElementById("grantRecipient"), document.getElementById("bursaryApplicant"), document.getElementById("wspEmployer")];
+      
+      onValue(ref(db, "courses"), snap => {
+        courseSelects.forEach(select => {
+          select.innerHTML = "<option value=''>Select Course</option>";
+          const data = snap.val() || {};
+          for (const id in data) {
+            const option = document.createElement("option");
+            option.value = id;
+            option.textContent = data[id].name;
+            select.appendChild(option);
           }
-        }
-        hideSpinner();
-      }, err => {
-        console.error("Error loading enrolled learners:", err);
-        enrolledList.innerHTML = `<li class="text-red-600">Failed to load enrolled learners.</li>`;
-        hideSpinner();
+        });
       });
+
+      onValue(ref(db, "users"), snap => {
+        userSelects.forEach(select => {
+          select.innerHTML = "<option value=''>Select User</option>";
+          const data = snap.val() || {};
+          for (const uid in data) {
+            const option = document.createElement("option");
+            option.value = uid;
+            option.textContent = data[uid].fullName || data[uid].email;
+            select.appendChild(option);
+          }
+        });
+      });
+    }
+
+    // Initialize
+    onAuthStateChanged(auth, user => {
+      if (user) populateDropdowns();
     });
   </script>
 </body>
