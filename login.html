@@ -37,7 +37,7 @@
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-    // Firebase configuration (move to backend for production)
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
@@ -52,34 +52,41 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // DOM elements
     const loginForm = document.getElementById("login-form");
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
     const errorMessage = document.getElementById("error-message");
     const loadingSpinner = document.getElementById("loading-spinner");
 
-    // Show/hide loading spinner
-    function showSpinner() { loadingSpinner.classList.remove("hidden"); }
-    function hideSpinner() { loadingSpinner.classList.add("hidden"); }
+    function showSpinner() {
+      loadingSpinner.classList.remove("hidden");
+    }
 
-    // Handle login
+    function hideSpinner() {
+      loadingSpinner.classList.add("hidden");
+    }
+
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = emailInput.value.trim();
       const password = passwordInput.value.trim();
+      errorMessage.classList.add("hidden");
+
       if (!email || !password) {
         errorMessage.textContent = "Please enter email and password.";
         errorMessage.classList.remove("hidden");
         return;
       }
+
       showSpinner();
+
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         const userRef = ref(db, `users/${user.uid}`);
         const snapshot = await get(userRef);
         const userData = snapshot.val();
+
         if (!userData) {
           errorMessage.textContent = "User data not found.";
           errorMessage.classList.remove("hidden");
@@ -87,14 +94,9 @@
           hideSpinner();
           return;
         }
+
         if (userData.role === "learner") {
-          if (!userData.approved) {
-            errorMessage.textContent = "Your account is pending admin approval.";
-            errorMessage.classList.remove("hidden");
-            await auth.signOut();
-            hideSpinner();
-            return;
-          }
+          // Approval check removed - allow all learners
           window.location.href = "dashboard.html";
         } else if (userData.role === "admin") {
           window.location.href = "program.html";
@@ -108,6 +110,7 @@
         errorMessage.textContent = "Invalid email or password.";
         errorMessage.classList.remove("hidden");
       }
+
       hideSpinner();
     });
   </script>
