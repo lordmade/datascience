@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CETA LMS Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .high-contrast { background: #000; color: #fff; }
-  </style>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex items-center justify-center">
   <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
@@ -24,7 +21,7 @@
       <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700" aria-label="Sign in to your account">Sign In</button>
     </form>
     <div class="mt-4 text-center">
-      <button id="toggle-contrast" class="text-blue-600 hover:underline" aria-label="Toggle high contrast mode">Toggle High Contrast</button>
+      <a href="signup.html" class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" aria-label="Create a new account">Create Account</a>
     </div>
     <p id="error-message" class="text-red-600 text-center mt-4 hidden"></p>
     <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
@@ -61,16 +58,10 @@
     const passwordInput = document.getElementById("password");
     const errorMessage = document.getElementById("error-message");
     const loadingSpinner = document.getElementById("loading-spinner");
-    const toggleContrast = document.getElementById("toggle-contrast");
 
     // Show/hide loading spinner
     function showSpinner() { loadingSpinner.classList.remove("hidden"); }
     function hideSpinner() { loadingSpinner.classList.add("hidden"); }
-
-    // High contrast toggle
-    toggleContrast.addEventListener("click", () => {
-      document.body.classList.toggle("high-contrast");
-    });
 
     // Handle login
     loginForm.addEventListener("submit", async (e) => {
@@ -97,9 +88,16 @@
           return;
         }
         if (userData.role === "learner") {
-          window.location.href = "dashboard.html";
+          if (!userData.approved) {
+            errorMessage.textContent = "Your account is pending admin approval.";
+            errorMessage.classList.remove("hidden");
+            await auth.signOut();
+            hideSpinner();
+            return;
+          }
+          window.location.href = "learner_dashboard.html";
         } else if (userData.role === "admin") {
-          window.location.href = "admin-dashboard.html";
+          window.location.href = "admin_dashboard.html";
         } else {
           errorMessage.textContent = "Access restricted. Contact administrator.";
           errorMessage.classList.remove("hidden");
