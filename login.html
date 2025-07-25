@@ -3,27 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CETA LMS Login</title>
+  <title>CETA Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .high-contrast { background: #000; color: #fff; }
+    .high-contrast input, .high-contrast button { background: #fff; color: #000; border-color: #fff; }
+  </style>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex items-center justify-center">
-  <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
-    <h1 class="text-2xl font-bold mb-6 text-center">CETA LMS Login</h1>
-    <form id="login-form">
-      <div class="mb-4">
+  <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold text-center mb-6">CETA Login</h1>
+    <form id="login-form" class="space-y-4">
+      <div>
         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-        <input type="email" id="email" class="border p-2 rounded w-full" aria-label="Enter your email" required />
+        <input type="email" id="email" class="border p-2 rounded w-full" placeholder="Enter your email" aria-label="Enter your email" required />
       </div>
-      <div class="mb-4">
+      <div>
         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-        <input type="password" id="password" class="border p-2 rounded w-full" aria-label="Enter your password" required />
+        <input type="password" id="password" class="border p-2 rounded w-full" placeholder="Enter your password" aria-label="Enter your password" required />
       </div>
       <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700" aria-label="Sign in to your account">Sign In</button>
     </form>
+    <p id="error-message" class="text-red-600 text-sm mt-4 text-center hidden"></p>
     <div class="mt-4 text-center">
-      <a href="signup.html" class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" aria-label="Create a new account">Create Account</a>
+      <button id="toggle-contrast" class="text-blue-600 hover:underline" aria-label="Toggle high contrast mode">Toggle High Contrast</button>
     </div>
-    <p id="error-message" class="text-red-600 text-center mt-4 hidden"></p>
     <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
       <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
     </div>
@@ -34,10 +38,10 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-    // Firebase configuration
+    // Firebase configuration (move to backend for production)
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
@@ -52,66 +56,103 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
+    // DOM elements
     const loginForm = document.getElementById("login-form");
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
     const errorMessage = document.getElementById("error-message");
     const loadingSpinner = document.getElementById("loading-spinner");
+    const toggleContrast = document.getElementById("toggle-contrast");
 
-    function showSpinner() {
-      loadingSpinner.classList.remove("hidden");
+    // Show/hide loading spinner
+    function showSpinner() { loadingSpinner.classList.remove("hidden"); }
+    function hideSpinner() { loadingSpinner.classList.add("hidden"); }
+
+    // Show error message
+    function showError(msg) {
+      errorMessage.textContent = msg;
+      errorMessage.classList.remove("hidden");
     }
 
-    function hideSpinner() {
-      loadingSpinner.classList.add("hidden");
-    }
+    // High contrast toggle
+    toggleContrast.addEventListener("click", () => {
+      document.body.classList.toggle("high-contrast");
+    });
 
+    // Handle login form submission
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = emailInput.value.trim();
       const password = passwordInput.value.trim();
-      errorMessage.classList.add("hidden");
 
       if (!email || !password) {
-        errorMessage.textContent = "Please enter email and password.";
-        errorMessage.classList.remove("hidden");
+        showError("Please enter both email and password.");
         return;
       }
 
       showSpinner();
-
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        const userRef = ref(db, `users/${user.uid}`);
-        const snapshot = await get(userRef);
-        const userData = snapshot.val();
-
-        if (!userData) {
-          errorMessage.textContent = "User data not found.";
-          errorMessage.classList.remove("hidden");
-          await auth.signOut();
-          hideSpinner();
-          return;
-        }
-
-        if (userData.role === "learner") {
-          // Approval check removed - allow all learners
-          window.location.href = "dashboard.html";
-        } else if (userData.role === "admin") {
-          window.location.href = "program.html";
-        } else {
-          errorMessage.textContent = "Access restricted. Contact administrator.";
-          errorMessage.classList.remove("hidden");
-          await auth.signOut();
-        }
+        // Role check will happen in onAuthStateChanged
       } catch (err) {
-        console.error("Login failed:", err);
-        errorMessage.textContent = "Invalid email or password.";
-        errorMessage.classList.remove("hidden");
+        console.error("Login error:", err);
+        hideSpinner();
+        switch (err.code) {
+          case "auth/invalid-email":
+            showError("Invalid email format.");
+            break;
+          case "auth/user-not-found":
+          case "auth/wrong-password":
+            showError("Incorrect email or password.");
+            break;
+          default:
+            showError("Login failed. Please try again.");
+        }
       }
+    });
 
-      hideSpinner();
+    // Authentication state listener
+    onAuthStateChanged(auth, async (authUser) => {
+      if (authUser) {
+        try {
+          const userSnap = await get(ref(db, `users/${authUser.uid}`));
+          hideSpinner();
+          if (userSnap.exists()) {
+            const userData = userSnap.val();
+            switch (userData.role) {
+              case "provider":
+                window.location.href = "provider_dashboard.html";
+                break;
+              case "learner":
+                window.location.href = "dashboard.html";
+                break;
+              case "admin":
+                // Placeholder for admin dashboard
+                alert("Admin dashboard not implemented. Redirecting to login.");
+                await auth.signOut();
+                window.location.href = "login.html";
+                break;
+              default:
+                showError("Invalid user role. Logging out...");
+                await auth.signOut();
+                window.location.href = "login.html";
+            }
+          } else {
+            showError("User data not found. Logging out...");
+            await auth.signOut();
+            window.location.href = "login.html";
+          }
+        } catch (err) {
+          console.error("Error fetching user data:", err);
+          hideSpinner();
+          showError("Failed to load user data. Logging out...");
+          await auth.signOut();
+          window.location.href = "login.html";
+        }
+      } else {
+        hideSpinner();
+        // User is not logged in, stay on login page
+      }
     });
   </script>
 </body>
