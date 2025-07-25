@@ -2,66 +2,160 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Learner Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CETA Learner Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .sidebar { transition: width 0.3s ease; }
+    .sidebar-hidden { width: 0; overflow: hidden; }
+    .main-content { transition: margin-left 0.3s ease; }
+    .high-contrast { background: #000; color: #fff; }
+    @media (max-width: 768px) {
+      .sidebar { width: 0; overflow: hidden; }
+      .sidebar-open { width: 256px; }
+      .main-content { margin-left: 0; }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen font-sans">
-  <div class="container mx-auto px-4 py-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold">Welcome, <span id="user-email" class="text-blue-600"></span></h1>
-      <button id="signout-btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded" aria-label="Sign out of your account">
-        Sign Out
-      </button>
-    </div>
-
-    <div class="mb-8 bg-white p-6 rounded shadow">
-      <h2 class="text-xl font-semibold mb-2">Notices</h2>
-      <div id="notices-container" class="space-y-4" aria-live="polite"></div>
-    </div>
-
-    <div class="mb-8">
-      <h2 class="text-2xl font-semibold mb-2">Your Enrolled Programs</h2>
-      <div id="programs-container" class="grid gap-4 md:grid-cols-2"></div>
-    </div>
-
-    <div class="mb-8">
-      <h2 class="text-2xl font-semibold mb-2">Progress Overview</h2>
-      <div class="relative h-64 md:h-80">
-        <canvas id="progressChart" class="bg-white rounded shadow p-4"></canvas>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
+  <div class="flex">
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar bg-gray-800 text-white w-64 min-h-screen p-4">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-bold">CETA Learner</h1>
+        <button id="toggle-sidebar" class="md:hidden text-white focus:outline-none" aria-label="Toggle sidebar">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+      <nav>
+        <ul class="space-y-2">
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="overview">Dashboard</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="courses">My Courses</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="assessments">Assessments</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="certifications">Certificates</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="bursaries">Bursaries</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="helpdesk">Helpdesk</button></li>
+        </ul>
+      </nav>
+      <div class="mt-auto">
+        <button id="toggle-contrast" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded mb-2" aria-label="Toggle high contrast mode">Toggle High Contrast</button>
+        <button id="signout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" aria-label="Sign out of learner account">Sign Out</button>
       </div>
     </div>
 
-    <div class="mb-8 bg-white p-6 rounded shadow max-w-md">
-      <h2 class="text-xl font-bold mb-4">Submit Assignment (PDF)</h2>
-      <form id="upload-form">
-        <input type="file" id="pdf-file" accept="application/pdf" required class="mb-4" aria-label="Upload PDF assignment" />
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50" id="upload-btn">
-          Upload Assignment
-        </button>
-        <p id="upload-status" class="mt-3 text-sm"></p>
-      </form>
-    </div>
+    <!-- Main Content -->
+    <div class="main-content flex-1 p-6 md:ml-64">
+      <!-- Overview Section -->
+      <div id="overview" class="section">
+        <h2 class="text-2xl font-semibold mb-4">Welcome, <span id="learner-name">Learner</span></h2>
+        <div class="grid gap-4 md:grid-cols-3">
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold">Enrolled Courses</h3>
+            <p id="enrolled-courses" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold">Completed Assessments</h3>
+            <p id="completed-assessments" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold">Certificates Earned</h3>
+            <p id="earned-certificates" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+        </div>
+        <div class="mt-6 bg-white p-4 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Your Progress</h3>
+          <canvas id="progress-chart" class="w-full h-64"></canvas>
+        </div>
+        <div class="mt-6 bg-white p-4 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Latest Notices</h3>
+          <input type="text" id="noticeSearch" placeholder="Search notices..." class="border p-2 rounded w-full mb-4" aria-label="Search notices by title" />
+          <div id="noticeList" class="space-y-4" aria-live="polite"></div>
+        </div>
+      </div>
 
-    <div id="assignments-container" class="mb-8 bg-white p-6 rounded shadow">
-      <h2 class="text-xl font-bold mb-4">Uploaded Assignments</h2>
-      <div id="assignments-list"></div>
-    </div>
+      <!-- Courses Section -->
+      <div id="courses" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">My Courses</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Available Courses</h3>
+          <input type="text" id="courseSearch" placeholder="Search courses..." class="border p-2 rounded w-full mb-4" aria-label="Search courses by name or tag" />
+          <div id="courseList" class="space-y-4"></div>
+        </div>
+      </div>
 
-    <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
-    </div>
+      <!-- Assessments Section -->
+      <div id="assessments" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Assessments</h2>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Your Assessments</h3>
+          <div id="assessmentList" class="space-y-4"></div>
+        </div>
+      </div>
 
-    <noscript>
-      <p class="text-red-600 text-center">JavaScript is required to use this dashboard.</p>
-    </noscript>
+      <!-- Certifications Section -->
+      <div id="certifications" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Certificates</h2>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Your Certificates</h3>
+          <div id="certificationList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Bursaries Section -->
+      <div id="bursaries" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Bursaries</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Apply for Bursary</h3>
+          <div class="flex gap-2 mb-4">
+            <select id="bursaryProgram" class="border p-2 rounded" aria-label="Select program"></select>
+            <input type="number" id="bursaryAmount" placeholder="Amount" class="border p-2 rounded w-1/3" aria-label="Enter bursary amount" />
+            <button onclick="applyBursary()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Apply</button>
+          </div>
+          <div class="flex gap-2">
+            <input type="file" id="bursaryDoc" accept=".pdf" class="border p-2 rounded" aria-label="Upload supporting document" />
+            <button onclick="uploadBursaryDoc()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Upload Document</button>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Your Bursary Applications</h3>
+          <div id="bursaryList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Helpdesk Section -->
+      <div id="helpdesk" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Helpdesk</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Submit a Ticket</h3>
+          <form id="ticket-form">
+            <input type="text" id="ticketIssue" placeholder="Issue Title" class="border p-2 rounded w-full mb-2" aria-label="Enter issue title" required />
+            <textarea id="ticketDescription" placeholder="Describe your issue" class="border p-2 rounded w-full mb-2" rows="4" aria-label="Enter issue description" required></textarea>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit Ticket</button>
+          </form>
+        </div>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Your Tickets</h3>
+          <div id="ticketList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
+      </div>
+
+      <noscript>
+        <p class="text-red-600 text-center">JavaScript is required to use this dashboard.</p>
+      </noscript>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, get, push, set, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getDatabase, ref, onValue, push, update, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
     // Firebase configuration (move to backend for production)
     const firebaseConfig = {
@@ -75,267 +169,467 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getDatabase(app);
+    const auth = getAuth(app);
 
-    const emailSpan = document.getElementById("user-email");
-    const programsContainer = document.getElementById("programs-container");
-    const assignmentsList = document.getElementById("assignments-list");
-    const noticesContainer = document.getElementById("notices-container");
-    const signOutBtn = document.getElementById("signout-btn");
-    const uploadForm = document.getElementById("upload-form");
-    const pdfFileInput = document.getElementById("pdf-file");
-    const uploadStatus = document.getElementById("upload-status");
-    const uploadBtn = document.getElementById("upload-btn");
+    // DOM elements
+    const learnerName = document.getElementById("learner-name");
+    const enrolledCourses = document.getElementById("enrolled-courses");
+    const completedAssessments = document.getElementById("completed-assessments");
+    const earnedCertificates = document.getElementById("earned-certificates");
+    const courseList = document.getElementById("courseList");
+    const courseSearch = document.getElementById("courseSearch");
+    const assessmentList = document.getElementById("assessmentList");
+    const certificationList = document.getElementById("certificationList");
+    const bursaryList = document.getElementById("bursaryList");
+    const ticketList = document.getElementById("ticketList");
+    const noticeList = document.getElementById("noticeList");
+    const noticeSearch = document.getElementById("noticeSearch");
+    const ticketForm = document.getElementById("ticket-form");
+    const ticketIssue = document.getElementById("ticketIssue");
+    const ticketDescription = document.getElementById("ticketDescription");
+    const progressChart = document.getElementById("progress-chart").getContext("2d");
     const loadingSpinner = document.getElementById("loading-spinner");
+    const sidebar = document.getElementById("sidebar");
+    const toggleSidebar = document.getElementById("toggle-sidebar");
+    const toggleContrast = document.getElementById("toggle-contrast");
 
-    function showSpinner() {
-      loadingSpinner.classList.remove("hidden");
-    }
+    let user = null, courses = {}, assessments = {}, certifications = {}, bursaries = {}, notices = {}, tickets = {};
 
-    function hideSpinner() {
-      loadingSpinner.classList.add("hidden");
-    }
+    // Show/hide loading spinner
+    function showSpinner() { loadingSpinner.classList.remove("hidden"); }
+    function hideSpinner() { loadingSpinner.classList.add("hidden"); }
 
-    function renderPrograms(programs) {
-      programsContainer.innerHTML = "";
-      const labels = [];
-      const data = [];
+    // Sidebar toggle
+    toggleSidebar.addEventListener("click", () => {
+      sidebar.classList.toggle("sidebar-open");
+    });
 
-      if (Object.keys(programs).length === 0) {
-        programsContainer.innerHTML = "<p class='text-gray-600'>No enrolled programs found.</p>";
-        return;
-      }
+    // High contrast toggle
+    toggleContrast.addEventListener("click", () => {
+      document.body.classList.toggle("high-contrast");
+    });
 
-      Object.entries(programs).forEach(([key, program]) => {
-        const title = key;
-        const progress = program.progress || 0;
+    // Section switching
+    document.querySelectorAll(".nav-button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
+        document.getElementById(btn.dataset.section).classList.remove("hidden");
+        if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
+      });
+    });
 
-        labels.push(title);
-        data.push(progress);
-
-        const card = document.createElement("div");
-        card.className = "bg-white p-4 shadow rounded";
-        card.innerHTML = `
-          <h3 class="text-lg font-bold">${title}</h3>
-          <div class="w-full bg-gray-200 rounded h-4 mt-2">
-            <div class="bg-blue-600 h-4 rounded" style="width: ${progress}%;"></div>
-          </div>
-          <p class="text-right text-sm mt-1 text-gray-600">${progress}% complete</p>
-        `;
-        programsContainer.appendChild(card);
+    // Load overview metrics and chart
+    function loadOverview() {
+      showSpinner();
+      onValue(ref(db, `users/${auth.currentUser.uid}`), snap => {
+        user = snap.val();
+        learnerName.textContent = user.fullName || user.email;
       });
 
-      const ctx = document.getElementById("progressChart").getContext("2d");
-      new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: labels,
-          datasets: [{
-            label: "Program Progress (%)",
-            data: data,
-            backgroundColor: ["#2563eb", "#16a34a", "#dc2626", "#d97706", "#7c3aed"],
-            borderColor: ["#1e3a8a", "#15803d", "#b91c1c", "#b45309", "#6d28d9"],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100,
-              title: { display: true, text: "Progress (%)" }
-            },
-            x: {
-              title: { display: true, text: "Programs" }
-            }
+      onValue(ref(db, "courses"), snap => {
+        courses = snap.val() || {};
+        let enrolledCount = 0;
+        for (const id in courses) {
+          if (courses[id].enrolled?.includes(auth.currentUser.uid)) enrolledCount++;
+        }
+        enrolledCourses.textContent = enrolledCount;
+      });
+
+      onValue(ref(db, "assessments"), snap => {
+        assessments = snap.val() || {};
+        let completedCount = 0;
+        for (const id in assessments) {
+          if (assessments[id].submissions?.[auth.currentUser.uid]?.status === "completed") completedCount++;
+        }
+        completedAssessments.textContent = completedCount;
+      });
+
+      onValue(ref(db, "certifications"), snap => {
+        certifications = snap.val() || {};
+        let certCount = 0;
+        for (const id in certifications) {
+          if (certifications[id].learnerId === auth.currentUser.uid) certCount++;
+        }
+        earnedCertificates.textContent = certCount;
+      });
+
+      onValue(ref(db, `users/${auth.currentUser.uid}/progress`), snap => {
+        const progress = snap.val() || 0;
+        new Chart(progressChart, {
+          type: "bar",
+          data: {
+            labels: ["Your Progress"],
+            datasets: [{
+              label: "Progress (%)",
+              data: [progress],
+              backgroundColor: "#2563eb"
+            }]
           },
-          plugins: {
-            legend: { display: true, position: "top" }
+          options: { scales: { y: { beginAtZero: true, max: 100 } } }
+        });
+      });
+
+      onValue(ref(db, "notices"), snap => {
+        notices = snap.val() || {};
+        renderNotices();
+        hideSpinner();
+      });
+    }
+
+    // Render notices
+    function renderNotices(filter = "") {
+      noticeList.innerHTML = "";
+      const filteredNotices = Object.entries(notices)
+        .filter(([_, notice]) => notice.title.toLowerCase().includes(filter.toLowerCase()) && (!notice.expiryDate || notice.expiryDate > Date.now()))
+        .sort((a, b) => b[1].createdAt - a[1].createdAt);
+      if (filteredNotices.length === 0) {
+        noticeList.innerHTML = "<p class='text-gray-600'>No active notices found.</p>";
+        return;
+      }
+      filteredNotices.forEach(([id, n]) => {
+        const noticeItem = document.createElement("div");
+        noticeItem.className = "bg-gray-50 p-4 rounded shadow";
+        noticeItem.innerHTML = `
+          <h4 class="text-md font-semibold">${n.title}</h4>
+          <p class="text-gray-700">${n.content}</p>
+          <p class="text-sm text-gray-500 mt-2">Posted on ${new Date(n.createdAt).toLocaleDateString()}
+          ${n.expiryDate ? ` | Expires on ${new Date(n.expiryDate).toLocaleDateString()}` : ""}</p>
+        `;
+        noticeList.appendChild(noticeItem);
+      });
+    }
+
+    // Search notices
+    noticeSearch.addEventListener("input", () => {
+      renderNotices(noticeSearch.value);
+    });
+
+    // Load courses
+    function loadCourses() {
+      showSpinner();
+      onValue(ref(db, "courses"), snap => {
+        courses = snap.val() || {};
+        courseList.innerHTML = "";
+        for (const id in courses) {
+          const c = courses[id];
+          if (c.archived) continue;
+          const isEnrolled = c.enrolled?.includes(auth.currentUser.uid);
+          const courseItem = document.createElement("div");
+          courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          courseItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${c.name}</p>
+              <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"}</p>
+            </div>
+            <div>
+              ${isEnrolled ? `<button onclick="viewCourse('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="View course ${c.name}">View</button>` : 
+              `<button onclick="enrollCourse('${id}')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" aria-label="Enroll in course ${c.name}">Enroll</button>`}
+            </div>
+          `;
+          courseList.appendChild(courseItem);
+        }
+        hideSpinner();
+      });
+    }
+
+    // Search courses
+    courseSearch.addEventListener("input", () => {
+      const filter = courseSearch.value.toLowerCase();
+      courseList.innerHTML = "";
+      for (const id in courses) {
+        const c = courses[id];
+        if (c.archived) continue;
+        if (c.name.toLowerCase().includes(filter) || c.metadata?.tags?.some(t => t.toLowerCase().includes(filter))) {
+          const isEnrolled = c.enrolled?.includes(auth.currentUser.uid);
+          const courseItem = document.createElement("div");
+          courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          courseItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${c.name}</p>
+              <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"}</p>
+            </div>
+            <div>
+              ${isEnrolled ? `<button onclick="viewCourse('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="View course ${c.name}">View</button>` : 
+              `<button onclick="enrollCourse('${id}')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" aria-label="Enroll in course ${c.name}">Enroll</button>`}
+            </div>
+          `;
+          courseList.appendChild(courseItem);
+        }
+      }
+    });
+
+    // Load assessments
+    function loadAssessments() {
+      showSpinner();
+      onValue(ref(db, "assessments"), snap => {
+        assessments = snap.val() || {};
+        assessmentList.innerHTML = "";
+        for (const id in assessments) {
+          const a = assessments[id];
+          if (a.archived || !courses[a.courseId]?.enrolled?.includes(auth.currentUser.uid)) continue;
+          const submission = a.submissions?.[auth.currentUser.uid];
+          const assessmentItem = document.createElement("div");
+          assessmentItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          assessmentItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${a.title}</p>
+              <p class="text-sm text-gray-600">Course: ${courses[a.courseId]?.name || "-"} | Status: ${submission?.status || "Not Started"}</p>
+            </div>
+            <div>
+              ${submission?.status === "completed" ? `<span class="text-green-600">Completed</span>` : 
+              `<button onclick="submitAssessment('${id}')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" aria-label="Submit assessment ${a.title}">Submit</button>`}
+            </div>
+          `;
+          assessmentList.appendChild(assessmentItem);
+        }
+        hideSpinner();
+      });
+    }
+
+    // Load certifications
+    function loadCertifications() {
+      showSpinner();
+      onValue(ref(db, "certifications"), snap => {
+        certifications = snap.val() || {};
+        certificationList.innerHTML = "";
+        for (const id in certifications) {
+          const c = certifications[id];
+          if (c.learnerId !== auth.currentUser.uid) continue;
+          const certItem = document.createElement("div");
+          certItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          certItem.innerHTML = `
+            <div>
+              <p class="font-semibold">Certificate for ${courses[c.courseId]?.name || "-"}</p>
+              <p class="text-sm text-gray-600">Issued: ${new Date(c.issuedAt).toLocaleDateString()}</p>
+            </div>
+            <div>
+              <button onclick="viewCertificate('${id}')" class="text-blue-600 hover:underline" aria-label="View certificate">View</button>
+            </div>
+          `;
+          certificationList.appendChild(certItem);
+        }
+        hideSpinner();
+      });
+    }
+
+    // Load bursaries
+    function loadBursaries() {
+      showSpinner();
+      onValue(ref(db, "bursaries"), snap => {
+        bursaries = snap.val() || {};
+        bursaryList.innerHTML = "";
+        for (const id in bursaries) {
+          const b = bursaries[id];
+          if (b.applicantId !== auth.currentUser.uid) continue;
+          const bursaryItem = document.createElement("div");
+          bursaryItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          bursaryItem.innerHTML = `
+            <div>
+              <p class="font-semibold">Bursary for ${courses[b.programId]?.name || "-"}</p>
+              <p class="text-sm text-gray-600">Amount: R${b.amount} | Status: ${b.status}</p>
+            </div>
+            <div>
+              <button onclick="viewBursary('${id}')" class="text-blue-600 hover:underline" aria-label="View bursary">View</button>
+            </div>
+          `;
+          bursaryList.appendChild(bursaryItem);
+        }
+        hideSpinner();
+      });
+    }
+
+    // Load tickets
+    function loadTickets() {
+      showSpinner();
+      onValue(ref(db, "helpdesk"), snap => {
+        tickets = snap.val() || {};
+        ticketList.innerHTML = "";
+        for (const id in tickets) {
+          const t = tickets[id];
+          if (t.userId !== auth.currentUser.uid) continue;
+          const ticketItem = document.createElement("div");
+          ticketItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          ticketItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${t.issue}</p>
+              <p class="text-sm text-gray-600">Status: ${t.status} | Submitted: ${new Date(t.createdAt).toLocaleDateString()}</p>
+            </div>
+            <div>
+              ${t.status === "open" ? `<button onclick="updateTicket('${id}')" class="text-blue-600 hover:underline" aria-label="Update ticket">Update</button>` : `<span class="text-green-600">Resolved</span>`}
+            </div>
+          `;
+          ticketList.appendChild(ticketItem);
+        }
+        hideSpinner();
+      });
+    }
+
+    // Course enrollment
+    window.enrollCourse = async (courseId) => {
+      showSpinner();
+      try {
+        const courseRef = ref(db, `courses/${courseId}/enrolled`);
+        const snap = await get(courseRef);
+        const enrolled = snap.val() || [];
+        if (!enrolled.includes(auth.currentUser.uid)) {
+          enrolled.push(auth.currentUser.uid);
+          await update(ref(db, `courses/${courseId}`), { enrolled });
+          alert("Enrolled successfully!");
+        } else {
+          alert("You are already enrolled in this course.");
+        }
+      } catch (err) {
+        console.error("Error enrolling in course:", err);
+        alert("Failed to enroll in course.");
+      }
+      hideSpinner();
+    };
+
+    // View course (placeholder)
+    window.viewCourse = (courseId) => {
+      alert(`View course ${courses[courseId].name}. Implement SCORM/video player integration.`);
+    };
+
+    // Submit assessment (placeholder)
+    window.submitAssessment = async (assessmentId) => {
+      showSpinner();
+      try {
+        await update(ref(db, `assessments/${assessmentId}/submissions/${auth.currentUser.uid}`), {
+          status: "completed",
+          submittedAt: Date.now()
+        });
+        const progress = Math.min((user.progress || 0) + 10, 100); // Increment progress
+        await update(ref(db, `users/${auth.currentUser.uid}`), { progress });
+        alert("Assessment submitted successfully!");
+      } catch (err) {
+        console.error("Error submitting assessment:", err);
+        alert("Failed to submit assessment.");
+      }
+      hideSpinner();
+    };
+
+    // View certificate (placeholder)
+    window.viewCertificate = (certId) => {
+      alert(`View certificate for ${certifications[certId].courseId}. Implement PDF viewer integration.`);
+    };
+
+    // Apply for bursary
+    window.applyBursary = async () => {
+      const programId = document.getElementById("bursaryProgram").value;
+      const amount = parseInt(document.getElementById("bursaryAmount").value);
+      if (!programId || !amount) {
+        alert("Please select a program and enter an amount.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "bursaries"), {
+          applicantId: auth.currentUser.uid,
+          programId,
+          amount,
+          status: "pending",
+          paymentStatus: "pending",
+          documents: [],
+          createdAt: Date.now()
+        });
+        alert("Bursary application submitted!");
+        document.getElementById("bursaryAmount").value = "";
+      } catch (err) {
+        console.error("Error applying for bursary:", err);
+        alert("Failed to apply for bursary.");
+      }
+      hideSpinner();
+    };
+
+    // Upload bursary document (placeholder)
+    window.uploadBursaryDoc = () => {
+      alert("Document upload placeholder. Implement Firebase Storage integration.");
+    };
+
+    // View bursary (placeholder)
+    window.viewBursary = (bursaryId) => {
+      alert(`View bursary ${bursaryId}. Implement document viewer integration.`);
+    };
+
+    // Submit ticket
+    ticketForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const issue = ticketIssue.value.trim();
+      const description = ticketDescription.value.trim();
+      if (!issue || !description) {
+        alert("Please enter issue title and description.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "helpdesk"), {
+          userId: auth.currentUser.uid,
+          issue,
+          description,
+          status: "open",
+          createdAt: Date.now()
+        });
+        alert("Ticket submitted successfully!");
+        ticketIssue.value = "";
+        ticketDescription.value = "";
+      } catch (err) {
+        console.error("Error submitting ticket:", err);
+        alert("Failed to submit ticket.");
+      }
+      hideSpinner();
+    });
+
+    // Update ticket (placeholder)
+    window.updateTicket = (ticketId) => {
+      alert(`Update ticket ${ticketId}. Implement ticket update form.`);
+    };
+
+    // Populate program dropdown
+    async function populateDropdowns() {
+      const bursaryProgram = document.getElementById("bursaryProgram");
+      onValue(ref(db, "courses"), snap => {
+        bursaryProgram.innerHTML = "<option value=''>Select Program</option>";
+        const data = snap.val() || {};
+        for (const id in data) {
+          if (!data[id].archived) {
+            const option = document.createElement("option");
+            option.value = id;
+            option.textContent = data[id].name;
+            bursaryProgram.appendChild(option);
           }
         }
       });
     }
 
-    async function renderAssignments(uid) {
-      assignmentsList.innerHTML = "";
-      try {
-        const assignmentsRef = ref(db, `assignments/${uid}`);
-        const snapshot = await get(assignmentsRef);
-        if (!snapshot.exists()) {
-          assignmentsList.innerHTML = "<p class='text-gray-600'>No assignments uploaded.</p>";
-          return;
-        }
-
-        const assignments = snapshot.val();
-        Object.values(assignments).forEach(assignment => {
-          const assignmentItem = document.createElement("div");
-          assignmentItem.className = "py-2";
-          assignmentItem.innerHTML = `
-            <p>${assignment.fileName} - Status: ${assignment.status}
-            (<a href="${assignment.url}" target="_blank" class="text-blue-600 hover:underline" aria-label="View assignment ${assignment.fileName}">View</a>)
-            <span class="text-gray-500 text-sm">Uploaded: ${new Date(assignment.uploadedAt).toLocaleDateString()}</span></p>
-          `;
-          assignmentsList.appendChild(assignmentItem);
-        });
-      } catch (err) {
-        console.error("Error loading assignments:", err);
-        assignmentsList.innerHTML = "<p class='text-red-600'>Failed to load assignments.</p>";
-      }
-    }
-
-    function renderNotices() {
-      showSpinner();
-      onValue(ref(db, "notices"), snap => {
-        noticesContainer.innerHTML = "";
-        const data = snap.val();
-        if (!data) {
-          noticesContainer.innerHTML = "<p class='text-gray-600'>No notices available.</p>";
-          hideSpinner();
-          return;
-        }
-
-        const now = Date.now();
-        const activeNotices = Object.entries(data)
-          .filter(([_, notice]) => !notice.expiryDate || notice.expiryDate > now)
-          .sort((a, b) => b[1].createdAt - a[1].createdAt); // Sort by newest first
-
-        if (activeNotices.length === 0) {
-          noticesContainer.innerHTML = "<p class='text-gray-600'>No active notices available.</p>";
-          hideSpinner();
-          return;
-        }
-
-        activeNotices.forEach(([_, notice]) => {
-          const noticeItem = document.createElement("div");
-          noticeItem.className = "bg-gray-50 p-4 rounded shadow";
-          noticeItem.innerHTML = `
-            <h3 class="text-lg font-bold">${notice.title}</h3>
-            <p class="text-gray-700">${notice.content}</p>
-            <p class="text-sm text-gray-500 mt-2">Posted on ${new Date(notice.createdAt).toLocaleDateString()}
-            ${notice.expiryDate ? ` | Expires on ${new Date(notice.expiryDate).toLocaleDateString()}` : ""}</p>
-          `;
-          noticesContainer.appendChild(noticeItem);
-        });
-        hideSpinner();
-      }, err => {
-        console.error("Error loading notices:", err);
-        noticesContainer.innerHTML = "<p class='text-red-600'>Failed to load notices.</p>";
-        hideSpinner();
-      });
-    }
-
-    async function uploadToCloudinary(file) {
-      const url = "https://api.cloudinary.com/v1_1/your-cloud-name/upload"; // Replace with your cloud name
-      const unsignedUploadPreset = "your-upload-preset"; // Replace with your unsigned preset
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", unsignedUploadPreset);
-
-      const response = await fetch(url, {
-        method: "POST",
-        body: formData
-      });
-      const data = await response.json();
-      if (!data.secure_url) {
-        throw new Error("Upload failed: No secure URL returned");
-      }
-      return data;
-    }
-
-    async function loadDashboard(uid) {
-      showSpinner();
-      try {
-        const userRef = ref(db, `users/${uid}`);
-        const snapshot = await get(userRef);
-
-        if (!snapshot.exists()) {
-          programsContainer.innerHTML = "<p class='text-gray-600'>No data found for this user.</p>";
-          return;
-        }
-
-        const userData = snapshot.val();
-        emailSpan.textContent = userData.email || "Learner";
-        const programs = userData.enrolledPrograms || {};
-        renderPrograms(programs);
-        await renderAssignments(uid);
-        renderNotices();
-      } catch (err) {
-        console.error("Error loading dashboard:", err);
-        programsContainer.innerHTML = "<p class='text-red-600'>Failed to load dashboard.</p>";
-      } finally {
-        hideSpinner();
-      }
-    }
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loadDashboard(user.uid);
-      } else {
+    // Authentication check
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        alert("Unauthorized. Redirecting...");
         window.location.href = "login.html";
+      } else if (user.role !== "learner") {
+        alert("Access restricted to learners.");
+        signOut(auth);
+        window.location.href = "login.html";
+      } else {
+        loadOverview();
+        loadCourses();
+        loadAssessments();
+        loadCertifications();
+        loadBursaries();
+        loadTickets();
+        populateDropdowns();
       }
     });
 
-    signOutBtn.addEventListener("click", async () => {
+    // Sign out
+    document.getElementById("signout-btn").addEventListener("click", async () => {
       try {
         await signOut(auth);
         window.location.href = "login.html";
       } catch (err) {
         console.error("Sign-out failed:", err);
         alert("Failed to sign out. Please try again.");
-      }
-    });
-
-    uploadForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      uploadStatus.textContent = "";
-      uploadBtn.disabled = true;
-      showSpinner();
-
-      const file = pdfFileInput.files[0];
-      if (!file) {
-        uploadStatus.textContent = "Please select a PDF file to upload.";
-        uploadBtn.disabled = false;
-        hideSpinner();
-        return;
-      }
-      if (file.type !== "application/pdf") {
-        uploadStatus.textContent = "Only PDF files are allowed.";
-        uploadBtn.disabled = false;
-        hideSpinner();
-        return;
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        uploadStatus.textContent = "File size exceeds 10MB limit.";
-        uploadBtn.disabled = false;
-        hideSpinner();
-        return;
-      }
-
-      uploadStatus.textContent = "Uploading PDF... Please wait.";
-
-      try {
-        const cloudinaryResponse = await uploadToCloudinary(file);
-        const user = auth.currentUser;
-        const assignmentRef = push(ref(db, `assignments/${user.uid}`));
-        await set(assignmentRef, {
-          fileName: file.name,
-          url: cloudinaryResponse.secure_url,
-          uploadedAt: Date.now(),
-          status: "pending"
-        });
-        uploadStatus.textContent = "Assignment uploaded successfully!";
-        pdfFileInput.value = "";
-        await renderAssignments(user.uid);
-      } catch (err) {
-        uploadStatus.textContent = "Upload failed. Try again.";
-        console.error("Upload error:", err);
-      } finally {
-        uploadBtn.disabled = false;
-        hideSpinner();
       }
     });
   </script>
