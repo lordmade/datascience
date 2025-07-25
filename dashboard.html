@@ -1,167 +1,135 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CETA LMS - Learner Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learner Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      background: #f5f8fa;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      min-height: 100vh;
-      margin: 0;
-      padding: 1.5rem;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 1.25rem 1.5rem;
-      box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
-    }
-  </style>
 </head>
-<body>
-  <main class="container">
-    <header class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-800">Welcome, <span id="user-email" class="text-twitter-blue"></span></h1>
-      <p class="text-gray-600 mt-1">Here's an overview of your learning progress and opportunities.</p>
-    </header>
+<body class="bg-gray-100 min-h-screen font-sans">
+  <div class="container mx-auto px-4 py-6">
+    <h1 class="text-3xl font-bold mb-4">Welcome, <span id="user-email" class="text-blue-600"></span></h1>
 
-    <section class="mb-10">
-      <h2 class="text-2xl font-semibold text-gray-700 mb-4">Enrolled Programs</h2>
-      <div id="programs-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        <!-- Program cards inserted here -->
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-2">Your Enrolled Programs</h2>
+      <div id="programs-container" class="grid gap-4 md:grid-cols-2"></div>
+    </div>
+
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-2">Progress Overview</h2>
+      <canvas id="progressChart" class="bg-white rounded shadow p-4"></canvas>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-3">
+      <div class="bg-white p-4 shadow rounded">
+        <h3 class="text-xl font-bold mb-2">Grants</h3>
+        <p class="text-gray-600">Info about available grants.</p>
       </div>
-    </section>
-
-    <section class="mb-10 max-w-lg">
-      <h2 class="text-2xl font-semibold text-gray-700 mb-4">Progress Chart</h2>
-      <canvas id="progressChart" width="400" height="250" class="rounded-lg bg-white shadow-md"></canvas>
-    </section>
-
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="card">
-        <h3 class="text-xl font-semibold mb-2">Grants</h3>
-        <p class="text-gray-600">Details about available grants will appear here.</p>
+      <div class="bg-white p-4 shadow rounded">
+        <h3 class="text-xl font-bold mb-2">Bursaries</h3>
+        <p class="text-gray-600">Details about bursaries for learners.</p>
       </div>
-      <div class="card">
-        <h3 class="text-xl font-semibold mb-2">Bursaries</h3>
-        <p class="text-gray-600">Information on bursaries will be displayed here.</p>
+      <div class="bg-white p-4 shadow rounded">
+        <h3 class="text-xl font-bold mb-2">WSP/ATR</h3>
+        <p class="text-gray-600">Workplace Skills Plan / Annual Training Report overview.</p>
       </div>
-      <div class="card">
-        <h3 class="text-xl font-semibold mb-2">WSP / ATR</h3>
-        <p class="text-gray-600">Workplace Skills Plan and Annual Training Report details will be available here.</p>
-      </div>
-    </section>
-  </main>
+    </div>
+  </div>
 
- <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-  import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+  <!-- Firebase + Chart Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
-    authDomain: "fire-b-a8878.firebaseapp.com",
-    databaseURL: "https://fire-b-a8878.firebaseio.com",
-    projectId: "fire-b-a8878",
-    storageBucket: "fire-b-a8878.firebasestorage.app",
-    messagingSenderId: "658673187627",
-    appId: "1:658673187627:web:6e4c29af661785f0afa36e"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+      authDomain: "fire-b-a8878.firebaseapp.com",
+      databaseURL: "https://fire-b-a8878.firebaseio.com",
+      projectId: "fire-b-a8878",
+      storageBucket: "fire-b-a8878.appspot.com",
+      messagingSenderId: "658673187627",
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
 
-  const userEmailSpan = document.getElementById("user-email");
-  const programsList = document.getElementById("programs-list");
+    const emailSpan = document.getElementById("user-email");
+    const programsContainer = document.getElementById("programs-container");
 
-  function renderPrograms(programs) {
-    programsList.innerHTML = "";
-    Object.values(programs).forEach(program => {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <h3 class="text-lg font-semibold mb-1">${program.title}</h3>
-        <p class="text-gray-600">${program.description}</p>
-      `;
-      programsList.appendChild(card);
-    });
-  }
+    function renderPrograms(programs) {
+      programsContainer.innerHTML = "";
+      const labels = [];
+      const data = [];
 
-  function setupProgressChart(progressData) {
-    const labels = Object.keys(progressData);
-    const data = Object.values(progressData);
+      Object.entries(programs).forEach(([key, program]) => {
+        const title = key;
+        const progress = program.progress || 0;
 
-    const ctx = document.getElementById('progressChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Course Completion %',
-          data: data,
-          fill: false,
-          borderColor: '#1DA1F2',
-          tension: 0.3,
-          pointBackgroundColor: '#1DA1F2',
-          pointRadius: 5
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true,
-            max: 100,
-            ticks: {
-              callback: value => value + '%'
+        // Save for chart
+        labels.push(title);
+        data.push(progress);
+
+        const card = document.createElement("div");
+        card.className = "bg-white p-4 shadow rounded";
+        card.innerHTML = `
+          <h3 class="text-lg font-bold">${title}</h3>
+          <div class="w-full bg-gray-200 rounded h-4 mt-2">
+            <div class="bg-blue-600 h-4 rounded" style="width: ${progress}%;"></div>
+          </div>
+          <p class="text-right text-sm mt-1 text-gray-600">${progress}% complete</p>
+        `;
+        programsContainer.appendChild(card);
+      });
+
+      // Create Chart
+      const ctx = document.getElementById('progressChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Program Progress (%)',
+            data: data,
+            backgroundColor: '#2563eb'
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
             }
           }
         }
+      });
+    }
+
+    async function loadDashboard(uid) {
+      const userRef = ref(db, `users/${uid}`);
+      const snapshot = await get(userRef);
+
+      if (!snapshot.exists()) {
+        alert("No data found for this user.");
+        return;
+      }
+
+      const userData = snapshot.val();
+      emailSpan.textContent = userData.email || "Learner";
+      const programs = userData.enrolledPrograms || {};
+      renderPrograms(programs);
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loadDashboard(user.uid);
+      } else {
+        window.location.href = "login.html";
       }
     });
-  }
-
-  async function loadUserData(uid) {
-    const userRef = ref(db, `users/${uid}`);
-    try {
-      const snapshot = await get(userRef);
-      if (snapshot.exists()) {
-        const userData = snapshot.val();
-        userEmailSpan.textContent = userData.email;
-
-        const programs = userData.enrolledPrograms || {};
-        const progress = userData.progress || {};
-
-        renderPrograms(programs);
-        if (Object.keys(progress).length > 0) {
-          setupProgressChart(progress);
-        }
-      } else {
-        alert("User data not found.");
-      }
-    } catch (error) {
-      console.error("Failed to load user data:", error);
-      alert("Error loading data. Please try again.");
-    }
-  }
-
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      loadUserData(user.uid);
-    } else {
-      window.location.replace("login.html");
-    }
-  });
-</script>
-
+  </script>
 </body>
 </html>
