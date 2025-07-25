@@ -61,96 +61,107 @@
     </section>
   </main>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+ <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+  import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-    // Your Firebase config (replace with your own)
-    const firebaseConfig = {
-      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
-      authDomain: "fire-b-a8878.firebaseapp.com",
-      databaseURL: "https://fire-b-a8878.firebaseio.com",
-      projectId: "fire-b-a8878",
-      storageBucket: "fire-b-a8878.firebasestorage.app",
-      messagingSenderId: "658673187627",
-      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+    authDomain: "fire-b-a8878.firebaseapp.com",
+    databaseURL: "https://fire-b-a8878.firebaseio.com",
+    projectId: "fire-b-a8878",
+    storageBucket: "fire-b-a8878.firebasestorage.app",
+    messagingSenderId: "658673187627",
+    appId: "1:658673187627:web:6e4c29af661785f0afa36e"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
-    const userEmailSpan = document.getElementById("user-email");
-    const programsList = document.getElementById("programs-list");
+  const userEmailSpan = document.getElementById("user-email");
+  const programsList = document.getElementById("programs-list");
 
-    // Dummy enrolled programs data (replace with real data fetch)
-    const enrolledPrograms = [
-      { id: 1, title: "Construction Safety", description: "Learn about workplace safety protocols." },
-      { id: 2, title: "Project Management", description: "Master the essentials of managing construction projects." },
-      { id: 3, title: "Sustainable Building", description: "Explore sustainable materials and methods." }
-    ];
+  function renderPrograms(programs) {
+    programsList.innerHTML = "";
+    Object.values(programs).forEach(program => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <h3 class="text-lg font-semibold mb-1">${program.title}</h3>
+        <p class="text-gray-600">${program.description}</p>
+      `;
+      programsList.appendChild(card);
+    });
+  }
 
-    // Render program cards
-    function renderPrograms() {
-      programsList.innerHTML = "";
-      enrolledPrograms.forEach(program => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <h3 class="text-lg font-semibold mb-1">${program.title}</h3>
-          <p class="text-gray-600">${program.description}</p>
-        `;
-        programsList.appendChild(card);
-      });
-    }
+  function setupProgressChart(progressData) {
+    const labels = Object.keys(progressData);
+    const data = Object.values(progressData);
 
-    // Setup Chart.js progress chart with dummy data
-    function setupProgressChart() {
-      const ctx = document.getElementById('progressChart').getContext('2d');
-      const chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
-          datasets: [{
-            label: 'Course Completion %',
-            data: [10, 25, 40, 55, 75, 90],
-            fill: false,
-            borderColor: '#1DA1F2',
-            tension: 0.2,
-            pointBackgroundColor: '#1DA1F2',
-            pointRadius: 5
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100,
-              ticks: {
-                callback: value => value + '%'
-              }
-            }
-          },
-          plugins: {
-            legend: {
-              labels: { color: '#0F1419', font: { weight: 'bold' } }
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Course Completion %',
+          data: data,
+          fill: false,
+          borderColor: '#1DA1F2',
+          tension: 0.3,
+          pointBackgroundColor: '#1DA1F2',
+          pointRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              callback: value => value + '%'
             }
           }
         }
-      });
-    }
-
-    // Auth state check
-    onAuthStateChanged(auth, user => {
-      if (user) {
-        userEmailSpan.textContent = user.email;
-        renderPrograms();
-        setupProgressChart();
-      } else {
-        // Redirect to login if not authenticated
-        window.location.replace("login.html");
       }
     });
-  </script>
+  }
+
+  async function loadUserData(uid) {
+    const userRef = ref(db, `users/${uid}`);
+    try {
+      const snapshot = await get(userRef);
+      if (snapshot.exists()) {
+        const userData = snapshot.val();
+        userEmailSpan.textContent = userData.email;
+
+        const programs = userData.enrolledPrograms || {};
+        const progress = userData.progress || {};
+
+        renderPrograms(programs);
+        if (Object.keys(progress).length > 0) {
+          setupProgressChart(progress);
+        }
+      } else {
+        alert("User data not found.");
+      }
+    } catch (error) {
+      console.error("Failed to load user data:", error);
+      alert("Error loading data. Please try again.");
+    }
+  }
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loadUserData(user.uid);
+    } else {
+      window.location.replace("login.html");
+    }
+  });
+</script>
+
 </body>
 </html>
