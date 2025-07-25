@@ -5,126 +5,152 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CETA Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    .tab-content { display: none; }
-    .tab-active { display: block; }
+    .sidebar { transition: width 0.3s ease; }
+    .sidebar-hidden { width: 0; overflow: hidden; }
+    .main-content { transition: margin-left 0.3s ease; }
+    @media (max-width: 768px) {
+      .sidebar { width: 0; overflow: hidden; }
+      .sidebar-open { width: 256px; }
+      .main-content { margin-left: 0; }
+    }
   </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans">
-  <div class="container mx-auto p-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold">CETA Admin Dashboard</h1>
-      <button id="signout-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" aria-label="Sign out of admin account">Sign Out</button>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
+  <div class="flex">
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar bg-gray-800 text-white w-64 min-h-screen p-4">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-bold">CETA Admin</h1>
+        <button id="toggle-sidebar" class="md:hidden text-white focus:outline-none" aria-label="Toggle sidebar">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+      <nav>
+        <ul class="space-y-2">
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="overview">Overview</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="courses">Courses</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="assign">Assign Learners</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="learners">Learners</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="assignments">Assignments</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="notices">Notice Board</button></li>
+        </ul>
+      </nav>
+      <div class="mt-auto">
+        <button id="signout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" aria-label="Sign out of admin account">Sign Out</button>
+      </div>
     </div>
 
-    <div class="mb-4">
-      <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded mr-2" data-tab="courses">Courses</button>
-      <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded mr-2" data-tab="assign">Assign Learners</button>
-      <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded mr-2" data-tab="learners">Learners</button>
-      <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded mr-2" data-tab="assignments">Assignments</button>
-      <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded" data-tab="notices">Notice Board</button>
-    </div>
-
-    <!-- Courses Tab -->
-    <div id="courses" class="tab-content tab-active">
-      <div class="mb-4">
-        <h2 class="text-xl font-semibold mb-2">Manage Courses</h2>
-        <div class="flex gap-2 mb-2">
-          <input type="text" id="courseName" placeholder="Course Name" class="border p-2 rounded w-1/3" aria-label="Enter course name" />
-          <button onclick="addCourse()" class="bg-green-600 text-white px-4 py-2 rounded">Add Course</button>
+    <!-- Main Content -->
+    <div class="main-content flex-1 p-6 md:ml-64">
+      <!-- Overview Section -->
+      <div id="overview" class="section">
+        <h2 class="text-2xl font-semibold mb-4">Dashboard Overview</h2>
+        <div class="grid gap-4 md:grid-cols-3">
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold">Total Learners</h3>
+            <p id="total-learners" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold">Total Courses</h3>
+            <p id="total-courses" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold">Pending Assignments</h3>
+            <p id="pending-assignments" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+        </div>
+        <div class="mt-6 bg-white p-4 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Recent Notices</h3>
+          <div id="recent-notices" class="space-y-4"></div>
         </div>
       </div>
-      <table class="min-w-full bg-white shadow rounded">
-        <thead class="bg-gray-200">
-          <tr><th class="p-3 text-left">Course Name</th><th class="p-3 text-left">Actions</th></tr>
-        </thead>
-        <tbody id="courseTable"></tbody>
-      </table>
-    </div>
 
-    <!-- Assign Learners Tab -->
-    <div id="assign" class="tab-content">
-      <h2 class="text-xl font-semibold mb-4">Assign Learners to Courses</h2>
-      <div class="mb-4 flex gap-2">
-        <select id="assignCourse" class="border p-2 rounded" aria-label="Select course"></select>
-        <select id="assignLearner" class="border p-2 rounded" aria-label="Select learner"></select>
-        <button onclick="assignLearner()" class="bg-blue-600 text-white px-4 py-2 rounded">Assign</button>
+      <!-- Courses Section -->
+      <div id="courses" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Manage Courses</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <div class="flex gap-2 mb-4">
+            <input type="text" id="courseName" placeholder="Course Name" class="border p-2 rounded w-1/3" aria-label="Enter course name" />
+            <button onclick="addCourse()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Course</button>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Courses</h3>
+          <div id="courseList" class="space-y-4"></div>
+        </div>
       </div>
-      <div>
-        <h3 class="text-lg font-semibold">Enrolled Learners</h3>
-        <ul id="enrolledLearners" class="list-disc pl-5 mt-2 text-gray-700"></ul>
-      </div>
-    </div>
 
-    <!-- Learners Tab -->
-    <div id="learners" class="tab-content">
-      <h2 class="text-xl font-semibold mb-2">Learner Management</h2>
-      <div class="flex gap-2 mb-4">
-        <select id="programFilter" class="border p-2 rounded" aria-label="Filter by program"><option value="">All Programs</option></select>
-        <select id="regionFilter" class="border p-2 rounded" aria-label="Filter by region"><option value="">All Regions</option></select>
-        <button onclick="exportCSV()" class="bg-blue-600 text-white px-4 py-2 rounded">Export CSV</button>
+      <!-- Assign Learners Section -->
+      <div id="assign" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Assign Learners to Courses</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <div class="flex gap-2 mb-4">
+            <select id="assignCourse" class="border p-2 rounded" aria-label="Select course"></select>
+            <select id="assignLearner" class="border p-2 rounded" aria-label="Select learner"></select>
+            <button onclick="assignLearner()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Assign</button>
+          </div>
+          <h3 class="text-lg font-semibold">Enrolled Learners</h3>
+          <ul id="enrolledLearners" class="list-disc pl-5 mt-2 text-gray-700"></ul>
+        </div>
       </div>
-      <div class="overflow-x-auto">
-        <table class="min-w-full bg-white shadow-md rounded">
-          <thead class="bg-gray-200 text-left">
-            <tr>
-              <th class="p-3">Name</th><th class="p-3">Email</th><th class="p-3">Program</th><th class="p-3">Region</th>
-              <th class="p-3">Progress (%)</th><th class="p-3">Approved</th><th class="p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="learnerTable"></tbody>
-        </table>
-      </div>
-    </div>
 
-    <!-- Assignments Tab -->
-    <div id="assignments" class="tab-content">
-      <h2 class="text-xl font-semibold mb-2">Uploaded Assignments</h2>
-      <div class="overflow-x-auto">
-        <table class="min-w-full bg-white shadow-md rounded">
-          <thead class="bg-gray-200 text-left">
-            <tr>
-              <th class="p-3">File Name</th><th class="p-3">Learner Email</th><th class="p-3">Course</th>
-              <th class="p-3">Upload Date</th><th class="p-3">Status</th><th class="p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="assignmentTable"></tbody>
-        </table>
+      <!-- Learners Section -->
+      <div id="learners" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Learner Management</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <div class="flex gap-2 mb-4">
+            <select id="programFilter" class="border p-2 rounded" aria-label="Filter by program"><option value="">All Programs</option></select>
+            <select id="regionFilter" class="border p-2 rounded" aria-label="Filter by region"><option value="">All Regions</option></select>
+            <button onclick="exportCSV()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Export CSV</button>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Learners</h3>
+          <div id="learnerList" class="space-y-4"></div>
+        </div>
       </div>
-    </div>
 
-    <!-- Notice Board Tab -->
-    <div id="notices" class="tab-content">
-      <h2 class="text-xl font-semibold mb-2">Notice Board</h2>
-      <div class="mb-4 bg-white p-6 rounded shadow">
-        <h3 class="text-lg font-semibold mb-2">Post New Notice</h3>
-        <form id="notice-form">
-          <input type="text" id="noticeTitle" placeholder="Notice Title" class="border p-2 rounded w-full mb-2" aria-label="Enter notice title" required />
-          <textarea id="noticeContent" placeholder="Notice Content" class="border p-2 rounded w-full mb-2" rows="4" aria-label="Enter notice content" required></textarea>
-          <input type="date" id="noticeExpiry" class="border p-2 rounded mb-2" aria-label="Select expiry date (optional)" />
-          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Post Notice</button>
-        </form>
+      <!-- Assignments Section -->
+      <div id="assignments" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Uploaded Assignments</h2>
+        <div class="bg-white p-6 rounded shadow">
+          <div id="assignmentList" class="space-y-4"></div>
+        </div>
       </div>
-      <div class="overflow-x-auto">
-        <table class="min-w-full bg-white shadow-md rounded">
-          <thead class="bg-gray-200 text-left">
-            <tr>
-              <th class="p-3">Title</th><th class="p-3">Content</th><th class="p-3">Created By</th>
-              <th class="p-3">Created On</th><th class="p-3">Expiry Date</th><th class="p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="noticeTable"></tbody>
-        </table>
+
+      <!-- Notice Board Section -->
+      <div id="notices" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Notice Board</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Post New Notice</h3>
+          <form id="notice-form">
+            <input type="text" id="noticeTitle" placeholder="Notice Title" class="border p-2 rounded w-full mb-2" aria-label="Enter notice title" required />
+            <textarea id="noticeContent" placeholder="Notice Content" class="border p-2 rounded w-full mb-2" rows="4" aria-label="Enter notice content" required></textarea>
+            <input type="date" id="noticeExpiry" class="border p-2 rounded mb-2" aria-label="Select expiry date (optional)" />
+            <div class="flex gap-2">
+              <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Post Notice</button>
+              <input type="text" id="noticeSearch" placeholder="Search notices..." class="border p-2 rounded w-full" aria-label="Search notices by title" />
+            </div>
+          </form>
+        </div>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Notices</h3>
+          <div id="noticeList" class="space-y-4" aria-live="polite"></div>
+        </div>
       </div>
-    </div>
 
-    <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
-    </div>
+      <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
+      </div>
 
-    <noscript>
-      <p class="text-red-600 text-center">JavaScript is required to use this dashboard.</p>
-    </noscript>
+      <noscript>
+        <p class="text-red-600 text-center">JavaScript is required to use this dashboard.</p>
+      </noscript>
+    </div>
   </div>
 
   <script type="module">
@@ -148,22 +174,29 @@
     const auth = getAuth(app);
 
     // DOM elements
-    const courseTable = document.getElementById("courseTable");
+    const courseList = document.getElementById("courseList");
     const assignCourse = document.getElementById("assignCourse");
     const assignLearner = document.getElementById("assignLearner");
     const enrolledList = document.getElementById("enrolledLearners");
     const programFilter = document.getElementById("programFilter");
     const regionFilter = document.getElementById("regionFilter");
-    const learnerTable = document.getElementById("learnerTable");
-    const assignmentTable = document.getElementById("assignmentTable");
-    const noticeTable = document.getElementById("noticeTable");
+    const learnerList = document.getElementById("learnerList");
+    const assignmentList = document.getElementById("assignmentList");
+    const noticeList = document.getElementById("noticeList");
     const noticeForm = document.getElementById("notice-form");
     const noticeTitle = document.getElementById("noticeTitle");
     const noticeContent = document.getElementById("noticeContent");
     const noticeExpiry = document.getElementById("noticeExpiry");
+    const noticeSearch = document.getElementById("noticeSearch");
+    const totalLearners = document.getElementById("total-learners");
+    const totalCourses = document.getElementById("total-courses");
+    const pendingAssignments = document.getElementById("pending-assignments");
+    const recentNotices = document.getElementById("recent-notices");
     const loadingSpinner = document.getElementById("loading-spinner");
+    const sidebar = document.getElementById("sidebar");
+    const toggleSidebar = document.getElementById("toggle-sidebar");
 
-    let courses = {}, learners = [];
+    let courses = {}, learners = [], notices = [];
 
     // Show/hide loading spinner
     function showSpinner() {
@@ -174,34 +207,98 @@
       loadingSpinner.classList.add("hidden");
     }
 
-    // Tab switching
-    document.querySelectorAll(".tab-button").forEach(btn => {
+    // Sidebar toggle for mobile
+    toggleSidebar.addEventListener("click", () => {
+      sidebar.classList.toggle("sidebar-open");
+    });
+
+    // Section switching
+    document.querySelectorAll(".nav-button").forEach(btn => {
       btn.addEventListener("click", () => {
-        document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("tab-active"));
-        document.getElementById(btn.dataset.tab).classList.add("tab-active");
+        document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
+        document.getElementById(btn.dataset.section).classList.remove("hidden");
+        if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
       });
     });
+
+    // Load overview metrics
+    function loadOverview() {
+      showSpinner();
+      onValue(ref(db, "users"), snap => {
+        const data = snap.val();
+        let learnerCount = 0;
+        for (const uid in data) {
+          if (data[uid].role === "learner") learnerCount++;
+        }
+        totalLearners.textContent = learnerCount;
+      });
+
+      onValue(ref(db, "courses"), snap => {
+        totalCourses.textContent = Object.keys(snap.val() || {}).length;
+      });
+
+      onValue(ref(db, "assignments"), snap => {
+        let pendingCount = 0;
+        const data = snap.val() || {};
+        for (const learnerUid in data) {
+          for (const assignmentId in data[learnerUid]) {
+            if (data[learnerUid][assignmentId].status === "pending") pendingCount++;
+          }
+        }
+        pendingAssignments.textContent = pendingCount;
+      });
+
+      onValue(ref(db, "notices"), snap => {
+        recentNotices.innerHTML = "";
+        const data = snap.val();
+        if (!data) {
+          recentNotices.innerHTML = "<p class='text-gray-600'>No recent notices.</p>";
+          hideSpinner();
+          return;
+        }
+
+        const recent = Object.entries(data)
+          .sort((a, b) => b[1].createdAt - a[1].createdAt)
+          .slice(0, 3);
+        recent.forEach(([_, notice]) => {
+          const noticeItem = document.createElement("div");
+          noticeItem.className = "bg-gray-50 p-4 rounded shadow";
+          noticeItem.innerHTML = `
+            <h4 class="text-md font-semibold">${notice.title}</h4>
+            <p class="text-gray-700">${notice.content.substring(0, 100)}${notice.content.length > 100 ? "..." : ""}</p>
+            <p class="text-sm text-gray-500 mt-2">Posted on ${new Date(notice.createdAt).toLocaleDateString()}</p>
+          `;
+          recentNotices.appendChild(noticeItem);
+        });
+        hideSpinner();
+      });
+    }
 
     // Load courses
     function loadCourses() {
       showSpinner();
       onValue(ref(db, "courses"), snap => {
         courses = snap.val() || {};
-        courseTable.innerHTML = "";
+        courseList.innerHTML = "";
         assignCourse.innerHTML = '<option value="">Select Course</option>';
         for (const id in courses) {
           const c = courses[id];
-          courseTable.innerHTML += `<tr><td class="p-3">${c.name}</td>
-            <td class="p-3">
-              <button onclick="editCourse('${id}')" class="text-blue-600 mr-2 hover:underline">Edit</button>
-              <button onclick="deleteCourse('${id}')" class="text-red-600 hover:underline">Delete</button>
-            </td></tr>`;
+          const courseItem = document.createElement("div");
+          courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          courseItem.innerHTML = `
+            <span>${c.name}</span>
+            <div>
+              <button onclick="editCourse('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit course ${c.name}">Edit</button>
+              <button onclick="deleteCourse('${id}')" class="text-red-600 hover:underline" aria-label="Delete course ${c.name}">Delete</button>
+            </div>
+          `;
+          courseList.appendChild(courseItem);
           assignCourse.innerHTML += `<option value="${id}">${c.name}</option>`;
         }
         hideSpinner();
       }, err => {
         console.error("Error loading courses:", err);
-        courseTable.innerHTML = `<tr><td colspan="2" class="p-3 text-red-600">Failed to load courses.</td></tr>`;
+        courseList.innerHTML = "<p class='text-red-600'>Failed to load courses.</p>";
         hideSpinner();
       });
     }
@@ -212,7 +309,7 @@
       onValue(ref(db, "users"), snap => {
         learners = [];
         const data = snap.val();
-        learnerTable.innerHTML = "";
+        learnerList.innerHTML = "";
         assignLearner.innerHTML = '<option value="">Select Learner</option>';
         const programs = new Set(), regions = new Set();
         for (const uid in data) {
@@ -222,19 +319,23 @@
             programs.add(u.program);
             regions.add(u.region);
             assignLearner.innerHTML += `<option value="${uid}">${u.fullName || u.email}</option>`;
-            learnerTable.innerHTML += `
-              <tr>
-                <td class="p-3">${u.fullName || "-"}</td>
-                <td class="p-3">${u.email}</td>
-                <td class="p-3">${u.program || "-"}</td>
-                <td class="p-3">${u.region || "-"}</td>
-                <td class="p-3"><input type="number" value="${u.progress || 0}" min="0" max="100"
+            const learnerItem = document.createElement("div");
+            learnerItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+            learnerItem.innerHTML = `
+              <div>
+                <p class="font-semibold">${u.fullName || "-"}</p>
+                <p class="text-sm text-gray-600">${u.email}</p>
+                <p class="text-sm text-gray-600">Program: ${u.program || "-"} | Region: ${u.region || "-"}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="number" value="${u.progress || 0}" min="0" max="100"
                   onchange="updateProgress('${uid}', this.value)"
-                  class="w-16 border p-1 rounded text-center" aria-label="Update progress for ${u.fullName || u.email}" /></td>
-                <td class="p-3">${u.approved ? "✅" : "❌"}</td>
-                <td class="p-3">${!u.approved ? `<button class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700" onclick="approveUser('${uid}')">Approve</button>` : ""}</td>
-              </tr>
+                  class="w-16 border p-1 rounded text-center" aria-label="Update progress for ${u.fullName || u.email}" />
+                <span>${u.approved ? "✅" : "❌"}</span>
+                ${!u.approved ? `<button class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700" onclick="approveUser('${uid}')">Approve</button>` : ""}
+              </div>
             `;
+            learnerList.appendChild(learnerItem);
           }
         }
         programFilter.innerHTML = `<option value="">All Programs</option>` + Array.from(programs).map(p => `<option>${p}</option>`).join("");
@@ -242,7 +343,7 @@
         hideSpinner();
       }, err => {
         console.error("Error loading learners:", err);
-        learnerTable.innerHTML = `<tr><td colspan="7" class="p-3 text-red-600">Failed to load learners.</td></tr>`;
+        learnerList.innerHTML = "<p class='text-red-600'>Failed to load learners.</p>";
         hideSpinner();
       });
     }
@@ -251,10 +352,10 @@
     function loadAssignments() {
       showSpinner();
       onValue(ref(db, "assignments"), snap => {
-        assignmentTable.innerHTML = "";
+        assignmentList.innerHTML = "";
         const data = snap.val();
         if (!data) {
-          assignmentTable.innerHTML = `<tr><td colspan="6" class="p-3 text-gray-600">No assignments found.</td></tr>`;
+          assignmentList.innerHTML = "<p class='text-gray-600'>No assignments found.</p>";
           hideSpinner();
           return;
         }
@@ -282,23 +383,22 @@
               break;
             }
           }
-          assignmentTable.innerHTML += `
-            <tr>
-              <td class="p-3">${a.fileName}</td>
-              <td class="p-3">${a.learnerEmail}</td>
-              <td class="p-3">${courseName}</td>
-              <td class="p-3">${new Date(a.uploadedAt).toLocaleDateString()}</td>
-              <td class="p-3">${a.status}</td>
-              <td class="p-3">
-                <a href="${a.url}" target="_blank" class="text-blue-600 hover:underline" aria-label="View assignment ${a.fileName}">View</a>
-              </td>
-            </tr>
+          const assignmentItem = document.createElement("div");
+          assignmentItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          assignmentItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${a.fileName}</p>
+              <p class="text-sm text-gray-600">${a.learnerEmail} | Course: ${courseName}</p>
+              <p class="text-sm text-gray-600">Uploaded: ${new Date(a.uploadedAt).toLocaleDateString()} | Status: ${a.status}</p>
+            </div>
+            <a href="${a.url}" target="_blank" class="text-blue-600 hover:underline" aria-label="View assignment ${a.fileName}">View</a>
           `;
+          assignmentList.appendChild(assignmentItem);
         });
         hideSpinner();
       }, err => {
         console.error("Error loading assignments:", err);
-        assignmentTable.innerHTML = `<tr><td colspan="6" class="p-3 text-red-600">Failed to load assignments.</td></tr>`;
+        assignmentList.innerHTML = "<p class='text-red-600'>Failed to load assignments.</p>";
         hideSpinner();
       });
     }
@@ -307,39 +407,52 @@
     function loadNotices() {
       showSpinner();
       onValue(ref(db, "notices"), snap => {
-        noticeTable.innerHTML = "";
-        const data = snap.val();
-        if (!data) {
-          noticeTable.innerHTML = `<tr><td colspan="6" class="p-3 text-gray-600">No notices found.</td></tr>`;
-          hideSpinner();
-          return;
-        }
-
-        for (const noticeId in data) {
-          const n = data[noticeId];
-          const creator = learners.find(l => l.uid === n.createdBy) || { email: "Unknown" };
-          const expiry = n.expiryDate ? new Date(n.expiryDate).toLocaleDateString() : "-";
-          noticeTable.innerHTML += `
-            <tr>
-              <td class="p-3">${n.title}</td>
-              <td class="p-3">${n.content}</td>
-              <td class="p-3">${creator.email}</td>
-              <td class="p-3">${new Date(n.createdAt).toLocaleDateString()}</td>
-              <td class="p-3">${expiry}</td>
-              <td class="p-3">
-                <button onclick="editNotice('${noticeId}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit notice ${n.title}">Edit</button>
-                <button onclick="deleteNotice('${noticeId}')" class="text-red-600 hover:underline" aria-label="Delete notice ${n.title}">Delete</button>
-              </td>
-            </tr>
-          `;
-        }
+        notices = snap.val() || {};
+        renderNotices();
         hideSpinner();
       }, err => {
         console.error("Error loading notices:", err);
-        noticeTable.innerHTML = `<tr><td colspan="6" class="p-3 text-red-600">Failed to load notices.</td></tr>`;
+        noticeList.innerHTML = "<p class='text-red-600'>Failed to load notices.</p>";
         hideSpinner();
       });
     }
+
+    function renderNotices(filter = "") {
+      noticeList.innerHTML = "";
+      const filteredNotices = Object.entries(notices)
+        .filter(([_, notice]) => notice.title.toLowerCase().includes(filter.toLowerCase()))
+        .sort((a, b) => b[1].createdAt - a[1].createdAt);
+
+      if (filteredNotices.length === 0) {
+        noticeList.innerHTML = "<p class='text-gray-600'>No notices found.</p>";
+        return;
+      }
+
+      filteredNotices.forEach(([id, n]) => {
+        const creator = learners.find(l => l.uid === n.createdBy) || { email: "Unknown" };
+        const expiry = n.expiryDate ? new Date(n.expiryDate).toLocaleDateString() : "-";
+        const noticeItem = document.createElement("div");
+        noticeItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+        noticeItem.innerHTML = `
+          <div>
+            <h4 class="text-md font-semibold">${n.title}</h4>
+            <p class="text-gray-700">${n.content}</p>
+            <p class="text-sm text-gray-500 mt-2">Posted by ${creator.email} on ${new Date(n.createdAt).toLocaleDateString()}
+            ${n.expiryDate ? ` | Expires on ${expiry}` : ""}</p>
+          </div>
+          <div>
+            <button onclick="editNotice('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit notice ${n.title}">Edit</button>
+            <button onclick="deleteNotice('${id}')" class="text-red-600 hover:underline" aria-label="Delete notice ${n.title}">Delete</button>
+          </div>
+        `;
+        noticeList.appendChild(noticeItem);
+      });
+    }
+
+    // Search notices
+    noticeSearch.addEventListener("input", () => {
+      renderNotices(noticeSearch.value);
+    });
 
     // Authentication check
     onAuthStateChanged(auth, user => {
@@ -347,6 +460,7 @@
         alert("Unauthorized. Redirecting...");
         window.location.href = "login.html";
       } else {
+        loadOverview();
         loadCourses();
         loadLearners();
         loadAssignments();
