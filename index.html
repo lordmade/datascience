@@ -233,13 +233,13 @@
   </div>
 
   <script type="module">
-    // Initialize Firebase
+    // Load Firebase scripts and initialize
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js";
+
     let auth, db;
     try {
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
-      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-auth.js";
-      import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js";
-
       const firebaseConfig = {
         apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
         authDomain: "fire-b-a8878.firebaseapp.com",
