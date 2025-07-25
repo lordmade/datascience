@@ -12,7 +12,11 @@
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans">
   <div class="container mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6">CETA Admin Dashboard</h1>
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold">CETA Admin Dashboard</h1>
+      <button id="signout-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Sign Out</button>
+    </div>
+
     <div class="mb-4">
       <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded mr-2" data-tab="courses">Courses</button>
       <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded mr-2" data-tab="assign">Assign Learners</button>
@@ -74,7 +78,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
     import { getDatabase, ref, onValue, update, push, remove, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -89,13 +93,18 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const auth = getAuth();
+    const auth = getAuth(app);
 
     onAuthStateChanged(auth, user => {
       if (!user) {
         alert("Unauthorized. Redirecting...");
         window.location.href = "login.html";
       }
+    });
+
+    document.getElementById("signout-btn").addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "login.html";
     });
 
     // Tab switching
@@ -171,7 +180,10 @@
 
     window.addCourse = () => {
       const name = document.getElementById("courseName").value.trim();
-      if (name) push(courseRef, { name });
+      if (name) {
+        push(courseRef, { name });
+        document.getElementById("courseName").value = "";
+      }
     };
 
     window.editCourse = (id) => {
@@ -194,12 +206,15 @@
     assignCourse.addEventListener("change", () => {
       const cid = assignCourse.value;
       enrolledList.innerHTML = "";
+      if (!cid) return;
       onValue(ref(db, `courses/${cid}/learners`), snap => {
         const data = snap.val();
         enrolledList.innerHTML = "";
-        for (const lid in data) {
-          const learner = learners.find(l => l.uid === lid);
-          if (learner) enrolledList.innerHTML += `<li>${learner.fullName || learner.email}</li>`;
+        if (data) {
+          for (const lid in data) {
+            const learner = learners.find(l => l.uid === lid);
+            if (learner) enrolledList.innerHTML += `<li>${learner.fullName || learner.email}</li>`;
+          }
         }
       });
     });
@@ -210,7 +225,7 @@
     window.exportCSV = () => {
       const rows = [["Name","Email","Program","Region","Progress","Approved"]];
       learners.forEach(l => rows.push([l.fullName, l.email, l.program, l.region, l.progress || 0, l.approved ? "Yes" : "No"]));
-      const csv = rows.map(r => r.map(cell => `"${cell}"`).join(",")).join("\\n");
+      const csv = rows.map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
       const link = document.createElement("a");
       link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
       link.download = "learners.csv";
