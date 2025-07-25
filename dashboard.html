@@ -1,952 +1,156 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Data Science Academy - Dashboard</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CETA LMS - Learner Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Arial, sans-serif;
-    }
-
     body {
-      background: #f5f7fa;
-      color: #333;
+      background: #f5f8fa;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       min-height: 100vh;
-      display: flex;
+      margin: 0;
+      padding: 1.5rem;
     }
-
     .container {
-      display: flex;
-      width: 100%;
-      max-width: 1400px;
+      max-width: 1200px;
       margin: 0 auto;
-      min-height: 100vh;
     }
-
-    .sidebar {
-      width: 200px;
-      background: linear-gradient(180deg, #004aad, #0066cc);
-      color: white;
-      padding: 1.5rem;
-      position: fixed;
-      height: 100%;
-      z-index: 10;
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar.hidden {
-      transform: translateX(-100%);
-    }
-
-    .sidebar-toggle {
-      display: none;
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      z-index: 20;
-      background: #ff6f61;
-      color: white;
-      border-radius: 50%;
-      padding: 0.5rem;
-      font-size: 1.2rem;
-      border: none;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-
-    .sidebar-toggle:hover {
-      background: #e65a50;
-    }
-
-    .content {
-      margin-left: 200px;
-      padding: 2rem;
-      flex-grow: 1;
-      position: relative;
-    }
-
-    .circuit-overlay {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      z-index: -1;
-      opacity: 0.1;
-    }
-
-    .logo {
-      max-width: 120px;
-      width: 100%;
-      margin-bottom: 1.5rem;
-    }
-
-    .sidebar ul {
-      list-style: none;
-    }
-
-    .sidebar li {
-      margin-bottom: 0.8rem;
-    }
-
-    .sidebar a {
-      color: white;
-      text-decoration: none;
-      font-weight: 500;
-      padding: 0.8rem 1rem;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      transition: background 0.2s ease;
-    }
-
-    .sidebar a:hover, .sidebar a.active {
-      background: #ff6f61;
-    }
-
-    .sidebar a svg {
-      width: 24px;
-      height: 24px;
-      fill: white;
-    }
-
-    .section {
-      display: none;
-      background: white;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      animation: fadeIn 1s ease-out;
-    }
-
-    .section.active {
-      display: block;
-    }
-
-    .section h2 {
-      font-size: 1.8rem;
-      color: #004aad;
-      margin-bottom: 1rem;
-    }
-
-    .section p {
-      color: #333;
-      margin-bottom: 0.8rem;
-    }
-
-    .gradient-text {
-      background: linear-gradient(90deg, #004aad, #0066cc, #004aad);
-      background-size: 200% 200%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shine 3s linear infinite;
-      font-weight: 700;
-    }
-
-    @keyframes shine {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 200% 50%; }
-    }
-
-    .stats-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .stats-card {
-      background: #f9f9f9;
-      border-radius: 10px;
-      padding: 1rem;
-      text-align: center;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      animation: fadeInUp 0.5s ease-out forwards;
-      opacity: 0;
-      animation-delay: calc(0.1s * var(--card-index));
-    }
-
-    .stats-card h3 {
-      font-size: 1.2rem;
-      color: #004aad;
-      margin-bottom: 0.5rem;
-    }
-
-    .stats-card p {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #ff6f61;
-    }
-
     .card {
-      background: #f9f9f9;
-      border-radius: 10px;
-      padding: 1.5rem;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      margin-bottom: 1rem;
-      animation: fadeInUp 0.5s ease-out forwards;
-      opacity: 0;
-      animation-delay: calc(0.1s * var(--card-index));
-    }
-
-    .card h3 {
-      font-size: 1.3rem;
-      color: #004aad;
-      margin-bottom: 0.5rem;
-    }
-
-    .card p {
-      font-size: 0.9rem;
-      color: #555;
-    }
-
-    .btn-glow {
-      background: #ff6f61;
-      color: white;
-      border: none;
-      padding: 0.8rem 1.8rem;
-      border-radius: 50px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .btn-glow:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-family: 'Segoe UI', Arial, sans-serif;
       background: white;
-      color: #333;
-      transition: border-color 0.2s ease;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: #0066cc;
-    }
-
-    .forum-message {
-      background: #f9f9f9;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .alert-modal {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      padding: 1.5rem 2rem;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      z-index: 1000;
-      color: #333;
-      font-weight: 500;
-      text-align: center;
-      max-width: 90%;
-      width: 320px;
-      border: 1px solid #0066cc;
-      opacity: 0;
-    }
-
-    .alert-modal.active {
-      display: block;
-    }
-
-    .alert-content {
-      position: relative;
-    }
-
-    .alert-close {
-      position: absolute;
-      top: 0.75rem;
-      right: 0.75rem;
-      width: 24px;
-      height: 24px;
-      background: none;
-      border: none;
-      color: #ff6f61;
-      cursor: pointer;
-      transition: transform 0.2s ease, color 0.2s ease;
-    }
-
-    .alert-close:hover {
-      transform: scale(1.2);
-      color: #e65a50;
-    }
-
-    .alert-close svg {
-      width: 100%;
-      height: 100%;
-    }
-
-    .spinner-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 5px solid #0066cc;
-      border-top: 5px solid #ff6f61;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    #calendar-container {
-      background: #f9f9f9;
-      border-radius: 10px;
-      padding: 1rem;
-    }
-
-    .bottom-nav {
-      display: none;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #004aad;
-      padding: 0.6rem 0;
-      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-      z-index: 1000;
-    }
-
-    .bottom-nav ul {
-      display: flex;
-      justify-content: space-around;
-      list-style: none;
-    }
-
-    .bottom-nav ul li a {
-      color: white;
-      text-decoration: none;
-      font-size: 0.8rem;
-      text-align: center;
-      padding: 0.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.3rem;
-      border-radius: 5px;
-      transition: background 0.2s ease;
-      min-width: 60px;
-    }
-
-    .bottom-nav ul li a.active, .bottom-nav ul li a:hover {
-      background: #ff6f61;
-    }
-
-    .bottom-nav svg {
-      width: 24px;
-      height: 24px;
-      fill: white;
-    }
-
-    footer {
-      background: #004aad;
-      color: white;
-      text-align: center;
-      padding: 1.5rem;
-      margin-top: 2rem;
-    }
-
-    .social-links a {
-      color: white;
-      margin: 0 0.8rem;
-      font-size: 1.1rem;
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    .social-links a:hover {
-      color: #ff6f61;
-    }
-
-    /* Animations */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      body {
-        flex-direction: column;
-      }
-      .sidebar {
-        position: fixed;
-        transform: translateX(-100%);
-        width: 200px;
-      }
-      .sidebar.active {
-        transform: translateX(0);
-      }
-      .sidebar-toggle {
-        display: block;
-      }
-      .content {
-        margin-left: 0;
-        padding: 1rem;
-      }
-      .section {
-        padding: 1rem;
-      }
-      .stats-container, .card {
-        grid-template-columns: 1fr;
-      }
-      .logo {
-        max-width: 100px;
-      }
-      .btn-glow {
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-      }
-      .form-input {
-        font-size: 0.875rem;
-      }
-      .alert-modal {
-        width: 85%;
-        padding: 1rem;
-      }
-      .alert-content p {
-        font-size: 0.875rem;
-      }
-      .spinner {
-        width: 40px;
-        height: 40px;
-        border-width: 4px;
-      }
-      .bottom-nav {
-        display: block;
-      }
-      footer {
-        display: none;
-      }
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
-    <div class="sidebar" id="sidebar">
-      <img src="https://dashboard.raregradetech.com/uploads/company/b65f0e95c1b847586fb52cd9c734f19a.png" alt="Data Science Academy Logo" class="logo">
-      <ul>
-        <li><a href="#" data-tab="dashboard" class="active tab-link" aria-label="Dashboard">
-          <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-          Dashboard
-        </a></li>
-        <li><a href="#" data-tab="lessons" class="tab-link" aria-label="Lessons">
-          <svg viewBox="0 0 24 24"><path d="M4 6h18V4H4v2zM4 11h18v-2H4v2zM4 16h18v-2H4v2zM4 21h18v-2H4v2z"/></svg>
-          Lessons
-        </a></li>
-        <li><a href="#" data-tab="forum" class="tab-link" aria-label="Forum">
-          <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
-          Forum
-        </a></li>
-        <li><a href="#" data-tab="projects" class="tab-link" aria-label="Projects">
-          <svg viewBox="0 0 24 24"><path d="M3 3v18h18V3H3zm16 16H5V5h14v14zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/></svg>
-          Projects
-        </a></li>
-        <li><a href="#" data-tab="calendar" class="tab-link" aria-label="Calendar">
-          <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
-          Calendar
-        </a></li>
-        <li><a href="#" id="sidebarLogout" onclick="logout()" aria-label="Logout">
-          <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10z"/></svg>
-          Logout
-        </a></li>
-      </ul>
-    </div>
-    <div class="content">
-      <svg class="circuit-overlay">
-        <path d="M0 150 Q 300 50, 600 150 T 1200 150 T 1800 150" stroke="#0066cc" stroke-width="2" fill="none" stroke-dasharray="8,8"></path>
-      </svg>
-      <div id="dashboard" class="section active">
-        <div class="card text-center">
-          <h2 class="gradient-text">Welcome, <span id="learnerName">Loading...</span></h2>
-          <p><strong>Course:</strong> <span id="courseType">-</span></p>
-          <p><strong>Status:</strong> <span id="status">-</span></p>
-          <p><strong>Institution:</strong> <span id="institution">-</span></p>
-          <button class="btn-glow" id="logoutBtn" onclick="logout()" aria-label="Logout">Logout</button>
-        </div>
-        <div class="stats-container">
-          <div class="stats-card" style="--card-index: 0;">
-            <h3>Uploaded Projects</h3>
-            <p id="projects-count">0</p>
-          </div>
-          <div class="stats-card" style="--card-index: 1;">
-            <h3>Available Lessons</h3>
-            <p id="lessons-count">0</p>
-          </div>
-          <div class="stats-card" style="--card-index: 2;">
-            <h3>Calendar Due Dates</h3>
-            <p id="due-dates-count">0</p>
-          </div>
-        </div>
+  <main class="container">
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800">Welcome, <span id="user-email" class="text-twitter-blue"></span></h1>
+      <p class="text-gray-600 mt-1">Here's an overview of your learning progress and opportunities.</p>
+    </header>
+
+    <section class="mb-10">
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">Enrolled Programs</h2>
+      <div id="programs-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <!-- Program cards inserted here -->
       </div>
-      <div id="lessons" class="section">
-        <div class="card">
-          <h2>Lessons</h2>
-          <div id="lessons-list"></div>
-        </div>
+    </section>
+
+    <section class="mb-10 max-w-lg">
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">Progress Chart</h2>
+      <canvas id="progressChart" width="400" height="250" class="rounded-lg bg-white shadow-md"></canvas>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="card">
+        <h3 class="text-xl font-semibold mb-2">Grants</h3>
+        <p class="text-gray-600">Details about available grants will appear here.</p>
       </div>
-      <div id="forum" class="section">
-        <div class="card">
-          <h2>Forum</h2>
-          <div class="mb-4">
-            <textarea id="forum-message" class="form-input" placeholder="Type your message..." rows="4" aria-label="Forum message"></textarea>
-            <button class="btn-glow mt-2" onclick="postForumMessage()">Post Message</button>
-          </div>
-          <div id="forum-messages"></div>
-        </div>
+      <div class="card">
+        <h3 class="text-xl font-semibold mb-2">Bursaries</h3>
+        <p class="text-gray-600">Information on bursaries will be displayed here.</p>
       </div>
-      <div id="projects" class="section">
-        <div class="card">
-          <h2>Projects</h2>
-          <div id="projects-list"></div>
-        </div>
+      <div class="card">
+        <h3 class="text-xl font-semibold mb-2">WSP / ATR</h3>
+        <p class="text-gray-600">Workplace Skills Plan and Annual Training Report details will be available here.</p>
       </div>
-      <div id="calendar" class="section">
-        <div class="card">
-          <h2>Calendar</h2>
-          <div id="calendar-container"></div>
-        </div>
-      </div>
-      <div id="custom-alert" class="alert-modal">
-        <div class="alert-content">
-          <button class="alert-close" onclick="closeAlert()" aria-label="Close alert">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-          <p id="alert-message"></p>
-        </div>
-      </div>
-      <div id="spinner-overlay" class="spinner-overlay">
-        <div class="spinner"></div>
-      </div>
-    </div>
-    <nav class="bottom-nav">
-      <ul>
-        <li><a href="#" data-tab="dashboard" class="tab-link">
-          <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-          Dashboard
-        </a></li>
-        <li><a href="#" data-tab="lessons" class="tab-link">
-          <svg viewBox="0 0 24 24"><path d="M4 6h18V4H4v2zM4 11h18v-2H4v2zM4 16h18v-2H4v2zM4 21h18v-2H4v2z"/></svg>
-          Lessons
-        </a></li>
-        <li><a href="#" data-tab="forum" class="tab-link">
-          <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
-          Forum
-        </a></li>
-        <li><a href="#" data-tab="projects" class="tab-link">
-          <svg viewBox="0 0 24 24"><path d="M3 3v18h18V3H3zm16 16H5V5h14v14zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/></svg>
-          Projects
-        </a></li>
-        <li><a href="#" data-tab="calendar" class="tab-link">
-          <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
-          Calendar
-        </a></li>
-        <li><a href="#" id="mobileLogoutBtn" onclick="logout()" aria-label="Logout">
-          <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10z"/></svg>
-          Logout
-        </a></li>
-      </ul>
-    </nav>
-  </div>
-  <footer>
-    <p>© 2025 Data Science Academy. All rights reserved.</p>
-    <div class="social-links">
-      <a href="#">Twitter</a>
-      <a href="#">LinkedIn</a>
-      <a href="#">Instagram</a>
-    </div>
-  </footer>
+    </section>
+  </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, get, query, orderByChild, equalTo, push, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
+    // Your Firebase config (replace with your own)
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
       databaseURL: "https://fire-b-a8878.firebaseio.com",
       projectId: "fire-b-a8878",
-      storageBucket: "fire-b-a8878.appspot.com",
+      storageBucket: "fire-b-a8878.firebasestorage.app",
       messagingSenderId: "658673187627",
-      appId: "1:658673187627:web:6e4c29af661785f0afa36e"
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getDatabase(app);
 
-    // GSAP Animations
-    gsap.from(".logo", { duration: 1, y: -50, opacity: 0, ease: "power3.out" });
-    gsap.from(".sidebar", { duration: 1, x: -50, opacity: 0, ease: "power3.out" });
-    gsap.from(".content", { duration: 1.2, scale: 0.9, opacity: 0, delay: 0.6, ease: "elastic.out(1, 0.6)" });
+    const userEmailSpan = document.getElementById("user-email");
+    const programsList = document.getElementById("programs-list");
 
-    // Show spinner
-    function showSpinner() {
-      console.log("Showing spinner");
-      document.getElementById('spinner-overlay').style.display = 'flex';
-      gsap.to("#spinner-overlay", { duration: 0.5, opacity: 1, ease: "power2.out" });
-    }
+    // Dummy enrolled programs data (replace with real data fetch)
+    const enrolledPrograms = [
+      { id: 1, title: "Construction Safety", description: "Learn about workplace safety protocols." },
+      { id: 2, title: "Project Management", description: "Master the essentials of managing construction projects." },
+      { id: 3, title: "Sustainable Building", description: "Explore sustainable materials and methods." }
+    ];
 
-    // Hide spinner
-    function hideSpinner() {
-      console.log("Hiding spinner");
-      gsap.to("#spinner-overlay", {
-        duration: 0.3,
-        opacity: 0,
-        ease: "power2.in",
-        onComplete: () => {
-          document.getElementById('spinner-overlay').style.display = 'none';
-        }
+    // Render program cards
+    function renderPrograms() {
+      programsList.innerHTML = "";
+      enrolledPrograms.forEach(program => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3 class="text-lg font-semibold mb-1">${program.title}</h3>
+          <p class="text-gray-600">${program.description}</p>
+        `;
+        programsList.appendChild(card);
       });
     }
 
-    // Show alert
-    function showAlert(message, autoHide = true) {
-      console.log("Showing alert:", message);
-      const alertModal = document.getElementById('custom-alert');
-      const alertMessage = document.getElementById('alert-message');
-      alertMessage.textContent = message;
-      alertModal.style.display = 'block';
-      gsap.to(".alert-content", { duration: 0.5, opacity: 1, ease: "power2.out" });
-      if (autoHide) {
-        setTimeout(() => closeAlert(), 2000);
-      }
-    }
-
-    // Close alert
-    window.closeAlert = function() {
-      console.log("Closing alert");
-      const alertModal = document.getElementById('custom-alert');
-      gsap.to(".alert-content", {
-        duration: 0.3,
-        opacity: 0,
-        ease: "power2.in",
-        onComplete: () => {
-          alertModal.style.display = 'none';
-        }
-      });
-    };
-
-    // Toggle sidebar on mobile
-    window.toggleSidebar = function() {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('active');
-      sidebar.classList.toggle('hidden');
-    };
-
-    // Show section
-    window.showSection = function(sectionId) {
-      document.querySelectorAll('.section').forEach(section => {
-        section.classList.remove('active');
-      });
-      document.getElementById(sectionId).classList.add('active');
-      document.querySelectorAll('.sidebar a, .bottom-nav a').forEach(a => {
-        a.classList.remove('active');
-      });
-      document.querySelectorAll(`.sidebar a[data-tab="${sectionId}"], .bottom-nav a[data-tab="${sectionId}"]`).forEach(a => {
-        a.classList.add('active');
-      });
-      if (window.innerWidth <= 768) {
-        toggleSidebar();
-      }
-      if (sectionId === 'calendar') {
-        loadCalendar();
-      }
-    };
-
-    // Tab switching
-    const tabLinks = document.querySelectorAll('.tab-link');
-    tabLinks.forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
-        showSection(link.getAttribute('data-tab'));
-      });
-    });
-
-    // Load dashboard data
-    async function loadDashboard(user) {
-      showSpinner();
-      try {
-        const q = query(ref(db, 'registrations'), orderByChild('personalEmail'), equalTo(user.email));
-        const snap = await get(q);
-        if (snap.exists()) {
-          const data = Object.values(snap.val())[0];
-          document.getElementById('learnerName').textContent = data.name || 'Unknown';
-          document.getElementById('courseType').textContent = data.course || 'N/A';
-          document.getElementById('status').textContent = data.status || 'N/A';
-          document.getElementById('institution').textContent = data.school || 'N/A';
-          showAlert(`Welcome, ${data.name}!`, true);
-        } else {
-          showAlert('No registration found for this email. Please create an account.', false);
-          setTimeout(() => window.location.href = "account.html", 3000);
-          hideSpinner();
-          return;
-        }
-
-        try {
-          const projectsQuery = query(ref(db, 'projects'), orderByChild('userEmail'), equalTo(user.email));
-          const projectsSnap = await get(projectsQuery);
-          const projectsCount = projectsSnap.exists() ? Object.keys(projectsSnap.val()).length : 0;
-          document.getElementById('projects-count').textContent = projectsCount;
-
-          const lessonsSnap = await get(ref(db, 'lessons'));
-          const lessonsCount = lessonsSnap.exists() ? Object.keys(lessonsSnap.val()).length : 0;
-          document.getElementById('lessons-count').textContent = lessonsCount;
-
-          const calendarQuery = query(ref(db, 'calendar'), orderByChild('userEmail'), equalTo(user.email));
-          const calendarSnap = await get(calendarQuery);
-          const dueDatesCount = calendarSnap.exists() ? Object.keys(calendarSnap.val()).length : 0;
-          document.getElementById('due-dates-count').textContent = dueDatesCount;
-
-          gsap.from(".stats-card", { duration: 0.5, opacity: 0, y: 20, stagger: 0.1, ease: "power2.out" });
-        } catch (error) {
-          console.error("Error fetching stats:", error);
-          showAlert(`Error fetching stats: ${error.message}`, false);
-        }
-      } catch (error) {
-        console.error("Error fetching registration:", error);
-        showAlert(error.code === 'PERMISSION_DENIED' ? 'You do not have permission to access registration data.' : `Error: ${error.message}`, false);
-      }
-      hideSpinner();
-    }
-
-    // Load lessons
-    async function loadLessons() {
-      showSpinner();
-      const lessonsList = document.getElementById('lessons-list');
-      lessonsList.innerHTML = '';
-      try {
-        const snap = await get(ref(db, 'lessons'));
-        if (snap.exists()) {
-          const lessons = snap.val();
-          let cardIndex = 0;
-          Object.entries(lessons).forEach(([id, lesson]) => {
-            const lessonDiv = document.createElement('div');
-            lessonDiv.className = 'card';
-            lessonDiv.style.setProperty('--card-index', cardIndex++);
-            lessonDiv.innerHTML = `
-              <h3>${lesson.title}</h3>
-              <p>${lesson.description}</p>
-              <a href="${lesson.contentUrl}" target="_blank" class="btn-glow mt-2 inline-block">View Lesson</a>
-            `;
-            lessonsList.appendChild(lessonDiv);
-            gsap.from(lessonDiv, { duration: 0.5, opacity: 0, y: 20, ease: "power2.out" });
-          });
-        } else {
-          lessonsList.innerHTML = '<p>No lessons available.</p>';
-        }
-      } catch (error) {
-        console.error("Error fetching lessons:", error);
-        showAlert(`Error: ${error.message}`, false);
-      }
-      hideSpinner();
-    }
-
-    // Load forum messages
-    function loadForumMessages() {
-      showSpinner();
-      const messagesList = document.getElementById('forum-messages');
-      messagesList.innerHTML = '';
-      const messagesRef = ref(db, 'forum');
-      onValue(messagesRef, (snap) => {
-        messagesList.innerHTML = '';
-        if (snap.exists()) {
-          const messages = snap.val();
-          let cardIndex = 0;
-          Object.entries(messages).forEach(([id, msg]) => {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'forum-message';
-            msgDiv.style.setProperty('--card-index', cardIndex++);
-            msgDiv.innerHTML = `
-              <p><strong>${msg.userName}</strong> (${msg.userEmail})</p>
-              <p>${msg.content}</p>
-              <p class="text-sm">${new Date(msg.timestamp).toLocaleString()}</p>
-            `;
-            messagesList.appendChild(msgDiv);
-            gsap.from(msgDiv, { duration: 0.5, opacity: 0, y: 20, ease: "power2.out" });
-          });
-        } else {
-          messagesList.innerHTML = '<p>No messages yet.</p>';
-        }
-        hideSpinner();
-      }, (error) => {
-        console.error("Error fetching forum messages:", error);
-        showAlert(`Error: ${error.message}`, false);
-        hideSpinner();
-      });
-    }
-
-    // Post forum message
-    window.postForumMessage = async function() {
-      const message = document.getElementById('forum-message').value.trim();
-      if (!message) {
-        showAlert('Please enter a message.', false);
-        return;
-      }
-      showSpinner();
-      try {
-        const user = auth.currentUser;
-        await push(ref(db, 'forum'), {
-          userEmail: user.email,
-          userName: document.getElementById('learnerName').textContent,
-          content: message,
-          timestamp: Date.now()
-        });
-        document.getElementById('forum-message').value = '';
-        showAlert('Message posted successfully.', true);
-      } catch (error) {
-        console.error("Error posting message:", error);
-        showAlert(`Error: ${error.message}`, false);
-      }
-      hideSpinner();
-    };
-
-    // Load projects
-    async function loadProjects(user) {
-      showSpinner();
-      const projectsList = document.getElementById('projects-list');
-      projectsList.innerHTML = '';
-      try {
-        const q = query(ref(db, 'projects'), orderByChild('userEmail'), equalTo(user.email));
-        const snap = await get(q);
-        if (snap.exists()) {
-          const projects = snap.val();
-          let cardIndex = 0;
-          Object.entries(projects).forEach(([id, project]) => {
-            const projectDiv = document.createElement('div');
-            projectDiv.className = 'card';
-            projectDiv.style.setProperty('--card-index', cardIndex++);
-            projectDiv.innerHTML = `
-              <h3>${project.title}</h3>
-              <p>${project.description}</p>
-              <p><strong>Due Date:</strong> ${project.dueDate}</p>
-              <p><strong>Status:</strong> ${project.status}</p>
-            `;
-            projectsList.appendChild(projectDiv);
-            gsap.from(projectDiv, { duration: 0.5, opacity: 0, y: 20, ease: "power2.out" });
-          });
-        } else {
-          projectsList.innerHTML = '<p>No projects assigned.</p>';
-        }
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-        showAlert(`Error: ${error.message}`, false);
-      }
-      hideSpinner();
-    }
-
-    // Load calendar
-    function loadCalendar() {
-      showSpinner();
-      const calendarEl = document.getElementById('calendar-container');
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: window.innerWidth <= 768 ? 'listWeek' : 'dayGridMonth',
-        events: async (fetchInfo, successCallback, failureCallback) => {
-          try {
-            const q = query(ref(db, 'calendar'), orderByChild('userEmail'), equalTo(auth.currentUser.email));
-            const snap = await get(q);
-            const events = [];
-            if (snap.exists()) {
-              Object.values(snap.val()).forEach(event => {
-                events.push({
-                  title: event.title,
-                  start: event.date,
-                  extendedProps: { type: event.type }
-                });
-              });
-            }
-            successCallback(events);
-          } catch (error) {
-            console.error("Error fetching calendar events:", error);
-            showAlert(`Error: ${error.message}`, false);
-            failureCallback(error);
-          }
-          hideSpinner();
+    // Setup Chart.js progress chart with dummy data
+    function setupProgressChart() {
+      const ctx = document.getElementById('progressChart').getContext('2d');
+      const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
+          datasets: [{
+            label: 'Course Completion %',
+            data: [10, 25, 40, 55, 75, 90],
+            fill: false,
+            borderColor: '#1DA1F2',
+            tension: 0.2,
+            pointBackgroundColor: '#1DA1F2',
+            pointRadius: 5
+          }]
         },
-        eventClick: function(info) {
-          showAlert(`${info.event.title} (${info.event.extendedProps.type}) on ${info.event.start.toLocaleDateString()}`, false);
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: {
+                callback: value => value + '%'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: { color: '#0F1419', font: { weight: 'bold' } }
+            }
+          }
         }
       });
-      calendar.render();
     }
 
-    // Check auth state
-    onAuthStateChanged(auth, async (user) => {
+    // Auth state check
+    onAuthStateChanged(auth, user => {
       if (user) {
-        await loadDashboard(user);
-        loadLessons();
-        loadForumMessages();
-        loadProjects(user);
+        userEmailSpan.textContent = user.email;
+        renderPrograms();
+        setupProgressChart();
       } else {
-        showSpinner();
-        showAlert('You are not logged in. Redirecting to login...', true);
-        setTimeout(() => window.location.href = "signup.html", 1500);
+        // Redirect to login if not authenticated
+        window.location.replace("login.html");
       }
     });
-
-    // Logout function
-    window.logout = async function() {
-      try {
-        showSpinner();
-        await signOut(auth);
-        showAlert('Logged out successfully.', true);
-        setTimeout(() => window.location.href = "signup.html", 1500);
-      } catch (error) {
-        console.error("Logout error:", error);
-        showAlert(`Error: ${error.message}`, false);
-        hideSpinner();
-      }
-    };
   </script>
 </body>
 </html>
