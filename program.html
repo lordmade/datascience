@@ -14,13 +14,15 @@
   <div class="container mx-auto p-6">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold">CETA Admin Dashboard</h1>
-      <button id="signout-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Sign Out</button>
+      <button id="signout-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" aria-label="Sign out of admin account">Sign Out</button>
     </div>
 
     <div class="mb-4">
       <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded mr-2" data-tab="courses">Courses</button>
       <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded mr-2" data-tab="assign">Assign Learners</button>
-      <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded" data-tab="learners">Learners</button>
+      <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded mr-2" data-tab="learners">Learners</button>
+      <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded mr-2" data-tab="assignments">Assignments</button>
+      <button class="tab-button bg-blue-600 text-white px-4 py-2 rounded" data-tab="notices">Notice Board</button>
     </div>
 
     <!-- Courses Tab -->
@@ -28,13 +30,13 @@
       <div class="mb-4">
         <h2 class="text-xl font-semibold mb-2">Manage Courses</h2>
         <div class="flex gap-2 mb-2">
-          <input type="text" id="courseName" placeholder="Course Name" class="border p-2 rounded w-1/3" />
+          <input type="text" id="courseName" placeholder="Course Name" class="border p-2 rounded w-1/3" aria-label="Enter course name" />
           <button onclick="addCourse()" class="bg-green-600 text-white px-4 py-2 rounded">Add Course</button>
         </div>
       </div>
       <table class="min-w-full bg-white shadow rounded">
         <thead class="bg-gray-200">
-          <tr><th class="p-3">Course Name</th><th class="p-3">Actions</th></tr>
+          <tr><th class="p-3 text-left">Course Name</th><th class="p-3 text-left">Actions</th></tr>
         </thead>
         <tbody id="courseTable"></tbody>
       </table>
@@ -44,8 +46,8 @@
     <div id="assign" class="tab-content">
       <h2 class="text-xl font-semibold mb-4">Assign Learners to Courses</h2>
       <div class="mb-4 flex gap-2">
-        <select id="assignCourse" class="border p-2 rounded"></select>
-        <select id="assignLearner" class="border p-2 rounded"></select>
+        <select id="assignCourse" class="border p-2 rounded" aria-label="Select course"></select>
+        <select id="assignLearner" class="border p-2 rounded" aria-label="Select learner"></select>
         <button onclick="assignLearner()" class="bg-blue-600 text-white px-4 py-2 rounded">Assign</button>
       </div>
       <div>
@@ -58,8 +60,8 @@
     <div id="learners" class="tab-content">
       <h2 class="text-xl font-semibold mb-2">Learner Management</h2>
       <div class="flex gap-2 mb-4">
-        <select id="programFilter" class="border p-2 rounded"><option value="">All Programs</option></select>
-        <select id="regionFilter" class="border p-2 rounded"><option value="">All Regions</option></select>
+        <select id="programFilter" class="border p-2 rounded" aria-label="Filter by program"><option value="">All Programs</option></select>
+        <select id="regionFilter" class="border p-2 rounded" aria-label="Filter by region"><option value="">All Regions</option></select>
         <button onclick="exportCSV()" class="bg-blue-600 text-white px-4 py-2 rounded">Export CSV</button>
       </div>
       <div class="overflow-x-auto">
@@ -74,6 +76,55 @@
         </table>
       </div>
     </div>
+
+    <!-- Assignments Tab -->
+    <div id="assignments" class="tab-content">
+      <h2 class="text-xl font-semibold mb-2">Uploaded Assignments</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white shadow-md rounded">
+          <thead class="bg-gray-200 text-left">
+            <tr>
+              <th class="p-3">File Name</th><th class="p-3">Learner Email</th><th class="p-3">Course</th>
+              <th class="p-3">Upload Date</th><th class="p-3">Status</th><th class="p-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="assignmentTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Notice Board Tab -->
+    <div id="notices" class="tab-content">
+      <h2 class="text-xl font-semibold mb-2">Notice Board</h2>
+      <div class="mb-4 bg-white p-6 rounded shadow">
+        <h3 class="text-lg font-semibold mb-2">Post New Notice</h3>
+        <form id="notice-form">
+          <input type="text" id="noticeTitle" placeholder="Notice Title" class="border p-2 rounded w-full mb-2" aria-label="Enter notice title" required />
+          <textarea id="noticeContent" placeholder="Notice Content" class="border p-2 rounded w-full mb-2" rows="4" aria-label="Enter notice content" required></textarea>
+          <input type="date" id="noticeExpiry" class="border p-2 rounded mb-2" aria-label="Select expiry date (optional)" />
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Post Notice</button>
+        </form>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white shadow-md rounded">
+          <thead class="bg-gray-200 text-left">
+            <tr>
+              <th class="p-3">Title</th><th class="p-3">Content</th><th class="p-3">Created By</th>
+              <th class="p-3">Created On</th><th class="p-3">Expiry Date</th><th class="p-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="noticeTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
+    </div>
+
+    <noscript>
+      <p class="text-red-600 text-center">JavaScript is required to use this dashboard.</p>
+    </noscript>
   </div>
 
   <script type="module">
@@ -81,6 +132,7 @@
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
     import { getDatabase, ref, onValue, update, push, remove, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
+    // Firebase configuration (move to backend for production)
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
@@ -95,17 +147,32 @@
     const db = getDatabase(app);
     const auth = getAuth(app);
 
-    onAuthStateChanged(auth, user => {
-      if (!user) {
-        alert("Unauthorized. Redirecting...");
-        window.location.href = "login.html";
-      }
-    });
+    // DOM elements
+    const courseTable = document.getElementById("courseTable");
+    const assignCourse = document.getElementById("assignCourse");
+    const assignLearner = document.getElementById("assignLearner");
+    const enrolledList = document.getElementById("enrolledLearners");
+    const programFilter = document.getElementById("programFilter");
+    const regionFilter = document.getElementById("regionFilter");
+    const learnerTable = document.getElementById("learnerTable");
+    const assignmentTable = document.getElementById("assignmentTable");
+    const noticeTable = document.getElementById("noticeTable");
+    const noticeForm = document.getElementById("notice-form");
+    const noticeTitle = document.getElementById("noticeTitle");
+    const noticeContent = document.getElementById("noticeContent");
+    const noticeExpiry = document.getElementById("noticeExpiry");
+    const loadingSpinner = document.getElementById("loading-spinner");
 
-    document.getElementById("signout-btn").addEventListener("click", async () => {
-      await signOut(auth);
-      window.location.href = "login.html";
-    });
+    let courses = {}, learners = [];
+
+    // Show/hide loading spinner
+    function showSpinner() {
+      loadingSpinner.classList.remove("hidden");
+    }
+
+    function hideSpinner() {
+      loadingSpinner.classList.add("hidden");
+    }
 
     // Tab switching
     document.querySelectorAll(".tab-button").forEach(btn => {
@@ -115,41 +182,38 @@
       });
     });
 
-    const courseRef = ref(db, "courses");
-    const userRef = ref(db, "users");
-    const courseTable = document.getElementById("courseTable");
-    const assignCourse = document.getElementById("assignCourse");
-    const assignLearner = document.getElementById("assignLearner");
-    const enrolledList = document.getElementById("enrolledLearners");
-    const programFilter = document.getElementById("programFilter");
-    const regionFilter = document.getElementById("regionFilter");
-    const learnerTable = document.getElementById("learnerTable");
-
-    let courses = {}, learners = [];
-
+    // Load courses
     function loadCourses() {
-      onValue(courseRef, snap => {
+      showSpinner();
+      onValue(ref(db, "courses"), snap => {
         courses = snap.val() || {};
         courseTable.innerHTML = "";
-        assignCourse.innerHTML = "";
+        assignCourse.innerHTML = '<option value="">Select Course</option>';
         for (const id in courses) {
           const c = courses[id];
           courseTable.innerHTML += `<tr><td class="p-3">${c.name}</td>
             <td class="p-3">
-              <button onclick="editCourse('${id}')" class="text-blue-600 mr-2">Edit</button>
-              <button onclick="deleteCourse('${id}')" class="text-red-600">Delete</button>
+              <button onclick="editCourse('${id}')" class="text-blue-600 mr-2 hover:underline">Edit</button>
+              <button onclick="deleteCourse('${id}')" class="text-red-600 hover:underline">Delete</button>
             </td></tr>`;
           assignCourse.innerHTML += `<option value="${id}">${c.name}</option>`;
         }
+        hideSpinner();
+      }, err => {
+        console.error("Error loading courses:", err);
+        courseTable.innerHTML = `<tr><td colspan="2" class="p-3 text-red-600">Failed to load courses.</td></tr>`;
+        hideSpinner();
       });
     }
 
+    // Load learners
     function loadLearners() {
-      onValue(userRef, snap => {
+      showSpinner();
+      onValue(ref(db, "users"), snap => {
         learners = [];
         const data = snap.val();
         learnerTable.innerHTML = "";
-        assignLearner.innerHTML = "";
+        assignLearner.innerHTML = '<option value="">Select Learner</option>';
         const programs = new Set(), regions = new Set();
         for (const uid in data) {
           const u = data[uid];
@@ -166,47 +230,314 @@
                 <td class="p-3">${u.region || "-"}</td>
                 <td class="p-3"><input type="number" value="${u.progress || 0}" min="0" max="100"
                   onchange="updateProgress('${uid}', this.value)"
-                  class="w-16 border p-1 rounded text-center" /></td>
+                  class="w-16 border p-1 rounded text-center" aria-label="Update progress for ${u.fullName || u.email}" /></td>
                 <td class="p-3">${u.approved ? "✅" : "❌"}</td>
-                <td class="p-3">${!u.approved ? `<button class="bg-green-600 text-white px-3 py-1 rounded" onclick="approveUser('${uid}')">Approve</button>` : ""}</td>
+                <td class="p-3">${!u.approved ? `<button class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700" onclick="approveUser('${uid}')">Approve</button>` : ""}</td>
               </tr>
             `;
           }
         }
         programFilter.innerHTML = `<option value="">All Programs</option>` + Array.from(programs).map(p => `<option>${p}</option>`).join("");
         regionFilter.innerHTML = `<option value="">All Regions</option>` + Array.from(regions).map(r => `<option>${r}</option>`).join("");
+        hideSpinner();
+      }, err => {
+        console.error("Error loading learners:", err);
+        learnerTable.innerHTML = `<tr><td colspan="7" class="p-3 text-red-600">Failed to load learners.</td></tr>`;
+        hideSpinner();
       });
     }
 
+    // Load assignments
+    function loadAssignments() {
+      showSpinner();
+      onValue(ref(db, "assignments"), snap => {
+        assignmentTable.innerHTML = "";
+        const data = snap.val();
+        if (!data) {
+          assignmentTable.innerHTML = `<tr><td colspan="6" class="p-3 text-gray-600">No assignments found.</td></tr>`;
+          hideSpinner();
+          return;
+        }
+
+        const assignments = [];
+        for (const learnerUid in data) {
+          const learner = learners.find(l => l.uid === learnerUid);
+          const learnerAssignments = data[learnerUid];
+          for (const assignmentId in learnerAssignments) {
+            const assignment = learnerAssignments[assignmentId];
+            assignments.push({
+              learnerUid,
+              assignmentId,
+              ...assignment,
+              learnerEmail: learner ? learner.email : "Unknown"
+            });
+          }
+        }
+
+        assignments.forEach(a => {
+          let courseName = "-";
+          for (const courseId in courses) {
+            if (courses[courseId].learners && courses[courseId].learners[a.learnerUid]) {
+              courseName = courses[courseId].name;
+              break;
+            }
+          }
+          assignmentTable.innerHTML += `
+            <tr>
+              <td class="p-3">${a.fileName}</td>
+              <td class="p-3">${a.learnerEmail}</td>
+              <td class="p-3">${courseName}</td>
+              <td class="p-3">${new Date(a.uploadedAt).toLocaleDateString()}</td>
+              <td class="p-3">${a.status}</td>
+              <td class="p-3">
+                <a href="${a.url}" target="_blank" class="text-blue-600 hover:underline" aria-label="View assignment ${a.fileName}">View</a>
+              </td>
+            </tr>
+          `;
+        });
+        hideSpinner();
+      }, err => {
+        console.error("Error loading assignments:", err);
+        assignmentTable.innerHTML = `<tr><td colspan="6" class="p-3 text-red-600">Failed to load assignments.</td></tr>`;
+        hideSpinner();
+      });
+    }
+
+    // Load notices
+    function loadNotices() {
+      showSpinner();
+      onValue(ref(db, "notices"), snap => {
+        noticeTable.innerHTML = "";
+        const data = snap.val();
+        if (!data) {
+          noticeTable.innerHTML = `<tr><td colspan="6" class="p-3 text-gray-600">No notices found.</td></tr>`;
+          hideSpinner();
+          return;
+        }
+
+        for (const noticeId in data) {
+          const n = data[noticeId];
+          const creator = learners.find(l => l.uid === n.createdBy) || { email: "Unknown" };
+          const expiry = n.expiryDate ? new Date(n.expiryDate).toLocaleDateString() : "-";
+          noticeTable.innerHTML += `
+            <tr>
+              <td class="p-3">${n.title}</td>
+              <td class="p-3">${n.content}</td>
+              <td class="p-3">${creator.email}</td>
+              <td class="p-3">${new Date(n.createdAt).toLocaleDateString()}</td>
+              <td class="p-3">${expiry}</td>
+              <td class="p-3">
+                <button onclick="editNotice('${noticeId}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit notice ${n.title}">Edit</button>
+                <button onclick="deleteNotice('${noticeId}')" class="text-red-600 hover:underline" aria-label="Delete notice ${n.title}">Delete</button>
+              </td>
+            </tr>
+          `;
+        }
+        hideSpinner();
+      }, err => {
+        console.error("Error loading notices:", err);
+        noticeTable.innerHTML = `<tr><td colspan="6" class="p-3 text-red-600">Failed to load notices.</td></tr>`;
+        hideSpinner();
+      });
+    }
+
+    // Authentication check
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        alert("Unauthorized. Redirecting...");
+        window.location.href = "login.html";
+      } else {
+        loadCourses();
+        loadLearners();
+        loadAssignments();
+        loadNotices();
+      }
+    });
+
+    // Sign out
+    document.getElementById("signout-btn").addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        window.location.href = "login.html";
+      } catch (err) {
+        console.error("Sign-out failed:", err);
+        alert("Failed to sign out. Please try again.");
+      }
+    });
+
+    // Course management
     window.addCourse = () => {
       const name = document.getElementById("courseName").value.trim();
-      if (name) {
-        push(courseRef, { name });
-        document.getElementById("courseName").value = "";
+      if (!name) {
+        alert("Please enter a course name.");
+        return;
       }
+      showSpinner();
+      push(ref(db, "courses"), { name })
+        .then(() => {
+          document.getElementById("courseName").value = "";
+          hideSpinner();
+        })
+        .catch(err => {
+          console.error("Error adding course:", err);
+          alert("Failed to add course.");
+          hideSpinner();
+        });
     };
 
     window.editCourse = (id) => {
       const newName = prompt("Edit course name:", courses[id].name);
-      if (newName) update(ref(db, `courses/${id}`), { name: newName });
-    };
-
-    window.deleteCourse = (id) => {
-      if (confirm("Delete this course?")) remove(ref(db, `courses/${id}`));
-    };
-
-    window.assignLearner = () => {
-      const courseId = assignCourse.value;
-      const learnerId = assignLearner.value;
-      if (courseId && learnerId) {
-        set(ref(db, `courses/${courseId}/learners/${learnerId}`), true);
+      if (newName) {
+        showSpinner();
+        update(ref(db, `courses/${id}`), { name: newName })
+          .then(() => hideSpinner())
+          .catch(err => {
+            console.error("Error editing course:", err);
+            alert("Failed to edit course.");
+            hideSpinner();
+          });
       }
     };
 
+    window.deleteCourse = (id) => {
+      if (confirm("Delete this course?")) {
+        showSpinner();
+        remove(ref(db, `courses/${id}`))
+          .then(() => hideSpinner())
+          .catch(err => {
+            console.error("Error deleting course:", err);
+            alert("Failed to delete course.");
+            hideSpinner();
+          });
+      }
+    };
+
+    // Assign learner to course
+    window.assignLearner = () => {
+      const courseId = assignCourse.value;
+      const learnerId = assignLearner.value;
+      if (!courseId || !learnerId) {
+        alert("Please select a course and a learner.");
+        return;
+      }
+      showSpinner();
+      set(ref(db, `courses/${courseId}/learners/${learnerId}`), true)
+        .then(() => hideSpinner())
+        .catch(err => {
+          console.error("Error assigning learner:", err);
+          alert("Failed to assign learner.");
+          hideSpinner();
+        });
+    };
+
+    // Update learner progress
+    window.updateProgress = (uid, val) => {
+      showSpinner();
+      update(ref(db, `users/${uid}`), { progress: parseInt(val) })
+        .then(() => hideSpinner())
+        .catch(err => {
+          console.error("Error updating progress:", err);
+          alert("Failed to update progress.");
+          hideSpinner();
+        });
+    };
+
+    // Approve learner
+    window.approveUser = (uid) => {
+      showSpinner();
+      update(ref(db, `users/${uid}`), { approved: true })
+        .then(() => hideSpinner())
+        .catch(err => {
+          console.error("Error approving user:", err);
+          alert("Failed to approve user.");
+          hideSpinner();
+        });
+    };
+
+    // Post notice
+    noticeForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const title = noticeTitle.value.trim();
+      const content = noticeContent.value.trim();
+      const expiry = noticeExpiry.value;
+      if (!title || !content) {
+        alert("Please enter a title and content.");
+        return;
+      }
+      showSpinner();
+      try {
+        const noticeData = {
+          title,
+          content,
+          createdAt: Date.now(),
+          createdBy: auth.currentUser.uid
+        };
+        if (expiry) {
+          noticeData.expiryDate = new Date(expiry).getTime();
+        }
+        await push(ref(db, "notices"), noticeData);
+        noticeTitle.value = "";
+        noticeContent.value = "";
+        noticeExpiry.value = "";
+      } catch (err) {
+        console.error("Error posting notice:", err);
+        alert("Failed to post notice.");
+      }
+      hideSpinner();
+    });
+
+    // Edit notice
+    window.editNotice = (id) => {
+      const notice = Object.values(notices).find(n => n.id === id);
+      const newTitle = prompt("Edit notice title:", notice.title);
+      const newContent = prompt("Edit notice content:", notice.content);
+      if (newTitle && newContent) {
+        showSpinner();
+        update(ref(db, `notices/${id}`), {
+          title: newTitle,
+          content: newContent,
+          expiryDate: notice.expiryDate || null
+        })
+          .then(() => hideSpinner())
+          .catch(err => {
+            console.error("Error editing notice:", err);
+            alert("Failed to edit notice.");
+            hideSpinner();
+          });
+      }
+    };
+
+    // Delete notice
+    window.deleteNotice = (id) => {
+      if (confirm("Delete this notice?")) {
+        showSpinner();
+        remove(ref(db, `notices/${id}`))
+          .then(() => hideSpinner())
+          .catch(err => {
+            console.error("Error deleting notice:", err);
+            alert("Failed to delete notice.");
+            hideSpinner();
+          });
+      }
+    };
+
+    // Export learners to CSV
+    window.exportCSV = () => {
+      const rows = [["Name","Email","Program","Region","Progress","Approved"]];
+      learners.forEach(l => rows.push([l.fullName || "-", l.email, l.program || "-", l.region || "-", l.progress || 0, l.approved ? "Yes" : "No"]));
+      const csv = rows.map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
+      const link = document.createElement("a");
+      link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+      link.download = "learners.csv";
+      link.click();
+    };
+
+    // Load enrolled learners for selected course
     assignCourse.addEventListener("change", () => {
       const cid = assignCourse.value;
       enrolledList.innerHTML = "";
       if (!cid) return;
+      showSpinner();
       onValue(ref(db, `courses/${cid}/learners`), snap => {
         const data = snap.val();
         enrolledList.innerHTML = "";
@@ -216,24 +547,13 @@
             if (learner) enrolledList.innerHTML += `<li>${learner.fullName || learner.email}</li>`;
           }
         }
+        hideSpinner();
+      }, err => {
+        console.error("Error loading enrolled learners:", err);
+        enrolledList.innerHTML = `<li class="text-red-600">Failed to load enrolled learners.</li>`;
+        hideSpinner();
       });
     });
-
-    window.updateProgress = (uid, val) => update(ref(db, `users/${uid}`), { progress: parseInt(val) });
-    window.approveUser = (uid) => update(ref(db, `users/${uid}`), { approved: true });
-
-    window.exportCSV = () => {
-      const rows = [["Name","Email","Program","Region","Progress","Approved"]];
-      learners.forEach(l => rows.push([l.fullName, l.email, l.program, l.region, l.progress || 0, l.approved ? "Yes" : "No"]));
-      const csv = rows.map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
-      const link = document.createElement("a");
-      link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-      link.download = "learners.csv";
-      link.click();
-    };
-
-    loadCourses();
-    loadLearners();
   </script>
 </body>
 </html>
