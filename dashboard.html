@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Learner Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -16,51 +16,32 @@
       </button>
     </div>
 
-    <!-- Programs -->
     <div class="mb-8">
       <h2 class="text-2xl font-semibold mb-2">Your Enrolled Programs</h2>
       <div id="programs-container" class="grid gap-4 md:grid-cols-2"></div>
     </div>
 
-    <!-- Progress Chart -->
     <div class="mb-8">
       <h2 class="text-2xl font-semibold mb-2">Progress Overview</h2>
       <canvas id="progressChart" class="bg-white rounded shadow p-4"></canvas>
     </div>
 
-    <!-- Assignment Submission -->
-    <div class="mb-8">
-      <h2 class="text-2xl font-semibold mb-2">Submit Assignment (PDF)</h2>
-      <form id="assignment-form" class="bg-white p-4 rounded shadow space-y-4">
-        <input type="file" id="pdf-file" accept="application/pdf" class="border p-2 w-full rounded" required />
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+    <div class="mb-8 bg-white p-6 rounded shadow max-w-md">
+      <h2 class="text-xl font-bold mb-4">Submit Assignment (PDF)</h2>
+      <form id="upload-form">
+        <input type="file" id="pdf-file" accept="application/pdf" required class="mb-4" />
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50" id="upload-btn">
           Upload Assignment
         </button>
-        <p id="upload-status" class="text-sm text-gray-700"></p>
+        <p id="upload-status" class="mt-3 text-sm"></p>
       </form>
-    </div>
-
-    <!-- Info Cards -->
-    <div class="grid gap-4 md:grid-cols-3">
-      <div class="bg-white p-4 shadow rounded">
-        <h3 class="text-xl font-bold mb-2">Grants</h3>
-        <p class="text-gray-600">Info about available grants.</p>
-      </div>
-      <div class="bg-white p-4 shadow rounded">
-        <h3 class="text-xl font-bold mb-2">Bursaries</h3>
-        <p class="text-gray-600">Details about bursaries for learners.</p>
-      </div>
-      <div class="bg-white p-4 shadow rounded">
-        <h3 class="text-xl font-bold mb-2">WSP/ATR</h3>
-        <p class="text-gray-600">Workplace Skills Plan / Annual Training Report overview.</p>
-      </div>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, get, set, push } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -72,9 +53,6 @@
       appId: "1:658673187627:web:6e4c29af661785f0afa36e"
     };
 
-    const cloudName = "your_cloud_name"; // 👈 Replace with your Cloudinary cloud name
-    const uploadPreset = "your_unsigned_preset"; // 👈 Replace with your unsigned preset
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
@@ -82,11 +60,10 @@
     const emailSpan = document.getElementById("user-email");
     const programsContainer = document.getElementById("programs-container");
     const signOutBtn = document.getElementById("signout-btn");
-    const assignmentForm = document.getElementById("assignment-form");
+    const uploadForm = document.getElementById("upload-form");
     const pdfFileInput = document.getElementById("pdf-file");
     const uploadStatus = document.getElementById("upload-status");
-
-    let currentUserId = null;
+    const uploadBtn = document.getElementById("upload-btn");
 
     function renderPrograms(programs) {
       programsContainer.innerHTML = "";
@@ -135,7 +112,6 @@
     }
 
     async function loadDashboard(uid) {
-      currentUserId = uid;
       const userRef = ref(db, `users/${uid}`);
       const snapshot = await get(userRef);
 
@@ -150,42 +126,19 @@
       renderPrograms(programs);
     }
 
-    assignmentForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const file = pdfFileInput.files[0];
-      if (!file || !currentUserId) return;
-
-      uploadStatus.textContent = "Uploading assignment...";
+    function uploadToCloudinary(file) {
+      const url = "https://api.cloudinary.com/v1_1/<YOUR_CLOUD_NAME>/upload"; // <-- replace <YOUR_CLOUD_NAME>
+      const unsignedUploadPreset = "<YOUR_UNSIGNED_UPLOAD_PRESET>"; // <-- replace with your unsigned preset
 
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", uploadPreset);
+      formData.append("upload_preset", unsignedUploadPreset);
 
-      try {
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, {
-          method: "POST",
-          body: formData
-        });
-        const data = await res.json();
-
-        if (data.secure_url) {
-          const assignmentRef = push(ref(db, `assignments/${currentUserId}`));
-          await set(assignmentRef, {
-            fileUrl: data.secure_url,
-            fileName: file.name,
-            status: "pending",
-            timestamp: Date.now()
-          });
-          uploadStatus.textContent = "✅ Assignment uploaded successfully.";
-          assignmentForm.reset();
-        } else {
-          uploadStatus.textContent = "❌ Failed to upload file.";
-        }
-      } catch (err) {
-        console.error("Upload failed", err);
-        uploadStatus.textContent = "❌ Error uploading file.";
-      }
-    });
+      return fetch(url, {
+        method: "POST",
+        body: formData
+      }).then(res => res.json());
+    }
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -198,6 +151,50 @@
     signOutBtn.addEventListener("click", async () => {
       await signOut(auth);
       window.location.href = "login.html";
+    });
+
+    uploadForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      uploadStatus.textContent = "";
+      uploadBtn.disabled = true;
+
+      const file = pdfFileInput.files[0];
+      if (!file) {
+        uploadStatus.textContent = "Please select a PDF file to upload.";
+        uploadBtn.disabled = false;
+        return;
+      }
+      if (file.type !== "application/pdf") {
+        uploadStatus.textContent = "Only PDF files are allowed.";
+        uploadBtn.disabled = false;
+        return;
+      }
+
+      uploadStatus.textContent = "Uploading PDF... Please wait.";
+
+      try {
+        const cloudinaryResponse = await uploadToCloudinary(file);
+        if (cloudinaryResponse.secure_url) {
+          // Save URL and metadata to Firebase
+          const user = auth.currentUser;
+          const assignmentRef = push(ref(db, `assignments/${user.uid}`));
+          await set(assignmentRef, {
+            fileName: file.name,
+            url: cloudinaryResponse.secure_url,
+            uploadedAt: Date.now(),
+            status: "pending"
+          });
+          uploadStatus.textContent = "Assignment uploaded successfully!";
+          pdfFileInput.value = ""; // reset file input
+        } else {
+          throw new Error("Upload failed");
+        }
+      } catch (err) {
+        uploadStatus.textContent = "Upload failed. Try again.";
+        console.error(err);
+      } finally {
+        uploadBtn.disabled = false;
+      }
     });
   </script>
 </body>
