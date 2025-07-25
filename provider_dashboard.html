@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CETA Provider Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    .sidebar { transition: width 0.3s ease; }
+    .sidebar-hidden { width: 0; overflow: hidden; }
+    .main-content { transition: margin-left 0.3s ease; }
+    .high-contrast { background: #000; color: #fff; }
+    @media (max-width: 768px) {
+      .sidebar { width: 0; overflow: hidden; }
+      .sidebar-open { width: 256px; }
+      .main-content { margin-left: 0; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
+  <div class="flex">
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar bg-gray-800 text-white w-64 min-h-screen p-4">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-bold">CETA Provider</h1>
+        <button id="toggle-sidebar" class="md:hidden text-white focus:outline-none" aria-label="Toggle sidebar">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+      <nav>
+        <ul class="space-y-2">
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="overview">Overview</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="courses">Manage Courses</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="progress">Learner Progress</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="analytics">Analytics</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="helpdesk">Helpdesk</button></li>
+        </ul>
+      </nav>
+      <div class="mt-auto">
+        <button id="toggle-contrast" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded mb-2" aria-label="Toggle high contrast mode">Toggle High Contrast</button>
+        <button id="signout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" aria-label="Sign out of provider account">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content flex-1 p-6 md:ml-64">
+      <!-- Overview Section -->
+      <div id="overview" class="section">
+        <h2 class="text-2xl font-semibold mb-4">Welcome, <span id="provider-name">Provider</span></h2>
+        <div class="grid gap-4 md:grid-cols-4">
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold">Courses Offered</h3>
+            <p id="courses-offered" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold">Enrolled Learners</h3>
+            <p id="enrolled-learners" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold">Completion Rate</h3>
+            <p id="completion-rate" class="text-3xl font-bold text-blue-600">0%</p>
+          </div>
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold">Certificates Issued</h3>
+            <p id="certificates-issued" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+        </div>
+        <div class="mt-6 bg-white p-4 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Course Completion Rates</h3>
+          <canvas id="completion-chart" class="w-full h-64"></canvas>
+        </div>
+      </div>
+
+      <!-- Courses Section -->
+      <div id="courses" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Manage Courses</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Add New Course</h3>
+          <form id="course-form">
+            <input type="text" id="courseName" placeholder="Course Name" class="border p-2 rounded w-full mb-2" aria-label="Enter course name" required />
+            <input type="text" id="courseTags" placeholder="Tags (comma-separated)" class="border p-2 rounded w-full mb-2" aria-label="Enter course tags" />
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Course</button>
+          </form>
+        </div>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Course List</h3>
+          <input type="text" id="courseSearch" placeholder="Search courses..." class="border p-2 rounded w-full mb-4" aria-label="Search courses by name or tag" />
+          <div id="courseList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Learner Progress Section -->
+      <div id="progress" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Learner Progress</h2>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Learner List</h3>
+          <input type="text" id="learnerSearch" placeholder="Search learners..." class="border p-2 rounded w-full mb-4" aria-label="Search learners by name or email" />
+          <div id="learnerList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Analytics Section -->
+      <div id="analytics" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Analytics</h2>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Course Analytics</h3>
+          <canvas id="analytics-chart" class="w-full h-64"></canvas>
+          <div id="analytics-details" class="mt-4 space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Helpdesk Section -->
+      <div id="helpdesk" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Helpdesk</h2>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Support Tickets</h3>
+          <div id="ticketList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
+      </div>
+
+      <noscript>
+        <p class="text-red-600 text-center">JavaScript is required to use this dashboard.</p>
+      </noscript>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getDatabase, ref, onValue, push, update, set, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+    // Firebase configuration (move to backend for production)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+      authDomain: "fire-b-a8878.firebaseapp.com",
+      databaseURL: "https://fire-b-a8878.firebaseio.com",
+      projectId: "fire-b-a8878",
+      storageBucket: "fire-b-a8878.appspot.com",
+      messagingSenderId: "658673187627",
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    // DOM elements
+    const providerName = document.getElementById("provider-name");
+    const coursesOffered = document.getElementById("courses-offered");
+    const enrolledLearners = document.getElementById("enrolled-learners");
+    const completionRate = document.getElementById("completion-rate");
+    const certificatesIssued = document.getElementById("certificates-issued");
+    const courseList = document.getElementById("courseList");
+    const courseSearch = document.getElementById("courseSearch");
+    const learnerList = document.getElementById("learnerList");
+    const learnerSearch = document.getElementById("learnerSearch");
+    const ticketList = document.getElementById("ticketList");
+    const courseForm = document.getElementById("course-form");
+    const courseName = document.getElementById("courseName");
+    const courseTags = document.getElementById("courseTags");
+    const completionChart = document.getElementById("completion-chart").getContext("2d");
+    const analyticsChart = document.getElementById("analytics-chart").getContext("2d");
+    const analyticsDetails = document.getElementById("analytics-details");
+    const loadingSpinner = document.getElementById("loading-spinner");
+    const sidebar = document.getElementById("sidebar");
+    const toggleSidebar = document.getElementById("toggle-sidebar");
+    const toggleContrast = document.getElementById("toggle-contrast");
+
+    let user = null, courses = {}, learners = {}, assessments = {}, certifications = {}, tickets = {};
+
+    // Show/hide loading spinner
+    function showSpinner() { loadingSpinner.classList.remove("hidden"); }
+    function hideSpinner() { loadingSpinner.classList.add("hidden"); }
+
+    // Sidebar toggle
+    toggleSidebar.addEventListener("click", () => {
+      sidebar.classList.toggle("sidebar-open");
+    });
+
+    // High contrast toggle
+    toggleContrast.addEventListener("click", () => {
+      document.body.classList.toggle("high-contrast");
+    });
+
+    // Section switching
+    document.querySelectorAll(".nav-button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
+        document.getElementById(btn.dataset.section).classList.remove("hidden");
+        if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
+      });
+    });
+
+    // Load overview metrics and chart
+    function loadOverview() {
+      showSpinner();
+      onValue(ref(db, `users/${auth.currentUser.uid}`), snap => {
+        user = snap.val();
+        providerName.textContent = user.fullName || user.email;
+      });
+
+      onValue(ref(db, "courses"), snap => {
+        courses = snap.val() || {};
+        let courseCount = 0, learnerCount = 0, completedCount = 0, totalAssessments = 0, certCount = 0;
+        const chartData = { labels: [], datasets: [{ label: "Completion Rate (%)", data: [], backgroundColor: "#2563eb" }] };
+
+        for (const id in courses) {
+          if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
+            courseCount++;
+            const enrolled = courses[id].enrolled?.length || 0;
+            learnerCount += enrolled;
+            chartData.labels.push(courses[id].name);
+            const completion = courses[id].completions?.length || 0;
+            completedCount += completion;
+            chartData.data.push(enrolled > 0 ? (completion / enrolled * 100).toFixed(1) : 0);
+          }
+        }
+        coursesOffered.textContent = courseCount;
+        enrolledLearners.textContent = learnerCount;
+        completionRate.textContent = learnerCount > 0 ? (completedCount / learnerCount * 100).toFixed(1) + "%" : "0%";
+
+        new Chart(completionChart, {
+          type: "bar",
+          data: chartData,
+          options: { scales: { y: { beginAtZero: true, max: 100 } } }
+        });
+      });
+
+      onValue(ref(db, "certifications"), snap => {
+        certifications = snap.val() || {};
+        let certCount = 0;
+        for (const id in certifications) {
+          if (courses[certifications[id].courseId]?.providerId === auth.currentUser.uid) certCount++;
+        }
+        certificatesIssued.textContent = certCount;
+      });
+
+      hideSpinner();
+    }
+
+    // Load courses
+    function loadCourses() {
+      showSpinner();
+      onValue(ref(db, "courses"), snap => {
+        courses = snap.val() || {};
+        renderCourses();
+        hideSpinner();
+      });
+    }
+
+    function renderCourses(filter = "") {
+      courseList.innerHTML = "";
+      for (const id in courses) {
+        const c = courses[id];
+        if (c.providerId !== auth.currentUser.uid || (filter && !c.name.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase())))) continue;
+        const courseItem = document.createElement("div");
+        courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+        courseItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${c.name}</p>
+            <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"} | Enrolled: ${c.enrolled?.length || 0}</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="editCourse('${id}')" class="text-blue-600 hover:underline" aria-label="Edit course ${c.name}">Edit</button>
+            <button onclick="archiveCourse('${id}')" class="text-red-600 hover:underline" aria-label="Archive course ${c.name}">${c.archived ? "Unarchive" : "Archive"}</button>
+          </div>
+        `;
+        courseList.appendChild(courseItem);
+      }
+    }
+
+    // Search courses
+    courseSearch.addEventListener("input", () => {
+      renderCourses(courseSearch.value);
+    });
+
+    // Add course
+    courseForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = courseName.value.trim();
+      const tags = courseTags.value.split(",").map(t => t.trim()).filter(t => t);
+      if (!name) {
+        alert("Please enter a course name.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "courses"), {
+          providerId: auth.currentUser.uid,
+          name,
+          metadata: { tags },
+          enrolled: [],
+          completions: [],
+          archived: false,
+          createdAt: Date.now()
+        });
+        alert("Course added successfully!");
+        courseName.value = "";
+        courseTags.value = "";
+      } catch (err) {
+        console.error("Error adding course:", err);
+        alert("Failed to add course.");
+      }
+      hideSpinner();
+    });
+
+    // Edit course (placeholder)
+    window.editCourse = (courseId) => {
+      const c = courses[courseId];
+      alert(`Edit course ${c.name}. Implement course edit form with name: ${c.name}, tags: ${c.metadata?.tags?.join(", ") || ""}.`);
+    };
+
+    // Archive/unarchive course
+    window.archiveCourse = async (courseId) => {
+      showSpinner();
+      try {
+        await update(ref(db, `courses/${courseId}`), { archived: !courses[courseId].archived });
+        alert(`Course ${courses[courseId].archived ? "unarchived" : "archived"} successfully!`);
+      } catch (err) {
+        console.error("Error archiving course:", err);
+        alert("Failed to archive course.");
+      }
+      hideSpinner();
+    };
+
+    // Load learner progress
+    function loadLearnerProgress() {
+      showSpinner();
+      onValue(ref(db, "users"), snap => {
+        learners = snap.val() || {};
+        onValue(ref(db, "courses"), snap => {
+          courses = snap.val() || {};
+          onValue(ref(db, "assessments"), snap => {
+            assessments = snap.val() || {};
+            onValue(ref(db, "certifications"), snap => {
+              certifications = snap.val() || {};
+              renderLearnerProgress();
+              hideSpinner();
+            });
+          });
+        });
+      });
+    }
+
+    function renderLearnerProgress(filter = "") {
+      learnerList.innerHTML = "";
+      for (const id in learners) {
+        const l = learners[id];
+        if (l.role !== "learner" || (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase()))) continue;
+        const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
+        if (enrolledCourses.length === 0) continue;
+        const learnerItem = document.createElement("div");
+        learnerItem.className = "bg-gray-50 p-4 rounded shadow";
+        let courseDetails = "";
+        enrolledCourses.forEach(c => {
+          const cert = Object.values(certifications).find(cert => cert.learnerId === id && cert.courseId === c.id);
+          courseDetails += `
+            <p class="text-sm font-semibold">${c.name}</p>
+            <p class="text-sm text-gray-600">Progress: ${l.progress || 0}% | Assessments: ${
+              Object.values(assessments).filter(a => a.courseId === c.id && a.submissions?.[id]?.status === "completed").length
+            } | Certificate: ${cert ? `<button onclick="downloadCertificate('${cert.id}')" class="text-blue-600 hover:underline" aria-label="Download certificate for ${c.name}">Download</button>` : "Not Issued"}</p>
+          `;
+        });
+        learnerItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${l.fullName || l.email}</p>
+            ${courseDetails}
+          </div>
+        `;
+        learnerList.appendChild(learnerItem);
+      }
+    }
+
+    // Search learners
+    learnerSearch.addEventListener("input", () => {
+      renderLearnerProgress(learnerSearch.value);
+    });
+
+    // Download certificate
+    window.downloadCertificate = (certId) => {
+      const cert = certifications[certId];
+      if (!cert || !courses[cert.courseId] || !learners[cert.learnerId]) {
+        alert("Certificate, course, or learner data not found.");
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(20);
+      doc.text("Certificate of Completion", 105, 30, { align: "center" });
+      doc.setFontSize(16);
+      doc.text(`This certifies that`, 105, 60, { align: "center" });
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text(learners[cert.learnerId].fullName || learners[cert.learnerId].email, 105, 80, { align: "center" });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(16);
+      doc.text(`has successfully completed the course`, 105, 100, { align: "center" });
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text(courses[cert.courseId].name, 105, 120, { align: "center" });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(14);
+      doc.text(`Issued on: ${new Date(cert.issuedAt).toLocaleDateString()}`, 105, 140, { align: "center" });
+      doc.text("CETA Provider Academy", 105, 160, { align: "center" });
+      doc.save(`certificate_${certId}.pdf`);
+    };
+
+    // Load analytics
+    function loadAnalytics() {
+      showSpinner();
+      onValue(ref(db, "courses"), snap => {
+        courses = snap.val() || {};
+        onValue(ref(db, "assessments"), snap => {
+          assessments = snap.val() || {};
+          renderAnalytics();
+          hideSpinner();
+        });
+      });
+    }
+
+    function renderAnalytics() {
+      analyticsDetails.innerHTML = "";
+      const chartData = {
+        labels: [],
+        datasets: [
+          { label: "Completion Rate (%)", data: [], backgroundColor: "#2563eb" },
+          { label: "Average Assessment Score (%)", data: [], backgroundColor: "#10b981" }
+        ]
+      };
+
+      for (const id in courses) {
+        if (courses[id].providerId !== auth.currentUser.uid || courses[id].archived) continue;
+        const c = courses[id];
+        chartData.labels.push(c.name);
+        const completionRate = c.enrolled?.length > 0 ? (c.completions?.length || 0) / c.enrolled.length * 100 : 0;
+        chartData.datasets[0].data.push(completionRate.toFixed(1));
+        let totalScore = 0, scoreCount = 0;
+        for (const aId in assessments) {
+          if (assessments[aId].courseId === id) {
+            for (const subId in assessments[aId].submissions) {
+              if (assessments[aId].submissions[subId].score) {
+                totalScore += assessments[aId].submissions[subId].score;
+                scoreCount++;
+              }
+            }
+          }
+        }
+        chartData.datasets[1].data.push(scoreCount > 0 ? (totalScore / scoreCount).toFixed(1) : 0);
+
+        const detailItem = document.createElement("div");
+        detailItem.className = "bg-gray-50 p-4 rounded shadow";
+        detailItem.innerHTML = `
+          <p class="font-semibold">${c.name}</p>
+          <p class="text-sm text-gray-600">Enrolled: ${c.enrolled?.length || 0} | Completion Rate: ${completionRate.toFixed(1)}% | Avg Score: ${scoreCount > 0 ? (totalScore / scoreCount).toFixed(1) : 0}%</p>
+        `;
+        analyticsDetails.appendChild(detailItem);
+      }
+
+      new Chart(analyticsChart, {
+        type: "bar",
+        data: chartData,
+        options: { scales: { y: { beginAtZero: true, max: 100 } } }
+      });
+    }
+
+    // Load tickets
+    function loadTickets() {
+      showSpinner();
+      onValue(ref(db, "helpdesk"), snap => {
+        tickets = snap.val() || {};
+        onValue(ref(db, "users"), snap => {
+          learners = snap.val() || {};
+          ticketList.innerHTML = "";
+          for (const id in tickets) {
+            const t = tickets[id];
+            if (!courses[t.courseId]?.providerId === auth.currentUser.uid) continue;
+            const ticketItem = document.createElement("div");
+            ticketItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+            ticketItem.innerHTML = `
+              <div>
+                <p class="font-semibold">${t.issue}</p>
+                <p class="text-sm text-gray-600">Learner: ${learners[t.userId]?.fullName || learners[t.userId]?.email || "Unknown"} | Status: ${t.status} | Submitted: ${new Date(t.createdAt).toLocaleDateString()}</p>
+              </div>
+              <div>
+                ${t.status === "open" ? `<button onclick="respondTicket('${id}')" class="text-blue-600 hover:underline" aria-label="Respond to ticket">Respond</button>` : `<span class="text-green-600">Resolved</span>`}
+              </div>
+            `;
+            ticketList.appendChild(ticketItem);
+          }
+          hideSpinner();
+        });
+      });
+    }
+
+    // Respond to ticket (placeholder)
+    window.respondTicket = (ticketId) => {
+      alert(`Respond to ticket ${ticketId}. Implement ticket response form.`);
+    };
+
+    // Authentication check
+    onAuthStateChanged(auth, async (authUser) => {
+      if (!authUser) {
+        alert("Unauthorized. Redirecting...");
+        window.location.href = "login.html";
+      } else {
+        try {
+          const userSnap = await get(ref(db, `users/${authUser.uid}`));
+          if (userSnap.exists()) {
+            user = userSnap.val();
+            if (user.role !== "provider") {
+              alert("Access denied. Provider role required. Redirecting...");
+              await signOut(auth);
+              window.location.href = "login.html";
+              return;
+            }
+            loadOverview();
+            loadCourses();
+            loadLearnerProgress();
+            loadAnalytics();
+            loadTickets();
+          } else {
+            alert("User data not found. Redirecting...");
+            await signOut(auth);
+            window.location.href = "login.html";
+          }
+        } catch (err) {
+          console.error("Error fetching user data:", err);
+          alert("Failed to load user data. Redirecting...");
+          await signOut(auth);
+          window.location.href = "login.html";
+        }
+      }
+    });
+
+    // Sign out
+    document.getElementById("signout-btn").addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        window.location.href = "login.html";
+      } catch (err) {
+        console.error("Sign-out failed:", err);
+        alert("Failed to sign out. Please try again.");
+      }
+    });
+  </script>
+</body>
+</html>
