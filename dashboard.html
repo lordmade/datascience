@@ -175,7 +175,7 @@
           assignmentItem.className = "py-2";
           assignmentItem.innerHTML = `
             <p>${assignment.fileName} - Status: ${assignment.status}
-            (<a href="${assignment.url}" target="_blank" class="text-blue-600 hover:underline">View</a>)
+            (<a href="${assignment.url}" target="_blank" class="text-blue-600 hover:underline" aria-label="View assignment ${assignment.fileName}">View</a>)
             <span class="text-gray-500 text-sm">Uploaded: ${new Date(assignment.uploadedAt).toLocaleDateString()}</span></p>
           `;
           assignmentsList.appendChild(assignmentItem);
