@@ -123,6 +123,10 @@
       display: block;
     }
 
+    .custom-alert[role="alertdialog"] {
+      outline: none;
+    }
+
     .custom-alert .close-btn {
       position: absolute;
       top: 0.75rem;
@@ -136,9 +140,11 @@
       transition: transform 0.2s ease, color 0.2s ease;
     }
 
-    .custom-alert .close-btn:hover {
+    .custom-alert .close-btn:hover,
+    .custom-alert .close-btn:focus {
       transform: scale(1.2);
       color: #1a91da;
+      outline: none;
     }
 
     .custom-alert .close-btn svg {
@@ -158,9 +164,11 @@
       transition: background 0.2s ease, transform 0.2s ease;
     }
 
-    .custom-alert .retry-btn:hover {
+    .custom-alert .retry-btn:hover,
+    .custom-alert .retry-btn:focus {
       background: #1a91da;
       transform: scale(1.05);
+      outline: none;
     }
 
     @keyframes fadeInUp {
@@ -209,10 +217,10 @@
   </style>
 </head>
 <body>
-  <div class="splash-container">
+  <div class="splash-container" role="main">
     <div class="logo-container">
-      
-      <div class="loader">
+      <!-- Optional logo -->
+      <div class="loader" aria-label="Loading">
         <div class="dot"></div>
         <div class="dot"></div>
         <div class="dot"></div>
@@ -221,8 +229,8 @@
     <p class="splash-text">CETA LMS<br>Empowering the Future of Construction Education</p>
   </div>
 
-  <div id="custom-alert" class="custom-alert">
-    <button class="close-btn" onclick="hideAlert()">
+  <div id="custom-alert" class="custom-alert" role="alertdialog" aria-modal="true" aria-labelledby="alert-message" tabindex="-1">
+    <button class="close-btn" aria-label="Close alert" onclick="hideAlert()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -233,12 +241,12 @@
   </div>
 
   <script type="module">
-    // Load Firebase scripts and initialize
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
     let auth, db;
+
     try {
       const firebaseConfig = {
         apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -248,7 +256,7 @@
         storageBucket: "fire-b-a8878.firebasestorage.app",
         messagingSenderId: "658673187627",
         appId: "1:658673187627:web:6e4c29af661785f0afa36e",
-        measurementId: "G-V4W97VMSKL"
+        // measurementId: "G-V4W97VMSKL" // optional
       };
 
       const app = initializeApp(firebaseConfig);
@@ -267,6 +275,7 @@
       if (customAlert && alertMessage) {
         alertMessage.textContent = message;
         customAlert.classList.add("active");
+        customAlert.focus();
         if (autoHide) {
           setTimeout(hideAlert, 5000);
         }
@@ -283,88 +292,66 @@
       }
     }
 
-    async function checkAuthState(retries = 3, delay = 1000) {
-      if (!auth || !db) {
-        showAlert("Firebase services not available. Please check configuration or network.", false);
-        console.error("Firebase auth or db not initialized");
-        return;
-      }
-
+    async function checkUserData(user, retries = 3, delay = 1000) {
+      const userRef = ref(db, `users/${user.uid}`);
       for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-          console.log(`Auth attempt ${attempt}: Starting`);
-          await new Promise((resolve, reject) => {
-            onAuthStateChanged(auth, async (user) => {
-              try {
-                console.log(`Auth attempt ${attempt}: User state`, user ? user.uid : 'null');
-                if (user) {
-                  const userRef = ref(db, `users/${user.uid}`);
-                  console.log(`Fetching user data for UID: ${user.uid}`);
-                  const snapshot = await get(userRef);
-                  if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    console.log(`User data:`, userData);
-                    const destination = userData.role === 'admin' ? 'program.html' : 'dashboard.html';
-                    console.log(`Redirecting to: ${destination}`);
-                    document.body.classList.add("fade-out");
-                    setTimeout(() => {
-                      window.location.href = destination;
-                    }, 1500);
-                  } else {
-                    console.log(`No user data found for UID: ${user.uid}, redirecting to signup`);
-                    document.body.classList.add("fade-out");
-                    setTimeout(() => {
-                      window.location.href = 'signup.html';
-                    }, 1500);
-                  }
-                  resolve();
-                } else {
-                  console.log(`No user logged in, redirecting to signup`);
-                  document.body.classList.add("fade-out");
-                  setTimeout(() => {
-                    window.location.href = 'signup.html';
-                  }, 1500);
-                  resolve();
-                }
-              } catch (error) {
-                console.error(`Auth attempt ${attempt} inner error:`, error.message, error.code);
-                reject(error);
-              }
-            }, (error) => {
-              console.error(`Auth attempt ${attempt} onAuthStateChanged error:`, error.message, error.code);
-              reject(error);
-            });
-          });
+          console.log(`Fetching user data, attempt ${attempt}`);
+          const snapshot = await get(userRef);
+          if (snapshot.exists()) {
+            const userData = snapshot.val();
+            const destination = userData.role === 'admin' ? 'program.html' : 'dashboard.html';
+            document.body.classList.add("fade-out");
+            setTimeout(() => {
+              window.location.replace(destination);
+            }, 1500);
+          } else {
+            document.body.classList.add("fade-out");
+            setTimeout(() => {
+              window.location.replace('signup.html');
+            }, 1500);
+          }
           return;
         } catch (error) {
-          console.error(`Auth attempt ${attempt} failed:`, error.message, error.code);
+          console.error(`Attempt ${attempt} to fetch user data failed:`, error.message);
           if (attempt === retries) {
-            let message = "Failed to connect to server. Please check your connection and try again.";
-            if (error.code === "permission-denied") {
-              message = "Permission denied. Please contact support.";
-            } else if (error.code === "unavailable") {
-              message = "Server is temporarily unavailable. Please try again later.";
-            } else if (error.code === "auth/network-request-failed") {
-              message = "Network error. Please check your internet connection.";
-            } else if (error.code === "auth/invalid-api-key") {
-              message = "Invalid Firebase configuration. Please contact the administrator.";
-            }
-            showAlert(message, false);
+            showAlert("Failed to fetch user data. Please try again later.", false);
           } else {
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await new Promise(res => setTimeout(res, delay));
           }
         }
       }
     }
 
+    function initAuthListener() {
+      if (!auth || !db) {
+        showAlert("Firebase not initialized properly.", false);
+        return;
+      }
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          checkUserData(user);
+        } else {
+          document.body.classList.add("fade-out");
+          setTimeout(() => {
+            window.location.replace('signup.html');
+          }, 1500);
+        }
+      }, (error) => {
+        console.error("Auth state listener error:", error);
+        showAlert("Authentication error. Please try again.", false);
+      });
+    }
+
     function retryAuth() {
       hideAlert();
-      checkAuthState();
+      initAuthListener();
     }
 
     document.addEventListener("DOMContentLoaded", () => {
       console.log("DOM loaded, starting auth check");
-      checkAuthState();
+      initAuthListener();
     });
   </script>
 </body>
