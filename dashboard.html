@@ -152,486 +152,482 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, onValue, push, update, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+  import { getDatabase, ref, onValue, push, update, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-    // Firebase configuration (move to backend for production)
-    const firebaseConfig = {
-      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
-      authDomain: "fire-b-a8878.firebaseapp.com",
-      databaseURL: "https://fire-b-a8878.firebaseio.com",
-      projectId: "fire-b-a8878",
-      storageBucket: "fire-b-a8878.appspot.com",
-      messagingSenderId: "658673187627",
-      appId: "1:658673187627:web:6e4c29af661785f0afa36e"
-    };
+  // Firebase configuration (move to backend for production)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+    authDomain: "fire-b-a8878.firebaseapp.com",
+    databaseURL: "https://fire-b-a8878.firebaseio.com",
+    projectId: "fire-b-a8878",
+    storageBucket: "fire-b-a8878.appspot.com",
+    messagingSenderId: "658673187627",
+    appId: "1:658673187627:web:6e4c29af661785f0afa36e"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
 
-    // DOM elements
-    const learnerName = document.getElementById("learner-name");
-    const enrolledCourses = document.getElementById("enrolled-courses");
-    const completedAssessments = document.getElementById("completed-assessments");
-    const earnedCertificates = document.getElementById("earned-certificates");
-    const courseList = document.getElementById("courseList");
-    const courseSearch = document.getElementById("courseSearch");
-    const assessmentList = document.getElementById("assessmentList");
-    const certificationList = document.getElementById("certificationList");
-    const bursaryList = document.getElementById("bursaryList");
-    const ticketList = document.getElementById("ticketList");
-    const noticeList = document.getElementById("noticeList");
-    const noticeSearch = document.getElementById("noticeSearch");
-    const ticketForm = document.getElementById("ticket-form");
-    const ticketIssue = document.getElementById("ticketIssue");
-    const ticketDescription = document.getElementById("ticketDescription");
-    const progressChart = document.getElementById("progress-chart").getContext("2d");
-    const loadingSpinner = document.getElementById("loading-spinner");
-    const sidebar = document.getElementById("sidebar");
-    const toggleSidebar = document.getElementById("toggle-sidebar");
-    const toggleContrast = document.getElementById("toggle-contrast");
+  // DOM elements
+  const learnerName = document.getElementById("learner-name");
+  const enrolledCourses = document.getElementById("enrolled-courses");
+  const completedAssessments = document.getElementById("completed-assessments");
+  const earnedCertificates = document.getElementById("earned-certificates");
+  const courseList = document.getElementById("courseList");
+  const courseSearch = document.getElementById("courseSearch");
+  const assessmentList = document.getElementById("assessmentList");
+  const certificationList = document.getElementById("certificationList");
+  const bursaryList = document.getElementById("bursaryList");
+  const ticketList = document.getElementById("ticketList");
+  const noticeList = document.getElementById("noticeList");
+  const noticeSearch = document.getElementById("noticeSearch");
+  const ticketForm = document.getElementById("ticket-form");
+  const ticketIssue = document.getElementById("ticketIssue");
+  const ticketDescription = document.getElementById("ticketDescription");
+  const progressChart = document.getElementById("progress-chart").getContext("2d");
+  const loadingSpinner = document.getElementById("loading-spinner");
+  const sidebar = document.getElementById("sidebar");
+  const toggleSidebar = document.getElementById("toggle-sidebar");
+  const toggleContrast = document.getElementById("toggle-contrast");
 
-    let user = null, courses = {}, assessments = {}, certifications = {}, bursaries = {}, notices = {}, tickets = {};
+  let user = null, courses = {}, assessments = {}, certifications = {}, bursaries = {}, notices = {}, tickets = {};
 
-    // Show/hide loading spinner
-    function showSpinner() { loadingSpinner.classList.remove("hidden"); }
-    function hideSpinner() { loadingSpinner.classList.add("hidden"); }
+  // Show/hide loading spinner
+  function showSpinner() { loadingSpinner.classList.remove("hidden"); }
+  function hideSpinner() { loadingSpinner.classList.add("hidden"); }
 
-    // Sidebar toggle
-    toggleSidebar.addEventListener("click", () => {
-      sidebar.classList.toggle("sidebar-open");
+  // Sidebar toggle
+  toggleSidebar.addEventListener("click", () => {
+    sidebar.classList.toggle("sidebar-open");
+  });
+
+  // High contrast toggle
+  toggleContrast.addEventListener("click", () => {
+    document.body.classList.toggle("high-contrast");
+  });
+
+  // Section switching
+  document.querySelectorAll(".nav-button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
+      document.getElementById(btn.dataset.section).classList.remove("hidden");
+      if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
+    });
+  });
+
+  // Load overview metrics and chart
+  function loadOverview() {
+    showSpinner();
+    onValue(ref(db, `users/${auth.currentUser.uid}`), snap => {
+      user = snap.val();
+      learnerName.textContent = user.fullName || user.email;
     });
 
-    // High contrast toggle
-    toggleContrast.addEventListener("click", () => {
-      document.body.classList.toggle("high-contrast");
-    });
-
-    // Section switching
-    document.querySelectorAll(".nav-button").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
-        document.getElementById(btn.dataset.section).classList.remove("hidden");
-        if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
-      });
-    });
-
-    // Load overview metrics and chart
-    function loadOverview() {
-      showSpinner();
-      onValue(ref(db, `users/${auth.currentUser.uid}`), snap => {
-        user = snap.val();
-        learnerName.textContent = user.fullName || user.email;
-      });
-
-      onValue(ref(db, "courses"), snap => {
-        courses = snap.val() || {};
-        let enrolledCount = 0;
-        for (const id in courses) {
-          if (courses[id].enrolled?.includes(auth.currentUser.uid)) enrolledCount++;
-        }
-        enrolledCourses.textContent = enrolledCount;
-      });
-
-      onValue(ref(db, "assessments"), snap => {
-        assessments = snap.val() || {};
-        let completedCount = 0;
-        for (const id in assessments) {
-          if (assessments[id].submissions?.[auth.currentUser.uid]?.status === "completed") completedCount++;
-        }
-        completedAssessments.textContent = completedCount;
-      });
-
-      onValue(ref(db, "certifications"), snap => {
-        certifications = snap.val() || {};
-        let certCount = 0;
-        for (const id in certifications) {
-          if (certifications[id].learnerId === auth.currentUser.uid) certCount++;
-        }
-        earnedCertificates.textContent = certCount;
-      });
-
-      onValue(ref(db, `users/${auth.currentUser.uid}/progress`), snap => {
-        const progress = snap.val() || 0;
-        new Chart(progressChart, {
-          type: "bar",
-          data: {
-            labels: ["Your Progress"],
-            datasets: [{
-              label: "Progress (%)",
-              data: [progress],
-              backgroundColor: "#2563eb"
-            }]
-          },
-          options: { scales: { y: { beginAtZero: true, max: 100 } } }
-        });
-      });
-
-      onValue(ref(db, "notices"), snap => {
-        notices = snap.val() || {};
-        renderNotices();
-        hideSpinner();
-      });
-    }
-
-    // Render notices
-    function renderNotices(filter = "") {
-      noticeList.innerHTML = "";
-      const filteredNotices = Object.entries(notices)
-        .filter(([_, notice]) => notice.title.toLowerCase().includes(filter.toLowerCase()) && (!notice.expiryDate || notice.expiryDate > Date.now()))
-        .sort((a, b) => b[1].createdAt - a[1].createdAt);
-      if (filteredNotices.length === 0) {
-        noticeList.innerHTML = "<p class='text-gray-600'>No active notices found.</p>";
-        return;
+    onValue(ref(db, "courses"), snap => {
+      courses = snap.val() || {};
+      let enrolledCount = 0;
+      for (const id in courses) {
+        if (courses[id].enrolled?.includes(auth.currentUser.uid)) enrolledCount++;
       }
-      filteredNotices.forEach(([id, n]) => {
-        const noticeItem = document.createElement("div");
-        noticeItem.className = "bg-gray-50 p-4 rounded shadow";
-        noticeItem.innerHTML = `
-          <h4 class="text-md font-semibold">${n.title}</h4>
-          <p class="text-gray-700">${n.content}</p>
-          <p class="text-sm text-gray-500 mt-2">Posted on ${new Date(n.createdAt).toLocaleDateString()}
-          ${n.expiryDate ? ` | Expires on ${new Date(n.expiryDate).toLocaleDateString()}` : ""}</p>
-        `;
-        noticeList.appendChild(noticeItem);
-      });
-    }
-
-    // Search notices
-    noticeSearch.addEventListener("input", () => {
-      renderNotices(noticeSearch.value);
+      enrolledCourses.textContent = enrolledCount;
     });
 
-    // Load courses
-    function loadCourses() {
-      showSpinner();
-      onValue(ref(db, "courses"), snap => {
-        courses = snap.val() || {};
-        courseList.innerHTML = "";
-        for (const id in courses) {
-          const c = courses[id];
-          if (c.archived) continue;
-          const isEnrolled = c.enrolled?.includes(auth.currentUser.uid);
-          const courseItem = document.createElement("div");
-          courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
-          courseItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${c.name}</p>
-              <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"}</p>
-            </div>
-            <div>
-              ${isEnrolled ? `<button onclick="viewCourse('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="View course ${c.name}">View</button>` : 
-              `<button onclick="enrollCourse('${id}')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" aria-label="Enroll in course ${c.name}">Enroll</button>`}
-            </div>
-          `;
-          courseList.appendChild(courseItem);
-        }
-        hideSpinner();
-      });
-    }
+    onValue(ref(db, "assessments"), snap => {
+      assessments = snap.val() || {};
+      let completedCount = 0;
+      for (const id in assessments) {
+        if (assessments[id].submissions?.[auth.currentUser.uid]?.status === "completed") completedCount++;
+      }
+      completedAssessments.textContent = completedCount;
+    });
 
-    // Search courses
-    courseSearch.addEventListener("input", () => {
-      const filter = courseSearch.value.toLowerCase();
+    onValue(ref(db, "certifications"), snap => {
+      certifications = snap.val() || {};
+      let certCount = 0;
+      for (const id in certifications) {
+        if (certifications[id].learnerId === auth.currentUser.uid) certCount++;
+      }
+      earnedCertificates.textContent = certCount;
+    });
+
+    onValue(ref(db, `users/${auth.currentUser.uid}/progress`), snap => {
+      const progress = snap.val() || 0;
+      new Chart(progressChart, {
+        type: "bar",
+        data: {
+          labels: ["Your Progress"],
+          datasets: [{
+            label: "Progress (%)",
+            data: [progress],
+            backgroundColor: "#2563eb"
+          }]
+        },
+        options: { scales: { y: { beginAtZero: true, max: 100 } } }
+      });
+    });
+
+    onValue(ref(db, "notices"), snap => {
+      notices = snap.val() || {};
+      renderNotices();
+      hideSpinner();
+    });
+  }
+
+  // Render notices
+  function renderNotices(filter = "") {
+    noticeList.innerHTML = "";
+    const filteredNotices = Object.entries(notices)
+      .filter(([_, notice]) => notice.title.toLowerCase().includes(filter.toLowerCase()) && (!notice.expiryDate || notice.expiryDate > Date.now()))
+      .sort((a, b) => b[1].createdAt - a[1].createdAt);
+    if (filteredNotices.length === 0) {
+      noticeList.innerHTML = "<p class='text-gray-600'>No active notices found.</p>";
+      return;
+    }
+    filteredNotices.forEach(([id, n]) => {
+      const noticeItem = document.createElement("div");
+      noticeItem.className = "bg-gray-50 p-4 rounded shadow";
+      noticeItem.innerHTML = `
+        <h4 class="text-md font-semibold">${n.title}</h4>
+        <p class="text-gray-700">${n.content}</p>
+        <p class="text-sm text-gray-500 mt-2">Posted on ${new Date(n.createdAt).toLocaleDateString()}
+        ${n.expiryDate ? ` | Expires on ${new Date(n.expiryDate).toLocaleDateString()}` : ""}</p>
+      `;
+      noticeList.appendChild(noticeItem);
+    });
+  }
+
+  // Search notices
+  noticeSearch.addEventListener("input", () => {
+    renderNotices(noticeSearch.value);
+  });
+
+  // Load courses
+  function loadCourses() {
+    showSpinner();
+    onValue(ref(db, "courses"), snap => {
+      courses = snap.val() || {};
       courseList.innerHTML = "";
       for (const id in courses) {
         const c = courses[id];
         if (c.archived) continue;
-        if (c.name.toLowerCase().includes(filter) || c.metadata?.tags?.some(t => t.toLowerCase().includes(filter))) {
-          const isEnrolled = c.enrolled?.includes(auth.currentUser.uid);
-          const courseItem = document.createElement("div");
-          courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
-          courseItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${c.name}</p>
-              <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"}</p>
-            </div>
-            <div>
-              ${isEnrolled ? `<button onclick="viewCourse('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="View course ${c.name}">View</button>` : 
-              `<button onclick="enrollCourse('${id}')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" aria-label="Enroll in course ${c.name}">Enroll</button>`}
-            </div>
-          `;
-          courseList.appendChild(courseItem);
-        }
-      }
-    });
-
-    // Load assessments
-    function loadAssessments() {
-      showSpinner();
-      onValue(ref(db, "assessments"), snap => {
-        assessments = snap.val() || {};
-        assessmentList.innerHTML = "";
-        for (const id in assessments) {
-          const a = assessments[id];
-          if (a.archived || !courses[a.courseId]?.enrolled?.includes(auth.currentUser.uid)) continue;
-          const submission = a.submissions?.[auth.currentUser.uid];
-          const assessmentItem = document.createElement("div");
-          assessmentItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
-          assessmentItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${a.title}</p>
-              <p class="text-sm text-gray-600">Course: ${courses[a.courseId]?.name || "-"} | Status: ${submission?.status || "Not Started"}</p>
-            </div>
-            <div>
-              ${submission?.status === "completed" ? `<span class="text-green-600">Completed</span>` : 
-              `<button onclick="submitAssessment('${id}')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" aria-label="Submit assessment ${a.title}">Submit</button>`}
-            </div>
-          `;
-          assessmentList.appendChild(assessmentItem);
-        }
-        hideSpinner();
-      });
-    }
-
-    // Load certifications
-    function loadCertifications() {
-      showSpinner();
-      onValue(ref(db, "certifications"), snap => {
-        certifications = snap.val() || {};
-        certificationList.innerHTML = "";
-        for (const id in certifications) {
-          const c = certifications[id];
-          if (c.learnerId !== auth.currentUser.uid) continue;
-          const certItem = document.createElement("div");
-          certItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
-          certItem.innerHTML = `
-            <div>
-              <p class="font-semibold">Certificate for ${courses[c.courseId]?.name || "-"}</p>
-              <p class="text-sm text-gray-600">Issued: ${new Date(c.issuedAt).toLocaleDateString()}</p>
-            </div>
-            <div>
-              <button onclick="viewCertificate('${id}')" class="text-blue-600 hover:underline" aria-label="View certificate">View</button>
-            </div>
-          `;
-          certificationList.appendChild(certItem);
-        }
-        hideSpinner();
-      });
-    }
-
-    // Load bursaries
-    function loadBursaries() {
-      showSpinner();
-      onValue(ref(db, "bursaries"), snap => {
-        bursaries = snap.val() || {};
-        bursaryList.innerHTML = "";
-        for (const id in bursaries) {
-          const b = bursaries[id];
-          if (b.applicantId !== auth.currentUser.uid) continue;
-          const bursaryItem = document.createElement("div");
-          bursaryItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
-          bursaryItem.innerHTML = `
-            <div>
-              <p class="font-semibold">Bursary for ${courses[b.programId]?.name || "-"}</p>
-              <p class="text-sm text-gray-600">Amount: R${b.amount} | Status: ${b.status}</p>
-            </div>
-            <div>
-              <button onclick="viewBursary('${id}')" class="text-blue-600 hover:underline" aria-label="View bursary">View</button>
-            </div>
-          `;
-          bursaryList.appendChild(bursaryItem);
-        }
-        hideSpinner();
-      });
-    }
-
-    // Load tickets
-    function loadTickets() {
-      showSpinner();
-      onValue(ref(db, "helpdesk"), snap => {
-        tickets = snap.val() || {};
-        ticketList.innerHTML = "";
-        for (const id in tickets) {
-          const t = tickets[id];
-          if (t.userId !== auth.currentUser.uid) continue;
-          const ticketItem = document.createElement("div");
-          ticketItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
-          ticketItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${t.issue}</p>
-              <p class="text-sm text-gray-600">Status: ${t.status} | Submitted: ${new Date(t.createdAt).toLocaleDateString()}</p>
-            </div>
-            <div>
-              ${t.status === "open" ? `<button onclick="updateTicket('${id}')" class="text-blue-600 hover:underline" aria-label="Update ticket">Update</button>` : `<span class="text-green-600">Resolved</span>`}
-            </div>
-          `;
-          ticketList.appendChild(ticketItem);
-        }
-        hideSpinner();
-      });
-    }
-
-    // Course enrollment
-    window.enrollCourse = async (courseId) => {
-      showSpinner();
-      try {
-        const courseRef = ref(db, `courses/${courseId}/enrolled`);
-        const snap = await get(courseRef);
-        const enrolled = snap.val() || [];
-        if (!enrolled.includes(auth.currentUser.uid)) {
-          enrolled.push(auth.currentUser.uid);
-          await update(ref(db, `courses/${courseId}`), { enrolled });
-          alert("Enrolled successfully!");
-        } else {
-          alert("You are already enrolled in this course.");
-        }
-      } catch (err) {
-        console.error("Error enrolling in course:", err);
-        alert("Failed to enroll in course.");
-      }
-      hideSpinner();
-    };
-
-    // View course (placeholder)
-    window.viewCourse = (courseId) => {
-      alert(`View course ${courses[courseId].name}. Implement SCORM/video player integration.`);
-    };
-
-    // Submit assessment (placeholder)
-    window.submitAssessment = async (assessmentId) => {
-      showSpinner();
-      try {
-        await update(ref(db, `assessments/${assessmentId}/submissions/${auth.currentUser.uid}`), {
-          status: "completed",
-          submittedAt: Date.now()
-        });
-        const progress = Math.min((user.progress || 0) + 10, 100); // Increment progress
-        await update(ref(db, `users/${auth.currentUser.uid}`), { progress });
-        alert("Assessment submitted successfully!");
-      } catch (err) {
-        console.error("Error submitting assessment:", err);
-        alert("Failed to submit assessment.");
-      }
-      hideSpinner();
-    };
-
-    // View certificate (placeholder)
-    window.viewCertificate = (certId) => {
-      alert(`View certificate for ${certifications[certId].courseId}. Implement PDF viewer integration.`);
-    };
-
-    // Apply for bursary
-    window.applyBursary = async () => {
-      const programId = document.getElementById("bursaryProgram").value;
-      const amount = parseInt(document.getElementById("bursaryAmount").value);
-      if (!programId || !amount) {
-        alert("Please select a program and enter an amount.");
-        return;
-      }
-      showSpinner();
-      try {
-        await push(ref(db, "bursaries"), {
-          applicantId: auth.currentUser.uid,
-          programId,
-          amount,
-          status: "pending",
-          paymentStatus: "pending",
-          documents: [],
-          createdAt: Date.now()
-        });
-        alert("Bursary application submitted!");
-        document.getElementById("bursaryAmount").value = "";
-      } catch (err) {
-        console.error("Error applying for bursary:", err);
-        alert("Failed to apply for bursary.");
-      }
-      hideSpinner();
-    };
-
-    // Upload bursary document (placeholder)
-    window.uploadBursaryDoc = () => {
-      alert("Document upload placeholder. Implement Firebase Storage integration.");
-    };
-
-    // View bursary (placeholder)
-    window.viewBursary = (bursaryId) => {
-      alert(`View bursary ${bursaryId}. Implement document viewer integration.`);
-    };
-
-    // Submit ticket
-    ticketForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const issue = ticketIssue.value.trim();
-      const description = ticketDescription.value.trim();
-      if (!issue || !description) {
-        alert("Please enter issue title and description.");
-        return;
-      }
-      showSpinner();
-      try {
-        await push(ref(db, "helpdesk"), {
-          userId: auth.currentUser.uid,
-          issue,
-          description,
-          status: "open",
-          createdAt: Date.now()
-        });
-        alert("Ticket submitted successfully!");
-        ticketIssue.value = "";
-        ticketDescription.value = "";
-      } catch (err) {
-        console.error("Error submitting ticket:", err);
-        alert("Failed to submit ticket.");
+        const isEnrolled = c.enrolled?.includes(auth.currentUser.uid);
+        const courseItem = document.createElement("div");
+        courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+        courseItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${c.name}</p>
+            <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"}</p>
+          </div>
+          <div>
+            ${isEnrolled ? `<button onclick="viewCourse('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="View course ${c.name}">View</button>` : 
+            `<button onclick="enrollCourse('${id}')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" aria-label="Enroll in course ${c.name}">Enroll</button>`}
+          </div>
+        `;
+        courseList.appendChild(courseItem);
       }
       hideSpinner();
     });
+  }
 
-    // Update ticket (placeholder)
-    window.updateTicket = (ticketId) => {
-      alert(`Update ticket ${ticketId}. Implement ticket update form.`);
-    };
-
-    // Populate program dropdown
-    async function populateDropdowns() {
-      const bursaryProgram = document.getElementById("bursaryProgram");
-      onValue(ref(db, "courses"), snap => {
-        bursaryProgram.innerHTML = "<option value=''>Select Program</option>";
-        const data = snap.val() || {};
-        for (const id in data) {
-          if (!data[id].archived) {
-            const option = document.createElement("option");
-            option.value = id;
-            option.textContent = data[id].name;
-            bursaryProgram.appendChild(option);
-          }
-        }
-      });
+  // Search courses
+  courseSearch.addEventListener("input", () => {
+    const filter = courseSearch.value.toLowerCase();
+    courseList.innerHTML = "";
+    for (const id in courses) {
+      const c = courses[id];
+      if (c.archived) continue;
+      if (c.name.toLowerCase().includes(filter) || c.metadata?.tags?.some(t => t.toLowerCase().includes(filter))) {
+        const isEnrolled = c.enrolled?.includes(auth.currentUser.uid);
+        const courseItem = document.createElement("div");
+        courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+        courseItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${c.name}</p>
+            <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"}</p>
+          </div>
+          <div>
+            ${isEnrolled ? `<button onclick="viewCourse('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="View course ${c.name}">View</button>` : 
+            `<button onclick="enrollCourse('${id}')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" aria-label="Enroll in course ${c.name}">Enroll</button>`}
+          </div>
+        `;
+        courseList.appendChild(courseItem);
+      }
     }
+  });
 
-    // Authentication check
-    onAuthStateChanged(auth, user => {
-      if (!user) {
-        alert("Unauthorized. Redirecting...");
-        window.location.href = "login.html";
-      } else if (user.role !== "learner") {
-        alert("Access restricted to learners.");
-        signOut(auth);
-        window.location.href = "login.html";
+  // Load assessments
+  function loadAssessments() {
+    showSpinner();
+    onValue(ref(db, "assessments"), snap => {
+      assessments = snap.val() || {};
+      assessmentList.innerHTML = "";
+      for (const id in assessments) {
+        const a = assessments[id];
+        if (a.archived || !courses[a.courseId]?.enrolled?.includes(auth.currentUser.uid)) continue;
+        const submission = a.submissions?.[auth.currentUser.uid];
+        const assessmentItem = document.createElement("div");
+        assessmentItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+        assessmentItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${a.title}</p>
+            <p class="text-sm text-gray-600">Course: ${courses[a.courseId]?.name || "-"} | Status: ${submission?.status || "Not Started"}</p>
+          </div>
+          <div>
+            ${submission?.status === "completed" ? `<span class="text-green-600">Completed</span>` : 
+            `<button onclick="submitAssessment('${id}')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" aria-label="Submit assessment ${a.title}">Submit</button>`}
+          </div>
+        `;
+        assessmentList.appendChild(assessmentItem);
+      }
+      hideSpinner();
+    });
+  }
+
+  // Load certifications
+  function loadCertifications() {
+    showSpinner();
+    onValue(ref(db, "certifications"), snap => {
+      certifications = snap.val() || {};
+      certificationList.innerHTML = "";
+      for (const id in certifications) {
+        const c = certifications[id];
+        if (c.learnerId !== auth.currentUser.uid) continue;
+        const certItem = document.createElement("div");
+        certItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+        certItem.innerHTML = `
+          <div>
+            <p class="font-semibold">Certificate for ${courses[c.courseId]?.name || "-"}</p>
+            <p class="text-sm text-gray-600">Issued: ${new Date(c.issuedAt).toLocaleDateString()}</p>
+          </div>
+          <div>
+            <button onclick="viewCertificate('${id}')" class="text-blue-600 hover:underline" aria-label="View certificate">View</button>
+          </div>
+        `;
+        certificationList.appendChild(certItem);
+      }
+      hideSpinner();
+    });
+  }
+
+  // Load bursaries
+  function loadBursaries() {
+    showSpinner();
+    onValue(ref(db, "bursaries"), snap => {
+      bursaries = snap.val() || {};
+      bursaryList.innerHTML = "";
+      for (const id in bursaries) {
+        const b = bursaries[id];
+        if (b.applicantId !== auth.currentUser.uid) continue;
+        const bursaryItem = document.createElement("div");
+        bursaryItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+        bursaryItem.innerHTML = `
+          <div>
+            <p class="font-semibold">Bursary for ${courses[b.programId]?.name || "-"}</p>
+            <p class="text-sm text-gray-600">Amount: R${b.amount} | Status: ${b.status}</p>
+          </div>
+          <div>
+            <button onclick="viewBursary('${id}')" class="text-blue-600 hover:underline" aria-label="View bursary">View</button>
+          </div>
+        `;
+        bursaryList.appendChild(bursaryItem);
+      }
+      hideSpinner();
+    });
+  }
+
+  // Load tickets
+  function loadTickets() {
+    showSpinner();
+    onValue(ref(db, "helpdesk"), snap => {
+      tickets = snap.val() || {};
+      ticketList.innerHTML = "";
+      for (const id in tickets) {
+        const t = tickets[id];
+        if (t.userId !== auth.currentUser.uid) continue;
+        const ticketItem = document.createElement("div");
+        ticketItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+        ticketItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${t.issue}</p>
+            <p class="text-sm text-gray-600">Status: ${t.status} | Submitted: ${new Date(t.createdAt).toLocaleDateString()}</p>
+          </div>
+          <div>
+            ${t.status === "open" ? `<button onclick="updateTicket('${id}')" class="text-blue-600 hover:underline" aria-label="Update ticket">Update</button>` : `<span class="text-green-600">Resolved</span>`}
+          </div>
+        `;
+        ticketList.appendChild(ticketItem);
+      }
+      hideSpinner();
+    });
+  }
+
+  // Course enrollment
+  window.enrollCourse = async (courseId) => {
+    showSpinner();
+    try {
+      const courseRef = ref(db, `courses/${courseId}/enrolled`);
+      const snap = await get(courseRef);
+      const enrolled = snap.val() || [];
+      if (!enrolled.includes(auth.currentUser.uid)) {
+        enrolled.push(auth.currentUser.uid);
+        await update(ref(db, `courses/${courseId}`), { enrolled });
+        alert("Enrolled successfully!");
       } else {
-        loadOverview();
-        loadCourses();
-        loadAssessments();
-        loadCertifications();
-        loadBursaries();
-        loadTickets();
-        populateDropdowns();
+        alert("You are already enrolled in this course.");
       }
-    });
+    } catch (err) {
+      console.error("Error enrolling in course:", err);
+      alert("Failed to enroll in course.");
+    }
+    hideSpinner();
+  };
 
-    // Sign out
-    document.getElementById("signout-btn").addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-        window.location.href = "login.html";
-      } catch (err) {
-        console.error("Sign-out failed:", err);
-        alert("Failed to sign out. Please try again.");
+  // View course (placeholder)
+  window.viewCourse = (courseId) => {
+    alert(`View course ${courses[courseId].name}. Implement SCORM/video player integration.`);
+  };
+
+  // Submit assessment (placeholder)
+  window.submitAssessment = async (assessmentId) => {
+    showSpinner();
+    try {
+      await update(ref(db, `assessments/${assessmentId}/submissions/${auth.currentUser.uid}`), {
+        status: "completed",
+        submittedAt: Date.now()
+      });
+      const progress = Math.min((user.progress || 0) + 10, 100); // Increment progress
+      await update(ref(db, `users/${auth.currentUser.uid}`), { progress });
+      alert("Assessment submitted successfully!");
+    } catch (err) {
+      console.error("Error submitting assessment:", err);
+      alert("Failed to submit assessment.");
+    }
+    hideSpinner();
+  };
+
+  // View certificate (placeholder)
+  window.viewCertificate = (certId) => {
+    alert(`View certificate for ${certifications[certId].courseId}. Implement PDF viewer integration.`);
+  };
+
+  // Apply for bursary
+  window.applyBursary = async () => {
+    const programId = document.getElementById("bursaryProgram").value;
+    const amount = parseInt(document.getElementById("bursaryAmount").value);
+    if (!programId || !amount) {
+      alert("Please select a program and enter an amount.");
+      return;
+    }
+    showSpinner();
+    try {
+      await push(ref(db, "bursaries"), {
+        applicantId: auth.currentUser.uid,
+        programId,
+        amount,
+        status: "pending",
+        paymentStatus: "pending",
+        documents: [],
+        createdAt: Date.now()
+      });
+      alert("Bursary application submitted!");
+      document.getElementById("bursaryAmount").value = "";
+    } catch (err) {
+      console.error("Error applying for bursary:", err);
+      alert("Failed to apply for bursary.");
+    }
+    hideSpinner();
+  };
+
+  // Upload bursary document (placeholder)
+  window.uploadBursaryDoc = () => {
+    alert("Document upload placeholder. Implement Firebase Storage integration.");
+  };
+
+  // View bursary (placeholder)
+  window.viewBursary = (bursaryId) => {
+    alert(`View bursary ${bursaryId}. Implement document viewer integration.`);
+  };
+
+  // Submit ticket
+  ticketForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const issue = ticketIssue.value.trim();
+    const description = ticketDescription.value.trim();
+    if (!issue || !description) {
+      alert("Please enter issue title and description.");
+      return;
+    }
+    showSpinner();
+    try {
+      await push(ref(db, "helpdesk"), {
+        userId: auth.currentUser.uid,
+        issue,
+        description,
+        status: "open",
+        createdAt: Date.now()
+      });
+      alert("Ticket submitted successfully!");
+      ticketIssue.value = "";
+      ticketDescription.value = "";
+    } catch (err) {
+      console.error("Error submitting ticket:", err);
+      alert("Failed to submit ticket.");
+    }
+    hideSpinner();
+  };
+
+  // Update ticket (placeholder)
+  window.updateTicket = (ticketId) => {
+    alert(`Update ticket ${ticketId}. Implement ticket update form.`);
+  };
+
+  // Populate program dropdown
+  async function populateDropdowns() {
+    const bursaryProgram = document.getElementById("bursaryProgram");
+    onValue(ref(db, "courses"), snap => {
+      bursaryProgram.innerHTML = "<option value=''>Select Program</option>";
+      const data = snap.val() || {};
+      for (const id in data) {
+        if (!data[id].archived) {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = data[id].name;
+          bursaryProgram.appendChild(option);
+        }
       }
     });
-  </script>
+  }
+
+  // Authentication check
+  onAuthStateChanged(auth, user => {
+    if (!user) {
+      alert("Unauthorized. Redirecting...");
+      window.location.href = "login.html";
+    } else {
+      loadOverview();
+      loadCourses();
+      loadAssessments();
+      loadCertifications();
+      loadBursaries();
+      loadTickets();
+      populateDropdowns();
+    }
+  });
+
+  // Sign out
+  document.getElementById("signout-btn").addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+      window.location.href = "login.html";
+    } catch (err) {
+      console.error("Sign-out failed:", err);
+      alert("Failed to sign out. Please try again.");
+    }
+  });
+</script>
 </body>
 </html>
