@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+  <div class="container mx-auto px-4 py-6">
+    <h1 class="text-3xl font-bold mb-4">Admin Dashboard</h1>
+    <p class="text-lg text-gray-700 mb-6">Signed in as: <span id="admin-email" class="text-blue-600 font-semibold"></span></p>
+
+    <h2 class="text-2xl font-semibold mb-4">Learners Overview</h2>
+    <div id="learners-container" class="space-y-6"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+      authDomain: "fire-b-a8878.firebaseapp.com",
+      databaseURL: "https://fire-b-a8878.firebaseio.com",
+      projectId: "fire-b-a8878",
+      storageBucket: "fire-b-a8878.appspot.com",
+      messagingSenderId: "658673187627",
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const adminEmailSpan = document.getElementById("admin-email");
+    const learnersContainer = document.getElementById("learners-container");
+
+    function renderLearner(uid, userData) {
+      const card = document.createElement("div");
+      card.className = "bg-white p-4 rounded shadow";
+
+      const programs = userData.enrolledPrograms || {};
+
+      let programHTML = Object.entries(programs).map(([programName, program]) => `
+        <div class="mt-2">
+          <h4 class="font-semibold">${programName}</h4>
+          <div class="w-full bg-gray-200 h-3 rounded">
+            <div class="bg-blue-500 h-3 rounded" style="width: ${program.progress || 0}%;"></div>
+          </div>
+          <p class="text-sm text-right text-gray-500">${program.progress || 0}% complete</p>
+        </div>
+      `).join("");
+
+      card.innerHTML = `
+        <h3 class="text-lg font-bold mb-1">${userData.email || 'Unknown Email'}</h3>
+        ${programHTML || '<p class="text-gray-500">No enrolled programs.</p>'}
+      `;
+
+      learnersContainer.appendChild(card);
+    }
+
+    async function loadLearners() {
+      const usersRef = ref(db, 'users');
+      const snapshot = await get(usersRef);
+
+      if (!snapshot.exists()) {
+        learnersContainer.innerHTML = "<p>No learners found.</p>";
+        return;
+      }
+
+      const allUsers = snapshot.val();
+      learnersContainer.innerHTML = "";
+
+      Object.entries(allUsers).forEach(([uid, user]) => {
+        if (user.role === "learner") {
+          renderLearner(uid, user);
+        }
+      });
+    }
+
+    async function verifyAdmin(uid) {
+      const userRef = ref(db, `users/${uid}`);
+      const snapshot = await get(userRef);
+
+      if (snapshot.exists() && snapshot.val().role === "admin") {
+        adminEmailSpan.textContent = snapshot.val().email;
+        loadLearners();
+      } else {
+        alert("Access denied. You are not an admin.");
+        window.location.href = "login.html";
+      }
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        verifyAdmin(user.uid);
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+  </script>
+</body>
+</html>
