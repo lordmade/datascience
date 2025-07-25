@@ -3,22 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard</title>
+  <title>CETA Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen font-sans">
-  <div class="container mx-auto px-4 py-6">
-    <h1 class="text-3xl font-bold mb-4">Admin Dashboard</h1>
-    <p class="text-lg text-gray-700 mb-6">Signed in as: <span id="admin-email" class="text-blue-600 font-semibold"></span></p>
+<body class="bg-gray-100 text-gray-800">
+  <div class="container mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">CETA Admin Dashboard</h1>
 
-    <h2 class="text-2xl font-semibold mb-4">Learners Overview</h2>
-    <div id="learners-container" class="space-y-6"></div>
+    <!-- Filters -->
+    <div class="flex gap-4 mb-4">
+      <select id="programFilter" class="border p-2 rounded">
+        <option value="">All Programs</option>
+      </select>
+      <select id="regionFilter" class="border p-2 rounded">
+        <option value="">All Regions</option>
+      </select>
+      <button onclick="exportCSV()" class="bg-blue-600 text-white px-4 py-2 rounded">Export CSV</button>
+    </div>
+
+    <!-- Learners Table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+        <thead>
+          <tr class="bg-gray-200 text-left">
+            <th class="p-3">Name</th>
+            <th class="p-3">Email</th>
+            <th class="p-3">Program</th>
+            <th class="p-3">Region</th>
+            <th class="p-3">Progress (%)</th>
+            <th class="p-3">Approved</th>
+            <th class="p-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="learnerTable"></tbody>
+      </table>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -27,79 +51,104 @@
       projectId: "fire-b-a8878",
       storageBucket: "fire-b-a8878.appspot.com",
       messagingSenderId: "658673187627",
-      appId: "1:658673187627:web:6e4c29af661785f0afa36e"
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getDatabase(app);
+    const usersRef = ref(db, "users");
 
-    const adminEmailSpan = document.getElementById("admin-email");
-    const learnersContainer = document.getElementById("learners-container");
+    const table = document.getElementById("learnerTable");
+    const programFilter = document.getElementById("programFilter");
+    const regionFilter = document.getElementById("regionFilter");
 
-    function renderLearner(uid, userData) {
-      const card = document.createElement("div");
-      card.className = "bg-white p-4 rounded shadow";
+    let allUsers = [];
 
-      const programs = userData.enrolledPrograms || {};
+    onValue(usersRef, (snapshot) => {
+      const data = snapshot.val();
+      allUsers = [];
+      const programs = new Set();
+      const regions = new Set();
 
-      let programHTML = Object.entries(programs).map(([programName, program]) => `
-        <div class="mt-2">
-          <h4 class="font-semibold">${programName}</h4>
-          <div class="w-full bg-gray-200 h-3 rounded">
-            <div class="bg-blue-500 h-3 rounded" style="width: ${program.progress || 0}%;"></div>
-          </div>
-          <p class="text-sm text-right text-gray-500">${program.progress || 0}% complete</p>
-        </div>
-      `).join("");
-
-      card.innerHTML = `
-        <h3 class="text-lg font-bold mb-1">${userData.email || 'Unknown Email'}</h3>
-        ${programHTML || '<p class="text-gray-500">No enrolled programs.</p>'}
-      `;
-
-      learnersContainer.appendChild(card);
-    }
-
-    async function loadLearners() {
-      const usersRef = ref(db, 'users');
-      const snapshot = await get(usersRef);
-
-      if (!snapshot.exists()) {
-        learnersContainer.innerHTML = "<p>No learners found.</p>";
-        return;
-      }
-
-      const allUsers = snapshot.val();
-      learnersContainer.innerHTML = "";
-
-      Object.entries(allUsers).forEach(([uid, user]) => {
+      table.innerHTML = "";
+      for (const uid in data) {
+        const user = data[uid];
         if (user.role === "learner") {
-          renderLearner(uid, user);
+          allUsers.push({ ...user, uid });
+          programs.add(user.program);
+          regions.add(user.region);
         }
-      });
-    }
-
-    async function verifyAdmin(uid) {
-      const userRef = ref(db, `users/${uid}`);
-      const snapshot = await get(userRef);
-
-      if (snapshot.exists() && snapshot.val().role === "admin") {
-        adminEmailSpan.textContent = snapshot.val().email;
-        loadLearners();
-      } else {
-        alert("Access denied. You are not an admin.");
-        window.location.href = "login.html";
       }
-    }
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        verifyAdmin(user.uid);
-      } else {
-        window.location.href = "login.html";
-      }
+      populateFilters(programs, regions);
+      renderTable(allUsers);
     });
+
+    function populateFilters(programs, regions) {
+      programFilter.innerHTML = `<option value="">All Programs</option>`;
+      regions.forEach(r => programFilter.innerHTML += `<option value="${r}">${r}</option>`);
+
+      regionFilter.innerHTML = `<option value="">All Regions</option>`;
+      programs.forEach(p => regionFilter.innerHTML += `<option value="${p}">${p}</option>`);
+    }
+
+    function renderTable(users) {
+      const filtered = users.filter(user =>
+        (programFilter.value === "" || user.program === programFilter.value) &&
+        (regionFilter.value === "" || user.region === regionFilter.value)
+      );
+
+      table.innerHTML = filtered.map(user => `
+        <tr class="border-t">
+          <td class="p-3">${user.fullName || "-"}</td>
+          <td class="p-3">${user.email}</td>
+          <td class="p-3">${user.program || "-"}</td>
+          <td class="p-3">${user.region || "-"}</td>
+          <td class="p-3">
+            <input type="number" value="${user.progress || 0}" 
+              min="0" max="100"
+              onchange="updateProgress('${user.uid}', this.value)"
+              class="w-16 border p-1 rounded text-center" />
+          </td>
+          <td class="p-3">${user.approved ? "✅" : "❌"}</td>
+          <td class="p-3">
+            ${!user.approved ? `<button class="bg-green-500 text-white px-3 py-1 rounded" onclick="approveUser('${user.uid}')">Approve</button>` : ""}
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    window.updateProgress = async (uid, value) => {
+      await update(ref(db, `users/${uid}`), { progress: parseInt(value) });
+      console.log("Progress updated");
+    };
+
+    window.approveUser = async (uid) => {
+      await update(ref(db, `users/${uid}`), { approved: true });
+      console.log("User approved");
+    };
+
+    window.exportCSV = () => {
+      const headers = ["Name", "Email", "Program", "Region", "Progress", "Approved"];
+      const rows = allUsers.map(u => [
+        `"${u.fullName || ''}"`,
+        `"${u.email || ''}"`,
+        `"${u.program || ''}"`,
+        `"${u.region || ''}"`,
+        `"${u.progress || 0}"`,
+        `"${u.approved ? "Yes" : "No"}"`
+      ]);
+
+      let csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map(e => e.join(",")).join("\n");
+      const link = document.createElement("a");
+      link.setAttribute("href", encodeURI(csvContent));
+      link.setAttribute("download", "ceta_learners.csv");
+      document.body.appendChild(link);
+      link.click();
+    };
+
+    programFilter.addEventListener("change", () => renderTable(allUsers));
+    regionFilter.addEventListener("change", () => renderTable(allUsers));
   </script>
 </body>
 </html>
