@@ -130,7 +130,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, onValue, update, push, remove, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getDatabase, ref, onValue, update, push, remove, set, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
     // Firebase configuration (move to backend for production)
     const firebaseConfig = {
@@ -487,24 +487,33 @@
     });
 
     // Edit notice
-    window.editNotice = (id) => {
-      const notice = Object.values(notices).find(n => n.id === id);
-      const newTitle = prompt("Edit notice title:", notice.title);
-      const newContent = prompt("Edit notice content:", notice.content);
-      if (newTitle && newContent) {
-        showSpinner();
-        update(ref(db, `notices/${id}`), {
-          title: newTitle,
-          content: newContent,
-          expiryDate: notice.expiryDate || null
-        })
-          .then(() => hideSpinner())
-          .catch(err => {
-            console.error("Error editing notice:", err);
-            alert("Failed to edit notice.");
-            hideSpinner();
-          });
+    window.editNotice = async (id) => {
+      showSpinner();
+      try {
+        const noticeRef = ref(db, `notices/${id}`);
+        const snapshot = await get(noticeRef);
+        if (!snapshot.exists()) {
+          alert("Notice not found.");
+          hideSpinner();
+          return;
+        }
+        const notice = snapshot.val();
+        const newTitle = prompt("Edit notice title:", notice.title);
+        const newContent = prompt("Edit notice content:", notice.content);
+        const newExpiry = prompt("Edit expiry date (YYYY-MM-DD, leave blank to remove):", notice.expiryDate ? new Date(notice.expiryDate).toISOString().split('T')[0] : "");
+        if (newTitle && newContent) {
+          const updates = {
+            title: newTitle,
+            content: newContent,
+            expiryDate: newExpiry ? new Date(newExpiry).getTime() : null
+          };
+          await update(noticeRef, updates);
+        }
+      } catch (err) {
+        console.error("Error editing notice:", err);
+        alert("Failed to edit notice.");
       }
+      hideSpinner();
     };
 
     // Delete notice
