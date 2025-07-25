@@ -16,6 +16,11 @@
       </button>
     </div>
 
+    <div class="mb-8 bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-semibold mb-2">Notices</h2>
+      <div id="notices-container" class="space-y-4" aria-live="polite"></div>
+    </div>
+
     <div class="mb-8">
       <h2 class="text-2xl font-semibold mb-2">Your Enrolled Programs</h2>
       <div id="programs-container" class="grid gap-4 md:grid-cols-2"></div>
@@ -56,9 +61,9 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getDatabase, ref, get, push, set, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-    // Firebase configuration (should be moved to backend for security)
+    // Firebase configuration (move to backend for production)
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
@@ -76,6 +81,7 @@
     const emailSpan = document.getElementById("user-email");
     const programsContainer = document.getElementById("programs-container");
     const assignmentsList = document.getElementById("assignments-list");
+    const noticesContainer = document.getElementById("notices-container");
     const signOutBtn = document.getElementById("signout-btn");
     const uploadForm = document.getElementById("upload-form");
     const pdfFileInput = document.getElementById("pdf-file");
@@ -180,8 +186,48 @@
       }
     }
 
+    function renderNotices() {
+      showSpinner();
+      onValue(ref(db, "notices"), snap => {
+        noticesContainer.innerHTML = "";
+        const data = snap.val();
+        if (!data) {
+          noticesContainer.innerHTML = "<p class='text-gray-600'>No notices available.</p>";
+          hideSpinner();
+          return;
+        }
+
+        const now = Date.now();
+        const activeNotices = Object.entries(data)
+          .filter(([_, notice]) => !notice.expiryDate || notice.expiryDate > now)
+          .sort((a, b) => b[1].createdAt - a[1].createdAt); // Sort by newest first
+
+        if (activeNotices.length === 0) {
+          noticesContainer.innerHTML = "<p class='text-gray-600'>No active notices available.</p>";
+          hideSpinner();
+          return;
+        }
+
+        activeNotices.forEach(([_, notice]) => {
+          const noticeItem = document.createElement("div");
+          noticeItem.className = "bg-gray-50 p-4 rounded shadow";
+          noticeItem.innerHTML = `
+            <h3 class="text-lg font-bold">${notice.title}</h3>
+            <p class="text-gray-700">${notice.content}</p>
+            <p class="text-sm text-gray-500 mt-2">Posted on ${new Date(notice.createdAt).toLocaleDateString()}
+            ${notice.expiryDate ? ` | Expires on ${new Date(notice.expiryDate).toLocaleDateString()}` : ""}</p>
+          `;
+          noticesContainer.appendChild(noticeItem);
+        });
+        hideSpinner();
+      }, err => {
+        console.error("Error loading notices:", err);
+        noticesContainer.innerHTML = "<p class='text-red-600'>Failed to load notices.</p>";
+        hideSpinner();
+      });
+    }
+
     async function uploadToCloudinary(file) {
-      // Ideally, use a backend endpoint for signed uploads
       const url = "https://api.cloudinary.com/v1_1/your-cloud-name/upload"; // Replace with your cloud name
       const unsignedUploadPreset = "your-upload-preset"; // Replace with your unsigned preset
 
@@ -216,6 +262,7 @@
         const programs = userData.enrolledPrograms || {};
         renderPrograms(programs);
         await renderAssignments(uid);
+        renderNotices();
       } catch (err) {
         console.error("Error loading dashboard:", err);
         programsContainer.innerHTML = "<p class='text-red-600'>Failed to load dashboard.</p>";
@@ -282,7 +329,7 @@
         });
         uploadStatus.textContent = "Assignment uploaded successfully!";
         pdfFileInput.value = "";
-        await renderAssignments(user.uid); // Refresh assignments list
+        await renderAssignments(user.uid);
       } catch (err) {
         uploadStatus.textContent = "Upload failed. Try again.";
         console.error("Upload error:", err);
