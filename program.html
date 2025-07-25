@@ -5,50 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CETA Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* Simple tab styles */
-    .tab-btn {
-      @apply px-4 py-2 font-semibold border-b-2 border-transparent cursor-pointer;
-    }
-    .tab-btn.active {
-      @apply border-blue-600 text-blue-600;
-    }
-  </style>
 </head>
 <body class="bg-gray-100 text-gray-800 min-h-screen">
-  <div class="container mx-auto p-6 space-y-6">
-    <h1 class="text-3xl font-bold mb-4">CETA Admin Dashboard</h1>
+
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">CETA Admin Dashboard</h1>
 
     <!-- Tabs -->
-    <div class="flex space-x-4 border-b mb-6">
-      <button class="tab-btn active" data-tab="learners">Learners</button>
-      <button class="tab-btn" data-tab="courses">Courses</button>
-      <button class="tab-btn" data-tab="enrollment">Enrollment</button>
+    <div class="mb-6">
+      <nav class="flex space-x-4 border-b">
+        <button id="tab-learners-btn" class="pb-2 border-b-4 border-blue-600 font-semibold text-blue-600">Learners</button>
+        <button id="tab-courses-btn" class="pb-2 border-b-4 border-transparent hover:border-blue-600 font-semibold">Courses</button>
+      </nav>
     </div>
 
-    <!-- Learners Content -->
-    <section id="learners" class="tab-content block">
-      <div class="flex gap-4 flex-wrap items-center mb-4">
+    <!-- Learners Tab Content -->
+    <section id="tab-learners" class="">
+      <div class="flex gap-4 mb-4">
         <select id="programFilter" class="border p-2 rounded">
           <option value="">All Programs</option>
         </select>
         <select id="regionFilter" class="border p-2 rounded">
           <option value="">All Regions</option>
         </select>
-        <button onclick="exportCSV()" class="bg-blue-600 text-white px-4 py-2 rounded whitespace-nowrap">Export CSV</button>
+        <button onclick="exportLearnersCSV()" class="bg-blue-600 text-white px-4 py-2 rounded">Export Learners CSV</button>
       </div>
 
-      <div class="overflow-x-auto bg-white shadow rounded">
-        <table class="min-w-full table-auto">
-          <thead class="bg-gray-200">
-            <tr>
-              <th class="p-3 border">Name</th>
-              <th class="p-3 border">Email</th>
-              <th class="p-3 border">Program</th>
-              <th class="p-3 border">Region</th>
-              <th class="p-3 border">Progress (%)</th>
-              <th class="p-3 border">Approved</th>
-              <th class="p-3 border">Actions</th>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+          <thead>
+            <tr class="bg-gray-200 text-left">
+              <th class="p-3">Name</th>
+              <th class="p-3">Email</th>
+              <th class="p-3">Program</th>
+              <th class="p-3">Region</th>
+              <th class="p-3">Progress (%)</th>
+              <th class="p-3">Approved</th>
+              <th class="p-3">Actions</th>
             </tr>
           </thead>
           <tbody id="learnerTable"></tbody>
@@ -56,80 +49,33 @@
       </div>
     </section>
 
-    <!-- Courses Content -->
-    <section id="courses" class="tab-content hidden">
-      <h2 class="text-2xl font-bold mb-4">Course Management</h2>
-
-      <form id="courseForm" class="mb-6 space-y-3 max-w-md">
-        <input type="hidden" id="editCourseId" />
-        <div>
-          <label for="courseTitle" class="block font-semibold mb-1">Course Title</label>
-          <input id="courseTitle" type="text" required
-            class="w-full border p-2 rounded" placeholder="Enter course title" />
-        </div>
-        <div>
-          <label for="courseDescription" class="block font-semibold mb-1">Description</label>
-          <textarea id="courseDescription" rows="3" required
-            class="w-full border p-2 rounded" placeholder="Enter course description"></textarea>
-        </div>
-        <div>
-          <label for="courseRegion" class="block font-semibold mb-1">Region</label>
-          <input id="courseRegion" type="text" required
-            class="w-full border p-2 rounded" placeholder="Enter region" />
-        </div>
-        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">
-          <span id="courseFormBtnText">Add Course</span>
-        </button>
-        <button type="button" id="cancelEditBtn" class="hidden ml-4 text-gray-600 underline">Cancel Edit</button>
-      </form>
-
-      <div class="overflow-x-auto bg-white shadow rounded max-w-4xl">
-        <table class="min-w-full table-auto">
-          <thead class="bg-gray-200">
-            <tr>
-              <th class="p-3 border">Title</th>
-              <th class="p-3 border">Description</th>
-              <th class="p-3 border">Region</th>
-              <th class="p-3 border">Actions</th>
+    <!-- Courses Tab Content -->
+    <section id="tab-courses" class="hidden">
+      <div class="mb-4 flex justify-between items-center">
+        <h2 class="text-xl font-bold">Courses</h2>
+        <button onclick="addNewCourse()" class="bg-green-600 text-white px-4 py-2 rounded">Add New Course</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+          <thead>
+            <tr class="bg-gray-200 text-left">
+              <th class="p-3">Course ID</th>
+              <th class="p-3">Title</th>
+              <th class="p-3">Description</th>
+              <th class="p-3">Actions</th>
             </tr>
           </thead>
-          <tbody id="coursesTable"></tbody>
+          <tbody id="courseTable"></tbody>
         </table>
       </div>
     </section>
 
-    <!-- Enrollment Content -->
-    <section id="enrollment" class="tab-content hidden">
-      <h2 class="text-2xl font-bold mb-4">Enroll Learners</h2>
-
-      <form id="enrollForm" class="flex flex-wrap items-end gap-4 max-w-md mb-6">
-        <div class="flex-1 min-w-[180px]">
-          <label for="selectLearner" class="block font-semibold mb-1">Select Learner</label>
-          <select id="selectLearner" required class="w-full border p-2 rounded"></select>
-        </div>
-        <div class="flex-1 min-w-[180px]">
-          <label for="selectCourse" class="block font-semibold mb-1">Select Course</label>
-          <select id="selectCourse" required class="w-full border p-2 rounded"></select>
-        </div>
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded whitespace-nowrap">Enroll</button>
-      </form>
-
-      <div id="enrollmentStatus" class="text-green-700 font-semibold"></div>
-    </section>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      onValue,
-      update,
-      push,
-      set,
-      remove,
-      get,
-    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getDatabase, ref, onValue, update, push, remove } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -142,302 +88,211 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // Tabs logic
-    const tabs = document.querySelectorAll(".tab-btn");
-    const tabContents = document.querySelectorAll(".tab-content");
+    // Elements
+    const tabLearnersBtn = document.getElementById("tab-learners-btn");
+    const tabCoursesBtn = document.getElementById("tab-courses-btn");
+    const tabLearners = document.getElementById("tab-learners");
+    const tabCourses = document.getElementById("tab-courses");
 
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", () => {
-        const target = tab.getAttribute("data-tab");
-
-        tabs.forEach((t) => t.classList.remove("active"));
-        tab.classList.add("active");
-
-        tabContents.forEach((content) => {
-          content.id === target
-            ? content.classList.remove("hidden")
-            : content.classList.add("hidden");
-        });
-      });
-    });
-
-    // --- USERS SECTION ---
-
-    const learnerTable = document.getElementById("learnerTable");
     const programFilter = document.getElementById("programFilter");
     const regionFilter = document.getElementById("regionFilter");
-    const selectLearner = document.getElementById("selectLearner");
 
+    const learnerTable = document.getElementById("learnerTable");
+    const courseTable = document.getElementById("courseTable");
+
+    // Data holders
     let allUsers = [];
+    let allCourses = [];
 
-    const usersRef = ref(db, "users");
-
-    onValue(usersRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      allUsers = [];
-      const programsSet = new Set();
-      const regionsSet = new Set();
-
-      learnerTable.innerHTML = "";
-      selectLearner.innerHTML = '<option value="">Select Learner</option>';
-
-      for (const uid in data) {
-        const user = data[uid];
-        if (user.role === "learner") {
-          allUsers.push({ ...user, uid });
-          if (user.program) programsSet.add(user.program);
-          if (user.region) regionsSet.add(user.region);
-
-          // Populate learner select dropdown
-          const option = document.createElement("option");
-          option.value = uid;
-          option.textContent = user.fullName || user.email || uid;
-          selectLearner.appendChild(option);
-        }
-      }
-
-      populateFilters(programsSet, regionsSet);
-      renderLearnerTable(allUsers);
+    // Switch tabs
+    tabLearnersBtn.addEventListener("click", () => {
+      tabLearners.classList.remove("hidden");
+      tabCourses.classList.add("hidden");
+      tabLearnersBtn.classList.add("border-blue-600", "text-blue-600");
+      tabCoursesBtn.classList.remove("border-blue-600", "text-blue-600");
     });
 
-    function populateFilters(programs, regions) {
-      // Programs filter
-      programFilter.innerHTML = `<option value="">All Programs</option>`;
-      Array.from(programs)
-        .sort()
-        .forEach((p) => {
-          programFilter.innerHTML += `<option value="${p}">${p}</option>`;
-        });
+    tabCoursesBtn.addEventListener("click", () => {
+      tabCourses.classList.remove("hidden");
+      tabLearners.classList.add("hidden");
+      tabCoursesBtn.classList.add("border-blue-600", "text-blue-600");
+      tabLearnersBtn.classList.remove("border-blue-600", "text-blue-600");
+    });
 
-      // Regions filter
-      regionFilter.innerHTML = `<option value="">All Regions</option>`;
-      Array.from(regions)
-        .sort()
-        .forEach((r) => {
-          regionFilter.innerHTML += `<option value="${r}">${r}</option>`;
-        });
+    // Authentication & admin check
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      // Check if user is admin
+      const userRef = ref(db, `users/${user.uid}`);
+      onValue(userRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data || data.role !== "admin") {
+          alert("Access denied: Admins only.");
+          signOut(auth).then(() => window.location.href = "login.html");
+          return;
+        }
+
+        // Load data after admin verified
+        loadLearners();
+        loadCourses();
+      }, { onlyOnce: true });
+    });
+
+    // Load learners data
+    function loadLearners() {
+      const usersRef = ref(db, "users");
+      onValue(usersRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        allUsers = [];
+        const programs = new Set();
+        const regions = new Set();
+
+        for (const uid in data) {
+          const user = data[uid];
+          if (user.role === "learner") {
+            allUsers.push({ ...user, uid });
+            if (user.program) programs.add(user.program);
+            if (user.region) regions.add(user.region);
+          }
+        }
+
+        populateFilters(programs, regions);
+        renderLearnersTable(allUsers);
+      });
     }
 
-    function renderLearnerTable(users) {
-      const filtered = users.filter(
-        (user) =>
-          (programFilter.value === "" || user.program === programFilter.value) &&
-          (regionFilter.value === "" || user.region === regionFilter.value)
+    function populateFilters(programs, regions) {
+      programFilter.innerHTML = `<option value="">All Programs</option>`;
+      Array.from(programs).forEach(p => {
+        programFilter.innerHTML += `<option value="${p}">${p}</option>`;
+      });
+
+      regionFilter.innerHTML = `<option value="">All Regions</option>`;
+      Array.from(regions).forEach(r => {
+        regionFilter.innerHTML += `<option value="${r}">${r}</option>`;
+      });
+    }
+
+    function renderLearnersTable(users) {
+      const filtered = users.filter(user =>
+        (programFilter.value === "" || user.program === programFilter.value) &&
+        (regionFilter.value === "" || user.region === regionFilter.value)
       );
 
-      learnerTable.innerHTML = filtered
-        .map(
-          (user) => `
+      learnerTable.innerHTML = filtered.map(user => `
         <tr class="border-t">
-          <td class="p-3 border">${user.fullName || "-"}</td>
-          <td class="p-3 border">${user.email}</td>
-          <td class="p-3 border">${user.program || "-"}</td>
-          <td class="p-3 border">${user.region || "-"}</td>
-          <td class="p-3 border text-center">
+          <td class="p-3">${user.fullName || "-"}</td>
+          <td class="p-3">${user.email}</td>
+          <td class="p-3">${user.program || "-"}</td>
+          <td class="p-3">${user.region || "-"}</td>
+          <td class="p-3">
             <input type="number" value="${user.progress || 0}" 
               min="0" max="100"
               onchange="updateProgress('${user.uid}', this.value)"
               class="w-16 border p-1 rounded text-center" />
           </td>
-          <td class="p-3 border text-center">${user.approved ? "✅" : "❌"}</td>
-          <td class="p-3 border text-center">
-            ${
-              !user.approved
-                ? `<button class="bg-green-500 text-white px-3 py-1 rounded" onclick="approveUser('${user.uid}')">Approve</button>`
-                : ""
-            }
+          <td class="p-3">${user.approved ? "✅" : "❌"}</td>
+          <td class="p-3">
+            ${!user.approved ? `<button class="bg-green-500 text-white px-3 py-1 rounded" onclick="approveUser('${user.uid}')">Approve</button>` : ""}
           </td>
         </tr>
-      `
-        )
-        .join("");
+      `).join("");
     }
 
+    // Load courses data
+    function loadCourses() {
+      const coursesRef = ref(db, "courses");
+      onValue(coursesRef, (snapshot) => {
+        const data = snapshot.val() || {};
+        allCourses = [];
+        courseTable.innerHTML = "";
+
+        for (const courseId in data) {
+          const course = data[courseId];
+          allCourses.push({ ...course, courseId });
+
+          const row = document.createElement("tr");
+          row.className = "border-t";
+          row.innerHTML = `
+            <td class="p-3">${courseId}</td>
+            <td class="p-3"><input type="text" value="${course.title || ''}" onchange="updateCourseTitle('${courseId}', this.value)" class="border rounded p-1 w-full" /></td>
+            <td class="p-3"><input type="text" value="${course.description || ''}" onchange="updateCourseDescription('${courseId}', this.value)" class="border rounded p-1 w-full" /></td>
+            <td class="p-3">
+              <button onclick="deleteCourse('${courseId}')" class="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+            </td>
+          `;
+          courseTable.appendChild(row);
+        }
+      });
+    }
+
+    // Update learner progress
     window.updateProgress = async (uid, value) => {
-      const progressVal = parseInt(value);
-      if (isNaN(progressVal) || progressVal < 0 || progressVal > 100) {
-        alert("Progress must be between 0 and 100");
-        return;
-      }
-      await update(ref(db, `users/${uid}`), { progress: progressVal });
-      console.log("Progress updated for user:", uid);
+      await update(ref(db, `users/${uid}`), { progress: parseInt(value) });
     };
 
+    // Approve learner
     window.approveUser = async (uid) => {
       await update(ref(db, `users/${uid}`), { approved: true });
-      console.log("User approved:", uid);
     };
 
-    programFilter.addEventListener("change", () => renderLearnerTable(allUsers));
-    regionFilter.addEventListener("change", () => renderLearnerTable(allUsers));
-
-    // --- COURSES SECTION ---
-
-    const coursesTable = document.getElementById("coursesTable");
-    const courseForm = document.getElementById("courseForm");
-    const courseTitleInput = document.getElementById("courseTitle");
-    const courseDescriptionInput = document.getElementById("courseDescription");
-    const courseRegionInput = document.getElementById("courseRegion");
-    const courseFormBtnText = document.getElementById("courseFormBtnText");
-    const cancelEditBtn = document.getElementById("cancelEditBtn");
-    const editCourseIdInput = document.getElementById("editCourseId");
-
-    const coursesRef = ref(db, "courses");
-
-    let allCourses = {};
-
-    onValue(coursesRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      allCourses = data;
-
-      renderCoursesTable(data);
-      populateCourseSelect(data);
-    });
-
-    function renderCoursesTable(courses) {
-      coursesTable.innerHTML = Object.entries(courses)
-        .map(
-          ([courseId, course]) => `
-        <tr class="border-t">
-          <td class="p-3 border">${course.title}</td>
-          <td class="p-3 border">${course.description}</td>
-          <td class="p-3 border">${course.region}</td>
-          <td class="p-3 border text-center whitespace-nowrap">
-            <button class="bg-yellow-400 text-gray-800 px-3 py-1 rounded mr-2" onclick="editCourse('${courseId}')">Edit</button>
-            <button class="bg-red-500 text-white px-3 py-1 rounded" onclick="deleteCourse('${courseId}')">Delete</button>
-          </td>
-        </tr>
-      `
-        )
-        .join("");
-    }
-
-    function populateCourseSelect(courses) {
-      selectCourse.innerHTML = '<option value="">Select Course</option>';
-      for (const [courseId, course] of Object.entries(courses)) {
-        const option = document.createElement("option");
-        option.value = courseId;
-        option.textContent = course.title;
-        selectCourse.appendChild(option);
-      }
-    }
-
-    courseForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const title = courseTitleInput.value.trim();
-      const description = courseDescriptionInput.value.trim();
-      const region = courseRegionInput.value.trim();
-      const editCourseId = editCourseIdInput.value;
-
-      if (!title || !description || !region) {
-        alert("Please fill all course fields");
-        return;
-      }
-
-      if (editCourseId) {
-        await update(ref(db, `courses/${editCourseId}`), { title, description, region });
-        alert("Course updated!");
-      } else {
-        const newCourseRef = push(coursesRef);
-        await set(newCourseRef, { title, description, region });
-        alert("Course added!");
-      }
-
-      resetCourseForm();
-    });
-
-    function resetCourseForm() {
-      courseForm.reset();
-      editCourseIdInput.value = "";
-      courseFormBtnText.textContent = "Add Course";
-      cancelEditBtn.classList.add("hidden");
-    }
-
-    window.editCourse = (courseId) => {
-      const course = allCourses[courseId];
-      if (!course) return alert("Course not found");
-      courseTitleInput.value = course.title;
-      courseDescriptionInput.value = course.description;
-      courseRegionInput.value = course.region;
-      editCourseIdInput.value = courseId;
-      courseFormBtnText.textContent = "Update Course";
-      cancelEditBtn.classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    // Update course title
+    window.updateCourseTitle = async (courseId, title) => {
+      await update(ref(db, `courses/${courseId}`), { title });
     };
 
-    cancelEditBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      resetCourseForm();
-    });
+    // Update course description
+    window.updateCourseDescription = async (courseId, description) => {
+      await update(ref(db, `courses/${courseId}`), { description });
+    };
 
+    // Delete course
     window.deleteCourse = async (courseId) => {
-      if (!confirm("Are you sure you want to delete this course?")) return;
-      await remove(ref(db, `courses/${courseId}`));
-      alert("Course deleted!");
+      if (confirm("Are you sure you want to delete this course?")) {
+        await remove(ref(db, `courses/${courseId}`));
+      }
     };
 
-    // --- ENROLLMENT SECTION ---
+    // Add new course
+    window.addNewCourse = async () => {
+      const newCourseRef = push(ref(db, "courses"));
+      await newCourseRef.set({
+        title: "New Course",
+        description: "Course description",
+      });
+    };
 
-    const selectCourse = document.getElementById("selectCourse");
-    const enrollForm = document.getElementById("enrollForm");
-    const enrollmentStatus = document.getElementById("enrollmentStatus");
-
-    enrollForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      enrollmentStatus.textContent = "";
-
-      const learnerId = selectLearner.value;
-      const courseId = selectCourse.value;
-
-      if (!learnerId || !courseId) {
-        alert("Please select both learner and course.");
-        return;
-      }
-
-      try {
-        const enrolledRef = ref(db, `users/${learnerId}/enrolledPrograms/${courseId}`);
-        const snapshot = await get(enrolledRef);
-
-        if (snapshot.exists()) {
-          enrollmentStatus.textContent = "Learner is already enrolled in this course.";
-          return;
-        }
-
-        await set(enrolledRef, { progress: 0 });
-
-        enrollmentStatus.textContent = "Enrollment successful!";
-      } catch (error) {
-        console.error("Enrollment error:", error);
-        alert("Failed to enroll learner. Try again.");
-      }
-    });
-
-    // --- EXPORT CSV ---
-
-    function exportCSV() {
+    // Export learners CSV
+    window.exportLearnersCSV = () => {
       const headers = ["Name", "Email", "Program", "Region", "Progress", "Approved"];
-      const rows = allUsers.map((u) => [
-        `"${u.fullName || ""}"`,
-        `"${u.email || ""}"`,
-        `"${u.program || ""}"`,
-        `"${u.region || ""}"`,
+      const rows = allUsers.map(u => [
+        `"${u.fullName || ''}"`,
+        `"${u.email || ''}"`,
+        `"${u.program || ''}"`,
+        `"${u.region || ''}"`,
         `"${u.progress || 0}"`,
         `"${u.approved ? "Yes" : "No"}"`,
       ]);
-
-      let csvContent =
-        "data:text/csv;charset=utf-8," +
-        [headers, ...rows].map((e) => e.join(",")).join("\n");
-
+      let csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].map(e => e.join(",")).join("\n");
       const link = document.createElement("a");
       link.setAttribute("href", encodeURI(csvContent));
       link.setAttribute("download", "ceta_learners.csv");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }
+    };
+
+    // Filters change handlers
+    programFilter.addEventListener("change", () => renderLearnersTable(allUsers));
+    regionFilter.addEventListener("change", () => renderLearnersTable(allUsers));
+
   </script>
 </body>
 </html>
