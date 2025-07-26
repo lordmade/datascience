@@ -3,36 +3,251 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CETA Login</title>
+  <title>CETA LMS Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .high-contrast { background: #000; color: #fff; }
-    .high-contrast input, .high-contrast button { background: #fff; color: #000; border-color: #fff; }
+    :root {
+      --primary-blue: #00A3FF;
+      --text-light: #E0E0E0;
+      --text-dark: #FFFFFF;
+      --border: #333333;
+      --background-dark: #0A0A0A;
+      --background-gradient: linear-gradient(135deg, #0A0A0A 0%, #1C2526 100%);
+      --glow: rgba(0, 163, 255, 0.3);
+      --card-bg: rgba(28, 37, 38, 0.85);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: var(--background-gradient);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-light);
+    }
+
+    body.high-contrast {
+      background: #000;
+      --text-light: #FFF;
+      --card-bg: #111;
+      --border: #FFF;
+    }
+
+    .login-container {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 400px;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .login-container h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      text-align: center;
+      color: var(--text-dark);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-dark);
+      font-size: 1rem;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body.high-contrast .form-group input {
+      background: #FFF;
+      color: #000;
+      border-color: #FFF;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 8px var(--glow);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--primary-blue);
+      color: var(--text-dark);
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    body.high-contrast .submit-btn {
+      background: #FFF;
+      color: #000;
+      border: 1px solid #FFF;
+    }
+
+    .submit-btn:hover,
+    .submit-btn:focus {
+      background: #33B5FF;
+      transform: translateY(-2px);
+      box-shadow: 0 0 12px var(--glow);
+      outline: none;
+    }
+
+    body.high-contrast .submit-btn:hover,
+    body.high-contrast .submit-btn:focus {
+      background: #E0E0E0;
+    }
+
+    .contrast-toggle {
+      color: var(--primary-blue);
+      background: none;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .contrast-toggle:hover,
+    .contrast-toggle:focus {
+      color: #33B5FF;
+      text-decoration: underline;
+      outline: none;
+    }
+
+    .error-message {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      color: #FF4D4F;
+      background: rgba(255, 77, 79, 0.1);
+    }
+
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .loader-spinner {
+      width: 60px;
+      height: 60px;
+      border: 5px solid transparent;
+      border-top-color: var(--primary-blue);
+      border-radius: 50%;
+      animation: spin 1.2s linear infinite, glow 1.5s ease-in-out infinite;
+    }
+
+    .loader-spinner::before {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      right: 5px;
+      bottom: 5px;
+      border-radius: 50%;
+      border: 5px solid transparent;
+      border-top-color: var(--primary-blue);
+      opacity: 0.5;
+      animation: spin 1.8s linear infinite reverse;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 10px var(--glow); }
+      50% { box-shadow: 0 0 20px var(--glow); }
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .login-container {
+        padding: 1.5rem;
+        max-width: 90%;
+      }
+
+      .login-container h1 {
+        font-size: 1.75rem;
+      }
+
+      .form-group input {
+        padding: 0.6rem;
+        font-size: 0.9rem;
+      }
+
+      .submit-btn {
+        padding: 0.6rem;
+        font-size: 0.9rem;
+      }
+
+      .loader-spinner {
+        width: 50px;
+        height: 50px;
+      }
+    }
   </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex items-center justify-center">
-  <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
-    <h1 class="text-2xl font-bold text-center mb-6">CETA Login</h1>
+<body>
+  <div class="login-container">
+    <h1>CETA LMS Login</h1>
     <form id="login-form" class="space-y-4">
-      <div>
-        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-        <input type="email" id="email" class="border p-2 rounded w-full" placeholder="Enter your email" aria-label="Enter your email" required />
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter your email" aria-label="Enter your email" required />
       </div>
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-        <input type="password" id="password" class="border p-2 rounded w-full" placeholder="Enter your password" aria-label="Enter your password" required />
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" aria-label="Enter your password" required />
       </div>
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700" aria-label="Sign in to your account">Sign In</button>
+      <button type="submit" class="submit-btn" aria-label="Sign in to your account">Sign In</button>
     </form>
-    <p id="error-message" class="text-red-600 text-sm mt-4 text-center hidden"></p>
-    <div class="mt-4 text-center">
-      <button id="toggle-contrast" class="text-blue-600 hover:underline" aria-label="Toggle high contrast mode">Toggle High Contrast</button>
+    <p id="error-message" class="error-message hidden"></p>
+    <div class="text-center mt-4">
+      <button id="toggle-contrast" class="contrast-toggle" aria-label="Toggle high contrast mode">Toggle High Contrast</button>
     </div>
-    <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
+    <div id="loading-spinner" class="loader hidden">
+      <div class="loader-spinner"></div>
     </div>
     <noscript>
-      <p class="text-red-600 text-center mt-4">JavaScript is required to log in.</p>
+      <p class="error-message">JavaScript is required to log in.</p>
     </noscript>
   </div>
 
@@ -41,7 +256,6 @@
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-    // Firebase configuration (move to backend for production)
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
@@ -56,7 +270,6 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // DOM elements
     const loginForm = document.getElementById("login-form");
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
@@ -64,22 +277,18 @@
     const loadingSpinner = document.getElementById("loading-spinner");
     const toggleContrast = document.getElementById("toggle-contrast");
 
-    // Show/hide loading spinner
     function showSpinner() { loadingSpinner.classList.remove("hidden"); }
     function hideSpinner() { loadingSpinner.classList.add("hidden"); }
 
-    // Show error message
     function showError(msg) {
       errorMessage.textContent = msg;
       errorMessage.classList.remove("hidden");
     }
 
-    // High contrast toggle
     toggleContrast.addEventListener("click", () => {
       document.body.classList.toggle("high-contrast");
     });
 
-    // Handle login form submission
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = emailInput.value.trim();
@@ -111,7 +320,6 @@
       }
     });
 
-    // Authentication state listener
     onAuthStateChanged(auth, async (authUser) => {
       if (authUser) {
         try {
@@ -127,7 +335,6 @@
                 window.location.href = "dashboard.html";
                 break;
               case "admin":
-                // Placeholder for admin dashboard
                 alert("Admin dashboard not implemented. Redirecting to login.");
                 await auth.signOut();
                 window.location.href = "login.html";
@@ -151,7 +358,6 @@
         }
       } else {
         hideSpinner();
-        // User is not logged in, stay on login page
       }
     });
   </script>
