@@ -123,6 +123,20 @@
       background: #E0E0E0;
     }
 
+    .text-link {
+      color: var(--primary-blue);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .text-link:hover,
+    .text-link:focus {
+      color: #33B5FF;
+      text-decoration: underline;
+      outline: none;
+    }
+
     .contrast-toggle {
       color: var(--primary-blue);
       background: none;
@@ -241,6 +255,7 @@
     </form>
     <p id="error-message" class="error-message hidden"></p>
     <div class="text-center mt-4">
+      <p class="text-sm">Don't have an account? <a href="signup.html" class="text-link">Sign Up</a></p>
       <button id="toggle-contrast" class="contrast-toggle" aria-label="Toggle high contrast mode">Toggle High Contrast</button>
     </div>
     <div id="loading-spinner" class="loader hidden">
