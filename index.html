@@ -7,17 +7,18 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
-      --twitter-blue: #1DA1F2;
-      --text-dark: #0F1419;
-      --text-light: #536471;
-      --border: #D8D9DB;
-      --white: #FFFFFF;
-      --background: #F5F8FA;
+      --primary-blue: #00A3FF;
+      --text-light: #E0E0E0;
+      --text-dark: #FFFFFF;
+      --border: #333333;
+      --background-dark: #0A0A0A;
+      --background-gradient: linear-gradient(135deg, #0A0A0A 0%, #1C2526 100%);
+      --glow: rgba(0, 163, 255, 0.3);
     }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      background: var(--white);
+      background: var(--background-gradient);
       min-height: 100vh;
       margin: 0;
       padding: 0;
@@ -42,59 +43,62 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1rem;
+      gap: 1.5rem;
       margin: 0 auto;
     }
 
     .twitter-logo {
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 100px;
       object-fit: contain;
-      animation: fadeInScale 1.2s ease-out forwards;
+      animation: fadeInRotate 1.5s ease-out forwards;
     }
 
     .loader {
-      display: flex;
-      gap: 8px;
-    }
-
-    .dot {
-      width: 12px;
-      height: 12px;
-      background: var(--twitter-blue);
+      width: 60px;
+      height: 60px;
+      border: 5px solid transparent;
+      border-top-color: var(--primary-blue);
       border-radius: 50%;
-      animation: pulse 1.2s ease-in-out infinite;
+      animation: spin 1.2s linear infinite, glow 1.5s ease-in-out infinite;
+      position: relative;
     }
 
-    .dot:nth-child(2) {
-      animation-delay: 0.2s;
+    .loader::before {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      right: 5px;
+      bottom: 5px;
+      border-radius: 50%;
+      border: 5px solid transparent;
+      border-top-color: var(--primary-blue);
+      opacity: 0.5;
+      animation: spin 1.8s linear infinite reverse;
     }
 
-    .dot:nth-child(3) {
-      animation-delay: 0.4s;
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
-    @keyframes pulse {
-      0%, 100% {
-        transform: scale(1);
-        opacity: 0.8;
-      }
-      50% {
-        transform: scale(1.5);
-        opacity: 0.4;
-      }
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 10px var(--glow); }
+      50% { box-shadow: 0 0 20px var(--glow); }
     }
 
-    @keyframes fadeInScale {
-      0% { opacity: 0; transform: scale(0.7); }
-      100% { opacity: 1; transform: scale(1); }
+    @keyframes fadeInRotate {
+      0% { opacity: 0; transform: scale(0.7) rotate(0deg); }
+      100% { opacity: 1; transform: scale(1) rotate(10deg); }
     }
 
     .splash-text {
       color: var(--text-dark);
-      font-weight: 700;
-      font-size: 1.5rem;
+      font-weight: 800;
+      font-size: 2rem;
       letter-spacing: 0.5px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
       animation: fadeInUp 1s ease-out 0.5s forwards;
       opacity: 0;
     }
@@ -105,16 +109,16 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: var(--white);
+      background: #1C2526;
       padding: 1.5rem 2rem;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 20px rgba(0, 163, 255, 0.2);
       z-index: 1000;
-      color: var(--text-dark);
+      color: var(--text-light);
       font-weight: 500;
       text-align: center;
       max-width: 90%;
-      width: 320px;
+      width: 340px;
       animation: fadeIn 0.3s ease-out forwards;
       border: 1px solid var(--border);
     }
@@ -135,7 +139,7 @@
       height: 24px;
       background: none;
       border: none;
-      color: var(--twitter-blue);
+      color: var(--primary-blue);
       cursor: pointer;
       transition: transform 0.2s ease, color 0.2s ease;
     }
@@ -143,7 +147,7 @@
     .custom-alert .close-btn:hover,
     .custom-alert .close-btn:focus {
       transform: scale(1.2);
-      color: #1a91da;
+      color: #33B5FF;
       outline: none;
     }
 
@@ -154,20 +158,21 @@
 
     .custom-alert .retry-btn {
       margin-top: 1rem;
-      padding: 0.5rem 1rem;
-      background: var(--twitter-blue);
-      color: var(--white);
+      padding: 0.5rem 1.5rem;
+      background: var(--primary-blue);
+      color: var(--text-dark);
       border: none;
       border-radius: 20px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s ease, transform 0.2s ease;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .custom-alert .retry-btn:hover,
     .custom-alert .retry-btn:focus {
-      background: #1a91da;
+      background: #33B5FF;
       transform: scale(1.05);
+      box-shadow: 0 0 10px var(--glow);
       outline: none;
     }
 
@@ -183,25 +188,21 @@
 
     @media (max-width: 640px) {
       .logo-container {
-        gap: 0.75rem;
+        gap: 1rem;
       }
 
       .twitter-logo {
-        width: 60px;
-        height: 60px;
+        width: 80px;
+        height: 80px;
       }
 
       .loader {
-        gap: 6px;
-      }
-
-      .dot {
-        width: 10px;
-        height: 10px;
+        width: 50px;
+        height: 50px;
       }
 
       .splash-text {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
       }
 
       .custom-alert {
@@ -210,7 +211,7 @@
       }
 
       .custom-alert .retry-btn {
-        padding: 0.4rem 0.8rem;
+        padding: 0.4rem 1.2rem;
         font-size: 0.9rem;
       }
     }
@@ -220,11 +221,8 @@
   <div class="splash-container" role="main">
     <div class="logo-container">
       <!-- Optional logo -->
-      <div class="loader" aria-label="Loading">
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-      </div>
+      <img src="https://via.placeholder.com/100?text=Logo" class="twitter-logo" alt="CETA LMS Logo" />
+      <div class="loader" aria-label="Loading"></div>
     </div>
     <p class="splash-text">CETA LMS<br>Empowering the Future of Construction Education</p>
   </div>
@@ -256,7 +254,6 @@
         storageBucket: "fire-b-a8878.firebasestorage.app",
         messagingSenderId: "658673187627",
         appId: "1:658673187627:web:6e4c29af661785f0afa36e",
-        // measurementId: "G-V4W97VMSKL" // optional
       };
 
       const app = initializeApp(firebaseConfig);
