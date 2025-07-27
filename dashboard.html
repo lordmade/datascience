@@ -2,211 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CETA Learner Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Learner Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-  <style>
-    .sidebar {
-      transition: transform 0.3s ease, width 0.3s ease;
-      transform: translateX(0);
-    }
-    .sidebar-hidden {
-      transform: translateX(-100%);
-      width: 0;
-    }
-    .main-content {
-      transition: margin-left 0.3s ease;
-    }
-    .high-contrast {
-      background: #000 !important;
-      color: #fff !important;
-    }
-    .high-contrast .bg-white {
-      background: #1a1a1a !important;
-    }
-    .high-contrast .text-gray-600 {
-      color: #e5e5e5 !important;
-    }
-    .tooltip {
-      position: relative;
-    }
-    .tooltip:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1f2937;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      white-space: nowrap;
-      z-index: 10;
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 100;
-    }
-    .modal-content {
-      background: white;
-      margin: 15% auto;
-      padding: 20px;
-      width: 90%;
-      max-width: 500px;
-      border-radius: 8px;
-    }
-    .high-contrast .modal-content {
-      background: #1a1a1a !important;
-      color: #fff !important;
-    }
-    @media (max-width: 768px) {
-      .sidebar {
-        position: fixed;
-        z-index: 50;
-        width: 256px;
-        transform: translateX(-100%);
-      }
-      .sidebar-open {
-        transform: translateX(0);
-      }
-      .main-content {
-        margin-left: 0;
-      }
-    }
-  </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
-  <div class="flex">
-    <!-- Sidebar -->
-    <div id="sidebar" class="sidebar bg-gradient-to-b from-gray-800 to-gray-900 text-white w-64 min-h-screen p-4 shadow-lg">
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-xl font-bold flex items-center gap-2">
-          <i class="fas fa-graduation-cap"></i> CETA Learner
-        </h1>
-        <button id="toggle-sidebar" class="md:hidden text-white focus:outline-none" aria-label="Toggle sidebar">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-      </div>
-      <nav>
-        <ul class="space-y-2">
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="overview" data-tooltip="Your Dashboard"><i class="fas fa-tachometer-alt"></i> Overview</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="courses" data-tooltip="Your Courses"><i class="fas fa-book"></i> My Courses</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="progress" data-tooltip="Track Progress"><i class="fas fa-chart-line"></i> Progress</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="certificates" data-tooltip="View Certificates"><i class="fas fa-certificate"></i> Certificates</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="helpdesk" data-tooltip="Submit Support Tickets"><i class="fas fa-headset"></i> Helpdesk</button></li>
-        </ul>
-      </nav>
-      <div class="mt-auto">
-        <button id="toggle-contrast" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded mb-2" aria-label="Toggle high contrast mode" data-tooltip="Toggle High Contrast">Toggle High Contrast</button>
-        <button id="signout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" aria-label="Sign out of learner account" data-tooltip="Sign Out">Sign Out</button>
-      </div>
+<body class="bg-gray-100 min-h-screen font-sans">
+  <div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold">Welcome, <span id="user-email" class="text-blue-600"></span></h1>
+      <button id="signout-btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded">
+        Sign Out
+      </button>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content flex-1 p-6 md:ml-64">
-      <!-- Overview Section -->
-      <div id="overview" class="section">
-        <h2 class="text-2xl font-semibold mb-4">Welcome, <span id="learner-name">Learner</span></h2>
-        <div class="grid gap-4 md:grid-cols-3">
-          <div class="bg-white p-4 rounded shadow hover:shadow-md transition-shadow">
-            <h3 class="text-lg font-semibold">Enrolled Courses</h3>
-            <p id="enrolled-courses" class="text-3xl font-bold text-blue-600">0</p>
-          </div>
-          <div class="bg-white p-4 rounded shadow hover:shadow-md transition-shadow">
-            <h3 class="text-lg font-semibold">Completion Rate</h3>
-            <p id="completion-rate" class="text-3xl font-bold text-blue-600">0%</p>
-          </div>
-          <div class="bg-white p-4 rounded shadow hover:shadow-md transition-shadow">
-            <h3 class="text-lg font-semibold">Certificates Earned</h3>
-            <p id="certificates-earned" class="text-3xl font-bold text-blue-600">0</p>
-          </div>
-        </div>
-        <div class="mt-6 bg-white p-4 rounded shadow">
-          <h3 class="text-lg font-semibold mb-2">Course Progress</h3>
-          <canvas id="progress-chart" class="w-full h-64"></canvas>
-        </div>
-      </div>
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-2">Your Enrolled Programs</h2>
+      <div id="programs-container" class="grid gap-4 md:grid-cols-2"></div>
+    </div>
 
-      <!-- Courses Section -->
-      <div id="courses" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">My Courses</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
-          <h3 class="text-lg font-semibold mb-2">Enrolled Courses</h3>
-          <input type="text" id="courseSearch" placeholder="Search courses..." class="border p-2 rounded w-full mb-4" aria-label="Search courses by name" />
-          <div id="courseList" class="space-y-4"></div>
-        </div>
-      </div>
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold mb-2">Progress Overview</h2>
+      <canvas id="progressChart" class="bg-white rounded shadow p-4"></canvas>
+    </div>
 
-      <!-- Progress Section -->
-      <div id="progress" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Track Progress</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
-          <h3 class="text-lg font-semibold mb-2">Course Progress</h3>
-          <select id="courseFilter" class="border p-2 rounded mb-4" aria-label="Select course">
-            <option value="">All Courses</option>
-          </select>
-          <div id="progressList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Certificates Section -->
-      <div id="certificates" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Certificates</h2>
-        <div class="bg-white p-6 rounded shadow">
-          <h3 class="text-lg font-semibold mb-2">Earned Certificates</h3>
-          <div id="certificateList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Helpdesk Section -->
-      <div id="helpdesk" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Helpdesk</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
-          <h3 class="text-lg font-semibold mb-2">Submit a Support Ticket</h3>
-          <form id="ticket-form">
-            <select id="ticketCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
-              <option value="">Select Course</option>
-            </select>
-            <textarea id="ticketIssue" placeholder="Describe your issue..." class="border p-2 rounded w-full mb-2" aria-label="Describe your issue" required></textarea>
-            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Submit ticket">Submit Ticket</button>
-          </form>
-        </div>
-        <div class="bg-white p-6 rounded shadow">
-          <h3 class="text-lg font-semibold mb-2">Your Tickets</h3>
-          <div id="ticketList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Loading Spinner -->
-      <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
-      </div>
-
-      <noscript>
-        <p class="text-red-600 text-center">JavaScript is required to use this dashboard.</p>
-      </noscript>
+    <div class="mb-8 bg-white p-6 rounded shadow max-w-md">
+      <h2 class="text-xl font-bold mb-4">Submit Assignment (PDF)</h2>
+      <form id="upload-form">
+        <input type="file" id="pdf-file" accept="application/pdf" required class="mb-4" />
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50" id="upload-btn">
+          Upload Assignment
+        </button>
+        <p id="upload-status" class="mt-3 text-sm"></p>
+      </form>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, onValue, push, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
@@ -218,401 +54,146 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
     const auth = getAuth(app);
+    const db = getDatabase(app);
 
-    // DOM elements
-    const learnerName = document.getElementById("learner-name");
-    const enrolledCourses = document.getElementById("enrolled-courses");
-    const completionRate = document.getElementById("completion-rate");
-    const certificatesEarned = document.getElementById("certificates-earned");
-    const courseList = document.getElementById("courseList");
-    const courseSearch = document.getElementById("courseSearch");
-    const progressList = document.getElementById("progressList");
-    const courseFilter = document.getElementById("courseFilter");
-    const certificateList = document.getElementById("certificateList");
-    const ticketList = document.getElementById("ticketList");
-    const ticketForm = document.getElementById("ticket-form");
-    const ticketCourse = document.getElementById("ticketCourse");
-    const ticketIssue = document.getElementById("ticketIssue");
-    const progressChart = document.getElementById("progress-chart").getContext("2d");
-    const loadingSpinner = document.getElementById("loading-spinner");
-    const sidebar = document.getElementById("sidebar");
-    const toggleSidebar = document.getElementById("toggle-sidebar");
-    const toggleContrast = document.getElementById("toggle-contrast");
-    let progressChartInstance = null;
+    const emailSpan = document.getElementById("user-email");
+    const programsContainer = document.getElementById("programs-container");
+    const signOutBtn = document.getElementById("signout-btn");
+    const uploadForm = document.getElementById("upload-form");
+    const pdfFileInput = document.getElementById("pdf-file");
+    const uploadStatus = document.getElementById("upload-status");
+    const uploadBtn = document.getElementById("upload-btn");
 
-    let user = null, courses = {}, assessments = {}, certifications = {}, tickets = {};
+    function renderPrograms(programs) {
+      programsContainer.innerHTML = "";
+      const labels = [];
+      const data = [];
 
-    // Show/hide loading spinner
-    function showSpinner() { loadingSpinner.classList.remove("hidden"); }
-    function hideSpinner() { loadingSpinner.classList.add("hidden"); }
+      Object.entries(programs).forEach(([key, program]) => {
+        const title = key;
+        const progress = program.progress || 0;
 
-    // Sidebar toggle
-    toggleSidebar.addEventListener("click", () => {
-      sidebar.classList.toggle("sidebar-hidden");
-      sidebar.classList.toggle("sidebar-open");
-    });
+        labels.push(title);
+        data.push(progress);
 
-    // High contrast toggle
-    toggleContrast.addEventListener("click", () => {
-      document.body.classList.toggle("high-contrast");
-      localStorage.setItem("highContrast", document.body.classList.contains("high-contrast"));
-    });
-
-    // Load high contrast preference
-    if (localStorage.getItem("highContrast") === "true") {
-      document.body.classList.add("high-contrast");
-    }
-
-    // Section switching
-    document.querySelectorAll(".nav-button").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
-        document.getElementById(btn.dataset.section).classList.remove("hidden");
-        if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
-      });
-    });
-
-    // Debounce function for search
-    function debounce(func, wait) {
-      let timeout;
-      return function executedFunction(...args) {
-        const later = () => {
-          clearTimeout(timeout);
-          func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-      };
-    }
-
-    // Sanitize input to prevent XSS
-    function sanitizeInput(input) {
-      const div = document.createElement("div");
-      div.textContent = input;
-      return div.innerHTML;
-    }
-
-    // Load overview
-    function loadOverview() {
-      showSpinner();
-      onValue(ref(db, `users/${auth.currentUser.uid}`), snap => {
-        user = snap.val();
-        learnerName.textContent = sanitizeInput(user.fullName || user.email);
+        const card = document.createElement("div");
+        card.className = "bg-white p-4 shadow rounded";
+        card.innerHTML = `
+          <h3 class="text-lg font-bold">${title}</h3>
+          <div class="w-full bg-gray-200 rounded h-4 mt-2">
+            <div class="bg-blue-600 h-4 rounded" style="width: ${progress}%;"></div>
+          </div>
+          <p class="text-right text-sm mt-1 text-gray-600">${progress}% complete</p>
+        `;
+        programsContainer.appendChild(card);
       });
 
-      onValue(ref(db, "courses"), snap => {
-        courses = snap.val() || {};
-        let courseCount = 0, completedCount = 0;
-        const progressData = { labels: [], datasets: [{ label: "Progress (%)", data: [], backgroundColor: "#2563eb", borderRadius: 4 }] };
-
-        for (const id in courses) {
-          if (courses[id].enrolled?.includes(auth.currentUser.uid)) {
-            courseCount++;
-            const progress = user.progress?.[id] || 0;
-            progressData.labels.push(courses[id].name);
-            progressData.datasets[0].data.push(progress);
-            if (progress >= 100) completedCount++;
+      const ctx = document.getElementById('progressChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Program Progress (%)',
+            data: data,
+            backgroundColor: '#2563eb'
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
           }
         }
-
-        enrolledCourses.textContent = courseCount;
-        completionRate.textContent = courseCount > 0 ? (completedCount / courseCount * 100).toFixed(1) + "%" : "0%";
-
-        if (progressChartInstance) progressChartInstance.destroy();
-        progressChartInstance = new Chart(progressChart, {
-          type: "bar",
-          data: progressData,
-          options: {
-            scales: { y: { beginAtZero: true, max: 100 } },
-            plugins: {
-              datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
-            }
-          },
-          plugins: [ChartDataLabels]
-        });
-
-        onValue(ref(db, "certifications"), snap => {
-          certifications = snap.val() || {};
-          const certCount = Object.values(certifications).filter(c => c.learnerId === auth.currentUser.uid).length;
-          certificatesEarned.textContent = certCount;
-          hideSpinner();
-        });
       });
     }
 
-    // Load courses
-    function loadCourses() {
-      showSpinner();
-      onValue(ref(db, "courses"), snap => {
-        courses = snap.val() || {};
-        renderCourses();
-        populateCourseFilter();
-        populateTicketCourse();
-        hideSpinner();
-      });
-    }
+    async function loadDashboard(uid) {
+      const userRef = ref(db, `users/${uid}`);
+      const snapshot = await get(userRef);
 
-    function renderCourses(filter = "") {
-      courseList.innerHTML = "";
-      for (const id in courses) {
-        const c = courses[id];
-        if (!c.enrolled?.includes(auth.currentUser.uid) || (filter && !c.name.toLowerCase().includes(filter.toLowerCase()))) continue;
-        const courseItem = document.createElement("div");
-        courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow";
-        courseItem.innerHTML = `
-          <div>
-            <p class="font-semibold">${sanitizeInput(c.name)}</p>
-            <p class="text-sm text-gray-600">Progress: ${user.progress?.[id] || 0}% | Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")}</p>
-          </div>
-          <button onclick="viewCourseDetails('${id}')" class="text-blue-600 hover:underline" aria-label="View details for ${sanitizeInput(c.name)}" data-tooltip="View details">Details</button>
-        `;
-        courseList.appendChild(courseItem);
-      }
-    }
-
-    // Search courses
-    const searchCourses = debounce(filter => renderCourses(sanitizeInput(filter)), 300);
-    courseSearch.addEventListener("input", () => searchCourses(courseSearch.value));
-
-    // View course details
-    window.viewCourseDetails = courseId => {
-      const c = courses[courseId];
-      const progress = user.progress?.[courseId] || 0;
-      const cert = Object.values(certifications).find(cert => cert.learnerId === auth.currentUser.uid && cert.courseId === courseId);
-      const modal = document.createElement("div");
-      modal.className = "modal";
-      modal.style.display = "block";
-      modal.innerHTML = `
-        <div class="modal-content">
-          <h3 class="text-lg font-semibold mb-4">Course: ${sanitizeInput(c.name)}</h3>
-          <p class="text-sm text-gray-600">Progress: ${progress}%</p>
-          <p class="text-sm text-gray-600">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")}</p>
-          <p class="text-sm text-gray-600">Certificate: ${cert ? `<button onclick="downloadCertificate('${cert.id}')" class="text-blue-600 hover:underline" data-tooltip="Download certificate">Download</button>` : "Not Earned"}</p>
-          <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 mt-4" onclick="this.parentElement.parentElement.remove()" data-tooltip="Close">Close</button>
-        </div>
-      `;
-      document.body.appendChild(modal);
-    };
-
-    // Load progress
-    function loadProgress() {
-      showSpinner();
-      onValue(ref(db, "assessments"), snap => {
-        assessments = snap.val() || {};
-        renderProgress();
-        hideSpinner();
-      });
-    }
-
-    function renderProgress(filter = "") {
-      progressList.innerHTML = "";
-      for (const id in courses) {
-        if (!courses[id].enrolled?.includes(auth.currentUser.uid) || (filter && filter !== id)) continue;
-        const c = courses[id];
-        const courseAssessments = Object.values(assessments).filter(a => a.courseId === id);
-        const completedAssessments = courseAssessments.filter(a => a.submissions?.[auth.currentUser.uid]?.status === "completed").length;
-        const totalAssessments = courseAssessments.length;
-        const progress = user.progress?.[id] || 0;
-        const cert = Object.values(certifications).find(cert => cert.learnerId === auth.currentUser.uid && cert.courseId === id);
-        const progressItem = document.createElement("div");
-        progressItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-        progressItem.innerHTML = `
-          <p class="font-semibold">${sanitizeInput(c.name)}</p>
-          <p class="text-sm text-gray-600">Progress: ${progress}% | Assessments Completed: ${completedAssessments}/${totalAssessments}</p>
-          <p class="text-sm text-gray-600">Certificate: ${cert ? `<button onclick="downloadCertificate('${cert.id}')" class="text-blue-600 hover:underline" data-tooltip="Download certificate">Download</button>` : "Not Earned"}</p>
-        `;
-        progressList.appendChild(progressItem);
-      }
-    }
-
-    // Filter progress
-    courseFilter.addEventListener("change", () => renderProgress(courseFilter.value));
-
-    // Populate course filter
-    function populateCourseFilter() {
-      courseFilter.innerHTML = '<option value="">All Courses</option>';
-      for (const id in courses) {
-        if (courses[id].enrolled?.includes(auth.currentUser.uid)) {
-          const option = document.createElement("option");
-          option.value = id;
-          option.textContent = sanitizeInput(courses[id].name);
-          courseFilter.appendChild(option);
-        }
-      }
-    }
-
-    // Populate ticket course dropdown
-    function populateTicketCourse() {
-      ticketCourse.innerHTML = '<option value="">Select Course</option>';
-      for (const id in courses) {
-        if (courses[id].enrolled?.includes(auth.currentUser.uid)) {
-          const option = document.createElement("option");
-          option.value = id;
-          option.textContent = sanitizeInput(courses[id].name);
-          ticketCourse.appendChild(option);
-        }
-      }
-    }
-
-    // Load certificates
-    function loadCertificates() {
-      showSpinner();
-      onValue(ref(db, "certifications"), snap => {
-        certifications = snap.val() || {};
-        renderCertificates();
-        hideSpinner();
-      });
-    }
-
-    function renderCertificates() {
-      certificateList.innerHTML = "";
-      for (const id in certifications) {
-        const c = certifications[id];
-        if (c.learnerId !== auth.currentUser.uid) continue;
-        const course = courses[c.courseId];
-        if (!course) continue;
-        const certItem = document.createElement("div");
-        certItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow";
-        certItem.innerHTML = `
-          <div>
-            <p class="font-semibold">${sanitizeInput(course.name)}</p>
-            <p class="text-sm text-gray-600">Issued: ${new Date(c.issuedAt).toLocaleDateString()}</p>
-          </div>
-          <button onclick="downloadCertificate('${id}')" class="text-blue-600 hover:underline" aria-label="Download certificate for ${sanitizeInput(course.name)}" data-tooltip="Download certificate">Download</button>
-        `;
-        certificateList.appendChild(certItem);
-      }
-    }
-
-    // Download certificate
-    window.downloadCertificate = certId => {
-      const cert = certifications[certId];
-      if (!cert || !courses[cert.courseId] || cert.learnerId !== auth.currentUser.uid) {
-        alert("Certificate or course data not found.");
+      if (!snapshot.exists()) {
+        alert("No data found for this user.");
         return;
       }
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.setFontSize(20);
-      doc.text("Certificate of Completion", 105, 30, { align: "center" });
-      doc.setFontSize(16);
-      doc.text("This certifies that", 105, 60, { align: "center" });
-      doc.setFontSize(18);
-      doc.setFont("helvetica", "bold");
-      doc.text(sanitizeInput(user.fullName || user.email), 105, 80, { align: "center" });
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(16);
-      doc.text("has successfully completed the course", 105, 100, { align: "center" });
-      doc.setFontSize(18);
-      doc.setFont("helvetica", "bold");
-      doc.text(sanitizeInput(courses[cert.courseId].name), 105, 120, { align: "center" });
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(14);
-      doc.text(`Issued on: ${new Date(cert.issuedAt).toLocaleDateString()}`, 105, 140, { align: "center" });
-      doc.text("CETA Provider Academy", 105, 160, { align: "center" });
-      doc.save(`certificate_${certId}.pdf`);
-    };
 
-    // Load tickets
-    function loadTickets() {
-      showSpinner();
-      onValue(ref(db, "helpdesk"), snap => {
-        tickets = snap.val() || {};
-        renderTickets();
-        hideSpinner();
-      });
+      const userData = snapshot.val();
+      emailSpan.textContent = userData.email || "Learner";
+      const programs = userData.enrolledPrograms || {};
+      renderPrograms(programs);
     }
 
-    function renderTickets() {
-      ticketList.innerHTML = "";
-      for (const id in tickets) {
-        const t = tickets[id];
-        if (t.userId !== auth.currentUser.uid) continue;
-        const ticketItem = document.createElement("div");
-        ticketItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow";
-        ticketItem.innerHTML = `
-          <div>
-            <p class="font-semibold">${sanitizeInput(t.issue)}</p>
-            <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[t.courseId]?.name || "Unknown")} | Status: ${t.status} | Submitted: ${new Date(t.createdAt).toLocaleDateString()}</p>
-            ${t.response ? `<p class="text-sm text-gray-600">Response: ${sanitizeInput(t.response)}</p>` : ""}
-          </div>
-        `;
-        ticketList.appendChild(ticketItem);
-      }
+    function uploadToCloudinary(file) {
+      const url = "https://api.cloudinary.com/v1_1/<YOUR_CLOUD_NAME>/upload"; // <-- replace <YOUR_CLOUD_NAME>
+      const unsignedUploadPreset = "<YOUR_UNSIGNED_UPLOAD_PRESET>"; // <-- replace with your unsigned preset
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", unsignedUploadPreset);
+
+      return fetch(url, {
+        method: "POST",
+        body: formData
+      }).then(res => res.json());
     }
 
-    // Submit ticket
-    ticketForm.addEventListener("submit", async e => {
-      e.preventDefault();
-      const courseId = ticketCourse.value;
-      const issue = sanitizeInput(ticketIssue.value.trim());
-      if (!courseId || !issue) {
-        alert("Please select a course and describe the issue.");
-        return;
-      }
-      showSpinner();
-      try {
-        await push(ref(db, "helpdesk"), {
-          userId: auth.currentUser.uid,
-          courseId,
-          issue,
-          status: "open",
-          createdAt: Date.now()
-        });
-        alert("Ticket submitted successfully!");
-        ticketForm.reset();
-      } catch (err) {
-        console.error("Error submitting ticket:", err);
-        alert("Failed to submit ticket.");
-      }
-      hideSpinner();
-    });
-
-    // Authentication check
-    onAuthStateChanged(auth, async authUser => {
-      if (!authUser) {
-        alert("Unauthorized. Redirecting...");
-        window.location.href = "login.html";
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loadDashboard(user.uid);
       } else {
-        try {
-          const userSnap = await get(ref(db, `users/${authUser.uid}`));
-          if (userSnap.exists()) {
-            user = userSnap.val();
-            if (user.role !== "learner") {
-              alert("Access denied. Learner role required. Redirecting...");
-              await signOut(auth);
-              window.location.href = "login.html";
-              return;
-            }
-            loadOverview();
-            loadCourses();
-            loadProgress();
-            loadCertificates();
-            loadTickets();
-          } else {
-            alert("User data not found. Redirecting...");
-            await signOut(auth);
-            window.location.href = "login.html");
-          }
-        } catch (err) {
-          console.error("Error fetching user data:", err);
-          alert("Failed to load user data. Redirecting...");
-          await signOut(auth);
-          window.location.href = "login.html");
-        }
+        window.location.href = "login.html";
       }
     });
 
-    // Sign out
-    document.getElementById("signout-btn").addEventListener("click", async () => {
+    signOutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "login.html";
+    });
+
+    uploadForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      uploadStatus.textContent = "";
+      uploadBtn.disabled = true;
+
+      const file = pdfFileInput.files[0];
+      if (!file) {
+        uploadStatus.textContent = "Please select a PDF file to upload.";
+        uploadBtn.disabled = false;
+        return;
+      }
+      if (file.type !== "application/pdf") {
+        uploadStatus.textContent = "Only PDF files are allowed.";
+        uploadBtn.disabled = false;
+        return;
+      }
+
+      uploadStatus.textContent = "Uploading PDF... Please wait.";
+
       try {
-        await signOut(auth);
-        window.location.href = "login.html";
+        const cloudinaryResponse = await uploadToCloudinary(file);
+        if (cloudinaryResponse.secure_url) {
+          // Save URL and metadata to Firebase
+          const user = auth.currentUser;
+          const assignmentRef = push(ref(db, `assignments/${user.uid}`));
+          await set(assignmentRef, {
+            fileName: file.name,
+            url: cloudinaryResponse.secure_url,
+            uploadedAt: Date.now(),
+            status: "pending"
+          });
+          uploadStatus.textContent = "Assignment uploaded successfully!";
+          pdfFileInput.value = ""; // reset file input
+        } else {
+          throw new Error("Upload failed");
+        }
       } catch (err) {
-        console.error("Sign-out failed:", err);
-        alert("Failed to sign out. Please try again.");
+        uploadStatus.textContent = "Upload failed. Try again.";
+        console.error(err);
+      } finally {
+        uploadBtn.disabled = false;
       }
     });
   </script>
