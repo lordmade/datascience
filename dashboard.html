@@ -2,47 +2,188 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Learner Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    .sidebar {
+      transition: transform 0.3s ease, width 0.3s ease;
+      transform: translateX(0);
+    }
+    .sidebar-hidden {
+      transform: translateX(-100%);
+      width: 0;
+    }
+    .main-content {
+      transition: margin-left 0.3s ease;
+    }
+    .high-contrast {
+      background: #000 !important;
+      color: #fff !important;
+    }
+    .high-contrast .bg-white {
+      background: #1a1a1a !important;
+    }
+    .high-contrast .bg-gray-50 {
+      background: #2d2d2d !important;
+    }
+    .high-contrast .text-gray-600 {
+      color: #e5e5e5 !important;
+    }
+    .tooltip {
+      position: relative;
+    }
+    .tooltip:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 10;
+    }
+    .progress-bar {
+      transition: width 0.3s ease;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        z-index: 50;
+        width: 256px;
+        transform: translateX(-100%);
+      }
+      .sidebar-open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+      }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen font-sans">
-  <div class="container mx-auto px-4 py-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold">Welcome, <span id="user-email" class="text-blue-600"></span></h1>
-      <button id="signout-btn" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded">
-        Sign Out
-      </button>
-    </div>
-
-    <div class="mb-8">
-      <h2 class="text-2xl font-semibold mb-2">Your Enrolled Programs</h2>
-      <div id="programs-container" class="grid gap-4 md:grid-cols-2"></div>
-    </div>
-
-    <div class="mb-8">
-      <h2 class="text-2xl font-semibold mb-2">Progress Overview</h2>
-      <canvas id="progressChart" class="bg-white rounded shadow p-4"></canvas>
-    </div>
-
-    <div class="mb-8 bg-white p-6 rounded shadow max-w-md">
-      <h2 class="text-xl font-bold mb-4">Submit Assignment (PDF)</h2>
-      <form id="upload-form">
-        <input type="file" id="pdf-file" accept="application/pdf" required class="mb-4" />
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50" id="upload-btn">
-          Upload Assignment
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
+  <div class="flex">
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar bg-gradient-to-b from-gray-800 to-gray-900 text-white w-64 min-h-screen p-4 shadow-lg">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-bold flex items-center gap-2">
+          <i class="fas fa-graduation-cap"></i> Learner Dashboard
+        </h1>
+        <button id="toggle-sidebar" class="md:hidden text-white focus:outline-none" aria-label="Toggle sidebar">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
         </button>
-        <p id="upload-status" class="mt-3 text-sm"></p>
-      </form>
+      </div>
+      <nav>
+        <ul class="space-y-2">
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="overview" data-tooltip="Dashboard Overview"><i class="fas fa-tachometer-alt"></i> Overview</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="programs" data-tooltip="Enrolled Programs"><i class="fas fa-book"></i> Programs</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="assignments" data-tooltip="Assignments"><i class="fas fa-tasks"></i> Assignments</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="profile" data-tooltip="Profile"><i class="fas fa-user"></i> Profile</button></li>
+        </ul>
+      </nav>
+      <div class="mt-auto">
+        <button id="toggle-contrast" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded mb-2" aria-label="Toggle high contrast mode" data-tooltip="Toggle High Contrast">Toggle High Contrast</button>
+        <button id="signout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" aria-label="Sign out of learner account" data-tooltip="Sign Out">Sign Out</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content flex-1 p-6 md:ml-64">
+      <!-- Overview Section -->
+      <div id="overview" class="section">
+        <h2 class="text-2xl font-semibold mb-4">Welcome, <span id="learner-name">Learner</span></h2>
+        <div class="grid gap-4 md:grid-cols-3">
+          <div class="bg-white p-4 rounded shadow hover:shadow-md transition-shadow">
+            <h3 class="text-lg font-semibold">Enrolled Programs</h3>
+            <p id="enrolled-programs" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+          <div class="bg-white p-4 rounded shadow hover:shadow-md transition-shadow">
+            <h3 class="text-lg font-semibold">Submitted Assignments</h3>
+            <p id="submitted-assignments" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+          <div class="bg-white p-4 rounded shadow hover:shadow-md transition-shadow">
+            <h3 class="text-lg font-semibold">Completion Rate</h3>
+            <p id="completion-rate" class="text-3xl font-bold text-blue-600">0%</p>
+          </div>
+        </div>
+        <div class="mt-6 bg-white p-4 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Program Progress</h3>
+          <canvas id="progressChart" class="w-full h-64" aria-label="Program progress chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Programs Section -->
+      <div id="programs" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Enrolled Programs</h2>
+        <input type="text" id="programSearch" placeholder="Search programs..." class="border p-2 rounded w-full mb-4 high-contrast:bg-gray-800 high-contrast:text-white" aria-label="Search programs by name" />
+        <div id="programs-container" class="grid gap-4 md:grid-cols-2" aria-live="polite"></div>
+      </div>
+
+      <!-- Assignments Section -->
+      <div id="assignments" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Assignments</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Submit Assignment (PDF)</h3>
+          <form id="upload-form">
+            <input type="file" id="pdf-file" accept="application/pdf" required class="border p-2 rounded w-full mb-4 high-contrast:bg-gray-800 high-contrast:text-white" aria-label="Upload PDF assignment" />
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500" id="upload-btn" aria-label="Upload assignment" data-tooltip="Upload Assignment">Upload Assignment</button>
+            <p id="upload-status" class="mt-3 text-sm" aria-live="assertive"></p>
+          </form>
+        </div>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Your Assignments</h3>
+          <div id="assignmentList" class="space-y-4" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <!-- Profile Section -->
+      <div id="profile" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Profile</h2>
+        <div class="bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Update Profile</h3>
+          <form id="profile-form">
+            <input type="text" id="profileFullName" placeholder="Full Name" class="border p-2 rounded w-full mb-2 high-contrast:bg-gray-800 high-contrast:text-white" aria-label="Enter full name" />
+            <input type="email" id="profileEmail" placeholder="Email" class="border p-2 rounded w-full mb-2 high-contrast:bg-gray-800 high-contrast:text-white" aria-label="Enter email" />
+            <input type="text" id="profileContact" placeholder="Contact Number" class="border p-2 rounded w-full mb-2 high-contrast:bg-gray-800 high-contrast:text-white" aria-label="Enter contact number" />
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-tooltip="Save profile">Save Profile</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
+      </div>
+
+      <noscript>
+        <p class="text-red-600 text-center">JavaScript is required to use this dashboard.</p>
+      </noscript>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getDatabase, ref, get, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 
+    // Firebase configuration from CETA Provider Dashboard
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
@@ -54,147 +195,369 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getDatabase(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
 
-    const emailSpan = document.getElementById("user-email");
+    // DOM elements
+    const learnerName = document.getElementById("learner-name");
+    const enrolledPrograms = document.getElementById("enrolled-programs");
+    const submittedAssignments = document.getElementById("submitted-assignments");
+    const completionRate = document.getElementById("completion-rate");
+    const programSearch = document.getElementById("programSearch");
     const programsContainer = document.getElementById("programs-container");
-    const signOutBtn = document.getElementById("signout-btn");
+    const progressChart = document.getElementById("progressChart").getContext("2d");
     const uploadForm = document.getElementById("upload-form");
     const pdfFileInput = document.getElementById("pdf-file");
     const uploadStatus = document.getElementById("upload-status");
     const uploadBtn = document.getElementById("upload-btn");
+    const assignmentList = document.getElementById("assignmentList");
+    const profileForm = document.getElementById("profile-form");
+    const profileFullName = document.getElementById("profileFullName");
+    const profileEmail = document.getElementById("profileEmail");
+    const profileContact = document.getElementById("profileContact");
+    const loadingSpinner = document.getElementById("loading-spinner");
+    const sidebar = document.getElementById("sidebar");
+    const toggleSidebar = document.getElementById("toggle-sidebar");
+    const toggleContrast = document.getElementById("toggle-contrast");
+    const signoutBtn = document.getElementById("signout-btn");
 
-    function renderPrograms(programs) {
-      programsContainer.innerHTML = "";
-      const labels = [];
-      const data = [];
+    let user = null, assignments = {};
+    let progressChartInstance = null;
 
-      Object.entries(programs).forEach(([key, program]) => {
-        const title = key;
-        const progress = program.progress || 0;
+    // Utility functions
+    function sanitizeInput(input) {
+      const div = document.createElement("div");
+      div.textContent = input || "";
+      return div.innerHTML;
+    }
 
-        labels.push(title);
-        data.push(progress);
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
 
-        const card = document.createElement("div");
-        card.className = "bg-white p-4 shadow rounded";
-        card.innerHTML = `
-          <h3 class="text-lg font-bold">${title}</h3>
-          <div class="w-full bg-gray-200 rounded h-4 mt-2">
-            <div class="bg-blue-600 h-4 rounded" style="width: ${progress}%;"></div>
-          </div>
-          <p class="text-right text-sm mt-1 text-gray-600">${progress}% complete</p>
-        `;
-        programsContainer.appendChild(card);
-      });
+    function showSpinner() { loadingSpinner.classList.remove("hidden"); }
+    function hideSpinner() { loadingSpinner.classList.add("hidden"); }
 
-      const ctx = document.getElementById('progressChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Program Progress (%)',
-            data: data,
-            backgroundColor: '#2563eb'
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100
-            }
+    async function logAudit(action) {
+      try {
+        await push(ref(db, "audit_logs"), {
+          userId: auth.currentUser.uid,
+          action,
+          timestamp: Date.now()
+        });
+      } catch (err) {
+        console.error("Error logging audit:", err);
+      }
+    }
+
+    async function withErrorHandling(operation, successMessage, errorMessage) {
+      showSpinner();
+      try {
+        const result = await operation();
+        alert(successMessage);
+        return result;
+      } catch (err) {
+        console.error(errorMessage, err);
+        alert(errorMessage);
+        throw err;
+      } finally {
+        hideSpinner();
+      }
+    }
+
+    // Authentication functions
+    function handleAuthState(callback) {
+      onAuthStateChanged(auth, async (authUser) => {
+        if (!authUser) {
+          alert("Unauthorized. Redirecting...");
+          window.location.href = "login.html";
+          return;
+        }
+        try {
+          const userSnap = await get(ref(db, `users/${authUser.uid}`));
+          if (!userSnap.exists()) {
+            alert("User data not found. Redirecting...");
+            await signOut(auth);
+            window.location.href = "login.html";
+            return;
           }
+          const userData = userSnap.val();
+          if (userData.role !== "learner") {
+            alert("Access denied. Learner role required. Redirecting...");
+            await signOut(auth);
+            window.location.href = "login.html";
+            return;
+          }
+          callback(userData);
+        } catch (err) {
+          console.error("Error fetching user data:", err);
+          alert("Failed to load user data. Redirecting...");
+          await signOut(auth);
+          window.location.href = "login.html");
         }
       });
     }
 
-    async function loadDashboard(uid) {
-      const userRef = ref(db, `users/${uid}`);
-      const snapshot = await get(userRef);
-
-      if (!snapshot.exists()) {
-        alert("No data found for this user.");
-        return;
-      }
-
-      const userData = snapshot.val();
-      emailSpan.textContent = userData.email || "Learner";
-      const programs = userData.enrolledPrograms || {};
-      renderPrograms(programs);
+    async function handleSignOut() {
+      await withErrorHandling(
+        () => signOut(auth).then(() => (window.location.href = "login.html")),
+        "Signed out successfully!",
+        "Failed to sign out. Please try again."
+      );
     }
 
-    function uploadToCloudinary(file) {
-      const url = "https://api.cloudinary.com/v1_1/<YOUR_CLOUD_NAME>/upload"; // <-- replace <YOUR_CLOUD_NAME>
-      const unsignedUploadPreset = "<YOUR_UNSIGNED_UPLOAD_PRESET>"; // <-- replace with your unsigned preset
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", unsignedUploadPreset);
-
-      return fetch(url, {
-        method: "POST",
-        body: formData
-      }).then(res => res.json());
+    async function updateUserProfile(userId, data) {
+      await withErrorHandling(async () => {
+        await updateProfile(auth.currentUser, {
+          displayName: data.fullName,
+          email: data.email
+        });
+        await update(ref(db, `users/${userId}`), {
+          fullName: data.fullName,
+          email: data.email,
+          metadata: { ...data.metadata, contact: data.contact || null }
+        });
+        await logAudit(`Updated profile for ${data.fullName}`);
+      }, "Profile updated successfully!", "Failed to update profile.");
     }
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loadDashboard(user.uid);
-      } else {
-        window.location.href = "login.html";
-      }
-    });
+    // Data functions
+    function loadUserData(uid, callback) {
+      onValue(ref(db, `users/${uid}`), (snap) => {
+        if (snap.exists()) {
+          callback(snap.val());
+        }
+      });
+    }
 
-    signOutBtn.addEventListener("click", async () => {
-      await signOut(auth);
-      window.location.href = "login.html";
-    });
+    function loadAssignments(uid, callback) {
+      onValue(ref(db, `assignments/${uid}`), (snap) => {
+        callback(snap.val() || {});
+      });
+    }
 
-    uploadForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      uploadStatus.textContent = "";
-      uploadBtn.disabled = true;
+    async function uploadAssignment(uid, file) {
+      return await withErrorHandling(
+        async () => {
+          const fileName = `${Date.now()}_${sanitizeInput(file.name)}`;
+          const storagePath = `assignments/${uid}/${fileName}`;
+          const fileRef = storageRef(storage, storagePath);
+          
+          // Upload file to Firebase Storage
+          await uploadBytes(fileRef, file);
+          const downloadURL = await getDownloadURL(fileRef);
 
-      const file = pdfFileInput.files[0];
-      if (!file) {
-        uploadStatus.textContent = "Please select a PDF file to upload.";
-        uploadBtn.disabled = false;
-        return;
-      }
-      if (file.type !== "application/pdf") {
-        uploadStatus.textContent = "Only PDF files are allowed.";
-        uploadBtn.disabled = false;
-        return;
-      }
-
-      uploadStatus.textContent = "Uploading PDF... Please wait.";
-
-      try {
-        const cloudinaryResponse = await uploadToCloudinary(file);
-        if (cloudinaryResponse.secure_url) {
-          // Save URL and metadata to Firebase
-          const user = auth.currentUser;
-          const assignmentRef = push(ref(db, `assignments/${user.uid}`));
+          // Save assignment metadata to Realtime Database
+          const assignmentRef = push(ref(db, `assignments/${uid}`));
           await set(assignmentRef, {
-            fileName: file.name,
-            url: cloudinaryResponse.secure_url,
+            fileName: sanitizeInput(file.name),
+            url: downloadURL,
             uploadedAt: Date.now(),
             status: "pending"
           });
-          uploadStatus.textContent = "Assignment uploaded successfully!";
-          pdfFileInput.value = ""; // reset file input
-        } else {
-          throw new Error("Upload failed");
-        }
-      } catch (err) {
-        uploadStatus.textContent = "Upload failed. Try again.";
-        console.error(err);
-      } finally {
-        uploadBtn.disabled = false;
+
+          await logAudit(`Uploaded assignment ${file.name}`);
+          return downloadURL;
+        },
+        "Assignment uploaded successfully!",
+        "Failed to upload assignment."
+      );
+    }
+
+    // UI functions
+    function initializeUI(userId, user, assignments) {
+      // Sidebar toggle
+      toggleSidebar.addEventListener("click", () => {
+        sidebar.classList.toggle("sidebar-hidden");
+        sidebar.classList.toggle("sidebar-open");
+      });
+
+      // High contrast toggle
+      toggleContrast.addEventListener("click", () => {
+        document.body.classList.toggle("high-contrast");
+        localStorage.setItem("highContrast", document.body.classList.contains("high-contrast"));
+      });
+
+      // Load high contrast preference
+      if (localStorage.getItem("highContrast") === "true") {
+        document.body.classList.add("high-contrast");
       }
+
+      // Section switching
+      document.querySelectorAll(".nav-button").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".section").forEach((section) => section.classList.add("hidden"));
+          document.getElementById(btn.dataset.section).classList.remove("hidden");
+          if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
+        });
+      });
+
+      // Render overview
+      function renderOverview(user) {
+        learnerName.textContent = sanitizeInput(user.fullName || user.email || "Learner");
+        profileFullName.value = user.fullName || "";
+        profileEmail.value = user.email || "";
+        profileContact.value = user.metadata?.contact || "";
+
+        const programs = user.enrolledPrograms || {};
+        const programCount = Object.keys(programs).length;
+        enrolledPrograms.textContent = programCount;
+
+        const completionRates = Object.values(programs).map((p) => p.progress || 0);
+        const avgCompletionRate = completionRates.length > 0 ? (completionRates.reduce((a, b) => a + b, 0) / completionRates.length).toFixed(1) : 0;
+        completionRate.textContent = `${avgCompletionRate}%`;
+
+        const labels = [];
+        const data = [];
+        Object.entries(programs).forEach(([key, program]) => {
+          labels.push(sanitizeInput(key));
+          data.push(program.progress || 0);
+        });
+
+        if (progressChartInstance) progressChartInstance.destroy();
+        progressChartInstance = new Chart(progressChart, {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Program Progress (%)",
+                data,
+                backgroundColor: "#2563eb",
+                borderRadius: 4
+              }
+            ]
+          },
+          options: {
+            scales: { y: { beginAtZero: true, max: 100 } },
+            plugins: {
+              datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
+            }
+          },
+          plugins: [ChartDataLabels]
+        });
+      }
+
+      // Render programs
+      function renderPrograms(programs, filter = "") {
+        programsContainer.innerHTML = "";
+        const filteredPrograms = Object.entries(programs).filter(([key]) =>
+          !filter || key.toLowerCase().includes(filter.toLowerCase())
+        );
+        if (filteredPrograms.length === 0) {
+          programsContainer.innerHTML = "<p class='text-gray-600 high-contrast:text-gray-400'>No programs found.</p>";
+          return;
+        }
+        filteredPrograms.forEach(([key, program]) => {
+          const title = sanitizeInput(key);
+          const progress = program.progress || 0;
+          const card = document.createElement("div");
+          card.className = "bg-white p-4 rounded shadow hover:shadow-md transition-shadow high-contrast:bg-gray-800 high-contrast:text-white";
+          card.innerHTML = `
+            <h3 class="text-lg font-bold">${title}</h3>
+            <div class="w-full bg-gray-200 rounded h-4 mt-2 high-contrast:bg-gray-600">
+              <div class="bg-blue-600 h-4 rounded progress-bar" style="width: ${progress}%"></div>
+            </div>
+            <p class="text-right text-sm mt-1 text-gray-600 high-contrast:text-gray-400">${progress}% complete</p>
+          `;
+          programsContainer.appendChild(card);
+        });
+      }
+
+      // Search programs
+      const searchPrograms = debounce((filter) => renderPrograms(user.enrolledPrograms || {}, sanitizeInput(filter)), 300);
+      programSearch.addEventListener("input", () => searchPrograms(programSearch.value));
+
+      // Render assignments
+      function renderAssignments(assignments) {
+        assignmentList.innerHTML = "";
+        const submittedCount = Object.keys(assignments).length;
+        submittedAssignments.textContent = submittedCount;
+        if (submittedCount === 0) {
+          assignmentList.innerHTML = "<p class='text-gray-600 high-contrast:text-gray-400'>No assignments submitted.</p>";
+          return;
+        }
+        Object.entries(assignments).forEach(([id, a]) => {
+          const assignmentItem = document.createElement("div");
+          assignmentItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow high-contrast:bg-gray-700 high-contrast:text-white";
+          assignmentItem.innerHTML = `
+            <div class="flex-1">
+              <p class="font-semibold">${sanitizeInput(a.fileName)}</p>
+              <p class="text-sm text-gray-600 high-contrast:text-gray-400">Status: ${a.status} | Submitted: ${new Date(a.uploadedAt).toLocaleDateString()}</p>
+              <a href="${a.url}" target="_blank" class="text-blue-600 hover:underline high-contrast:text-blue-400" aria-label="View assignment ${sanitizeInput(a.fileName)}" data-tooltip="View file">View File</a>
+            </div>
+          `;
+          assignmentList.appendChild(assignmentItem);
+        });
+      }
+
+      // Handle form submissions
+      uploadForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        uploadStatus.textContent = "";
+        uploadBtn.disabled = true;
+
+        const file = pdfFileInput.files[0];
+        if (!file) {
+          uploadStatus.textContent = "Please select a PDF file to upload.";
+          uploadBtn.disabled = false;
+          return;
+        }
+        if (file.type !== "application/pdf") {
+          uploadStatus.textContent = "Only PDF files are allowed.";
+          uploadBtn.disabled = false;
+          return;
+        }
+
+        uploadStatus.textContent = "Uploading PDF... Please wait.";
+        await uploadAssignment(userId, file);
+        uploadStatus.textContent = "Assignment uploaded successfully!";
+        pdfFileInput.value = "";
+        uploadBtn.disabled = false;
+      });
+
+      profileForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const data = {
+          fullName: sanitizeInput(profileFullName.value.trim()),
+          email: sanitizeInput(profileEmail.value.trim()),
+          contact: sanitizeInput(profileContact.value.trim()),
+          metadata: user.metadata || {}
+        };
+        await updateUserProfile(userId, data);
+      });
+
+      // Initial render
+      renderOverview(user);
+      renderPrograms(user.enrolledPrograms || {});
+      renderAssignments(assignments);
+    }
+
+    // Initialize
+    handleAuthState((userData) => {
+      user = userData;
+      initializeUI(userData.uid, user, assignments);
+
+      loadUserData(userData.uid, (data) => {
+        user = data;
+        initializeUI(userData.uid, user, assignments);
+      });
+
+      loadAssignments(userData.uid, (data) => {
+        assignments = data;
+        initializeUI(userData.uid, user, assignments);
+      });
+
+      signoutBtn.addEventListener("click", handleSignOut);
     });
   </script>
 </body>
