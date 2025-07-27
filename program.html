@@ -6,24 +6,75 @@
   <title>CETA Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <style>
-    .sidebar { transition: width 0.3s ease; }
-    .sidebar-hidden { width: 0; overflow: hidden; }
-    .main-content { transition: margin-left 0.3s ease; }
-    .high-contrast { background: #000; color: #fff; }
+    .sidebar {
+      transition: transform 0.3s ease, width 0.3s ease;
+      transform: translateX(0);
+    }
+    .sidebar-hidden {
+      transform: translateX(-100%);
+      width: 0;
+    }
+    .main-content {
+      transition: margin-left 0.3s ease;
+    }
+    .dark-mode {
+      background: #1f2937;
+      color: #f3f4f6;
+    }
+    .dark-mode .bg-white {
+      background: #374151;
+    }
+    .dark-mode .bg-gray-50 {
+      background: #4b5563;
+    }
+    .dark-mode .text-gray-600 {
+      color: #d1d5db;
+    }
+    .tooltip {
+      position: relative;
+    }
+    .tooltip:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 10;
+    }
     @media (max-width: 768px) {
-      .sidebar { width: 0; overflow: hidden; }
-      .sidebar-open { width: 256px; }
-      .main-content { margin-left: 0; }
+      .sidebar {
+        position: fixed;
+        z-index: 50;
+        width: 256px;
+        transform: translateX(-100%);
+      }
+      .sidebar-open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+      }
     }
   </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen transition-colors duration-300">
   <div class="flex">
     <!-- Sidebar -->
-    <div id="sidebar" class="sidebar bg-gray-800 text-white w-64 min-h-screen p-4">
+    <div id="sidebar" class="sidebar bg-gradient-to-b from-gray-800 to-gray-900 text-white w-64 min-h-screen p-4 shadow-lg">
       <div class="flex items-center justify-between mb-6">
-        <h1 class="text-xl font-bold">CETA Admin</h1>
+        <h1 class="text-2xl font-bold flex items-center gap-2">
+          <i class="fas fa-graduation-cap"></i> CETA Admin
+        </h1>
         <button id="toggle-sidebar" class="md:hidden text-white focus:outline-none" aria-label="Toggle sidebar">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -32,56 +83,70 @@
       </div>
       <nav>
         <ul class="space-y-2">
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="overview">Overview</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="users">User Management</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="courses">Program Management</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="assessments">Assessments</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="certifications">Certifications</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="accreditations">Accreditations</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="grants">Grants</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="bursaries">Bursaries</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="projects">Special Projects</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="wsp_atr">WSP/ATR</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="notices">Notice Board</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="analytics">Analytics</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="helpdesk">Helpdesk</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded" data-section="audit_logs">Audit Logs</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="overview" data-tooltip="Dashboard Overview"><i class="fas fa-tachometer-alt"></i> Overview</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="users" data-tooltip="Manage Users"><i class="fas fa-users"></i> User Management</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="courses" data-tooltip="Manage Programs"><i class="fas fa-book"></i> Program Management</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="assessments" data-tooltip="Manage Assessments"><i class="fas fa-tasks"></i> Assessments</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="certifications" data-tooltip="Issue Certificates"><i class="fas fa-certificate"></i> Certifications</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="accreditations" data-tooltip="Manage Accreditations"><i class="fas fa-award"></i> Accreditations</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="grants" data-tooltip="Manage Grants"><i class="fas fa-money-bill"></i> Grants</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="bursaries" data-tooltip="Manage Bursaries"><i class="fas fa-wallet"></i> Bursaries</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="projects" data-tooltip="Special Projects"><i class="fas fa-project-diagram"></i> Special Projects</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="wsp_atr" data-tooltip="WSP/ATR Management"><i class="fas fa-file-alt"></i> WSP/ATR</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="notices" data-tooltip="Notice Board"><i class="fas fa-bell"></i> Notice Board</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="analytics" data-tooltip="View Analytics"><i class="fas fa-chart-bar"></i> Analytics</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="helpdesk" data-tooltip="Helpdesk Tickets"><i class="fas fa-headset"></i> Helpdesk</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="audit_logs" data-tooltip="Audit Logs"><i class="fas fa-history"></i> Audit Logs</button></li>
         </ul>
       </nav>
       <div class="mt-auto">
-        <button id="toggle-contrast" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded mb-2" aria-label="Toggle high contrast mode">Toggle High Contrast</button>
-        <button id="signout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" aria-label="Sign out of admin account">Sign Out</button>
+        <button id="toggle-dark-mode" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded mb-2" aria-label="Toggle dark mode">Toggle Dark Mode</button>
+        <button id="signout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" aria-label="Sign out">Sign Out</button>
       </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content flex-1 p-6 md:ml-64">
+      <!-- Notifications -->
+      <div id="notifications" class="mb-4 hidden">
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded shadow">
+          <h3 class="text-lg font-semibold">Notifications</h3>
+          <ul id="notification-list" class="space-y-2"></ul>
+        </div>
+      </div>
+
       <!-- Overview Section -->
       <div id="overview" class="section">
-        <h2 class="text-2xl font-semibold mb-4">Dashboard Overview</h2>
-        <div class="grid gap-4 md:grid-cols-4">
-          <div class="bg-white p-4 rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h2>
+        <div class="grid gap-6 md:grid-cols-4">
+          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
             <h3 class="text-lg font-semibold">Total Learners</h3>
-            <p id="total-learners" class="text-3xl font-bold text-blue-600">0</p>
+            <p id="total-learners" class="text-4xl font-bold text-indigo-600">0</p>
           </div>
-          <div class="bg-white p-4 rounded shadow">
+          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
             <h3 class="text-lg font-semibold">Total Courses</h3>
-            <p id="total-courses" class="text-3xl font-bold text-blue-600">0</p>
+            <p id="total-courses" class="text-4xl font-bold text-indigo-600">0</p>
           </div>
-          <div class="bg-white p-4 rounded shadow">
+          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
             <h3 class="text-lg font-semibold">Pending Grants</h3>
-            <p id="pending-grants" class="text-3xl font-bold text-blue-600">0</p>
+            <p id="pending-grants" class="text-4xl font-bold text-indigo-600">0</p>
           </div>
-          <div class="bg-white p-4 rounded shadow">
+          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
             <h3 class="text-lg font-semibold">Open Helpdesk Tickets</h3>
-            <p id="open-tickets" class="text-3xl font-bold text-blue-600">0</p>
+            <p id="open-tickets" class="text-4xl font-bold text-indigo-600">0</p>
           </div>
         </div>
-        <div class="mt-6 bg-white p-4 rounded shadow">
-          <h3 class="text-lg font-semibold mb-2">Learner Progress</h3>
-          <canvas id="progress-chart" class="w-full h-64"></canvas>
+        <div class="mt-6 grid gap-6 md:grid-cols-2">
+          <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-lg font-semibold mb-2">Learner Progress</h3>
+            <canvas id="progress-chart" class="w-full h-64"></canvas>
+          </div>
+          <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-lg font-semibold mb-2">Grant Distribution</h3>
+            <canvas id="grant-chart" class="w-full h-64"></canvas>
+          </div>
         </div>
-        <div class="mt-6 bg-white p-4 rounded shadow">
+        <div class="mt-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Recent Notices</h3>
           <div id="recent-notices" class="space-y-4"></div>
         </div>
@@ -89,55 +154,58 @@
 
       <!-- User Management Section -->
       <div id="users" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">User Management</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-users"></i> User Management</h2>
+        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Add/Edit User</h3>
-          <div class="flex gap-2 mb-4">
-            <input type="email" id="userEmail" placeholder="Email" class="border p-2 rounded w-1/3" aria-label="Enter user email" />
-            <input type="text" id="userName" placeholder="Full Name" class="border p-2 rounded w-1/3" aria-label="Enter full name" />
-            <select id="userRole" class="border p-2 rounded" aria-label="Select user role">
+          <div class="flex flex-wrap gap-4 mb-4">
+            <input type="email" id="userEmail" placeholder="Email" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter user email" />
+            <input type="text" id="userName" placeholder="Full Name" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter full name" />
+            <select id="userRole" class="border p-2 rounded min-w-[150px]" aria-label="Select user role">
               <option value="learner">Learner</option>
               <option value="admin">Admin</option>
               <option value="provider">Training Provider</option>
               <option value="sdf">SDF</option>
             </select>
-            <button onclick="addUser()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add User</button>
+            <button onclick="addUser()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add new user">Add User</button>
           </div>
-          <div class="flex gap-2">
+          <div class="flex flex-wrap gap-4">
             <input type="file" id="userImport" accept=".csv,.xlsx" class="border p-2 rounded" aria-label="Import users from CSV/Excel" />
-            <button onclick="importUsers()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Import Users</button>
-            <button onclick="exportUsers()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Export Users</button>
+            <button onclick="importUsers()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Import users">Import Users</button>
+            <button onclick="exportUsers()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Export users">Export Users</button>
           </div>
         </div>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Users</h3>
+          <input type="text" id="userSearch" placeholder="Search users..." class="border p-2 rounded w-full mb-4" aria-label="Search users by name or email" />
           <div id="userList" class="space-y-4"></div>
         </div>
       </div>
 
       <!-- Program Management Section -->
       <div id="courses" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Program Management</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-book"></i> Program Management</h2>
+        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Add Program</h3>
-          <div class="flex gap-2 mb-4">
-            <input type="text" id="courseName" placeholder="Program Name" class="border p-2 rounded w-1/3" aria-label="Enter program name" />
-            <input type="text" id="courseTags" placeholder="Tags (comma-separated)" class="border p-2 rounded w-1/3" aria-label="Enter tags" />
-            <button onclick="addCourse()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Program</button>
+          <div class="flex flex-wrap gap-4 mb-4">
+            <input type="text" id="courseName" placeholder="Program Name" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter program name" />
+            <input type="text" id="courseTags" placeholder="Tags (comma-separated)" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter tags" />
+            <button onclick="addCourse()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add new program">Add Program</button>
           </div>
           <div class="mb-4">
             <h4 class="text-md font-semibold">Add Content</h4>
-            <select id="contentType" class="border p-2 rounded" aria-label="Select content type">
-              <option value="scorm">SCORM</option>
-              <option value="video">Video</option>
-              <option value="document">Document</option>
-            </select>
-            <input type="text" id="contentUrl" placeholder="Content URL" class="border p-2 rounded w-1/3" aria-label="Enter content URL" />
-            <input type="text" id="contentTitle" placeholder="Content Title" class="border p-2 rounded w-1/3" aria-label="Enter content title" />
-            <button onclick="addContent()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add Content</button>
+            <div class="flex flex-wrap gap-4">
+              <select id="contentType" class="border p-2 rounded min-w-[150px]" aria-label="Select content type">
+                <option value="scorm">SCORM</option>
+                <option value="video">Video</option>
+                <option value="document">Document</option>
+              </select>
+              <input type="text" id="contentUrl" placeholder="Content URL" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter content URL" />
+              <input type="text" id="contentTitle" placeholder="Content Title" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter content title" />
+              <button onclick="addContent()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Add content to program">Add Content</button>
+            </div>
           </div>
         </div>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Programs</h3>
           <input type="text" id="courseSearch" placeholder="Search programs..." class="border p-2 rounded w-full mb-4" aria-label="Search programs by name or tag" />
           <div id="courseList" class="space-y-4"></div>
@@ -146,17 +214,17 @@
 
       <!-- Assessments Section -->
       <div id="assessments" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Assessment Management</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Assessment Management</h2>
+        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Add Assessment</h3>
-          <div class="flex gap-2 mb-4">
-            <select id="assessmentCourse" class="border p-2 rounded" aria-label="Select course"></select>
-            <input type="text" id="assessmentTitle" placeholder="Assessment Title" class="border p-2 rounded w-1/3" aria-label="Enter assessment title" />
-            <input type="text" id="assessmentTags" placeholder="Tags" class="border p-2 rounded w-1/3" aria-label="Enter tags" />
-            <button onclick="addAssessment()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Assessment</button>
+          <div class="flex flex-wrap gap-4 mb-4">
+            <select id="assessmentCourse" class="border p-2 rounded min-w-[150px]" aria-label="Select course"></select>
+            <input type="text" id="assessmentTitle" placeholder="Assessment Title" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter assessment title" />
+            <input type="text" id="assessmentTags" placeholder="Tags" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter tags" />
+            <button onclick="addAssessment()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add new assessment">Add Assessment</button>
           </div>
         </div>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Assessments</h3>
           <div id="assessmentList" class="space-y-4"></div>
         </div>
@@ -164,17 +232,17 @@
 
       <!-- Certifications Section -->
       <div id="certifications" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Certification Management</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-certificate"></i> Certification Management</h2>
+        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Issue Certificate</h3>
-          <div class="flex gap-2 mb-4">
-            <select id="certCourse" class="border p-2 rounded" aria-label="Select course"></select>
-            <select id="certLearner" class="border p-2 rounded" aria-label="Select learner"></select>
-            <input type="text" id="certTemplate" placeholder="Template Name" class="border p-2 rounded w-1/3" aria-label="Enter template name" />
-            <button onclick="issueCertificate()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Issue Certificate</button>
+          <div class="flex flex-wrap gap-4 mb-4">
+            <select id="certCourse" class="border p-2 rounded min-w-[150px]" aria-label="Select course"></select>
+            <select id="certLearner" class="border p-2 rounded min-w-[150px]" aria-label="Select learner"></select>
+            <input type="text" id="certTemplate" placeholder="Template Name" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter template name" />
+            <button onclick="issueCertificate()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Issue certificate">Issue Certificate</button>
           </div>
         </div>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Certificates</h3>
           <div id="certificationList" class="space-y-4"></div>
         </div>
@@ -182,16 +250,16 @@
 
       <!-- Accreditations Section -->
       <div id="accreditations" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Accreditation Management</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-award"></i> Accreditation Management</h2>
+        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Add Accreditation</h3>
-          <div class="flex gap-2 mb-4">
-            <select id="accProvider" class="border p-2 rounded" aria-label="Select provider"></select>
-            <input type="text" id="accLetterUrl" placeholder="Letter URL" class="border p-2 rounded w-1/3" aria-label="Enter letter URL" />
-            <button onclick="addAccreditation()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Accreditation</button>
+          <div class="flex flex-wrap gap-4 mb-4">
+            <select id="accProvider" class="border p-2 rounded min-w-[150px]" aria-label="Select provider"></select>
+            <input type="text" id="accLetterUrl" placeholder="Letter URL" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter letter URL" />
+            <button onclick="addAccreditation()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add accreditation">Add Accreditation</button>
           </div>
         </div>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Accreditations</h3>
           <div id="accreditationList" class="space-y-4"></div>
         </div>
@@ -199,20 +267,20 @@
 
       <!-- Grants Section -->
       <div id="grants" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Grants Management</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-money-bill"></i> Grants Management</h2>
+        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Add Grant</h3>
-          <div class="flex gap-2 mb-4">
-            <select id="grantType" class="border p-2 rounded" aria-label="Select grant type">
+          <div class="flex flex-wrap gap-4 mb-4">
+            <select id="grantType" class="border p-2 rounded min-w-[150px]" aria-label="Select grant type">
               <option value="mandatory">Mandatory</option>
               <option value="discretionary">Discretionary</option>
             </select>
-            <input type="number" id="grantAmount" placeholder="Amount" class="border p-2 rounded w-1/3" aria-label="Enter grant amount" />
-            <select id="grantRecipient" class="border p-2 rounded" aria-label="Select recipient"></select>
-            <button onclick="addGrant()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Grant</button>
+            <input type="number" id="grantAmount" placeholder="Amount" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter grant amount" />
+            <select id="grantRecipient" class="border p-2 rounded min-w-[150px]" aria-label="Select recipient"></select>
+            <button onclick="addGrant()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add grant">Add Grant</button>
           </div>
         </div>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Grants</h3>
           <div id="grantList" class="space-y-4"></div>
         </div>
@@ -220,21 +288,21 @@
 
       <!-- Bursaries Section -->
       <div id="bursaries" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Bursary Management</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-wallet"></i> Bursary Management</h2>
+        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Manage Bursary</h3>
-          <div class="flex gap-2 mb-4">
-            <select id="bursaryApplicant" class="border p-2 rounded" aria-label="Select applicant"></select>
-            <select id="bursaryProgram" class="border p-2 rounded" aria-label="Select program"></select>
-            <input type="number" id="bursaryAmount" placeholder="Amount" class="border p-2 rounded w-1/3" aria-label="Enter bursary amount" />
-            <button onclick="addBursary()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Bursary</button>
+          <div class="flex flex-wrap gap-4 mb-4">
+            <select id="bursaryApplicant" class="border p-2 rounded min-w-[150px]" aria-label="Select applicant"></select>
+            <select id="bursaryProgram" class="border p-2 rounded min-w-[150px]" aria-label="Select program"></select>
+            <input type="number" id="bursaryAmount" placeholder="Amount" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter bursary amount" />
+            <button onclick="addBursary()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add bursary">Add Bursary</button>
           </div>
-          <div class="flex gap-2">
+          <div class="flex flex-wrap gap-4">
             <input type="file" id="bursaryDoc" accept=".pdf" class="border p-2 rounded" aria-label="Upload supporting document" />
-            <button onclick="uploadBursaryDoc()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Upload Document</button>
+            <button onclick="uploadBursaryDoc()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Upload document">Upload Document</button>
           </div>
         </div>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Bursaries</h3>
           <div id="bursaryList" class="space-y-4"></div>
         </div>
@@ -242,16 +310,16 @@
 
       <!-- Special Projects Section -->
       <div id="projects" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Special Projects</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-project-diagram"></i> Special Projects</h2>
+        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Add Project</h3>
-          <div class="flex gap-2 mb-4">
-            <input type="text" id="projectName" placeholder="Project Name" class="border p-2 rounded w-1/3" aria-label="Enter project name" />
-            <textarea id="projectCharter" placeholder="Project Charter" class="border p-2 rounded w-1/3" rows="4" aria-label="Enter project charter"></textarea>
-            <button onclick="addProject()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Add Project</button>
+          <div class="flex flex-wrap gap-4 mb-4">
+            <input type="text" id="projectName" placeholder="Project Name" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter project name" />
+            <textarea id="projectCharter" placeholder="Project Charter" class="border p-2 rounded flex-1 min-w-[200px]" rows="4" aria-label="Enter project charter"></textarea>
+            <button onclick="addProject()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add project">Add Project</button>
           </div>
         </div>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Projects</h3>
           <div id="projectList" class="space-y-4"></div>
         </div>
@@ -259,20 +327,20 @@
 
       <!-- WSP/ATR Section -->
       <div id="wsp_atr" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">WSP/ATR Management</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-file-alt"></i> WSP/ATR Management</h2>
+        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Manage WSP/ATR</h3>
-          <div class="flex gap-2 mb-4">
-            <select id="wspEmployer" class="border p-2 rounded" aria-label="Select employer"></select>
-            <select id="wspType" class="border p-2 rounded" aria-label="Select type">
+          <div class="flex flex-wrap gap-4 mb-4">
+            <select id="wspEmployer" class="border p-2 rounded min-w-[150px]" aria-label="Select employer"></select>
+            <select id="wspType" class="border p-2 rounded min-w-[150px]" aria-label="Select type">
               <option value="wsp">WSP</option>
               <option value="atr">ATR</option>
             </select>
             <input type="file" id="wspDoc" accept=".pdf" class="border p-2 rounded" aria-label="Upload WSP/ATR document" />
-            <button onclick="uploadWspDoc()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Upload</button>
+            <button onclick="uploadWspDoc()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Upload document">Upload</button>
           </div>
         </div>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">WSP/ATR Submissions</h3>
           <div id="wspList" class="space-y-4"></div>
         </div>
@@ -280,20 +348,20 @@
 
       <!-- Notice Board Section -->
       <div id="notices" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Notice Board</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-bell"></i> Notice Board</h2>
+        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Post New Notice</h3>
           <form id="notice-form">
             <input type="text" id="noticeTitle" placeholder="Notice Title" class="border p-2 rounded w-full mb-2" aria-label="Enter notice title" required />
             <textarea id="noticeContent" placeholder="Notice Content" class="border p-2 rounded w-full mb-2" rows="4" aria-label="Enter notice content" required></textarea>
             <input type="date" id="noticeExpiry" class="border p-2 rounded mb-2" aria-label="Select expiry date (optional)" />
-            <div class="flex gap-2">
-              <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Post Notice</button>
-              <input type="text" id="noticeSearch" placeholder="Search notices..." class="border p-2 rounded w-full" aria-label="Search notices by title" />
+            <div class="flex flex-wrap gap-4">
+              <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Post notice">Post Notice</button>
+              <input type="text" id="noticeSearch" placeholder="Search notices..." class="border p-2 rounded w-full md:w-1/2" aria-label="Search notices by title" />
             </div>
           </form>
         </div>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Notices</h3>
           <div id="noticeList" class="space-y-4" aria-live="polite"></div>
         </div>
@@ -301,18 +369,20 @@
 
       <!-- Analytics Section -->
       <div id="analytics" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Analytics & Reporting</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-chart-bar"></i> Analytics & Reporting</h2>
+        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Generate Report</h3>
-          <div class="flex gap-2 mb-4">
-            <select id="reportType" class="border p-2 rounded" aria-label="Select report type">
+          <div class="flex flex-wrap gap-4 mb-4">
+            <select id="reportType" class="border p-2 rounded min-w-[150px]" aria-label="Select report type">
               <option value="learner_progress">Learner Progress</option>
               <option value="grant_disbursement">Grant Disbursement</option>
+              <option value="user_activity">User Activity</option>
             </select>
-            <button onclick="generateReport()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Generate Report</button>
+            <button onclick="generateReport()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Generate report">Generate Report</button>
+            <button onclick="exportReportToPDF()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700" data-tooltip="Export as PDF">Export to PDF</button>
           </div>
         </div>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">Reports</h3>
           <div id="reportList" class="space-y-4"></div>
         </div>
@@ -320,8 +390,8 @@
 
       <!-- Helpdesk Section -->
       <div id="helpdesk" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Helpdesk</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-headset"></i> Helpdesk</h2>
+        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
           <h3 class="text-lg font-semibold mb-2">View Tickets</h3>
           <div id="ticketList" class="space-y-4"></div>
         </div>
@@ -329,15 +399,15 @@
 
       <!-- Audit Logs Section -->
       <div id="audit_logs" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Audit Logs</h2>
-        <div class="bg-white p-6 rounded shadow">
-          <h3 class="text-lg font-semibold mb-2">Logs</h3>
+        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-history"></i> Audit Logs</h2>
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h3 class="text-lg font-semibold mb-2">Activity Timeline</h3>
           <div id="auditLogList" class="space-y-4"></div>
         </div>
       </div>
 
       <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-indigo-600"></div>
       </div>
 
       <noscript>
@@ -351,7 +421,7 @@
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
     import { getDatabase, ref, onValue, update, push, remove, set, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-    // Firebase configuration (move to backend for production)
+    // Firebase configuration (move to environment variables in production)
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
@@ -368,6 +438,7 @@
 
     // DOM elements
     const userList = document.getElementById("userList");
+    const userSearch = document.getElementById("userSearch");
     const courseList = document.getElementById("courseList");
     const courseSearch = document.getElementById("courseSearch");
     const assessmentList = document.getElementById("assessmentList");
@@ -391,13 +462,17 @@
     const pendingGrants = document.getElementById("pending-grants");
     const openTickets = document.getElementById("open-tickets");
     const recentNotices = document.getElementById("recent-notices");
-    const progressChart = document.getElementById("progress-chart").getContext("2d");
+    const progressChartCanvas = document.getElementById("progress-chart");
+    const grantChartCanvas = document.getElementById("grant-chart");
     const loadingSpinner = document.getElementById("loading-spinner");
     const sidebar = document.getElementById("sidebar");
     const toggleSidebar = document.getElementById("toggle-sidebar");
-    const toggleContrast = document.getElementById("toggle-contrast");
+    const toggleDarkMode = document.getElementById("toggle-dark-mode");
+    const notifications = document.getElementById("notifications");
+    const notificationList = document.getElementById("notification-list");
 
-    let users = [], courses = {}, assessments = {}, certifications = {}, accreditations = {}, grants = {}, bursaries = {}, projects = {}, wspAtr = {}, notices = [], analytics = {}, tickets = {}, auditLogs = {};
+    let users = [], courses = {}, assessments = {}, certifications = {}, accreditations = {}, grants = {}, bursaries = {}, projects = {}, wspAtr = {}, notices = {}, analytics = {}, tickets = {}, auditLogs = {};
+    let currentUserRole = null;
 
     // Show/hide loading spinner
     function showSpinner() { loadingSpinner.classList.remove("hidden"); }
@@ -405,13 +480,20 @@
 
     // Sidebar toggle
     toggleSidebar.addEventListener("click", () => {
+      sidebar.classList.toggle("sidebar-hidden");
       sidebar.classList.toggle("sidebar-open");
     });
 
-    // High contrast toggle
-    toggleContrast.addEventListener("click", () => {
-      document.body.classList.toggle("high-contrast");
+    // Dark mode toggle
+    toggleDarkMode.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
     });
+
+    // Load dark mode preference
+    if (localStorage.getItem("darkMode") === "true") {
+      document.body.classList.add("dark-mode");
+    }
 
     // Section switching
     document.querySelectorAll(".nav-button").forEach(btn => {
@@ -419,10 +501,45 @@
         document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
         document.getElementById(btn.dataset.section).classList.remove("hidden");
         if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
+        logAudit(`Viewed ${btn.dataset.section} section`);
       });
     });
 
-    // Load overview metrics and chart
+    // Debounce function for search
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // Load notifications
+    function loadNotifications() {
+      onValue(ref(db, "audit_logs"), snap => {
+        notificationList.innerHTML = "";
+        const data = snap.val() || {};
+        const recentLogs = Object.entries(data)
+          .sort((a, b) => b[1].timestamp - a[1].timestamp)
+          .slice(0, 5);
+        if (recentLogs.length > 0) {
+          notifications.classList.remove("hidden");
+        }
+        recentLogs.forEach(([_, log]) => {
+          const user = users.find(u => u.uid === log.userId) || { email: "Unknown" };
+          const item = document.createElement("li");
+          item.className = "text-sm";
+          item.innerHTML = `<i class="fas fa-bell mr-2"></i> ${log.action} by ${user.email} at ${new Date(log.timestamp).toLocaleString()}`;
+          notificationList.appendChild(item);
+        });
+      });
+    }
+
+    // Load overview metrics and charts
     function loadOverview() {
       showSpinner();
       onValue(ref(db, "users"), snap => {
@@ -447,6 +564,24 @@
           if (data[grantId].status === "pending") pendingCount++;
         }
         pendingGrants.textContent = pendingCount;
+
+        // Grant chart
+        const statuses = { pending: 0, disbursed: 0 };
+        for (const id in data) {
+          statuses[data[id].status]++;
+        }
+        new Chart(grantChartCanvas, {
+          type: "pie",
+          data: {
+            labels: ["Pending", "Disbursed"],
+            datasets: [{
+              label: "Grants",
+              data: [statuses.pending, statuses.disbursed],
+              backgroundColor: ["#f87171", "#34d399"]
+            }]
+          },
+          options: { responsive: true }
+        });
       });
 
       onValue(ref(db, "helpdesk"), snap => {
@@ -464,17 +599,21 @@
         for (const uid in data) {
           if (data[uid].role === "learner") progressData.push(data[uid].progress || 0);
         }
-        new Chart(progressChart, {
+        new Chart(progressChartCanvas, {
           type: "bar",
           data: {
             labels: progressData.map((_, i) => `Learner ${i + 1}`),
             datasets: [{
               label: "Progress (%)",
               data: progressData,
-              backgroundColor: "#2563eb"
+              backgroundColor: "#2563eb",
+              borderRadius: 4
             }]
           },
-          options: { scales: { y: { beginAtZero: true, max: 100 } } }
+          options: {
+            scales: { y: { beginAtZero: true, max: 100 } },
+            plugins: { legend: { display: true } }
+          }
         });
       });
 
@@ -491,7 +630,7 @@
           .slice(0, 3);
         recent.forEach(([_, notice]) => {
           const noticeItem = document.createElement("div");
-          noticeItem.className = "bg-gray-50 p-4 rounded shadow";
+          noticeItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow";
           noticeItem.innerHTML = `
             <h4 class="text-md font-semibold">${notice.title}</h4>
             <p class="text-gray-700">${notice.content.substring(0, 100)}${notice.content.length > 100 ? "..." : ""}</p>
@@ -504,53 +643,61 @@
     }
 
     // Load users
-    function loadUsers() {
+    function loadUsers(filter = "") {
       showSpinner();
       onValue(ref(db, "users"), snap => {
         userList.innerHTML = "";
         users = [];
         const data = snap.val();
         for (const uid in data) {
-          users.push({ uid, ...data[uid] });
-          const userItem = document.createElement("div");
-          userItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
-          userItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${data[uid].fullName || "-"}</p>
-              <p class="text-sm text-gray-600">${data[uid].email} | Role: ${data[uid].role}</p>
-            </div>
-            <div>
-              <button onclick="editUser('${uid}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit user ${data[uid].email}">Edit</button>
-              <button onclick="deleteUser('${uid}')" class="text-red-600 hover:underline" aria-label="Delete user ${data[uid].email}">Delete</button>
-            </div>
-          `;
-          userList.appendChild(userItem);
+          if (data[uid].fullName?.toLowerCase().includes(filter.toLowerCase()) || data[uid].email?.toLowerCase().includes(filter.toLowerCase())) {
+            users.push({ uid, ...data[uid] });
+            const userItem = document.createElement("div");
+            userItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
+            userItem.innerHTML = `
+              <div>
+                <p class="font-semibold">${data[uid].fullName || "-"}</p>
+                <p class="text-sm text-gray-600">${data[uid].email} | Role: ${data[uid].role}</p>
+              </div>
+              <div class="flex gap-2">
+                ${currentUserRole === "admin" ? `
+                  <button onclick="editUser('${uid}')" class="text-blue-600 hover:underline" aria-label="Edit user ${data[uid].email}" data-tooltip="Edit user">Edit</button>
+                  <button onclick="deleteUser('${uid}')" class="text-red-600 hover:underline" aria-label="Delete user ${data[uid].email}" data-tooltip="Delete user">Delete</button>
+                ` : ""}
+              </div>
+            `;
+            userList.appendChild(userItem);
+          }
         }
         hideSpinner();
       });
     }
 
     // Load courses
-    function loadCourses() {
+    function loadCourses(filter = "") {
       showSpinner();
       onValue(ref(db, "courses"), snap => {
         courses = snap.val() || {};
         courseList.innerHTML = "";
         for (const id in courses) {
           const c = courses[id];
-          const courseItem = document.createElement("div");
-          courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
-          courseItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${c.name}</p>
-              <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"}</p>
-            </div>
-            <div>
-              <button onclick="editCourse('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit program ${c.name}">Edit</button>
-              <button onclick="archiveCourse('${id}')" class="text-red-600 hover:underline" aria-label="Archive program ${c.name}">${c.archived ? "Unarchive" : "Archive"}</button>
-            </div>
-          `;
-          courseList.appendChild(courseItem);
+          if (c.name.toLowerCase().includes(filter.toLowerCase()) || c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) {
+            const courseItem = document.createElement("div");
+            courseItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
+            courseItem.innerHTML = `
+              <div>
+                <p class="font-semibold">${c.name}</p>
+                <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"}</p>
+              </div>
+              <div class="flex gap-2">
+                ${currentUserRole === "admin" ? `
+                  <button onclick="editCourse('${id}')" class="text-blue-600 hover:underline" aria-label="Edit program ${c.name}" data-tooltip="Edit program">Edit</button>
+                  <button onclick="archiveCourse('${id}')" class="text-red-600 hover:underline" aria-label="${c.archived ? "Unarchive" : "Archive"} program ${c.name}" data-tooltip="${c.archived ? "Unarchive" : "Archive"} program">${c.archived ? "Unarchive" : "Archive"}</button>
+                ` : ""}
+              </div>
+            `;
+            courseList.appendChild(courseItem);
+          }
         }
         hideSpinner();
       });
@@ -565,15 +712,17 @@
         for (const id in assessments) {
           const a = assessments[id];
           const assessmentItem = document.createElement("div");
-          assessmentItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          assessmentItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
           assessmentItem.innerHTML = `
             <div>
               <p class="font-semibold">${a.title}</p>
               <p class="text-sm text-gray-600">Course: ${courses[a.courseId]?.name || "-"}</p>
             </div>
-            <div>
-              <button onclick="editAssessment('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit assessment ${a.title}">Edit</button>
-              <button onclick="archiveAssessment('${id}')" class="text-red-600 hover:underline" aria-label="Archive assessment ${a.title}">${a.archived ? "Unarchive" : "Archive"}</button>
+            <div class="flex gap-2">
+              ${currentUserRole === "admin" ? `
+                <button onclick="editAssessment('${id}')" class="text-blue-600 hover:underline" aria-label="Edit assessment ${a.title}" data-tooltip="Edit assessment">Edit</button>
+                <button onclick="archiveAssessment('${id}')" class="text-red-600 hover:underline" aria-label="${a.archived ? "Unarchive" : "Archive"} assessment ${a.title}" data-tooltip="${a.archived ? "Unarchive" : "Archive"} assessment">${a.archived ? "Unarchive" : "Archive"}</button>
+              ` : ""}
             </div>
           `;
           assessmentList.appendChild(assessmentItem);
@@ -591,14 +740,14 @@
         for (const id in certifications) {
           const c = certifications[id];
           const certItem = document.createElement("div");
-          certItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          certItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
           certItem.innerHTML = `
             <div>
               <p class="font-semibold">Certificate for ${users.find(u => u.uid === c.learnerId)?.fullName || "-"}</p>
               <p class="text-sm text-gray-600">Course: ${courses[c.courseId]?.name || "-"} | Issued: ${new Date(c.issuedAt).toLocaleDateString()}</p>
             </div>
             <div>
-              <button onclick="viewCertificate('${id}')" class="text-blue-600 hover:underline" aria-label="View certificate">View</button>
+              <button onclick="viewCertificate('${id}')" class="text-blue-600 hover:underline" aria-label="View certificate" data-tooltip="View certificate">View</button>
             </div>
           `;
           certificationList.appendChild(certItem);
@@ -616,15 +765,17 @@
         for (const id in accreditations) {
           const a = accreditations[id];
           const accItem = document.createElement("div");
-          accItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          accItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
           accItem.innerHTML = `
             <div>
               <p class="font-semibold">Accreditation for ${users.find(u => u.uid === a.providerId)?.fullName || "-"}</p>
               <p class="text-sm text-gray-600">Status: ${a.status}</p>
             </div>
-            <div>
-              <button onclick="editAccreditation('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit accreditation">Edit</button>
-              <button onclick="deleteAccreditation('${id}')" class="text-red-600 hover:underline" aria-label="Delete accreditation">Delete</button>
+            <div class="flex gap-2">
+              ${currentUserRole === "admin" ? `
+                <button onclick="editAccreditation('${id}')" class="text-blue-600 hover:underline" aria-label="Edit accreditation" data-tooltip="Edit accreditation">Edit</button>
+                <button onclick="deleteAccreditation('${id}')" class="text-red-600 hover:underline" aria-label="Delete accreditation" data-tooltip="Delete accreditation">Delete</button>
+              ` : ""}
             </div>
           `;
           accreditationList.appendChild(accItem);
@@ -642,15 +793,17 @@
         for (const id in grants) {
           const g = grants[id];
           const grantItem = document.createElement("div");
-          grantItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          grantItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
           grantItem.innerHTML = `
             <div>
               <p class="font-semibold">${g.type} Grant</p>
               <p class="text-sm text-gray-600">Amount: R${g.amount} | Status: ${g.status}</p>
             </div>
-            <div>
-              <button onclick="editGrant('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit grant">Edit</button>
-              <button onclick="deleteGrant('${id}')" class="text-red-600 hover:underline" aria-label="Delete grant">Delete</button>
+            <div class="flex gap-2">
+              ${currentUserRole === "admin" ? `
+                <button onclick="editGrant('${id}')" class="text-blue-600 hover:underline" aria-label="Edit grant" data-tooltip="Edit grant">Edit</button>
+                <button onclick="deleteGrant('${id}')" class="text-red-600 hover:underline" aria-label="Delete grant" data-tooltip="Delete grant">Delete</button>
+              ` : ""}
             </div>
           `;
           grantList.appendChild(grantItem);
@@ -668,15 +821,17 @@
         for (const id in bursaries) {
           const b = bursaries[id];
           const bursaryItem = document.createElement("div");
-          bursaryItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          bursaryItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
           bursaryItem.innerHTML = `
             <div>
               <p class="font-semibold">Bursary for ${users.find(u => u.uid === b.applicantId)?.fullName || "-"}</p>
               <p class="text-sm text-gray-600">Amount: R${b.amount} | Status: ${b.status}</p>
             </div>
-            <div>
-              <button onclick="editBursary('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit bursary">Edit</button>
-              <button onclick="deleteBursary('${id}')" class="text-red-600 hover:underline" aria-label="Delete bursary">Delete</button>
+            <div class="flex gap-2">
+              ${currentUserRole === "admin" ? `
+                <button onclick="editBursary('${id}')" class="text-blue-600 hover:underline" aria-label="Edit bursary" data-tooltip="Edit bursary">Edit</button>
+                <button onclick="deleteBursary('${id}')" class="text-red-600 hover:underline" aria-label="Delete bursary" data-tooltip="Delete bursary">Delete</button>
+              ` : ""}
             </div>
           `;
           bursaryList.appendChild(bursaryItem);
@@ -694,15 +849,17 @@
         for (const id in projects) {
           const p = projects[id];
           const projectItem = document.createElement("div");
-          projectItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          projectItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
           projectItem.innerHTML = `
             <div>
               <p class="font-semibold">${p.name}</p>
               <p class="text-sm text-gray-600">Status: ${p.status}</p>
             </div>
-            <div>
-              <button onclick="editProject('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit project ${p.name}">Edit</button>
-              <button onclick="deleteProject('${id}')" class="text-red-600 hover:underline" aria-label="Delete project ${p.name}">Delete</button>
+            <div class="flex gap-2">
+              ${currentUserRole === "admin" ? `
+                <button onclick="editProject('${id}')" class="text-blue-600 hover:underline" aria-label="Edit project ${p.name}" data-tooltip="Edit project">Edit</button>
+                <button onclick="deleteProject('${id}')" class="text-red-600 hover:underline" aria-label="Delete project ${p.name}" data-tooltip="Delete project">Delete</button>
+              ` : ""}
             </div>
           `;
           projectList.appendChild(projectItem);
@@ -720,15 +877,17 @@
         for (const id in wspAtr) {
           const w = wspAtr[id];
           const wspItem = document.createElement("div");
-          wspItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          wspItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
           wspItem.innerHTML = `
             <div>
               <p class="font-semibold">${w.type.toUpperCase()} by ${users.find(u => u.uid === w.employerId)?.fullName || "-"}</p>
               <p class="text-sm text-gray-600">Status: ${w.status}</p>
             </div>
-            <div>
-              <button onclick="reviewWsp('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Review ${w.type}">Review</button>
-              <button onclick="deleteWsp('${id}')" class="text-red-600 hover:underline" aria-label="Delete ${w.type}">Delete</button>
+            <div class="flex gap-2">
+              ${currentUserRole === "admin" ? `
+                <button onclick="reviewWsp('${id}')" class="text-blue-600 hover:underline" aria-label="Review ${w.type}" data-tooltip="Review ${w.type}">Review</button>
+                <button onclick="deleteWsp('${id}')" class="text-red-600 hover:underline" aria-label="Delete ${w.type}" data-tooltip="Delete ${w.type}">Delete</button>
+              ` : ""}
             </div>
           `;
           wspList.appendChild(wspItem);
@@ -760,7 +919,7 @@
         const creator = users.find(u => u.uid === n.createdBy) || { email: "Unknown" };
         const expiry = n.expiryDate ? new Date(n.expiryDate).toLocaleDateString() : "-";
         const noticeItem = document.createElement("div");
-        noticeItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+        noticeItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
         noticeItem.innerHTML = `
           <div>
             <h4 class="text-md font-semibold">${n.title}</h4>
@@ -768,9 +927,11 @@
             <p class="text-sm text-gray-500 mt-2">Posted by ${creator.email} on ${new Date(n.createdAt).toLocaleDateString()}
             ${n.expiryDate ? ` | Expires on ${expiry}` : ""}</p>
           </div>
-          <div>
-            <button onclick="editNotice('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit notice ${n.title}">Edit</button>
-            <button onclick="deleteNotice('${id}')" class="text-red-600 hover:underline" aria-label="Delete notice ${n.title}">Delete</button>
+          <div class="flex gap-2">
+            ${currentUserRole === "admin" ? `
+              <button onclick="editNotice('${id}')" class="text-blue-600 hover:underline" aria-label="Edit notice ${n.title}" data-tooltip="Edit notice">Edit</button>
+              <button onclick="deleteNotice('${id}')" class="text-red-600 hover:underline" aria-label="Delete notice ${n.title}" data-tooltip="Delete notice">Delete</button>
+            ` : ""}
           </div>
         `;
         noticeList.appendChild(noticeItem);
@@ -786,14 +947,15 @@
         for (const id in analytics) {
           const a = analytics[id];
           const reportItem = document.createElement("div");
-          reportItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          reportItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
           reportItem.innerHTML = `
             <div>
               <p class="font-semibold">${a.type.replace("_", " ")}</p>
               <p class="text-sm text-gray-600">Generated: ${new Date(a.createdAt).toLocaleDateString()}</p>
             </div>
-            <div>
-              <button onclick="viewReport('${id}')" class="text-blue-600 hover:underline" aria-label="View report">View</button>
+            <div class="flex gap-2">
+              <button onclick="viewReport('${id}')" class="text-blue-600 hover:underline" aria-label="View report" data-tooltip="View report">View</button>
+              <button onclick="exportReportToPDF('${id}')" class="text-purple-600 hover:underline" aria-label="Export report to PDF" data-tooltip="Export to PDF">Export PDF</button>
             </div>
           `;
           reportList.appendChild(reportItem);
@@ -811,14 +973,16 @@
         for (const id in tickets) {
           const t = tickets[id];
           const ticketItem = document.createElement("div");
-          ticketItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
+          ticketItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
           ticketItem.innerHTML = `
             <div>
               <p class="font-semibold">${t.issue}</p>
               <p class="text-sm text-gray-600">Status: ${t.status} | By: ${users.find(u => u.uid === t.userId)?.email || "-"}</p>
             </div>
             <div>
-              <button onclick="resolveTicket('${id}')" class="text-blue-600 hover:underline" aria-label="Resolve ticket">Resolve</button>
+              ${currentUserRole === "admin" ? `
+                <button onclick="resolveTicket('${id}')" class="text-blue-600 hover:underline" aria-label="Resolve ticket" data-tooltip="Resolve ticket">Resolve</button>
+              ` : ""}
             </div>
           `;
           ticketList.appendChild(ticketItem);
@@ -833,13 +997,18 @@
       onValue(ref(db, "audit_logs"), snap => {
         auditLogs = snap.val() || {};
         auditLogList.innerHTML = "";
-        for (const id in auditLogs) {
-          const log = auditLogs[id];
+        const sortedLogs = Object.entries(auditLogs).sort((a, b) => b[1].timestamp - a[1].timestamp);
+        for (const [id, log] of sortedLogs) {
           const logItem = document.createElement("div");
-          logItem.className = "bg-gray-50 p-4 rounded shadow";
+          logItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center gap-4";
           logItem.innerHTML = `
-            <p class="font-semibold">${log.action}</p>
-            <p class="text-sm text-gray-600">By: ${users.find(u => u.uid === log.userId)?.email || "-"} | ${new Date(log.timestamp).toLocaleString()}</p>
+            <div class="flex-shrink-0">
+              <i class="fas fa-history text-blue-600"></i>
+            </div>
+            <div>
+              <p class="font-semibold">${log.action}</p>
+              <p class="text-sm text-gray-600">By: ${users.find(u => u.uid === log.userId)?.email || "-"} | ${new Date(log.timestamp).toLocaleString()}</p>
+            </div>
           `;
           auditLogList.appendChild(logItem);
         }
@@ -847,41 +1016,23 @@
       });
     }
 
-    // Search notices
-    noticeSearch.addEventListener("input", () => {
-      renderNotices(noticeSearch.value);
-    });
-
-    // Search courses
-    courseSearch.addEventListener("input", () => {
-      const filter = courseSearch.value.toLowerCase();
-      courseList.innerHTML = "";
-      for (const id in courses) {
-        const c = courses[id];
-        if (c.name.toLowerCase().includes(filter) || c.metadata?.tags?.some(t => t.toLowerCase().includes(filter))) {
-          const courseItem = document.createElement("div");
-          courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center";
-          courseItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${c.name}</p>
-              <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"}</p>
-            </div>
-            <div>
-              <button onclick="editCourse('${id}')" class="text-blue-600 mr-2 hover:underline" aria-label="Edit program ${c.name}">Edit</button>
-              <button onclick="archiveCourse('${id}')" class="text-red-600 hover:underline" aria-label="Archive program ${c.name}">${c.archived ? "Unarchive" : "Archive"}</button>
-            </div>
-          `;
-          courseList.appendChild(courseItem);
-        }
-      }
-    });
+    // Search handlers
+    const searchUsers = debounce(filter => loadUsers(filter), 300);
+    userSearch.addEventListener("input", () => searchUsers(userSearch.value));
+    const searchCourses = debounce(filter => loadCourses(filter), 300);
+    courseSearch.addEventListener("input", () => searchCourses(courseSearch.value));
+    const searchNotices = debounce(filter => renderNotices(filter), 300);
+    noticeSearch.addEventListener("input", () => searchNotices(noticeSearch.value));
 
     // Authentication check
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, async user => {
       if (!user) {
         alert("Unauthorized. Redirecting...");
         window.location.href = "login.html";
       } else {
+        const userSnap = await get(ref(db, `users/${user.uid}`));
+        currentUserRole = userSnap.val()?.role || "learner";
+        loadNotifications();
         loadOverview();
         loadUsers();
         loadCourses();
@@ -912,6 +1063,10 @@
 
     // User management
     window.addUser = async () => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can add users.");
+        return;
+      }
       const email = document.getElementById("userEmail").value.trim();
       const name = document.getElementById("userName").value.trim();
       const role = document.getElementById("userRole").value;
@@ -923,7 +1078,7 @@
       try {
         const userData = { email, fullName: name, role, approved: role === "admin" };
         await set(ref(db, `users/${email.replace(".", "_")}`), userData);
-        logAudit("Added user " + email);
+        logAudit(`Added user ${email}`);
         document.getElementById("userEmail").value = "";
         document.getElementById("userName").value = "";
       } catch (err) {
@@ -933,7 +1088,11 @@
       hideSpinner();
     };
 
-    window.editUser = async (uid) => {
+    window.editUser = async uid => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can edit users.");
+        return;
+      }
       const user = users.find(u => u.uid === uid);
       const newEmail = prompt("Edit email:", user.email);
       const newName = prompt("Edit name:", user.fullName);
@@ -942,7 +1101,7 @@
         showSpinner();
         try {
           await update(ref(db, `users/${uid}`), { email: newEmail, fullName: newName, role: newRole });
-          logAudit("Edited user " + uid);
+          logAudit(`Edited user ${uid}`);
         } catch (err) {
           console.error("Error editing user:", err);
           alert("Failed to edit user.");
@@ -951,12 +1110,16 @@
       }
     };
 
-    window.deleteUser = async (uid) => {
+    window.deleteUser = async uid => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can delete users.");
+        return;
+      }
       if (confirm("Delete this user?")) {
         showSpinner();
         try {
           await remove(ref(db, `users/${uid}`));
-          logAudit("Deleted user " + uid);
+          logAudit(`Deleted user ${uid}`);
         } catch (err) {
           console.error("Error deleting user:", err);
           alert("Failed to delete user.");
@@ -966,6 +1129,10 @@
     };
 
     window.importUsers = () => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can import users.");
+        return;
+      }
       alert("CSV/Excel import placeholder. Parse file and push to Firebase.");
     };
 
@@ -977,10 +1144,15 @@
       link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
       link.download = "users.csv";
       link.click();
+      logAudit("Exported users to CSV");
     };
 
     // Course management
     window.addCourse = async () => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can add programs.");
+        return;
+      }
       const name = document.getElementById("courseName").value.trim();
       const tags = document.getElementById("courseTags").value.split(",").map(t => t.trim());
       if (!name) {
@@ -990,7 +1162,7 @@
       showSpinner();
       try {
         await push(ref(db, "courses"), { name, metadata: { tags, version: "1.0" }, createdAt: Date.now(), archived: false });
-        logAudit("Added program " + name);
+        logAudit(`Added program ${name}`);
         document.getElementById("courseName").value = "";
         document.getElementById("courseTags").value = "";
       } catch (err) {
@@ -1001,6 +1173,10 @@
     };
 
     window.addContent = async () => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can add content.");
+        return;
+      }
       const type = document.getElementById("contentType").value;
       const url = document.getElementById("contentUrl").value.trim();
       const title = document.getElementById("contentTitle").value.trim();
@@ -1012,7 +1188,7 @@
       try {
         const courseId = prompt("Enter course ID to add content to:");
         await push(ref(db, `courses/${courseId}/content`), { type, url, title });
-        logAudit("Added content to program " + courseId);
+        logAudit(`Added content to program ${courseId}`);
         document.getElementById("contentUrl").value = "";
         document.getElementById("contentTitle").value = "";
       } catch (err) {
@@ -1022,14 +1198,18 @@
       hideSpinner();
     };
 
-    window.editCourse = async (id) => {
+    window.editCourse = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can edit programs.");
+        return;
+      }
       const newName = prompt("Edit program name:", courses[id].name);
       const newTags = prompt("Edit tags (comma-separated):", courses[id].metadata?.tags?.join(", ") || "");
       if (newName) {
         showSpinner();
         try {
           await update(ref(db, `courses/${id}`), { name: newName, metadata: { tags: newTags.split(",").map(t => t.trim()), version: "1.1" } });
-          logAudit("Edited program " + id);
+          logAudit(`Edited program ${id}`);
         } catch (err) {
           console.error("Error editing program:", err);
           alert("Failed to edit program.");
@@ -1038,7 +1218,11 @@
       }
     };
 
-    window.archiveCourse = async (id) => {
+    window.archiveCourse = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can archive programs.");
+        return;
+      }
       const action = courses[id].archived ? "unarchive" : "archive";
       if (confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} this program?`)) {
         showSpinner();
@@ -1055,6 +1239,10 @@
 
     // Assessment management
     window.addAssessment = async () => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can add assessments.");
+        return;
+      }
       const courseId = document.getElementById("assessmentCourse").value;
       const title = document.getElementById("assessmentTitle").value.trim();
       const tags = document.getElementById("assessmentTags").value.split(",").map(t => t.trim());
@@ -1065,7 +1253,7 @@
       showSpinner();
       try {
         await push(ref(db, "assessments"), { courseId, title, metadata: { tags, version: "1.0" }, createdAt: Date.now(), archived: false });
-        logAudit("Added assessment " + title);
+        logAudit(`Added assessment ${title}`);
         document.getElementById("assessmentTitle").value = "";
         document.getElementById("assessmentTags").value = "";
       } catch (err) {
@@ -1075,8 +1263,52 @@
       hideSpinner();
     };
 
+    window.editAssessment = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can edit assessments.");
+        return;
+      }
+      const assessment = assessments[id];
+      const newTitle = prompt("Edit assessment title:", assessment.title);
+      const newTags = prompt("Edit tags (comma-separated):", assessment.metadata?.tags?.join(", ") || "");
+      if (newTitle) {
+        showSpinner();
+        try {
+          await update(ref(db, `assessments/${id}`), { title: newTitle, metadata: { tags: newTags.split(",").map(t => t.trim()), version: "1.1" } });
+          logAudit(`Edited assessment ${id}`);
+        } catch (err) {
+          console.error("Error editing assessment:", err);
+          alert("Failed to edit assessment.");
+        }
+        hideSpinner();
+      }
+    };
+
+    window.archiveAssessment = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can archive assessments.");
+        return;
+      }
+      const action = assessments[id].archived ? "unarchive" : "archive";
+      if (confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} this assessment?`)) {
+        showSpinner();
+        try {
+          await update(ref(db, `assessments/${id}`), { archived: !assessments[id].archived });
+          logAudit(`${action.charAt(0).toUpperCase() + action.slice(1)}d assessment ${id}`);
+        } catch (err) {
+          console.error(`Error ${action}ing assessment:`, err);
+          alert(`Failed to ${action} assessment.`);
+        }
+        hideSpinner();
+      }
+    };
+
     // Certification management
     window.issueCertificate = async () => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can issue certificates.");
+        return;
+      }
       const courseId = document.getElementById("certCourse").value;
       const learnerId = document.getElementById("certLearner").value;
       const template = document.getElementById("certTemplate").value.trim();
@@ -1087,7 +1319,7 @@
       showSpinner();
       try {
         await push(ref(db, "certifications"), { courseId, learnerId, template, issuedAt: Date.now(), metadata: { tags: ["certificate"], version: "1.0" } });
-        logAudit("Issued certificate for learner " + learnerId);
+        logAudit(`Issued certificate for learner ${learnerId}`);
       } catch (err) {
         console.error("Error issuing certificate:", err);
         alert("Failed to issue certificate.");
@@ -1095,8 +1327,17 @@
       hideSpinner();
     };
 
+    window.viewCertificate = id => {
+      const cert = certifications[id];
+      alert(`Certificate: ${cert.template} for ${users.find(u => u.uid === cert.learnerId)?.fullName || "-"} on course ${courses[cert.courseId]?.name || "-"}`);
+    };
+
     // Accreditation management
     window.addAccreditation = async () => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can add accreditations.");
+        return;
+      }
       const providerId = document.getElementById("accProvider").value;
       const letterUrl = document.getElementById("accLetterUrl").value.trim();
       if (!providerId || !letterUrl) {
@@ -1106,7 +1347,7 @@
       showSpinner();
       try {
         await push(ref(db, "accreditations"), { providerId, status: "approved", letterUrl, metadata: { tags: ["accreditation"], version: "1.0" }, createdAt: Date.now() });
-        logAudit("Added accreditation for provider " + providerId);
+        logAudit(`Added accreditation for provider ${providerId}`);
         document.getElementById("accLetterUrl").value = "";
       } catch (err) {
         console.error("Error adding accreditation:", err);
@@ -1115,19 +1356,70 @@
       hideSpinner();
     };
 
-    // Grant management
+    // Continuation of Accreditation Management
+    window.editAccreditation = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can edit accreditations.");
+        return;
+      }
+      const accreditation = accreditations[id];
+      const newStatus = prompt("Edit status (approved/rejected):", accreditation.status);
+      const newLetterUrl = prompt("Edit letter URL:", accreditation.letterUrl);
+      if (newStatus && newLetterUrl) {
+        showSpinner();
+        try {
+          await update(ref(db, `accreditations/${id}`), { status: newStatus, letterUrl: newLetterUrl });
+          logAudit(`Edited accreditation ${id}`);
+        } catch (err) {
+          console.error("Error editing accreditation:", err);
+          alert("Failed to edit accreditation.");
+        }
+        hideSpinner();
+      }
+    };
+
+    window.deleteAccreditation = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can delete accreditations.");
+        return;
+      }
+      if (confirm("Delete this accreditation?")) {
+        showSpinner();
+        try {
+          await remove(ref(db, `accreditations/${id}`));
+          logAudit(`Deleted accreditation ${id}`);
+        } catch (err) {
+          console.error("Error deleting accreditation:", err);
+          alert("Failed to delete accreditation.");
+        }
+        hideSpinner();
+      }
+    };
+
+    // Grant Management
     window.addGrant = async () => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can add grants.");
+        return;
+      }
       const type = document.getElementById("grantType").value;
-      const amount = parseInt(document.getElementById("grantAmount").value);
+      const amount = parseFloat(document.getElementById("grantAmount").value);
       const recipientId = document.getElementById("grantRecipient").value;
-      if (!type || !amount || !recipientId) {
+      if (!type || isNaN(amount) || !recipientId) {
         alert("Please select grant type, enter amount, and select recipient.");
         return;
       }
       showSpinner();
       try {
-        await push(ref(db, "grants"), { type, amount, status: "pending", recipientId, createdAt: Date.now() });
-        logAudit("Added " + type + " grant for " + recipientId);
+        await push(ref(db, "grants"), {
+          type,
+          amount,
+          recipientId,
+          status: "pending",
+          createdAt: Date.now(),
+          metadata: { tags: ["grant"], version: "1.0" }
+        });
+        logAudit(`Added ${type} grant of R${amount} for recipient ${recipientId}`);
         document.getElementById("grantAmount").value = "";
       } catch (err) {
         console.error("Error adding grant:", err);
@@ -1136,19 +1428,69 @@
       hideSpinner();
     };
 
-    // Bursary management
+    window.editGrant = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can edit grants.");
+        return;
+      }
+      const grant = grants[id];
+      const newAmount = prompt("Edit grant amount:", grant.amount);
+      const newStatus = prompt("Edit status (pending/disbursed):", grant.status);
+      if (newAmount && newStatus) {
+        showSpinner();
+        try {
+          await update(ref(db, `grants/${id}`), { amount: parseFloat(newAmount), status: newStatus });
+          logAudit(`Edited grant ${id}`);
+        } catch (err) {
+          console.error("Error editing grant:", err);
+          alert("Failed to edit grant.");
+        }
+        hideSpinner();
+      }
+    };
+
+    window.deleteGrant = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can delete grants.");
+        return;
+      }
+      if (confirm("Delete this grant?")) {
+        showSpinner();
+        try {
+          await remove(ref(db, `grants/${id}`));
+          logAudit(`Deleted grant ${id}`);
+        } catch (err) {
+          console.error("Error deleting grant:", err);
+          alert("Failed to delete grant.");
+        }
+        hideSpinner();
+      }
+    };
+
+    // Bursary Management
     window.addBursary = async () => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can add bursaries.");
+        return;
+      }
       const applicantId = document.getElementById("bursaryApplicant").value;
       const programId = document.getElementById("bursaryProgram").value;
-      const amount = parseInt(document.getElementById("bursaryAmount").value);
-      if (!applicantId || !programId || !amount) {
+      const amount = parseFloat(document.getElementById("bursaryAmount").value);
+      if (!applicantId || !programId || isNaN(amount)) {
         alert("Please select applicant, program, and enter amount.");
         return;
       }
       showSpinner();
       try {
-        await push(ref(db, "bursaries"), { applicantId, programId, amount, status: "pending", paymentStatus: "pending", documents: [], createdAt: Date.now() });
-        logAudit("Added bursary for applicant " + applicantId);
+        await push(ref(db, "bursaries"), {
+          applicantId,
+          programId,
+          amount,
+          status: "pending",
+          createdAt: Date.now(),
+          metadata: { tags: ["bursary"], version: "1.0" }
+        });
+        logAudit(`Added bursary of R${amount} for applicant ${applicantId}`);
         document.getElementById("bursaryAmount").value = "";
       } catch (err) {
         console.error("Error adding bursary:", err);
@@ -1157,28 +1499,90 @@
       hideSpinner();
     };
 
-    window.uploadBursaryDoc = () => {
-      alert("Document upload placeholder. Implement Firebase Storage integration.");
+    window.uploadBursaryDoc = async () => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can upload bursary documents.");
+        return;
+      }
+      const file = document.getElementById("bursaryDoc").files[0];
+      if (!file) {
+        alert("Please select a file to upload.");
+        return;
+      }
+      showSpinner();
+      try {
+        // Placeholder for file upload (e.g., to Firebase Storage)
+        alert("File upload placeholder. Implement Firebase Storage upload.");
+        logAudit("Uploaded bursary document");
+        document.getElementById("bursaryDoc").value = "";
+      } catch (err) {
+        console.error("Error uploading bursary document:", err);
+        alert("Failed to upload document.");
+      }
+      hideSpinner();
     };
 
-    // Project management
+    window.editBursary = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can edit bursaries.");
+        return;
+      }
+      const bursary = bursaries[id];
+      const newAmount = prompt("Edit bursary amount:", bursary.amount);
+      const newStatus = prompt("Edit status (pending/approved/rejected):", bursary.status);
+      if (newAmount && newStatus) {
+        showSpinner();
+        try {
+          await update(ref(db, `bursaries/${id}`), { amount: parseFloat(newAmount), status: newStatus });
+          logAudit(`Edited bursary ${id}`);
+        } catch (err) {
+          console.error("Error editing bursary:", err);
+          alert("Failed to edit bursary.");
+        }
+        hideSpinner();
+      }
+    };
+
+    window.deleteBursary = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can delete bursaries.");
+        return;
+      }
+      if (confirm("Delete this bursary?")) {
+        showSpinner();
+        try {
+          await remove(ref(db, `bursaries/${id}`));
+          logAudit(`Deleted bursary ${id}`);
+        } catch (err) {
+          console.error("Error deleting bursary:", err);
+          alert("Failed to delete bursary.");
+        }
+        hideSpinner();
+      }
+    };
+
+    // Project Management
     window.addProject = async () => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can add projects.");
+        return;
+      }
       const name = document.getElementById("projectName").value.trim();
       const charter = document.getElementById("projectCharter").value.trim();
       if (!name || !charter) {
-        alert("Please enter project nameand charter.");
+        alert("Please enter project name and charter.");
         return;
       }
       showSpinner();
       try {
         await push(ref(db, "projects"), {
           name,
-          status: "initiation",
-          charter: { objective: charter, timeline: new Date().toISOString().split("T")[0] },
-          tasks: [],
-          createdAt: Date.now()
+          charter,
+          status: "active",
+          createdAt: Date.now(),
+          metadata: { tags: ["project"], version: "1.0" }
         });
-        logAudit("Added project " + name);
+        logAudit(`Added project ${name}`);
         document.getElementById("projectName").value = "";
         document.getElementById("projectCharter").value = "";
       } catch (err) {
@@ -1188,18 +1592,20 @@
       hideSpinner();
     };
 
-    window.editProject = async (id) => {
+    window.editProject = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can edit projects.");
+        return;
+      }
       const project = projects[id];
       const newName = prompt("Edit project name:", project.name);
-      const newCharter = prompt("Edit project charter:", project.charter.objective);
-      if (newName && newCharter) {
+      const newCharter = prompt("Edit project charter:", project.charter);
+      const newStatus = prompt("Edit status (active/completed):", project.status);
+      if (newName && newCharter && newStatus) {
         showSpinner();
         try {
-          await update(ref(db, `projects/${id}`), {
-            name: newName,
-            charter: { ...project.charter, objective: newCharter }
-          });
-          logAudit("Edited project " + id);
+          await update(ref(db, `projects/${id}`), { name: newName, charter: newCharter, status: newStatus });
+          logAudit(`Edited project ${id}`);
         } catch (err) {
           console.error("Error editing project:", err);
           alert("Failed to edit project.");
@@ -1208,12 +1614,16 @@
       }
     };
 
-    window.deleteProject = async (id) => {
+    window.deleteProject = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can delete projects.");
+        return;
+      }
       if (confirm("Delete this project?")) {
         showSpinner();
         try {
           await remove(ref(db, `projects/${id}`));
-          logAudit("Deleted project " + id);
+          logAudit(`Deleted project ${id}`);
         } catch (err) {
           console.error("Error deleting project:", err);
           alert("Failed to delete project.");
@@ -1222,42 +1632,51 @@
       }
     };
 
-    // WSP/ATR management
+    // WSP/ATR Management
     window.uploadWspDoc = async () => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can upload WSP/ATR documents.");
+        return;
+      }
       const employerId = document.getElementById("wspEmployer").value;
       const type = document.getElementById("wspType").value;
       const file = document.getElementById("wspDoc").files[0];
       if (!employerId || !type || !file) {
-        alert("Please select employer, type, and upload a document.");
+        alert("Please select employer, type, and file.");
         return;
       }
       showSpinner();
       try {
-        // Placeholder for Firebase Storage upload
-        const docUrl = `https://storage.com/${type}_${employerId}_${Date.now()}.pdf`;
+        // Placeholder for file upload (e.g., to Firebase Storage)
         await push(ref(db, "wsp_atr"), {
           employerId,
           type,
           status: "pending",
-          documents: [{ id: `doc_${Date.now()}`, url: docUrl }],
-          createdAt: Date.now()
+          docUrl: "placeholder_url",
+          createdAt: Date.now(),
+          metadata: { tags: [type], version: "1.0" }
         });
-        logAudit(`Uploaded ${type} for employer ${employerId}`);
+        logAudit(`Uploaded ${type} document for employer ${employerId}`);
         document.getElementById("wspDoc").value = "";
       } catch (err) {
-        console.error("Error uploading WSP/ATR:", err);
-        alert("Failed to upload WSP/ATR.");
+        console.error("Error uploading WSP/ATR document:", err);
+        alert("Failed to upload document.");
       }
       hideSpinner();
     };
 
-    window.reviewWsp = async (id) => {
-      const status = prompt("Enter new status (approved/rejected):", wspAtr[id].status);
-      if (status === "approved" || status === "rejected") {
+    window.reviewWsp = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can review WSP/ATR submissions.");
+        return;
+      }
+      const wsp = wspAtr[id];
+      const newStatus = prompt("Update status (pending/approved/rejected):", wsp.status);
+      if (newStatus) {
         showSpinner();
         try {
-          await update(ref(db, `wsp_atr/${id}`), { status });
-          logAudit(`Reviewed ${wspAtr[id].type} ${id} as ${status}`);
+          await update(ref(db, `wsp_atr/${id}`), { status: newStatus });
+          logAudit(`Reviewed ${wsp.type} ${id}`);
         } catch (err) {
           console.error("Error reviewing WSP/ATR:", err);
           alert("Failed to review WSP/ATR.");
@@ -1266,12 +1685,16 @@
       }
     };
 
-    window.deleteWsp = async (id) => {
-      if (confirm("Delete this WSP/ATR?")) {
+    window.deleteWsp = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can delete WSP/ATR submissions.");
+        return;
+      }
+      if (confirm("Delete this WSP/ATR submission?")) {
         showSpinner();
         try {
           await remove(ref(db, `wsp_atr/${id}`));
-          logAudit(`Deleted ${wspAtr[id].type} ${id}`);
+          logAudit(`Deleted WSP/ATR ${id}`);
         } catch (err) {
           console.error("Error deleting WSP/ATR:", err);
           alert("Failed to delete WSP/ATR.");
@@ -1280,14 +1703,18 @@
       }
     };
 
-    // Notice management
-    noticeForm.addEventListener("submit", async (e) => {
+    // Notice Management
+    noticeForm.addEventListener("submit", async e => {
       e.preventDefault();
+      if (currentUserRole !== "admin") {
+        alert("Only admins can post notices.");
+        return;
+      }
       const title = noticeTitle.value.trim();
       const content = noticeContent.value.trim();
-      const expiry = noticeExpiry.value ? new Date(noticeExpiry.value).getTime() : null;
+      const expiry = noticeExpiry.value;
       if (!title || !content) {
-        alert("Please enter title and content.");
+        alert("Please enter notice title and content.");
         return;
       }
       showSpinner();
@@ -1295,14 +1722,13 @@
         await push(ref(db, "notices"), {
           title,
           content,
-          createdAt: Date.now(),
           createdBy: auth.currentUser.uid,
-          expiryDate: expiry
+          createdAt: Date.now(),
+          expiryDate: expiry || null,
+          metadata: { tags: ["notice"], version: "1.0" }
         });
-        logAudit("Posted notice " + title);
-        noticeTitle.value = "";
-        noticeContent.value = "";
-        noticeExpiry.value = "";
+        logAudit(`Posted notice: ${title}`);
+        noticeForm.reset();
       } catch (err) {
         console.error("Error posting notice:", err);
         alert("Failed to post notice.");
@@ -1310,20 +1736,24 @@
       hideSpinner();
     });
 
-    window.editNotice = async (id) => {
+    window.editNotice = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can edit notices.");
+        return;
+      }
       const notice = notices[id];
-      const newTitle = prompt("Edit title:", notice.title);
-      const newContent = prompt("Edit content:", notice.content);
-      const newExpiry = prompt("Edit expiry date (YYYY-MM-DD):", notice.expiryDate ? new Date(notice.expiryDate).toISOString().split("T")[0] : "");
+      const newTitle = prompt("Edit notice title:", notice.title);
+      const newContent = prompt("Edit notice content:", notice.content);
+      const newExpiry = prompt("Edit expiry date (YYYY-MM-DD):", notice.expiryDate || "");
       if (newTitle && newContent) {
         showSpinner();
         try {
           await update(ref(db, `notices/${id}`), {
             title: newTitle,
             content: newContent,
-            expiryDate: newExpiry ? new Date(newExpiry).getTime() : null
+            expiryDate: newExpiry || null
           });
-          logAudit("Edited notice " + id);
+          logAudit(`Edited notice ${id}`);
         } catch (err) {
           console.error("Error editing notice:", err);
           alert("Failed to edit notice.");
@@ -1332,12 +1762,16 @@
       }
     };
 
-    window.deleteNotice = async (id) => {
+    window.deleteNotice = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can delete notices.");
+        return;
+      }
       if (confirm("Delete this notice?")) {
         showSpinner();
         try {
           await remove(ref(db, `notices/${id}`));
-          logAudit("Deleted notice " + id);
+          logAudit(`Deleted notice ${id}`);
         } catch (err) {
           console.error("Error deleting notice:", err);
           alert("Failed to delete notice.");
@@ -1346,14 +1780,23 @@
       }
     };
 
-    // Analytics management
+    // Analytics and Reporting
     window.generateReport = async () => {
-      const type = document.getElementById("reportType").value;
+      if (currentUserRole !== "admin") {
+        alert("Only admins can generate reports.");
+        return;
+      }
+      const reportType = document.getElementById("reportType").value;
       showSpinner();
       try {
-        const data = type === "learner_progress" ? await generateProgressReport() : await generateGrantReport();
-        await push(ref(db, "analytics"), { type, data, createdAt: Date.now() });
-        logAudit("Generated " + type + " report");
+        const reportData = await generateReportData(reportType);
+        await push(ref(db, "analytics"), {
+          type: reportType,
+          data: reportData,
+          createdAt: Date.now(),
+          metadata: { tags: ["report"], version: "1.0" }
+        });
+        logAudit(`Generated ${reportType} report`);
       } catch (err) {
         console.error("Error generating report:", err);
         alert("Failed to generate report.");
@@ -1361,58 +1804,77 @@
       hideSpinner();
     };
 
-    async function generateProgressReport() {
-      const snap = await get(ref(db, "users"));
-      const data = snap.val() || {};
-      const progressData = [];
-      for (const uid in data) {
-        if (data[uid].role === "learner") progressData.push(data[uid].progress || 0);
+    async function generateReportData(type) {
+      if (type === "learner_progress") {
+        const snap = await get(ref(db, "users"));
+        const data = snap.val() || {};
+        return Object.entries(data)
+          .filter(([_, u]) => u.role === "learner")
+          .map(([uid, u]) => ({ learner: u.fullName || u.email, progress: u.progress || 0 }));
+      } else if (type === "grant_disbursement") {
+        const snap = await get(ref(db, "grants"));
+        const data = snap.val() || {};
+        return Object.entries(data).map(([id, g]) => ({
+          id,
+          type: g.type,
+          amount: g.amount,
+          status: g.status,
+          recipient: users.find(u => u.uid === g.recipientId)?.fullName || "-"
+        }));
+      } else if (type === "user_activity") {
+        const snap = await get(ref(db, "audit_logs"));
+        const data = snap.val() || {};
+        return Object.entries(data).map(([id, log]) => ({
+          action: log.action,
+          user: users.find(u => u.uid === log.userId)?.email || "-",
+          timestamp: log.timestamp
+        }));
       }
-      return {
-        labels: progressData.map((_, i) => `Learner ${i + 1}`),
-        datasets: [{
-          label: "Progress (%)",
-          data: progressData,
-          backgroundColor: "#2563eb"
-        }]
-      };
+      return [];
     }
 
-    async function generateGrantReport() {
-      const snap = await get(ref(db, "grants"));
-      const data = snap.val() || {};
-      const statuses = { pending: 0, disbursed: 0 };
-      for (const id in data) {
-        statuses[data[id].status]++;
-      }
-      return {
-        labels: ["Pending", "Disbursed"],
-        datasets: [{
-          label: "Grants",
-          data: [statuses.pending, statuses.disbursed],
-          backgroundColor: ["#f87171", "#34d399"]
-        }]
-      };
-    }
-
-    window.viewReport = async (id) => {
+    window.viewReport = id => {
       const report = analytics[id];
-      const canvas = document.createElement("canvas");
-      reportList.appendChild(canvas);
-      new Chart(canvas, {
-        type: report.type === "learner_progress" ? "bar" : "pie",
-        data: report.data,
-        options: { scales: report.type === "learner_progress" ? { y: { beginAtZero: true, max: 100 } } : {} }
-      });
+      alert(`Report: ${report.type}\nData: ${JSON.stringify(report.data, null, 2)}`);
     };
 
-    // Helpdesk management
-    window.resolveTicket = async (id) => {
+    window.exportReportToPDF = id => {
+      const report = analytics[id];
+      const docDefinition = {
+        content: [
+          { text: report.type.replace("_", " "), style: "header" },
+          { text: `Generated on ${new Date(report.createdAt).toLocaleDateString()}`, style: "subheader" },
+          {
+            table: {
+              headerRows: 1,
+              widths: ["*", "*"],
+              body: [
+                ["Field", "Value"],
+                ...report.data.map(item => Object.values(item).map(val => val.toString()))
+              ]
+            }
+          }
+        ],
+        styles: {
+          header: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
+          subheader: { fontSize: 14, margin: [0, 0, 0, 10] }
+        }
+      };
+      pdfMake.createPdf(docDefinition).download(`${report.type}_${new Date().toISOString().split("T")[0]}.pdf`);
+      logAudit(`Exported ${report.type} report to PDF`);
+    };
+
+    // Helpdesk Ticket Management
+    window.resolveTicket = async id => {
+      if (currentUserRole !== "admin") {
+        alert("Only admins can resolve tickets.");
+        return;
+      }
       if (confirm("Resolve this ticket?")) {
         showSpinner();
         try {
-          await update(ref(db, `helpdesk/${id}`), { status: "resolved" });
-          logAudit("Resolved ticket " + id);
+          await update(ref(db, `helpdesk/${id}`), { status: "resolved", resolvedAt: Date.now() });
+          logAudit(`Resolved ticket ${id}`);
         } catch (err) {
           console.error("Error resolving ticket:", err);
           alert("Failed to resolve ticket.");
@@ -1421,8 +1883,9 @@
       }
     };
 
-    // Audit logging
+    // Audit Logging
     async function logAudit(action) {
+      if (!auth.currentUser) return;
       try {
         await push(ref(db, "audit_logs"), {
           userId: auth.currentUser.uid,
@@ -1436,40 +1899,53 @@
 
     // Populate dropdowns
     async function populateDropdowns() {
-      const courseSelects = [document.getElementById("assessmentCourse"), document.getElementById("certCourse"), document.getElementById("bursaryProgram")];
-      const userSelects = [document.getElementById("certLearner"), document.getElementById("accProvider"), document.getElementById("grantRecipient"), document.getElementById("bursaryApplicant"), document.getElementById("wspEmployer")];
-      
+      const assessmentCourse = document.getElementById("assessmentCourse");
+      const certCourse = document.getElementById("certCourse");
+      const certLearner = document.getElementById("certLearner");
+      const accProvider = document.getElementById("accProvider");
+      const grantRecipient = document.getElementById("grantRecipient");
+      const bursaryApplicant = document.getElementById("bursaryApplicant");
+      const bursaryProgram = document.getElementById("bursaryProgram");
+      const wspEmployer = document.getElementById("wspEmployer");
+
       onValue(ref(db, "courses"), snap => {
-        courseSelects.forEach(select => {
-          select.innerHTML = "<option value=''>Select Course</option>";
-          const data = snap.val() || {};
-          for (const id in data) {
-            const option = document.createElement("option");
-            option.value = id;
-            option.textContent = data[id].name;
-            select.appendChild(option);
-          }
-        });
+        assessmentCourse.innerHTML = '<option value="">Select Course</option>';
+        certCourse.innerHTML = '<option value="">Select Course</option>';
+        bursaryProgram.innerHTML = '<option value="">Select Program</option>';
+        const data = snap.val() || {};
+        for (const id in data) {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = data[id].name;
+          assessmentCourse.appendChild(option.cloneNode(true));
+          certCourse.appendChild(option.cloneNode(true));
+          bursaryProgram.appendChild(option.cloneNode(true));
+        }
       });
 
       onValue(ref(db, "users"), snap => {
-        userSelects.forEach(select => {
-          select.innerHTML = "<option value=''>Select User</option>";
-          const data = snap.val() || {};
-          for (const uid in data) {
-            const option = document.createElement("option");
-            option.value = uid;
-            option.textContent = data[uid].fullName || data[uid].email;
-            select.appendChild(option);
-          }
-        });
+        certLearner.innerHTML = '<option value="">Select Learner</option>';
+        accProvider.innerHTML = '<option value="">Select Provider</option>';
+        grantRecipient.innerHTML = '<option value="">Select Recipient</option>';
+        bursaryApplicant.innerHTML = '<option value="">Select Applicant</option>';
+        wspEmployer.innerHTML = '<option value="">Select Employer</option>';
+        const data = snap.val() || {};
+        for (const uid in data) {
+          const user = data[uid];
+          const option = document.createElement("option");
+          option.value = uid;
+          option.textContent = user.fullName || user.email;
+          if (user.role === "learner") certLearner.appendChild(option.cloneNode(true));
+          if (user.role === "provider") accProvider.appendChild(option.cloneNode(true));
+          grantRecipient.appendChild(option.cloneNode(true));
+          bursaryApplicant.appendChild(option.cloneNode(true));
+          if (user.role === "sdf" || user.role === "admin") wspEmployer.appendChild(option.cloneNode(true));
+        }
       });
     }
 
-    // Initialize
-    onAuthStateChanged(auth, user => {
-      if (user) populateDropdowns();
-    });
+    // Initialize dropdowns
+    populateDropdowns();
   </script>
 </body>
 </html>
