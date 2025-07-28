@@ -1411,19 +1411,25 @@
       pdfMake.createPdf(docDefinition).download(`analytics_report_${new Date().toISOString().split("T")[0]}.pdf`);
     });
 
-    // Helpdesk
-    function loadTickets() {
-      showSpinner();
-      onValue(ref(db, "helpdesk"), snap => {
-        tickets = snap.val() || {};
-        onValue(ref(db, "users"), snap => {
-          learners = snap.val() || {};
-          dom.ticketList.inner
-            renderTickets();
-          hideSpinner();
-        });
-      });
-    }
+   function loadTickets() {
+  showSpinner();
+  onValue(ref(db, "helpdesk"), snap => {
+    tickets = snap.val() || {};
+    onValue(ref(db, "users"), snap => {
+      learners = snap.val() || {};
+      renderTickets();
+      hideSpinner();
+    }, err => {
+      console.error("Error fetching users:", err);
+      showError("Failed to load user data for tickets.");
+      hideSpinner();
+    });
+  }, err => {
+    console.error("Error fetching tickets:", err);
+    showError("Failed to load tickets: " + err.message);
+    hideSpinner();
+  });
+}
 
     function renderTickets(filter = "", page = 1) {
       dom.ticketList.innerHTML = "";
