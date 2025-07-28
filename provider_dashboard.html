@@ -73,6 +73,12 @@
       background: #1a1a1a !important;
       color: #fff !important;
     }
+    #course-checkboxes label {
+      cursor: pointer;
+    }
+    #course-checkboxes input[type="checkbox"] {
+      accent-color: #2563eb;
+    }
     @media (max-width: 768px) {
       .sidebar {
         position: fixed;
@@ -266,6 +272,21 @@
             <div class="flex gap-2">
               <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Upload CSV">Upload</button>
               <button type="button" id="close-bulk-upload" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-tooltip="Cancel">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Assign Courses Modal -->
+      <div id="assign-courses-modal" class="modal">
+        <div class="modal-content">
+          <h3 class="text-lg font-semibold mb-4">Assign Courses to Learner</h3>
+          <form id="assign-courses-form">
+            <p id="assign-learner-name" class="text-sm text-gray-600 mb-2"></p>
+            <div id="course-checkboxes" class="space-y-2 mb-4 max-h-64 overflow-y-auto"></div>
+            <div class="flex gap-2">
+              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Save course assignments">Save</button>
+              <button type="button" id="close-assign-courses" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-tooltip="Cancel">Cancel</button>
             </div>
           </form>
         </div>
