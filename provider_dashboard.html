@@ -792,37 +792,37 @@
     };
 
     // Load courses
-    function loadCourses() {
-      showSpinner();
-      onValue(ref(db, "courses"), snap => {
-        courses = snap.val() || {};
-        renderCourses();
-        populateCourseFilter();
-        populateLearnerCourseDropdown();
-        hideSpinner();
-      });
-    }
+   function loadCourses() {
+  showSpinner();
+  onValue(ref(db, "courses"), snap => {
+    courses = snap.val() || {};
+    renderCourses();
+    populateCourseFilter();
+    populateLearnerCourseDropdown();
+    hideSpinner();
+  });
+}
 
     function renderCourses(filter = "") {
-      courseList.innerHTML = "";
-      for (const id in courses) {
-        const c = courses[id];
-        if (c.providerId !== auth.currentUser.uid || (filter && !c.name.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase())))) continue;
-        const courseItem = document.createElement("div");
-        courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow";
-        courseItem.innerHTML = `
-          <div>
-            <p class="font-semibold">${sanitizeInput(c.name)}</p>
-            <p class="text-sm text-gray-600">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Enrolled: ${c.enrolled?.length || 0}</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="editCourse('${id}')" class="text-blue-600 hover:underline" aria-label="Edit course ${sanitizeInput(c.name)}" data-tooltip="Edit course">Edit</button>
-            <button onclick="archiveCourse('${id}')" class="text-red-600 hover:underline" aria-label="${c.archived ? "Unarchive" : "Archive"} course ${sanitizeInput(c.name)}" data-tooltip="${c.archived ? "Unarchive" : "Archive"} course">${c.archived ? "Unarchive" : "Archive"}</button>
-          </div>
-        `;
-        courseList.appendChild(courseItem);
-      }
-    }
+  courseList.innerHTML = "";
+  for (const id in courses) {
+    const c = courses[id];
+    if (c.providerId !== auth.currentUser.uid || (filter && !c.name.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase())))) continue;
+    const courseItem = document.createElement("div");
+    courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow";
+    courseItem.innerHTML = `
+      <div>
+        <p class="font-semibold">${sanitizeInput(c.name)}</p>
+        <p class="text-sm text-gray-600">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Enrolled: ${c.enrolled?.length || 0}</p>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="editCourse('${id}')" class="text-blue-600 hover:underline" aria-label="Edit course ${sanitizeInput(c.name)}" data-tooltip="Edit course">Edit</button>
+        <button onclick="archiveCourse('${id}')" class="text-red-600 hover:underline" aria-label="${c.archived ? "Unarchive" : "Archive"} course ${sanitizeInput(c.name)}" data-tooltip="${c.archived ? "Unarchive" : "Archive"} course">${c.archived ? "Unarchive" : "Archive"}</button>
+      </div>
+    `;
+    courseList.appendChild(courseItem);
+  }
+}
 
     // Search courses
     const searchCourses = debounce(filter => renderCourses(sanitizeInput(filter)), 300);
