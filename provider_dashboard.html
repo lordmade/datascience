@@ -73,12 +73,6 @@
       background: #1a1a1a !important;
       color: #fff !important;
     }
-    #course-checkboxes label {
-      cursor: pointer;
-    }
-    #course-checkboxes input[type="checkbox"] {
-      accent-color: #2563eb;
-    }
     @media (max-width: 768px) {
       .sidebar {
         position: fixed;
@@ -277,21 +271,6 @@
         </div>
       </div>
 
-      <!-- Assign Courses Modal -->
-      <div id="assign-courses-modal" class="modal">
-        <div class="modal-content">
-          <h3 class="text-lg font-semibold mb-4">Assign Courses to Learner</h3>
-          <form id="assign-courses-form">
-            <p id="assign-learner-name" class="text-sm text-gray-600 mb-2"></p>
-            <div id="course-checkboxes" class="space-y-2 mb-4 max-h-64 overflow-y-auto"></div>
-            <div class="flex gap-2">
-              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Save course assignments">Save</button>
-              <button type="button" id="close-assign-courses" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-tooltip="Cancel">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
       <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
       </div>
@@ -301,1242 +280,1108 @@
       </noscript>
     </div>
   </div>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-  import { getDatabase, ref, onValue, push, update, set, get, remove, runTransaction } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-  // Firebase configuration (move to environment variables in production)
-  const firebaseConfig = {
-    apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
-    authDomain: "fire-b-a8878.firebaseapp.com",
-    databaseURL: "https://fire-b-a8878.firebaseio.com",
-    projectId: "fire-b-a8878",
-    storageBucket: "fire-b-a8878.appspot.com",
-    messagingSenderId: "658673187627",
-    appId: "1:658673187627:web:6e4c29af661785f0afa36e"
-  };
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getDatabase, ref, onValue, push, update, set, get, remove, runTransaction } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
-
-  // DOM elements
-  const providerName = document.getElementById("provider-name");
-  const coursesOffered = document.getElementById("courses-offered");
-  const enrolledLearners = document.getElementById("enrolled-learners");
-  const completionRate = document.getElementById("completion-rate");
-  const certificatesIssued = document.getElementById("certificates-issued");
-  const courseList = document.getElementById("courseList");
-  const courseSearch = document.getElementById("courseSearch");
-  const learnerList = document.getElementById("learnerList");
-  const learnerSearch = document.getElementById("learnerSearch");
-  const groupFilter = document.getElementById("groupFilter");
-  const progressList = document.getElementById("progressList");
-  const progressSearch = document.getElementById("progressSearch");
-  const ticketList = document.getElementById("ticketList");
-  const courseForm = document.getElementById("course-form");
-  const courseName = document.getElementById("courseName");
-  const courseTags = document.getElementById("courseTags");
-  const addLearnerModal = document.getElementById("add-learner-modal");
-  const addLearnerForm = document.getElementById("add-learner-form");
-  const learnerFullName = document.getElementById("learnerFullName");
-  const learnerEmail = document.getElementById("learnerEmail");
-  const learnerContact = document.getElementById("learnerContact");
-  const learnerTags = document.getElementById("learnerTags");
-  const learnerCourse = document.getElementById("learnerCourse");
-  const closeAddLearner = document.getElementById("close-add-learner");
-  const bulkUploadModal = document.getElementById("bulk-upload-modal");
-  const bulkUploadForm = document.getElementById("bulk-upload-form");
-  const learnerCSV = document.getElementById("learnerCSV");
-  const closeBulkUpload = document.getElementById("close-bulk-upload");
-  const assignCoursesModal = document.getElementById("assign-courses-modal");
-  const assignCoursesForm = document.getElementById("assign-courses-form");
-  const assignLearnerName = document.getElementById("assign-learner-name");
-  const courseCheckboxes = document.getElementById("course-checkboxes");
-  const closeAssignCourses = document.getElementById("close-assign-courses");
-  const completionChart = document.getElementById("completion-chart").getContext("2d");
-  const enrollmentTrendChart = document.getElementById("enrollment-trend-chart").getContext("2d");
-  const analyticsChart = document.getElementById("analytics-chart").getContext("2d");
-  const heatmapChart = document.getElementById("heatmap-chart").getContext("2d");
-  const analyticsDetails = document.getElementById("analytics-details");
-  const timeRange = document.getElementById("timeRange");
-  const courseFilter = document.getElementById("courseFilter");
-  const groupFilterAnalytics = document.getElementById("groupFilterAnalytics");
-  const exportAnalytics = document.getElementById("export-analytics");
-  const loadingSpinner = document.getElementById("loading-spinner");
-  const sidebar = document.getElementById("sidebar");
-  const toggleSidebar = document.getElementById("toggle-sidebar");
-  const toggleContrast = document.getElementById("toggle-contrast");
-  const openAddLearner = document.getElementById("open-add-learner");
-  const openBulkUpload = document.getElementById("open-bulk-upload");
-  const signoutBtn = document.getElementById("signout-btn");
-
-  let user = null, courses = {}, learners = {}, assessments = {}, certifications = {}, tickets = {}, notifications = [];
-  let completionChartInstance = null, enrollmentTrendChartInstance = null, analyticsChartInstance = null, heatmapChartInstance = null;
-
-  // Show/hide loading spinner
-  function showSpinner() { loadingSpinner.classList.remove("hidden"); }
-  function hideSpinner() { loadingSpinner.classList.add("hidden"); }
-
-  // Sidebar toggle
-  toggleSidebar.addEventListener("click", () => {
-    sidebar.classList.toggle("sidebar-hidden");
-    sidebar.classList.toggle("sidebar-open");
-  });
-
-  // High contrast toggle
-  toggleContrast.addEventListener("click", () => {
-    document.body.classList.toggle("high-contrast");
-    localStorage.setItem("highContrast", document.body.classList.contains("high-contrast"));
-  });
-
-  // Load high contrast preference
-  if (localStorage.getItem("highContrast") === "true") {
-    document.body.classList.add("high-contrast");
-  }
-
-  // Section switching
-  document.querySelectorAll(".nav-button").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
-      document.getElementById(btn.dataset.section).classList.remove("hidden");
-      if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
-    });
-  });
-
-  // Debounce function for search
-  function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
+    // Firebase configuration (move to environment variables in production)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+      authDomain: "fire-b-a8878.firebaseapp.com",
+      databaseURL: "https://fire-b-a8878.firebaseio.com",
+      projectId: "fire-b-a8878",
+      storageBucket: "fire-b-a8878.appspot.com",
+      messagingSenderId: "658673187627",
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e"
     };
-  }
 
-  // Sanitize input to prevent XSS
-  function sanitizeInput(input) {
-    const div = document.createElement("div");
-    div.textContent = input;
-    return div.innerHTML;
-  }
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
 
-  // Load overview metrics and charts
-  function loadOverview() {
-    showSpinner();
-    onValue(ref(db, `users/${auth.currentUser.uid}`), snap => {
-      user = snap.val();
-      providerName.textContent = sanitizeInput(user.fullName || user.email);
+    // DOM elements
+    const providerName = document.getElementById("provider-name");
+    const coursesOffered = document.getElementById("courses-offered");
+    const enrolledLearners = document.getElementById("enrolled-learners");
+    const completionRate = document.getElementById("completion-rate");
+    const certificatesIssued = document.getElementById("certificates-issued");
+    const courseList = document.getElementById("courseList");
+    const courseSearch = document.getElementById("courseSearch");
+    const learnerList = document.getElementById("learnerList");
+    const learnerSearch = document.getElementById("learnerSearch");
+    const groupFilter = document.getElementById("groupFilter");
+    const progressList = document.getElementById("progressList");
+    const progressSearch = document.getElementById("progressSearch");
+    const ticketList = document.getElementById("ticketList");
+    const courseForm = document.getElementById("course-form");
+    const courseName = document.getElementById("courseName");
+    const courseTags = document.getElementById("courseTags");
+    const addLearnerModal = document.getElementById("add-learner-modal");
+    const addLearnerForm = document.getElementById("add-learner-form");
+    const learnerFullName = document.getElementById("learnerFullName");
+    const learnerEmail = document.getElementById("learnerEmail");
+    const learnerContact = document.getElementById("learnerContact");
+    const learnerTags = document.getElementById("learnerTags");
+    const learnerCourse = document.getElementById("learnerCourse");
+    const closeAddLearner = document.getElementById("close-add-learner");
+    const bulkUploadModal = document.getElementById("bulk-upload-modal");
+    const bulkUploadForm = document.getElementById("bulk-upload-form");
+    const learnerCSV = document.getElementById("learnerCSV");
+    const closeBulkUpload = document.getElementById("close-bulk-upload");
+    const completionChart = document.getElementById("completion-chart").getContext("2d");
+    const enrollmentTrendChart = document.getElementById("enrollment-trend-chart").getContext("2d");
+    const analyticsChart = document.getElementById("analytics-chart").getContext("2d");
+    const heatmapChart = document.getElementById("heatmap-chart").getContext("2d");
+    const analyticsDetails = document.getElementById("analytics-details");
+    const timeRange = document.getElementById("timeRange");
+    const courseFilter = document.getElementById("courseFilter");
+    const groupFilterAnalytics = document.getElementById("groupFilterAnalytics");
+    const exportAnalytics = document.getElementById("export-analytics");
+    const loadingSpinner = document.getElementById("loading-spinner");
+    const sidebar = document.getElementById("sidebar");
+    const toggleSidebar = document.getElementById("toggle-sidebar");
+    const toggleContrast = document.getElementById("toggle-contrast");
+    const openAddLearner = document.getElementById("open-add-learner");
+    const openBulkUpload = document.getElementById("open-bulk-upload");
+
+    let user = null, courses = {}, learners = {}, assessments = {}, certifications = {}, tickets = {}, notifications = [];
+    let completionChartInstance = null, enrollmentTrendChartInstance = null, analyticsChartInstance = null, heatmapChartInstance = null;
+
+    // Show/hide loading spinner
+    function showSpinner() { loadingSpinner.classList.remove("hidden"); }
+    function hideSpinner() { loadingSpinner.classList.add("hidden"); }
+
+    // Sidebar toggle
+    toggleSidebar.addEventListener("click", () => {
+      sidebar.classList.toggle("sidebar-hidden");
+      sidebar.classList.toggle("sidebar-open");
     });
 
-    onValue(ref(db, "courses"), snap => {
-      courses = snap.val() || {};
-      let courseCount = 0, learnerCount = 0, completedCount = 0, certCount = 0;
-      const completionData = { labels: [], datasets: [{ label: "Completion Rate (%)", data: [], backgroundColor: "#2563eb", borderRadius: 4 }] };
-      const enrollmentData = { labels: [], datasets: [{ label: "Enrollments", data: [], backgroundColor: "#10b981", borderRadius: 4 }] };
+    // High contrast toggle
+    toggleContrast.addEventListener("click", () => {
+      document.body.classList.toggle("high-contrast");
+      localStorage.setItem("highContrast", document.body.classList.contains("high-contrast"));
+    });
 
-      const now = Date.now();
-      const days = 30;
-      const timePoints = Array.from({ length: days }, (_, i) => {
-        const date = new Date(now - (days - i - 1) * 24 * 60 * 60 * 1000);
-        return date.toLocaleDateString();
-      });
+    // Load high contrast preference
+    if (localStorage.getItem("highContrast") === "true") {
+      document.body.classList.add("high-contrast");
+    }
 
-      const enrollmentsByDay = timePoints.map(() => 0);
-
-      for (const id in courses) {
-        if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
-          courseCount++;
-          const enrolled = courses[id].enrolled?.length || 0;
-          learnerCount += enrolled;
-          const completion = courses[id].completions?.length || 0;
-          completionData.labels.push(courses[id].name);
-          completionData.datasets[0].data.push(enrolled > 0 ? (completion / enrolled * 100).toFixed(1) : 0);
-          completedCount += completion;
-
-          courses[id].enrolled?.forEach(learnerId => {
-            const enrollmentDate = learners[learnerId]?.enrollmentDate || now;
-            const daysSince = Math.floor((now - enrollmentDate) / (24 * 60 * 60 * 1000));
-            if (daysSince < days) enrollmentsByDay[days - daysSince - 1]++;
-          });
-        }
-      }
-
-      coursesOffered.textContent = courseCount;
-      enrolledLearners.textContent = learnerCount;
-      completionRate.textContent = learnerCount > 0 ? (completedCount / learnerCount * 100).toFixed(1) + "%" : "0%";
-
-      if (completionChartInstance) completionChartInstance.destroy();
-      completionChartInstance = new Chart(completionChart, {
-        type: "bar",
-        data: completionData,
-        options: {
-          scales: { y: { beginAtZero: true, max: 100 } },
-          plugins: {
-            datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
-          }
-        },
-        plugins: [ChartDataLabels]
-      });
-
-      if (enrollmentTrendChartInstance) enrollmentTrendChartInstance.destroy();
-      enrollmentTrendChartInstance = new Chart(enrollmentTrendChart, {
-        type: "line",
-        data: {
-          labels: timePoints,
-          datasets: [{ label: "Enrollments", data: enrollmentsByDay, borderColor: "#10b981", fill: false }]
-        },
-        options: {
-          scales: { y: { beginAtZero: true } },
-          plugins: { tooltip: { mode: "index", intersect: false } }
-        }
-      });
-
-      onValue(ref(db, "certifications"), snap => {
-        certifications = snap.val() || {};
-        certCount = Object.values(certifications).filter(c => courses[c.courseId]?.providerId === auth.currentUser.uid).length;
-        certificatesIssued.textContent = certCount;
-        hideSpinner();
+    // Section switching
+    document.querySelectorAll(".nav-button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
+        document.getElementById(btn.dataset.section).classList.remove("hidden");
+        if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
       });
     });
-  }
 
-  // Load learners
-  function loadLearners() {
-    showSpinner();
-    onValue(ref(db, "users"), snap => {
-      learners = snap.val() || {};
+    // Debounce function for search
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // Sanitize input to prevent XSS
+    function sanitizeInput(input) {
+      const div = document.createElement("div");
+      div.textContent = input;
+      return div.innerHTML;
+    }
+
+    // Load overview metrics and charts
+    function loadOverview() {
+      showSpinner();
+      onValue(ref(db, `users/${auth.currentUser.uid}`), snap => {
+        user = snap.val();
+        providerName.textContent = sanitizeInput(user.fullName || user.email);
+      });
+
       onValue(ref(db, "courses"), snap => {
         courses = snap.val() || {};
-        renderLearners();
-        populateGroupFilter();
-        populateCourseFilter();
-        populateLearnerCourseDropdown();
-        hideSpinner();
-      });
-    });
-  }
+        let courseCount = 0, learnerCount = 0, completedCount = 0, certCount = 0;
+        const completionData = { labels: [], datasets: [{ label: "Completion Rate (%)", data: [], backgroundColor: "#2563eb", borderRadius: 4 }] };
+        const enrollmentData = { labels: [], datasets: [{ label: "Enrollments", data: [], backgroundColor: "#10b981", borderRadius: 4 }] };
 
-  function renderLearners(filter = "", group = "") {
-    learnerList.innerHTML = "";
-    for (const id in learners) {
-      const l = learners[id];
-      if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
-      if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase()) && !l.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) continue;
-      if (group && !l.metadata?.tags?.includes(group)) continue;
-      const learnerItem = document.createElement("div");
-      learnerItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-      const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
-      learnerItem.innerHTML = `
-        <div class="flex justify-between items-center">
-          <div>
-            <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p>
-            <p class="text-sm text-gray-600">Email: ${sanitizeInput(l.email)} | Contact: ${sanitizeInput(l.metadata?.contact || "-")} | Tags: ${sanitizeInput(l.metadata?.tags?.join(", ") || "-")}</p>
-            <p class="text-sm text-gray-600">Courses: ${enrolledCourses.map(c => sanitizeInput(c.name)).join(", ") || "None"}</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="viewLearnerProfile('${id}')" class="text-blue-600 hover:underline" aria-label="View profile for ${sanitizeInput(l.fullName || l.email)}" data-tooltip="View profile">Profile</button>
-            <button onclick="editLearner('${id}')" class="text-blue-600 hover:underline" aria-label="Edit learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Edit learner">Edit</button>
-            <button onclick="assignCourses('${id}')" class="text-green-600 hover:underline" aria-label="Assign courses to ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Assign courses">Assign Courses</button>
-            <button onclick="deleteLearner('${id}')" class="text-red-600 hover:underline" aria-label="Delete learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Delete learner">Delete</button>
-          </div>
-        </div>
-      `;
-      learnerList.appendChild(learnerItem);
-    }
-  }
-
-  // Search learners
-  const searchLearners = debounce((filter, group) => renderLearners(sanitizeInput(filter), group), 300);
-  learnerSearch.addEventListener("input", () => searchLearners(learnerSearch.value, groupFilter.value));
-  groupFilter.addEventListener("change", () => searchLearners(learnerSearch.value, groupFilter.value));
-
-  // Populate group filter
-  function populateGroupFilter() {
-    const groups = new Set();
-    for (const id in learners) {
-      if (learners[id].role === "learner" && learners[id].providerId === auth.currentUser.uid) {
-        learners[id].metadata?.tags?.forEach(tag => groups.add(tag));
-      }
-    }
-    groupFilter.innerHTML = '<option value="">All Groups</option>';
-    groups.forEach(group => {
-      const option = document.createElement("option");
-      option.value = group;
-      option.textContent = sanitizeInput(group);
-      groupFilter.appendChild(option);
-    });
-    groupFilterAnalytics.innerHTML = groupFilter.innerHTML;
-  }
-
-  // Populate learner course dropdown
-  function populateLearnerCourseDropdown() {
-    learnerCourse.innerHTML = '<option value="">Select Course (optional)</option>';
-    for (const id in courses) {
-      if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
-        const option = document.createElement("option");
-        option.value = id;
-        option.textContent = sanitizeInput(courses[id].name);
-        learnerCourse.appendChild(option);
-      }
-    }
-  }
-
-  // Add learner
-  openAddLearner.addEventListener("click", () => {
-    addLearnerModal.style.display = "block";
-    learnerFullName.focus();
-  });
-
-  closeAddLearner.addEventListener("click", () => {
-    addLearnerModal.style.display = "none";
-    addLearnerForm.reset();
-  });
-
-  addLearnerForm.addEventListener("submit", async e => {
-    e.preventDefault();
-    const fullName = sanitizeInput(learnerFullName.value.trim());
-    const email = sanitizeInput(learnerEmail.value.trim());
-    const contact = sanitizeInput(learnerContact.value.trim());
-    const tags = learnerTags.value.split(",").map(t => sanitizeInput(t.trim())).filter(t => t);
-    const courseId = learnerCourse.value;
-    if (!fullName || !email) {
-      alert("Please enter full name and email.");
-      return;
-    }
-    showSpinner();
-    try {
-      const { user: newUser } = await createUserWithEmailAndPassword(auth, email, generateTempPassword());
-      await set(ref(db, `users/${newUser.uid}`), {
-        fullName,
-        email,
-        role: "learner",
-        providerId: auth.currentUser.uid,
-        enrollmentDate: Date.now(),
-        progress: {},
-        metadata: { contact: contact || null, tags, version: "1.0" }
-      });
-      if (courseId) {
-        await runTransaction(ref(db, `courses/${courseId}`), course => {
-          course = course || { enrolled: [] };
-          course.enrolled = course.enrolled || [];
-          if (!course.enrolled.includes(newUser.uid)) course.enrolled.push(newUser.uid);
-          return course;
+        const now = Date.now();
+        const days = 30;
+        const timePoints = Array.from({ length: days }, (_, i) => {
+          const date = new Date(now - (days - i - 1) * 24 * 60 * 60 * 1000);
+          return date.toLocaleDateString();
         });
+
+        const enrollmentsByDay = timePoints.map(() => 0);
+
+        for (const id in courses) {
+          if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
+            courseCount++;
+            const enrolled = courses[id].enrolled?.length || 0;
+            learnerCount += enrolled;
+            const completion = courses[id].completions?.length || 0;
+            completionData.labels.push(courses[id].name);
+            completionData.datasets[0].data.push(enrolled > 0 ? (completion / enrolled * 100).toFixed(1) : 0);
+            completedCount += completion;
+
+            courses[id].enrolled?.forEach(learnerId => {
+              const enrollmentDate = learners[learnerId]?.enrollmentDate || now;
+              const daysSince = Math.floor((now - enrollmentDate) / (24 * 60 * 60 * 1000));
+              if (daysSince < days) enrollmentsByDay[days - daysSince - 1]++;
+            });
+          }
+        }
+
+        coursesOffered.textContent = courseCount;
+        enrolledLearners.textContent = learnerCount;
+        completionRate.textContent = learnerCount > 0 ? (completedCount / learnerCount * 100).toFixed(1) + "%" : "0%";
+
+        if (completionChartInstance) completionChartInstance.destroy();
+        completionChartInstance = new Chart(completionChart, {
+          type: "bar",
+          data: completionData,
+          options: {
+            scales: { y: { beginAtZero: true, max: 100 } },
+            plugins: {
+              datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
+            }
+          },
+          plugins: [ChartDataLabels]
+        });
+
+        if (enrollmentTrendChartInstance) enrollmentTrendChartInstance.destroy();
+        enrollmentTrendChartInstance = new Chart(enrollmentTrendChart, {
+          type: "line",
+          data: {
+            labels: timePoints,
+            datasets: [{ label: "Enrollments", data: enrollmentsByDay, borderColor: "#10b981", fill: false }]
+          },
+          options: {
+            scales: { y: { beginAtZero: true } },
+            plugins: { tooltip: { mode: "index", intersect: false } }
+          }
+        });
+
+        onValue(ref(db, "certifications"), snap => {
+          certifications = snap.val() || {};
+          certCount = Object.values(certifications).filter(c => courses[c.courseId]?.providerId === auth.currentUser.uid).length;
+          certificatesIssued.textContent = certCount;
+          hideSpinner();
+        });
+      });
+    }
+
+    // Load learners
+    function loadLearners() {
+      showSpinner();
+      onValue(ref(db, "users"), snap => {
+        learners = snap.val() || {};
+        onValue(ref(db, "courses"), snap => {
+          courses = snap.val() || {};
+          renderLearners();
+          populateGroupFilter();
+          populateCourseFilter();
+          populateLearnerCourseDropdown();
+          hideSpinner();
+        });
+      });
+    }
+
+    function renderLearners(filter = "", group = "") {
+      learnerList.innerHTML = "";
+      for (const id in learners) {
+        const l = learners[id];
+        if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
+        if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase()) && !l.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) continue;
+        if (group && !l.metadata?.tags?.includes(group)) continue;
+        const learnerItem = document.createElement("div");
+        learnerItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
+        learnerItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p>
+              <p class="text-sm text-gray-600">Email: ${sanitizeInput(l.email)} | Contact: ${sanitizeInput(l.metadata?.contact || "-")} | Tags: ${sanitizeInput(l.metadata?.tags?.join(", ") || "-")}</p>
+              <p class="text-sm text-gray-600">Courses: ${enrolledCourses.map(c => sanitizeInput(c.name)).join(", ") || "None"}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="viewLearnerProfile('${id}')" class="text-blue-600 hover:underline" aria-label="View profile for ${sanitizeInput(l.fullName || l.email)}" data-tooltip="View profile">Profile</button>
+              <button onclick="editLearner('${id}')" class="text-blue-600 hover:underline" aria-label="Edit learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Edit learner">Edit</button>
+              <button onclick="deleteLearner('${id}')" class="text-red-600 hover:underline" aria-label="Delete learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Delete learner">Delete</button>
+            </div>
+          </div>
+        `;
+        learnerList.appendChild(learnerItem);
       }
-      logAudit(`Added learner ${fullName} (${email})`);
-      alert("Learner added successfully!");
+    }
+
+    // Search learners
+    const searchLearners = debounce((filter, group) => renderLearners(sanitizeInput(filter), group), 300);
+    learnerSearch.addEventListener("input", () => searchLearners(learnerSearch.value, groupFilter.value));
+    groupFilter.addEventListener("change", () => searchLearners(learnerSearch.value, groupFilter.value));
+
+    // Populate group filter
+    function populateGroupFilter() {
+      const groups = new Set();
+      for (const id in learners) {
+        if (learners[id].role === "learner" && learners[id].providerId === auth.currentUser.uid) {
+          learners[id].metadata?.tags?.forEach(tag => groups.add(tag));
+        }
+      }
+      groupFilter.innerHTML = '<option value="">All Groups</option>';
+      groups.forEach(group => {
+        const option = document.createElement("option");
+        option.value = group;
+        option.textContent = sanitizeInput(group);
+        groupFilter.appendChild(option);
+      });
+      groupFilterAnalytics.innerHTML = groupFilter.innerHTML;
+    }
+
+    // Populate learner course dropdown
+    function populateLearnerCourseDropdown() {
+      learnerCourse.innerHTML = '<option value="">Select Course (optional)</option>';
+      for (const id in courses) {
+        if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = sanitizeInput(courses[id].name);
+          learnerCourse.appendChild(option);
+        }
+      }
+    }
+
+    // Add learner
+    openAddLearner.addEventListener("click", () => {
+      addLearnerModal.style.display = "block";
+      learnerFullName.focus();
+    });
+
+    closeAddLearner.addEventListener("click", () => {
       addLearnerModal.style.display = "none";
       addLearnerForm.reset();
-    } catch (err) {
-      console.error("Error adding learner:", err);
-      alert("Failed to add learner.");
-    }
-    hideSpinner();
-  });
-
-  // Generate temporary password
-  function generateTempPassword() {
-    return Math.random().toString(36).slice(-8);
-  }
-
-  // Bulk upload learners
-  openBulkUpload.addEventListener("click", () => {
-    bulkUploadModal.style.display = "block";
-  });
-
-  closeBulkUpload.addEventListener("click", () => {
-    bulkUploadModal.style.display = "none";
-    bulkUploadForm.reset();
-  });
-
-  bulkUploadForm.addEventListener("submit", async e => {
-    e.preventDefault();
-    const file = learnerCSV.files[0];
-    if (!file) {
-      alert("Please select a CSV file.");
-      return;
-    }
-    showSpinner();
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: async results => {
-        try {
-          for (const row of results.data) {
-            const fullName = sanitizeInput(row.fullName?.trim() || "");
-            const email = sanitizeInput(row.email?.trim() || "");
-            const contact = sanitizeInput(row.contact?.trim() || "");
-            const tags = row.tags ? row.tags.split(",").map(t => sanitizeInput(t.trim())).filter(t => t) : [];
-            const courseId = row.courseId?.trim();
-            if (!fullName || !email) continue;
-            const { user: newUser } = await createUserWithEmailAndPassword(auth, email, generateTempPassword());
-            await set(ref(db, `users/${newUser.uid}`), {
-              fullName,
-              email,
-              role: "learner",
-              providerId: auth.currentUser.uid,
-              enrollmentDate: Date.now(),
-              progress: {},
-              metadata: { contact: contact || null, tags, version: "1.0" }
-            });
-            if (courseId && courses[courseId]?.providerId === auth.currentUser.uid) {
-              await runTransaction(ref(db, `courses/${courseId}`), course => {
-                course = course || { enrolled: [] };
-                course.enrolled = course.enrolled || [];
-                if (!course.enrolled.includes(newUser.uid)) course.enrolled.push(newUser.uid);
-                return course;
-              });
-            }
-            logAudit(`Bulk added learner ${fullName} (${email})`);
-          }
-          alert("Bulk upload completed!");
-          bulkUploadModal.style.display = "none";
-          bulkUploadForm.reset();
-        } catch (err) {
-          console.error("Error during bulk upload:", err);
-          alert("Failed to upload some learners.");
-        }
-        hideSpinner();
-      },
-      error: err => {
-        console.error("CSV parsing error:", err);
-        alert("Failed to parse CSV file.");
-        hideSpinner();
-      }
     });
-  });
 
-  // Open course assignment modal
-  window.assignCourses = learnerId => {
-    const learner = learners[learnerId];
-    if (!learner) {
-      alert("Learner not found.");
-      return;
-    }
-    assignLearnerName.textContent = `Assigning courses to: ${sanitizeInput(learner.fullName || learner.email)}`;
-    courseCheckboxes.innerHTML = "";
-    const enrolledCourses = Object.keys(courses).filter(id => courses[id].enrolled?.includes(learnerId) && courses[id].providerId === auth.currentUser.uid && !courses[id].archived);
-
-    for (const id in courses) {
-      if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
-        const div = document.createElement("div");
-        div.className = "flex items-center";
-        div.innerHTML = `
-          <input type="checkbox" id="course-${id}" name="courses" value="${id}" ${enrolledCourses.includes(id) ? "checked" : ""} class="mr-2">
-          <label for="course-${id}">${sanitizeInput(courses[id].name)}</label>
-        `;
-        courseCheckboxes.appendChild(div);
-      }
-    }
-
-    assignCoursesModal.style.display = "block";
-
-    assignCoursesForm.onsubmit = async e => {
-      e.preventDefault();
-      showSpinner();
-      try {
-        const selectedCourses = Array.from(document.querySelectorAll('input[name="courses"]:checked')).map(input => input.value);
-        const previouslyEnrolled = Object.keys(courses).filter(id => courses[id].enrolled?.includes(learnerId) && courses[id].providerId === auth.currentUser.uid);
-
-        // Unassign courses
-        for (const courseId of previouslyEnrolled) {
-          if (!selectedCourses.includes(courseId)) {
-            await runTransaction(ref(db, `courses/${courseId}`), course => {
-              course = course || { enrolled: [] };
-              course.enrolled = course.enrolled?.filter(id => id !== learnerId) || [];
-              return course;
-            });
-            logAudit(`Unassigned course ${courses[courseId].name} from learner ${learner.fullName || learner.email}`);
-          }
-        }
-
-        // Assign new courses
-        for (const courseId of selectedCourses) {
-          if (!previouslyEnrolled.includes(courseId)) {
-            await runTransaction(ref(db, `courses/${courseId}`), course => {
-              course = course || { enrolled: [] };
-              course.enrolled = course.enrolled || [];
-              if (!course.enrolled.includes(learnerId)) course.enrolled.push(learnerId);
-              return course;
-            });
-            logAudit(`Assigned course ${courses[courseId].name} to learner ${learner.fullName || learner.email}`);
-          }
-        }
-
-        alert("Course assignments updated successfully!");
-        assignCoursesModal.style.display = "none";
-        assignCoursesForm.reset();
-        assignCoursesForm.onsubmit = null;
-      } catch (err) {
-        console.error("Error assigning courses:", err);
-        alert("Failed to update course assignments.");
-      }
-      hideSpinner();
-    };
-
-    closeAssignCourses.onclick = () => {
-      assignCoursesModal.style.display = "none";
-      assignCoursesForm.reset();
-      assignCoursesForm.onsubmit = null;
-    };
-  };
-
-  // Edit learner
-  window.editLearner = async learnerId => {
-    const l = learners[learnerId];
-    learnerFullName.value = l.fullName || "";
-    learnerEmail.value = l.email;
-    learnerContact.value = l.metadata?.contact || "";
-    learnerTags.value = l.metadata?.tags?.join(", ") || "";
-    learnerCourse.value = Object.keys(courses).find(id => courses[id].enrolled?.includes(learnerId)) || "";
-    addLearnerModal.style.display = "block";
-    addLearnerForm.onsubmit = async e => {
+    addLearnerForm.addEventListener("submit", async e => {
       e.preventDefault();
       const fullName = sanitizeInput(learnerFullName.value.trim());
       const email = sanitizeInput(learnerEmail.value.trim());
       const contact = sanitizeInput(learnerContact.value.trim());
       const tags = learnerTags.value.split(",").map(t => sanitizeInput(t.trim())).filter(t => t);
-      const newCourseId = learnerCourse.value;
+      const courseId = learnerCourse.value;
       if (!fullName || !email) {
         alert("Please enter full name and email.");
         return;
       }
       showSpinner();
       try {
-        await update(ref(db, `users/${learnerId}`), {
+        const { user: newUser } = await createUserWithEmailAndPassword(auth, email, generateTempPassword());
+        await set(ref(db, `users/${newUser.uid}`), {
           fullName,
           email,
-          metadata: { contact: contact || null, tags, version: "1.1" }
+          role: "learner",
+          providerId: auth.currentUser.uid,
+          enrollmentDate: Date.now(),
+          progress: {},
+          metadata: { contact: contact || null, tags, version: "1.0" }
         });
-        const oldCourseId = Object.keys(courses).find(id => courses[id].enrolled?.includes(learnerId));
-        if (oldCourseId !== newCourseId) {
-          if (oldCourseId) {
-            await runTransaction(ref(db, `courses/${oldCourseId}`), course => {
+        if (courseId) {
+          await runTransaction(ref(db, `courses/${courseId}`), course => {
+            course = course || { enrolled: [] };
+            course.enrolled = course.enrolled || [];
+            if (!course.enrolled.includes(newUser.uid)) course.enrolled.push(newUser.uid);
+            return course;
+          });
+        }
+        logAudit(`Added learner ${fullName} (${email})`);
+        alert("Learner added successfully!");
+        addLearnerModal.style.display = "none";
+        addLearnerForm.reset();
+      } catch (err) {
+        console.error("Error adding learner:", err);
+        alert("Failed to add learner.");
+      }
+      hideSpinner();
+    });
+
+    // Generate temporary password
+    function generateTempPassword() {
+      return Math.random().toString(36).slice(-8);
+    }
+
+    // Bulk upload learners
+    openBulkUpload.addEventListener("click", () => {
+      bulkUploadModal.style.display = "block";
+    });
+
+    closeBulkUpload.addEventListener("click", () => {
+      bulkUploadModal.style.display = "none";
+      bulkUploadForm.reset();
+    });
+
+    bulkUploadForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const file = learnerCSV.files[0];
+      if (!file) {
+        alert("Please select a CSV file.");
+        return;
+      }
+      showSpinner();
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: async results => {
+          try {
+            for (const row of results.data) {
+              const fullName = sanitizeInput(row.fullName?.trim() || "");
+              const email = sanitizeInput(row.email?.trim() || "");
+              const contact = sanitizeInput(row.contact?.trim() || "");
+              const tags = row.tags ? row.tags.split(",").map(t => sanitizeInput(t.trim())).filter(t => t) : [];
+              const courseId = row.courseId?.trim();
+              if (!fullName || !email) continue;
+              const { user: newUser } = await createUserWithEmailAndPassword(auth, email, generateTempPassword());
+              await set(ref(db, `users/${newUser.uid}`), {
+                fullName,
+                email,
+                role: "learner",
+                providerId: auth.currentUser.uid,
+                enrollmentDate: Date.now(),
+                progress: {},
+                metadata: { contact: contact || null, tags, version: "1.0" }
+              });
+              if (courseId && courses[courseId]?.providerId === auth.currentUser.uid) {
+                await runTransaction(ref(db, `courses/${courseId}`), course => {
+                  course = course || { enrolled: [] };
+                  course.enrolled = course.enrolled || [];
+                  if (!course.enrolled.includes(newUser.uid)) course.enrolled.push(newUser.uid);
+                  return course;
+                });
+              }
+              logAudit(`Bulk added learner ${fullName} (${email})`);
+            }
+            alert("Bulk upload completed!");
+            bulkUploadModal.style.display = "none";
+            bulkUploadForm.reset();
+          } catch (err) {
+            console.error("Error during bulk upload:", err);
+            alert("Failed to upload some learners.");
+          }
+          hideSpinner();
+        },
+        error: err => {
+          console.error("CSV parsing error:", err);
+          alert("Failed to parse CSV file.");
+          hideSpinner();
+        }
+      });
+    });
+
+    // Edit learner
+    window.editLearner = async learnerId => {
+      const l = learners[learnerId];
+      learnerFullName.value = l.fullName || "";
+      learnerEmail.value = l.email;
+      learnerContact.value = l.metadata?.contact || "";
+      learnerTags.value = l.metadata?.tags?.join(", ") || "";
+      learnerCourse.value = Object.keys(courses).find(id => courses[id].enrolled?.includes(learnerId)) || "";
+      addLearnerModal.style.display = "block";
+      addLearnerForm.onsubmit = async e => {
+        e.preventDefault();
+        const fullName = sanitizeInput(learnerFullName.value.trim());
+        const email = sanitizeInput(learnerEmail.value.trim());
+        const contact = sanitizeInput(learnerContact.value.trim());
+        const tags = learnerTags.value.split(",").map(t => sanitizeInput(t.trim())).filter(t => t);
+        const newCourseId = learnerCourse.value;
+        if (!fullName || !email) {
+          alert("Please enter full name and email.");
+          return;
+        }
+        showSpinner();
+        try {
+          await update(ref(db, `users/${learnerId}`), {
+            fullName,
+            email,
+            metadata: { contact: contact || null, tags, version: "1.1" }
+          });
+          const oldCourseId = Object.keys(courses).find(id => courses[id].enrolled?.includes(learnerId));
+          if (oldCourseId !== newCourseId) {
+            if (oldCourseId) {
+              await runTransaction(ref(db, `courses/${oldCourseId}`), course => {
+                course = course || { enrolled: [] };
+                course.enrolled = course.enrolled.filter(id => id !== learnerId);
+                return course;
+              });
+            }
+            if (newCourseId) {
+              await runTransaction(ref(db, `courses/${newCourseId}`), course => {
+                course = course || { enrolled: [] };
+                course.enrolled = course.enrolled || [];
+                if (!course.enrolled.includes(learnerId)) course.enrolled.push(learnerId);
+                return course;
+              });
+            }
+          }
+          logAudit(`Edited learner ${fullName} (${email})`);
+          alert("Learner updated successfully!");
+          addLearnerModal.style.display = "none";
+          addLearnerForm.reset();
+          addLearnerForm.onsubmit = null; // Reset to default add behavior
+        } catch (err) {
+          console.error("Error editing learner:", err);
+          alert("Failed to edit learner.");
+        }
+        hideSpinner();
+      };
+    };
+
+    // Delete learner
+    window.deleteLearner = async learnerId => {
+      if (!confirm("Are you sure you want to delete this learner?")) return;
+      showSpinner();
+      try {
+        await remove(ref(db, `users/${learnerId}`));
+        for (const courseId in courses) {
+          if (courses[courseId].enrolled?.includes(learnerId)) {
+            await runTransaction(ref(db, `courses/${courseId}`), course => {
               course = course || { enrolled: [] };
               course.enrolled = course.enrolled.filter(id => id !== learnerId);
               return course;
             });
           }
-          if (newCourseId) {
-            await runTransaction(ref(db, `courses/${newCourseId}`), course => {
-              course = course || { enrolled: [] };
-              course.enrolled = course.enrolled || [];
-              if (!course.enrolled.includes(learnerId)) course.enrolled.push(learnerId);
-              return course;
-            });
-          }
         }
-        logAudit(`Edited learner ${fullName} (${email})`);
-        alert("Learner updated successfully!");
-        addLearnerModal.style.display = "none";
-        addLearnerForm.reset();
-        addLearnerForm.onsubmit = null; // Reset to default add behavior
+        logAudit(`Deleted learner ${learners[learnerId].fullName || learners[learnerId].email}`);
+        alert("Learner deleted successfully!");
       } catch (err) {
-        console.error("Error editing learner:", err);
-        alert("Failed to edit learner.");
+        console.error("Error deleting learner:", err);
+        alert("Failed to delete learner.");
       }
       hideSpinner();
     };
-  };
 
-  // Delete learner
-  window.deleteLearner = async learnerId => {
-    if (!confirm("Are you sure you want to delete this learner?")) return;
-    showSpinner();
-    try {
-      await remove(ref(db, `users/${learnerId}`));
-      for (const courseId in courses) {
-        if (courses[courseId].enrolled?.includes(learnerId)) {
-          await runTransaction(ref(db, `courses/${courseId}`), course => {
-            course = course || { enrolled: [] };
-            course.enrolled = course.enrolled.filter(id => id !== learnerId);
-            return course;
-          });
-        }
-      }
-      logAudit(`Deleted learner ${learners}${learnerId}.${fullName} || ${learners}${learnerId}.email`);
-      alert("Learner deleted successfully!");
-    } catch (err) {
-      console.error("Error deleting learner:", err);
-      alert("Failed to delete learner.");
-    }
-    hideSpinner();
-  };
-
-  // View learner profile
-  window.viewLearnerProfile = learnerId => {
-    const l = learners[learnerId];
-    const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(learnerId));
-    const certs = Object.values(certifications).filter(c => c.learnerId === learnerId && courses[c.courseId]?.providerId === auth.currentUser.uid);
-    const activityLogs = notifications.filter(n => n?.learnerId === learnerId);
-    const modal = document.createElement("div");
-    modal.className = "modal";
-    modal.style.display = "block";
-    modal.innerHTML = `
-      <div class="modal-content">
-        <h3 class="text-lg font-semibold mb-4">Learner Profile: ${sanitizeInput(l.fullName || l.email)} ${sanitizeInput}</h3>
-        <p class="text-sm text-gray-600">Email: ${sanitizeInput(l.email)}</p> ${sanitizeInput}</p>
-        <p class="text-sm text-gray-600">Contact: ${sanitizeInput(l.metadata?.contact || '')} || "-")}</p>
-        <p class="text-sm text-gray-600">Tags: ${sanitizeInput(l.metadata?.tags?.join(", ") || "-")}</p>
-        <p class="text-sm text-gray-600">Courses: ${enrolledCourses.map(c => sanitizeInput(c.name)).join(", ") || "None"} ${sanitizeInput}</p>
-        <button onclick="assignCourses('${learnerId}') ${assignCourses}" class="text-green-600 hover:underline mb-2" aria-label="Assign courses to ${sanitizeInput(l.fullName || l.email)} ${sanitizeInput}" data-tooltip="Assign courses">Assign Courses</button>
-        <p class="text-sm text-gray-600">Certificates Issued: ${certs.map(c => `<a href="#cert-${c.id}"`. onclick="${c.id}')" onclick="downloadCertificate('${c.id}') ${downloadCourse}" class="text-blue-600 hover:underline">${sanitizeInput(courses[c.courseId].name)}</p> ${certificateInput})</a>`).join(", ") || "No certificates issued."} ${certificateInput}</p>
-        <h4 class="text-md font-semibold mt-4 mb-2">Activity Log</h4>
-        <ul class="text-sm text-gray-600 space-y-1">${activityLogs.map(n => `<li>${sanitizeInput(n.message || "No message")} ${sanitizeInput} (${new Date(n?.timestamp || Date.now()).toLocaleString()})</li>`).join("") || "No activity recorded."}</li>
-        </ul>
-        <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 mt-4" onclick="this.parentElement.parentElement.remove();" data-tooltip="Close profile">Close</button>
-      </div>
-    `;
-    document.body.appendChild(modal);
-  };
-
-  // Load courses
-  function loadCourses() {
-    showSpinner();
-    onValue(ref(db, "courses'), snap => {
-      courses = snap.val() || {};
-      renderCourses();
-      populateCourseFilter();
-      populateLearnerCourseDropdown();
-      hideSpinner();
-    });
-  }
-
-  function renderCourses(filter = '') {
-    courseList.innerHTML = '';
-    for (const id in courses) {
-      const c = courses[id];
-      if (c.providerId !== auth.currentUser.uid || (filter && !c.name?.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t?.toLowerCase().includes(filter.toLowerCase())))) continue;
-      const courseItem = document.createElement("div");
-      courseItem.className = "bg-gray-50 p-4 rounded shadow flex flex items-center hover:shadow-md justify-between items";
-      item.innerHTML = `
-        <div class="flex items-center">
-          <div>
-            <p class="font-semibold">${sanitizeInput(c.name)}</p> ${sanitizeInput(c.name)}</p>
-            <p class="text-sm text-gray-600">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")}</p> || "-")}</p>
-            <p class="text-sm text-gray-600">Enrolled: ${c.enrollment?.length || 0}</p>
-          </div>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="editCourse('${id}') ${editCourse}" class="text-blue-600 hover:underline" aria-label="Edit course ${sanitizeInput(c.name)} ${sanitizeInput}" data-tooltip="Edit course">Edit</button>
-          <button onclick="archiveCourse('${course.id}') ${archiveCourse}" class="text-red-600 hover:underline" aria-label="${c?.archived || "Archive"} course ${sanitizeInput(c.name)} ${sanitizeInput}" data-tooltip="${c?.archived ? "Unarchive" : "Archive"} course${sanitizeInput}" course">${c?.archived ? "Unarchive" : "Archive"}</button>
+    // View learner profile
+    window.viewLearnerProfile = learnerId => {
+      const l = learners[learnerId];
+      const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(learnerId));
+      const certs = Object.values(certifications).filter(c => c.learnerId === learnerId && courses[c.courseId]?.providerId === auth.currentUser.uid);
+      const activityLogs = notifications.filter(n => n.learnerId === learnerId);
+      const modal = document.createElement("div");
+      modal.className = "modal";
+      modal.style.display = "block";
+      modal.innerHTML = `
+        <div class="modal-content">
+          <h3 class="text-lg font-semibold mb-4">Learner Profile: ${sanitizeInput(l.fullName || l.email)}</h3>
+          <p class="text-sm text-gray-600">Email: ${sanitizeInput(l.email)}</p>
+          <p class="text-sm text-gray-600">Contact: ${sanitizeInput(l.metadata?.contact || "-")}</p>
+          <p class="text-sm text-gray-600">Tags: ${sanitizeInput(l.metadata?.tags?.join(", ") || "-")}</p>
+          <p class="text-sm text-gray-600">Enrolled Courses: ${enrolledCourses.map(c => sanitizeInput(c.name)).join(", ") || "None"}</p>
+          <p class="text-sm text-gray-600">Certificates: ${certs.map(c => `<a href="#" onclick="downloadCertificate('${c.id}')" class="text-blue-600 hover:underline">${sanitizeInput(courses[c.courseId].name)}</a>`).join(", ") || "None"}</p>
+          <h4 class="text-md font-semibold mt-4 mb-2">Activity Log</h4>
+          <ul class="text-sm text-gray-600 space-y-1">${activityLogs.map(n => `<li>${sanitizeInput(n.message)} (${new Date(n.timestamp).toLocaleString()})</li>`).join("") || "No activity"}</ul>
+          <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 mt-4" onclick="this.parentElement.parentElement.remove()" data-tooltip="Close profile">Close</button>
         </div>
       `;
-      courseList.appendChild(courseItem);
-    }
-  }
+      document.body.appendChild(modal);
+    };
 
-  // Search courses
-  const searchCourses = debounce(filter => renderCourses(sanitizeInput(filter)), 300);
-  courseSearch.addEventListener("input", () => searchCourses(courseSearch.value));
-
-  // Add course
-  courseForm.addEventListener("submit", async e => {
-    e.preventDefault();
-    const name = sanitizeInput(courseName.value.trim());
-    const tags = courseTags.value?.split(",").map(t => sanitizeInput(t.trim())).filter(t => t);
-    if (!name) {
-      alert("Please enter a course name.");
-      return;
-    }
-    showSpinner();
-    try {
-      await push(ref(db, "courses"), {
-        providerId: auth.currentUser.uid,
-        name,
-        metadata: { tags: tags, version: "1.0" },
-        enrolled: [],
-        completions: [],
-        archived: false,
-        createdAt: new Date.now()
+    // Load courses
+    function loadCourses() {
+      showSpinner();
+      onValue(ref(db, "courses"), snap => {
+        courses = snap.val() || {};
+        renderCourses();
+        populateCourseFilter();
+        populateLearnerCourseDropdown();
+        hideSpinner();
       });
-      logAudit(`Added course ${name}`);
-      alert("Course added successfully!");
-      courseForm.reset();
-    } catch (err) {
-      console.error("Error adding course:", err);
-      alert("Failed to add course.");
     }
-    hideSpinner();
-  });
 
-  // Edit course
-  window.editCourse = async courseId => {
-    const c = courses[courseId];
-    const newName = prompt("Edit course name:", sanitizeInput(c.name || ""));
-    const newTags = prompt("Edit tags (comma-separated):", sanitizeInput(c.metadata?.tags?.join(", ") || ""));
-    if (newName && newTags !== undefined) {
+    function renderCourses(filter = "") {
+      courseList.innerHTML = "";
+      for (const id in courses) {
+        const c = courses[id];
+        if (c.providerId !== auth.currentUser.uid || (filter && !c.name.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase())))) continue;
+        const courseItem = document.createElement("div");
+        courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow";
+        courseItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${sanitizeInput(c.name)}</p>
+            <p class="text-sm text-gray-600">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Enrolled: ${c.enrolled?.length || 0}</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="editCourse('${id}')" class="text-blue-600 hover:underline" aria-label="Edit course ${sanitizeInput(c.name)}" data-tooltip="Edit course">Edit</button>
+            <button onclick="archiveCourse('${id}')" class="text-red-600 hover:underline" aria-label="${c.archived ? "Unarchive" : "Archive"} course ${sanitizeInput(c.name)}" data-tooltip="${c.archived ? "Unarchive" : "Archive"} course">${c.archived ? "Unarchive" : "Archive"}</button>
+          </div>
+        `;
+        courseList.appendChild(courseItem);
+      }
+    }
+
+    // Search courses
+    const searchCourses = debounce(filter => renderCourses(sanitizeInput(filter)), 300);
+    courseSearch.addEventListener("input", () => searchCourses(courseSearch.value));
+
+    // Add course
+    courseForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const name = sanitizeInput(courseName.value.trim());
+      const tags = courseTags.value.split(",").map(t => sanitizeInput(t.trim())).filter(t => t);
+      if (!name) {
+        alert("Please enter a course name.");
+        return;
+      }
       showSpinner();
       try {
-        await update(ref(db, `courses/${courseId}`), {
-          name: sanitizeInput(newName),
-          metadata: { tags: newTags?.split(",").map(t => sanitizeInput(t.trim())).filter(t => t.length > 0) || [], version: "1.1" }
+        await push(ref(db, "courses"), {
+          providerId: auth.currentUser.uid,
+          name,
+          metadata: { tags, version: "1.0" },
+          enrolled: [],
+          completions: [],
+          archived: false,
+          createdAt: Date.now()
         });
-        logAudit(`Edited course "${newName}"`);
-        alert("Course updated successfully!");
+        logAudit(`Added course ${name}`);
+        alert("Course added successfully!");
+        courseForm.reset();
       } catch (err) {
-        console.error("Error editing course:", err);
-        alert("Failed to edit course.");
+        console.error("Error adding course:", err);
+        alert("Failed to add course.");
       }
       hideSpinner();
-    }
-  };
+    });
 
-  // Archive/unarchive course
-  window.archiveCourse = async courseId => {
-    showSpinner();
-    try {
-      const isArchived = courses[courseId]?.?.archived || false;
-      await update(ref(db, `courses/${courseId}`), { courseId: !isArchived?.id });
-      logAudit(`Course "${courses[${courseId}].name}" ${isArchived?.name ? "unarchived" : "archived"}`);
-      alert(`Course ${isArchived ? "unarchived" : "archived"} successfully!`);
-    } catch (err) {
-      console.error("Error archiving course:", err);
-      alert("Failed to archive course.");
-    }
-    hideSpinner();
-  };
+    // Edit course
+    window.editCourse = async courseId => {
+      const c = courses[courseId];
+      const newName = prompt("Edit course name:", c.name);
+      const newTags = prompt("Edit tags (comma-separated):", c.metadata?.tags?.join(", ") || "");
+      if (newName && newTags) {
+        showSpinner();
+        try {
+          await update(ref(db, `courses/${courseId}`), {
+            name: sanitizeInput(newName),
+            metadata: { tags: newTags.split(",").map(t => sanitizeInput(t.trim())), version: "1.1" }
+          });
+          logAudit(`Edited course ${newName}`);
+          alert("Course updated successfully!");
+        } catch (err) {
+          console.error("Error editing course:", err);
+          alert("Failed to edit course.");
+        }
+        hideSpinner();
+      }
+    };
 
-  // Load learner progress
-  function loadLearnerProgress() {
-    showSpinner();
-    onValue(ref(db, "users"), snap => {
-      learners = snap.val() || {};
+    // Archive/unarchive course
+    window.archiveCourse = async courseId => {
+      showSpinner();
+      try {
+        await update(ref(db, `courses/${courseId}`), { archived: !courses[courseId].archived });
+        logAudit(`Course ${courses[courseId].name} ${courses[courseId].archived ? "unarchived" : "archived"}`);
+        alert(`Course ${courses[courseId].archived ? "unarchived" : "archived"} successfully!`);
+      } catch (err) {
+        console.error("Error archiving course:", err);
+        alert("Failed to archive course.");
+      }
+      hideSpinner();
+    };
+
+    // Load learner progress
+    function loadLearnerProgress() {
+      showSpinner();
+      onValue(ref(db, "users"), snap => {
+        learners = snap.val() || {};
+        onValue(ref(db, "courses"), snap => {
+          courses = snap.val() || {};
+          onValue(ref(db, "assessments"), snap => {
+            assessments = snap.val() || {};
+            onValue(ref(db, "certifications"), snap => {
+              certifications = snap.val() || {};
+              renderLearnerProgress();
+              hideSpinner();
+            });
+          });
+        });
+      });
+    }
+
+    function renderLearnerProgress(filter = "") {
+      progressList.innerHTML = "";
+      for (const id in learners) {
+        const l = learners[id];
+        if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
+        if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase())) continue;
+        const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
+        if (enrolledCourses.length === 0) continue;
+        const learnerItem = document.createElement("div");
+        learnerItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        let courseDetails = "";
+        enrolledCourses.forEach(c => {
+          const cert = Object.values(certifications).find(cert => cert.learnerId === id && cert.courseId === c.id);
+          const completedAssessments = Object.values(assessments).filter(a => a.courseId === c.id && a.submissions?.[id]?.status === "completed").length;
+          const totalAssessments = Object.values(assessments).filter(a => a.courseId === c.id).length;
+          const progress = l.progress?.[c.id] || 0;
+          if (progress >= 50 && !notifications.some(n => n.learnerId === id && n.courseId === c.id && n.message.includes("50%"))) {
+            notifications.push({ learnerId: id, courseId: c.id, message: `${l.fullName || l.email} reached 50% progress in ${c.name}`, timestamp: Date.now() });
+          }
+          if (progress >= 100 && !notifications.some(n => n.learnerId === id && n.courseId === c.id && n.message.includes("completed"))) {
+            notifications.push({ learnerId: id, courseId: c.id, message: `${l.fullName || l.email} completed ${c.name}`, timestamp: Date.now() });
+          }
+          courseDetails += `
+            <p class="text-sm font-semibold">${sanitizeInput(c.name)}</p>
+            <p class="text-sm text-gray-600">Progress: ${progress}% | Assessments: ${completedAssessments}/${totalAssessments} | Certificate: ${cert ? `<button onclick="downloadCertificate('${cert.id}')" class="text-blue-600 hover:underline" aria-label="Download certificate for ${sanitizeInput(c.name)}" data-tooltip="Download certificate">Download</button>` : "Not Issued"}</p>
+          `;
+        });
+        learnerItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p>
+            ${courseDetails}
+          </div>
+        `;
+        progressList.appendChild(learnerItem);
+      }
+    }
+
+    // Search learner progress
+    const searchProgress = debounce(filter => renderLearnerProgress(sanitizeInput(filter)), 300);
+    progressSearch.addEventListener("input", () => searchProgress(progressSearch.value));
+
+    // Download certificate
+    window.downloadCertificate = certId => {
+      const cert = certifications[certId];
+      if (!cert || !courses[cert.courseId] || !learners[cert.learnerId]) {
+        alert("Certificate, course, or learner data not found.");
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(20);
+      doc.text("Certificate of Completion", 105, 30, { align: "center" });
+      doc.setFontSize(16);
+      doc.text("This certifies that", 105, 60, { align: "center" });
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text(sanitizeInput(learners[cert.learnerId].fullName || learners[cert.learnerId].email), 105, 80, { align: "center" });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(16);
+      doc.text("has successfully completed the course", 105, 100, { align: "center" });
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.text(sanitizeInput(courses[cert.courseId].name), 105, 120, { align: "center" });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(14);
+      doc.text(`Issued on: ${new Date(cert.issuedAt).toLocaleDateString()}`, 105, 140, { align: "center" });
+      doc.text("CETA Provider Academy", 105, 160, { align: "center" });
+      doc.save(`certificate_${certId}.pdf`);
+      logAudit(`Downloaded certificate for ${learners[cert.learnerId].fullName || learners[cert.learnerId].email}`);
+    };
+
+    // Advanced analytics
+    function loadAnalytics() {
+      showSpinner();
       onValue(ref(db, "courses"), snap => {
         courses = snap.val() || {};
         onValue(ref(db, "assessments"), snap => {
           assessments = snap.val() || {};
           onValue(ref(db, "certifications"), snap => {
             certifications = snap.val() || {};
-            renderLearnerProgress();
+            renderAnalytics();
             hideSpinner();
           });
         });
       });
-    });
-  }
+    }
 
-  function renderLearnerProgress(filter = '') {
-    progressList.innerHTML = '';
-    for (const id in learners) {
-      const l = learners[id];
-      if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
-      if (filter && !l?.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email?.toLowerCase().includes(filter.toLowerCase())) continue;
-      const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c?.enrolled?.includes(id));
-      if (enrolledCourses.length === 0) continue;
-      const learnerItem = document.createElement("div");
-      learnerItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-      let courseDetails = '';
-      enrolledCourses.forEach(c => {
-        const cert = Object.values(certifications).find(cert => cert?.learnerId === id && cert?.courseId === c.id);
-        const completedAssessments = Object.values(assessments).filter(a => a?.courseId === c.id && a?.submissions?.[id]?.status === "completed").length;
-        const totalAssessments = Object.values(assessments).filter(a => a?.courseId === c.id).length;
-        const progress = l?.progress?.[c.id]?.progress || 0;
-        if (progress >= 50 && !notifications?.some(n => n?.learnerId === id && n?.courseId === c.id && n?.message?.includes("50%"))) {
-          notifications.push({ learnerId: id, courseId: c.id, message: `${l?.fullName || l?.email} reached 50% progress in ${c.name}`, timestamp: new Date.now() });
+    function predictCompletionRate(courseId) {
+      const course = courses[courseId];
+      if (!course || !course.enrolled) return 0;
+      const completions = course.completions?.length || 0;
+      const enrolled = course.enrolled.length;
+      const historicalRate = enrolled > 0 ? completions / enrolled : 0;
+      const difficultyFactor = course.metadata?.tags?.includes("advanced") ? 0.8 : 1;
+      const engagementFactor = course.enrolled.length > 10 ? 1.1 : 0.9;
+      const predictedRate = historicalRate * difficultyFactor * engagementFactor * 100;
+      return Math.min(Math.max(predictedRate.toFixed(1), 0), 100);
+    }
+
+    function calculateStatisticalMetrics(courseId) {
+      const course = courses[courseId];
+      const assessmentsForCourse = Object.values(assessments).filter(a => a.courseId === courseId);
+      const completionTimes = [];
+      const scores = [];
+
+      assessmentsForCourse.forEach(a => {
+        if (a.submissions) {
+          Object.values(a.submissions).forEach(s => {
+            if (s.status === "completed" && s.completedAt && s.submittedAt) {
+              completionTimes.push((s.completedAt - s.submittedAt) / (1000 * 60 * 60));
+            }
+            if (s.score) scores.push(s.score);
+          });
         }
-        if (progress >= 100 && !notifications?.some(n => n?.learnerId === id && n?.courseId === c.id && n?.message?.includes("completed"))) {
-          notifications.push({ learnerId: id, courseId: c.id, message: `${l?.fullName || l?.email} completed ${c.name}`, timestamp: new Date.now() });
-        }
-        courseDetails += `.concat(
-          <p class="text-sm font-semibold">${sanitizeInput(c.name)}</p> ${sanitizeInput}
-          <p class="text-sm text-gray-600">Progress: ${progress}% | Assessments: ${completedAssessments}/${totalAssessments} | Certificate: ${cert?.id ? `<button onclick="downloadCertificate('${cert.id}') ${downloadCertificate}" class="text-blue-600 hover:underline" aria-label="Download certificate for ${sanitizeInput(c.name)} ${sanitizeInput}" data-tooltip="Download certificate">Download</button>` : "Not issued"} ${certificateInput}</p>
-        `;
       });
-      learnerItem.innerHTML = `
-        <div>
-          <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p> ${sanitizeInput}
-          ${courseDetails}
-        </div>
-      `;
-      progressList.appendChild(learnerItem);
+
+      const avgCompletionTime = completionTimes.length > 0 ? (completionTimes.reduce((a, b) => a + b, 0) / completionTimes.length).toFixed(1) : 0;
+      const avgScore = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : 0;
+      const stdDevScore = scores.length > 0 ? Math.sqrt(scores.reduce((a, b) => a + Math.pow(b - avgScore, 2), 0) / scores.length).toFixed(1) : 0;
+      const difficultyIndex = scores.length > 0 ? (100 - avgScore).toFixed(1) : 0;
+
+      return { avgCompletionTime, avgScore, stdDevScore, difficultyIndex };
     }
-  }
 
-  // Search learner progress
-  const searchProgress = debounce(filter => renderLearnerProgress(sanitizeInput(filter))), 300);
-  progressSearch.addEventListener("input", () => searchProgress(progressSearch.value));
-
-  // Download certificate
-  window.downloadCertificate = certId => {
-    const cert = certifications[certId];
-    if (!cert || !courses[cert?.courseId] || !learners[cert?.learnerId]) {
-      alert("Certificate, course, or learner data not found.");
-      return null;
+    function generateHeatmapData() {
+      const heatmapData = Array(7).fill().map(() => Array(24).fill(0));
+      for (const id in assessments) {
+        const submissions = assessments[id].submissions || {};
+        for (const subId in submissions) {
+          const submission = submissions[subId];
+          if (submission.submittedAt && courses[assessments[id].courseId]?.providerId === auth.currentUser.uid) {
+            const date = new Date(submission.submittedAt);
+            const day = date.getDay();
+            const hour = date.getHours();
+            heatmapData[day][hour]++;
+          }
+        }
+      }
+      return heatmapData;
     }
-    const { jsPDF } = window.jspdf || {};
-    const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text("Certificate of Completion", 105, 30, { align: "center" });
-    doc.setFontSize(16);
-    doc.text("This certifies that", 105, 60, { align: "center" });
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.text(sanitizeInput(learners[cert.learnerId]?.fullName || learners[cert.learnerId]?.email || "Unknown"), 105, 80, { align: "center" });
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(16);
-    doc.text("has successfully completed the course", 105, 100, { align: "center" });
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.text(sanitizeInput(courses[cert.courseId]?.name || "Unknown Course"), 105, 120, { align: "center" });
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(14);
-    doc.text(`Issued on: ${new Date(cert?.issuedAt || Date.now()).toLocaleDateString()}`, 105, 140, { align: "center" });
-    doc.text("CETA Provider Academy", 105, 160, { align: "center" });
-    doc.save(`certificate_${certId}.pdf`);
-    logAudit(`Downloaded certificate for ${learners[cert.learnerId]?.fullName || learners[cert?.learnerId]?.email} for course ${courses[cert.courseId]?.name}`);
-  };
 
-  // Advanced analytics
-  function loadAnalytics() {
-    showSpinner();
-    onValue(ref(db, "courses'), snap => {
-      courses = snap.val() || {};
-      onValue(ref(db, "assessments"), snap => {
-        assessments = snap.val() || {};
-        onValue(ref(db, "certifications"), snap => {
-          certifications = snap.val() || {};
-          renderAnalytics();
+    function renderAnalytics() {
+      analyticsDetails.innerHTML = "";
+      const timeRangeValue = timeRange.value;
+      const courseFilterValue = courseFilter.value;
+      const groupFilterValue = groupFilterAnalytics.value;
+      const now = Date.now();
+      let cutoff = 0;
+      if (timeRangeValue === "30") cutoff = now - 30 * 24 * 60 * 60 * 1000;
+      else if (timeRangeValue === "90") cutoff = now - 90 * 24 * 60 * 60 * 1000;
+      else if (timeRangeValue === "365") cutoff = now - 365 * 24 * 60 * 60 * 1000;
+
+      const chartData = {
+        labels: [],
+        datasets: [
+          { label: "Completion Rate (%)", data: [], backgroundColor: "#2563eb", stack: "Stack 0" },
+          { label: "Average Assessment Score (%)", data: [], backgroundColor: "#10b981", stack: "Stack 0" },
+          { label: "Predicted Completion Rate (%)", data: [], backgroundColor: "#f59e0b", stack: "Stack 0" }
+        ]
+      };
+
+      const filteredCourses = Object.entries(courses).filter(([id, c]) => {
+        if (c.providerId !== auth.currentUser.uid || c.archived) return false;
+        if (courseFilterValue && courseFilterValue !== id) return false;
+        if (cutoff && c.createdAt < cutoff) return false;
+        return true;
+      });
+
+      const analyticsData = [];
+      filteredCourses.forEach(([id, c]) => {
+        let filteredLearners = Object.keys(learners).filter(lid => learners[lid].role === "learner" && learners[lid].providerId === auth.currentUser.uid && c.enrolled?.includes(lid));
+        if (groupFilterValue) filteredLearners = filteredLearners.filter(lid => learners[lid].metadata?.tags?.includes(groupFilterValue));
+        const completionRate = filteredLearners.length > 0 ? (c.completions?.filter(lid => filteredLearners.includes(lid)).length || 0) / filteredLearners.length * 100 : 0;
+        let totalScore = 0, scoreCount = 0;
+        const assessmentsForCourse = Object.values(assessments).filter(a => a.courseId === id && (!cutoff || a.createdAt >= cutoff));
+        assessmentsForCourse.forEach(a => {
+          for (const subId in a.submissions) {
+            if (filteredLearners.includes(subId) && (!cutoff || a.submissions[subId].submittedAt >= cutoff)) {
+              if (a.submissions[subId].score) {
+                totalScore += a.submissions[subId].score;
+                scoreCount++;
+              }
+            }
+          }
+        });
+        const avgScore = scoreCount > 0 ? (totalScore / scoreCount).toFixed(1) : 0;
+        const predictedRate = predictCompletionRate(id);
+        const stats = calculateStatisticalMetrics(id);
+
+        chartData.labels.push(c.name);
+        chartData.datasets[0].data.push(completionRate.toFixed(1));
+        chartData.datasets[1].data.push(avgScore);
+        chartData.datasets[2].data.push(predictedRate);
+
+        analyticsData.push({
+          courseId: id,
+          name: c.name,
+          completionRate: completionRate.toFixed(1),
+          avgScore,
+          predictedRate,
+          ...stats
+        });
+
+        const detailItem = document.createElement("div");
+        detailItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        detailItem.innerHTML = `
+          <p class="font-semibold">${sanitizeInput(c.name)}</p>
+          <p class="text-sm text-gray-600">Enrolled: ${filteredLearners.length} | Completion Rate: ${completionRate.toFixed(1)}% | Predicted Completion: ${predictedRate}%</p>
+          <p class="text-sm text-gray-600">Avg Score: ${avgScore}% | Avg Completion Time: ${stats.avgCompletionTime} hrs | Score Std Dev: ${stats.stdDevScore} | Difficulty Index: ${stats.difficultyIndex}</p>
+        `;
+        analyticsDetails.appendChild(detailItem);
+      });
+
+      if (analyticsChartInstance) analyticsChartInstance.destroy();
+      analyticsChartInstance = new Chart(analyticsChart, {
+        type: "bar",
+        data: chartData,
+        options: {
+          scales: {
+            y: { beginAtZero: true, max: 100 },
+            x: { stacked: false }
+          },
+          plugins: {
+            tooltip: { mode: "index", intersect: false },
+            datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
+          }
+        },
+        plugins: [ChartDataLabels]
+      });
+
+      const heatmapData = generateHeatmapData();
+      if (heatmapChartInstance) heatmapChartInstance.destroy();
+      heatmapChartInstance = new Chart(heatmapChart, {
+        type: "matrix",
+        data: {
+          datasets: [{
+            label: "Submission Activity",
+            data: heatmapData.flatMap((row, day) => row.map((value, hour) => ({ x: hour, y: day, v: value }))),
+            backgroundColor: c => {
+              const value = c.raw.v;
+              const alpha = Math.min(value / 10, 1);
+              return `rgba(37, 99, 235, ${alpha})`;
+            },
+            width: ({ chart }) => (chart.chartArea?.width || 0) / 24,
+            height: ({ chart }) => (chart.chartArea?.height || 0) / 7
+          }]
+        },
+        options: {
+          scales: {
+            x: { type: "category", labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), title: { display: true, text: "Hour of Day" } },
+            y: { type: "category", labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], title: { display: true, text: "Day of Week" } }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: ctx => `Submissions: ${ctx.raw.v} at ${ctx.raw.x}:00 on ${ctx.chart.scales.y.getLabelForValue(ctx.raw.y)}`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Export analytics to PDF
+    exportAnalytics.addEventListener("click", () => {
+      const timeRangeValue = timeRange.value;
+      const courseFilterValue = courseFilter.value;
+      const groupFilterValue = groupFilterAnalytics.value;
+      const now = Date.now();
+      let cutoff = 0;
+      if (timeRangeValue === "30") cutoff = now - 30 * 24 * 60 * 60 * 1000;
+      else if (timeRangeValue === "90") cutoff = now - 90 * 24 * 60 * 60 * 1000;
+      else if (timeRangeValue === "365") cutoff = now - 365 * 24 * 60 * 60 * 1000;
+
+      const filteredCourses = Object.entries(courses).filter(([id, c]) => {
+        if (c.providerId !== auth.currentUser.uid || c.archived) return false;
+        if (courseFilterValue && courseFilterValue !== id) return false;
+        if (cutoff && c.createdAt < cutoff) return false;
+        return true;
+      });
+
+      const docDefinition = {
+        content: [
+          { text: "CETA Provider Analytics Report", style: "header" },
+          { text: `Generated on ${new Date().toLocaleDateString()}`, style: "subheader" },
+          { text: `Time Range: ${timeRangeValue === "all" ? "All Time" : `Last ${timeRangeValue} Days`}`, style: "subheader" },
+          { text: courseFilterValue ? `Course: ${courses[courseFilterValue]?.name || "All"}` : "All Courses", style: "subheader" },
+          { text: groupFilterValue ? `Group: ${groupFilterValue}` : "All Groups", style: "subheader" },
+          {
+            table: {
+              headerRows: 1,
+              widths: ["*", "*", "*", "*", "*", "*"],
+              body: [
+                ["Course", "Enrolled", "Completion Rate (%)", "Avg Score (%)", "Predicted Completion (%)", "Difficulty Index"],
+                ...filteredCourses.map(([id, c]) => {
+                  let filteredLearners = Object.keys(learners).filter(lid => learners[lid].role === "learner" && learners[lid].providerId === auth.currentUser.uid && c.enrolled?.includes(lid));
+                  if (groupFilterValue) filteredLearners = filteredLearners.filter(lid => learners[lid].metadata?.tags?.includes(groupFilterValue));
+                  const stats = calculateStatisticalMetrics(id);
+                  const completionRate = filteredLearners.length > 0 ? (c.completions?.filter(lid => filteredLearners.includes(lid)).length || 0) / filteredLearners.length * 100 : 0;
+                  let totalScore = 0, scoreCount = 0;
+                  Object.values(assessments)
+                    .filter(a => a.courseId === id && (!cutoff || a.createdAt >= cutoff))
+                    .forEach(a => {
+                      for (const subId in a.submissions) {
+                        if (filteredLearners.includes(subId) && (!cutoff || a.submissions[subId].submittedAt >= cutoff)) {
+                          if (a.submissions[subId].score) {
+                            totalScore += a.submissions[subId].score;
+                            scoreCount++;
+                          }
+                        }
+                      }
+                    });
+                  const avgScore = scoreCount > 0 ? (totalScore / scoreCount).toFixed(1) : 0;
+                  return [
+                    sanitizeInput(c.name),
+                    filteredLearners.length,
+                    completionRate.toFixed(1),
+                    avgScore,
+                    predictCompletionRate(id),
+                    stats.difficultyIndex
+                  ];
+                })
+              ]
+            }
+          },
+          { text: "Statistical Metrics", style: "subheader", margin: [0, 20, 0, 10] },
+          {
+            ul: filteredCourses.map(([id, c]) => {
+              const stats = calculateStatisticalMetrics(id);
+              return `${sanitizeInput(c.name)}: Avg Completion Time: ${stats.avgCompletionTime} hrs, Score Std Dev: ${stats.stdDevScore}`;
+            })
+          }
+        ],
+        styles: {
+          header: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
+          subheader: { fontSize: 14, margin: [0, 0, 0, 10] }
+        }
+      };
+
+      pdfMake.createPdf(docDefinition).download(`analytics_report_${new Date().toISOString().split("T")[0]}.pdf`);
+    });
+
+    // Load tickets
+    function loadTickets() {
+      showSpinner();
+      onValue(ref(db, "helpdesk"), snap => {
+        tickets = snap.val() || {};
+        onValue(ref(db, "users"), snap => {
+          learners = snap.val() || {};
+          ticketList.innerHTML = "";
+          for (const id in tickets) {
+            const t = tickets[id];
+            if (courses[t.courseId]?.providerId !== auth.currentUser.uid) continue;
+            const ticketItem = document.createElement("div");
+            ticketItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow";
+            ticketItem.innerHTML = `
+              <div>
+                <p class="font-semibold">${sanitizeInput(t.issue)}</p>
+                <p class="text-sm text-gray-600">Learner: ${sanitizeInput(learners[t.userId]?.fullName || learners[t.userId]?.email || "Unknown")} | Status: ${t.status} | Submitted: ${new Date(t.createdAt).toLocaleDateString()}</p>
+              </div>
+              <div>
+                ${t.status === "open" ? `<button onclick="respondTicket('${id}')" class="text-blue-600 hover:underline" aria-label="Respond to ticket ${sanitizeInput(t.issue)}" data-tooltip="Respond to ticket">Respond</button>` : `<span class="text-green-600">Resolved</span>`}
+              </div>
+            `;
+            ticketList.appendChild(ticketItem);
+          }
           hideSpinner();
         });
       });
-    });
-  }
-
-  function predictCompletionRate(courseId) {
-    const course = courses[courseId];
-    if (!course?.enrolled?.length) return 0;
-    const completions = course?.completions?.length || 0;
-    const enrolled = course.enrolled?.length || 0;
-    const historicalRate = enrolled > 0 ? completions / enrolled : 0;
-    const difficultyFactor = course?.metadata?.tags?.includes("advanced") ? 0.8 : 1;
-    const engagementFactor = course.enrolled?.length > 10 ? 1.1 : 0.9;
-    const predictedRate = historicalRate * difficultyFactor * engagementFactor * 100;
-    return Math.min(Math.max(predictedRate.toFixed(1), 0), 100);
-  }
-
-  function calculateStatisticalMetrics(courseId) {
-    const course = courses[courseId];
-    const assessmentsForCourse = Object.values(assessments).filter(a => a?.courseId === courseId);
-    const completionTimes = [];
-    const scores = [];
-
-    assessmentsForCourse.forEach((a => {
-      if (a?.submissions) {
-        Object.values(a.submissions).forEach((s => {
-          if (s?.status === "completed' && s?.completedAt && s?.submittedAt) {
-            completionTimes.push((s.completedAt - s.submittedAt) / (1000 * 60 * 60));
-          }
-          if (s?.score) scores.push(s.score));
-        }));
-      }
-    }));
-
-    const avgCompletionTime = completionTimes.length > 0 ? (completionTimes.length / completionTimes.length).toFixed(1) : 0;
-    const avgScore = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1)) : 0;
-    const stdDevScore = scores.length > 0 ? Math.sqrt(scores.reduce((a, b) => a + Math.pow(b - avgScore, 2), 0) / scores.length).toFixed(1)) : 0;
-    const difficultyIndex = scores.length > 0 ? (100 - avgScore).toFixed(1)) : 0;
-
-    return { avgCompletionTime, avgScore, stdDevScore, difficultyIndex };
-  }
-
-  function generateHeatmapData() {
-    const heatmapData = new Array(7).fill().map(() => new Array(24).fill(0));
-    for (const id in assessments) {
-      const submissions = assessments[id]?.?.submissions || {};
-      for (const subId in submissions.submissions) {
-        const submission = submissions[subId]?.submissions?.[subId] || {};
-        if (submission?.submittedAt && courses[assessments[id]?.courseId]?.?.providerId === auth?.currentUser?.uid) {
-          const date = new Date(submission?.submittedAt);
-          const day = date.getDay();
-          const hour = date.getHours();
-          heatmapData[day][hour]++;
-        }
-      }
     }
-    return heatmapData;
-  }
 
-  function renderAnalytics() {
-    analyticsDetails.innerHTML = '';
-    const timeRangeValue = parseInt(timeRange?.value || '30');
-    const courseFilterValue = courseFilter?.value || '';
-    const groupFilterValue = groupFilterAnalytics?.value || '';
-    const now = new Date.now();
-    let cutoffTime = 0;
-    if (timeRangeValue === "30") cutoffTime = now - 30 * 24 * 60 * 60 * 1000;
-    else if (timeRangeValue === "90") cutoffTime = now - 90 * 24 * 60 * 60 * 1000;
-    else if (timeRangeValue === "365") cutoffTime = now - 365 * 24 * 60 * 60 * 1000;
-
-    const chartData = {
-      labels: [],
-      datasets: [
-        { label: "Completion Rate (%)", data: [], backgroundColor: "#2563eb", stack: "Stack 1" },
-        { label: "Average Assessment Score (%)", data: [], backgroundColor: "#10b981", stack: "Stack 2" },
-        { label: "Predicted Completion Rate (%)", data: [], backgroundColor: "#f59e0b", stack: "Stack 3" }
-      ]
-    };
-
-    const filteredCourses = Object.entries(courses).filter(([id, c]) => {
-      if (c?.providerId !== auth.currentUser.uid || c?.archived) return false;
-      if (courseFilterValue && courseFilterValue !== id) return false;
-      if (cutoffTime && c?.createdAt && c.createdAt < cutoff) return false;
-      return true;
-    });
-
-    const analyticsData = [];
-    filteredCourses.forEach(([id, c]) => {
-      let filteredLearners = Object.keys(learners).filter(lid => learners[?.lid]?..role]?.role === "learner" && learners[lid]?.providerId === auth.currentUser.uid && c?.enrolled?.includes(lid));
-      if (groupFilterValue) filteredLearners = filteredLearners.filter(lid => learners[lid]?.metadata?.tags?.includes(groupFilterValue));
-      const completionRate = filteredLearners.length > 0 ? (c?.completions?.filter(lid => filteredLearners.includes(lid))?.length || 0) / filteredLearners?.length * 100 : 0;
-      let totalScore = 0, scoreCount = 0;
-      const assessmentsForCourse = Object.values(assessments).filter(a => a?.courseId === id && (!cutoffTime || a?.createdAt >= cutoffTime));
-      assessmentsForCourse.forEach(a => {
-        for (const subId in a?.submissions)) {
-          if (filteredLearners?.includes(subId) && (!cutoffTime || a?.submissions[subId]?.?.submissions[subId]?.?.submittedAt >= cutoffTime)) {
-            if (a.submissions[subId]?.?.score)) {
-              totalScore += a.submissions[subId].score;
-              scoreCount++;
-            }
-          }
-        }
-      });
-      const avgScore = scoreCount > 0 ? (totalScore / scoreCount).toFixed(1) : 0;
-      const predictedRate = predictCompletionRate(id);
-      const stats = calculateStatisticalMetrics(id);
-
-      chartData.labels.push(...c.name);
-      chartData.datasets[0].data.push(completionRate?.toFixed(1));
-      chartData.datasets[1].data.push(avgScore);
-      chartData.datasets[2].data.push(predictedRate);
-
-      analyticsData.push({
-        courseId: id,
-        name: c.name,
-        completionRate: completionRate.toFixed(1),
-        avgScore,
-        predictedRate,
-        ...stats
-      });
-
-      const detailItem = document.createElement("div");
-      detailItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-      detailItem.innerHTML = `
-        <p class="font-semibold">${sanitizeInput(c.name)}</p> ${sanitizeInput(c.name)}</p>
-        <p class="text-sm text-gray-600">Enrolled: ${filteredLearners.length} | Completion Rate: ${completionRate.toFixed(1)}% | Predicted Completion: ${predictedRate}%</p>
-        <p class="text-sm">Avg Score: ${avgScore}% | Avg Completion Time: ${stats.avgTimeCompletionTime} hrs | Score Std Dev: ${stats.stdDevScore}% | Difficulty: ${stats.difficultyIndex}</p>
-      `;
-      analyticsDetails.appendChild(detailItem);
-    });
-
-    if (analyticsChartInstance) analyticsChartInstance?.destroy();
-    analyticsChartInstance = new Chart(analyticsChart, {
-      type: "bar",
-      data: chartData,
-      options: {
-        responsive: true,
-        scales: {
-          y: { beginAtZero: true, max: 100 },
-          x: { stacked: false }
-        },
-        plugins: {
-          tooltip: {
-            mode: "index",
-            intersect: false
-          },
-          datalabels: {
-            anchor: "end",
-            align: "top",
-            color: "#374151",
-            font: { weight: "bold" }
-          }
-        }
-      },
-      plugins: [ChartDataLabels]
-    });
-
-    const heatmapData = generateHeatmapData();
-    if (heatmapChartInstance) heatmapChartInstance?.destroy();
-    heatmapChartInstance = new Chart(heatmapChart, {
-      type: "matrix",
-      data: {
-        datasets: [{
-          label: "Submission Activity",
-          data: heatmapData.flatMap((row, day) => row.map((value, hour) => ({ x: hour, y: day, v: value }))),
-          backgroundColor: c => {
-            const value = c?.raw?.v || 0;
-            const alpha = Math.min(value / 10, 0);
-            return `rgba(37, 99, 235, ${alpha})`;
-          },
-          width: ({ chart }) => (chart?.chartArea?.width || 0) / 24,
-          height: ({ chart }) => (chart?.chartArea?.height || 0) / 7
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: {
-            type: "category",
-            labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
-            title: { display: true, text: "Hour of Day" }
-          },
-          y: {
-            type: "category",
-            labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-            title: { display: true, text: "Day of Week" }
-          }
-        },
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: ctx => `Submissions: ${ctx?.raw?.v || 0} at ${ctx?.raw?.x || 0}:00 on ${ctx?.chart?.scales?.y?.getLabelForValue(ctx?.raw?.y || 0) || 'Unknown'}`
-            }
-          }
-        }
-      }
-    });
-  };
-
-  // Export analytics to PDF
-  exportAnalytics.addEventListener('click', () => {
-    const timeRangeValue = parseInt(timeRange?.value || '30');
-    const courseFilterValue = courseFilter?.value || '';
-    const groupFilterValue = groupFilterAnalytics?.value || '';
-    const now = new Date.now();
-    let cutoffTime = 0;
-    if (timeRangeValue === "30") cutoffTime = now - 30 * 24 * 60 * 60 * 1000;
-    else if (timeRangeValue === "90") cutoffTime = now - 90 * 24 * 60 * 60 * 1000;
-    else if (timeRangeValue === "365") cutoffTime = now - 365 * 24 * 60 * 60 * 1000;
-
-    const filteredCourses = Object.entries(courses).filter(([courseId, c]) => {
-      if (c?.providerId !== auth.currentUser?.uid || c?.archived) return false;
-      if (courseFilterValue && courseFilterValue !== courseId) return false;
-      if (cutoffTime && c?.createdAt && c.createdAt < cutoffTime) return false;
-      return true;
-    });
-
-    const docDefinition = {
-      content: [
-        { text: "CETA Provider Analytics Report", style: "header" },
-        { text: `Generated on: ${new Date().toLocaleDateString()}`, style: "subheader" },
-        { text: `Time Range: ${timeRangeValue === "all" ? "All Time" : `Last ${timeRangeValue} Days`}`, style: "subheader" },
-        { text: courseFilterValue ? `Course: ${courses[courseFilterValue]?.name || "Unknown"} ` : "All Courses", style: "subheader" },
-        { text: groupFilterValue ? `Group: ${groupFilterValue}` : "All Groups", style: "subheader" },
-        {
-          table: {
-            headerRows: 1,
-            widths: ['*', 'auto', 'auto', 'auto', 'auto', 'auto'],
-            body: [
-              ['Course', 'Name', 'Enrolled', 'Completion Rate (%)', 'Avg Score (%)', 'Predicted Completion (%)', 'Difficulty Index (%)'],
-              ...filteredCourses.map(([courseId, course]) => {
-                let filteredLearners = Object.keys(learners).filter(lid => learners[lid]?.?.lid]?..role === 'learner' && course.lid]?.?.providerId === auth.uid && course?.enrolled?.includes(lid));
-                if (groupFilterValue) {
-                  filteredLearners = filteredLearners.filter(lid => learners[lid]?.metadata?.lid]?.?.tags?.includes(groupFilterValue));
-                }
-                const completionRate = filteredLearners.length > 0 ? (course?.completions?.filter(lid => filteredLearners.includes(lid))?.length || 0) / filteredLearnerners.length * 100 : 0;
-                let totalScore = 0, scoreCount = 0;
-                Object.values(assessments).filter(a => a?.courseId === courseId && (!cutoffTime || a?.createdAt >= cutoffTime)).forEach(a => {
-                  for (const subId in a?.submissions)) {
-                    if (filteredLearners.includes(subId) && (!cutoffTime || a.submissions[subId]?.?.submissions[subId]?.]?..submittedAt >= cutoffTime))) {
-                      if (a.submissions[subId]?.?.score)) {
-                        totalScore += a.submissions[subId].score;
-                        scoreCount++;
-                      }
-                    }
-                  }
-                });
-                const avgScore = scoreCount > 0 ? (totalScore / scoreCount).toFixed(1) : 0;
-                const stats = calculateStatisticalMetrics(courseId);
-                return [
-                  sanitizeInput(course?.name || 'Unknown'),
-                  filteredLearnerners.length,
-                  completionRate.toFixed(1),
-                  avgScore,
-                  predictCompletionRate(courseId),
-                  stats?.difficultyIndex || 0
-                ];
-              });
-            ]
-          }
-        },
-        { text: "Statistical Metrics", style: "subheader", margin: [0, 10, 0, 10] },
-        {
-          ul: filteredCourses.map(([courseId, course]) => {
-            const stats = calculateStatisticalMetrics(courseId);
-            return `${sanitizeInput(course?.name || 'Unknown')}: Avg Completion Time: ${stats?.avgCompletionTime || 0} hrs, Score Std Dev: ${stats?.stdDevScore || 0}`;
-          })
-        }
-      ],
-      styles: {
-        header: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
-        subheader: { fontSize: 14, margin: [0, 5, 0, 5] }
-      }
-    };
-
-    try {
-      pdfMake?.createPdf(docDefinition)?.download(`analytics_report_${new Date().toISOString().split("T")[0]}.pdf`);
-      logAudit('Exported analytics report to PDF');
-    } catch (err) {
-      console.error('Error generating PDF:', err);
-      alert('Failed to generate PDF report.');
-    }
-  });
-
-  // Load tickets
-  function loadTickets() {
-    showSpinner();
-    onValue(ref(db, "helpdesk"), snap => {
-      tickets = snap.val() || {};
-      onValue(ref(db, "users"), snap => {
-        learners = snap.val() || {};
-        ticketList.innerHTML = '';
-        for (const id in tickets) {
-          const ticket = tickets[id];
-          if (!courses[ticket?.courseId]?.providerId === auth.currentUser?.uid) continue;
-          const ticketItem = document.createElement("div");
-          ticketItem.className = 'bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow';
-          ticketItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${sanitizeInput(ticket?.issue || 'No issue specified')}</p>
-              <p class="text-sm text-gray-600">Learner: ${sanitizeInput(learners[ticket?.userId]?.fullName || learners[ticket?.userId]?.email || 'Unknown')} | Status: ${ticket?.status || 'Unknown'} | Submitted: ${ticket?.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : 'Unknown'}</p>
-            </div>
-            <div>
-              ${ticket?.status === 'open' ? `<button onclick="respondTicket('${id}') ${respondTicket}" class="text-blue-600 hover:underline" aria-label="Respond to ticket ${sanitizeInput(ticket?.issue || 'ticket')} ${ticketInput}" data-tooltip="Respond to ticket">Respond</button>` : '<span class="text-green-500">Resolved</span>'}
-            </div>
-          `;
-          ticketList.appendChild(ticketItem);
+    // Respond to ticket
+    window.respondTicket = async ticketId => {
+      const response = prompt("Enter your response:");
+      if (response) {
+        showSpinner();
+        try {
+          await update(ref(db, `helpdesk/${ticketId}`), {
+            status: "resolved",
+            resolvedAt: Date.now(),
+            response: sanitizeInput(response)
+          });
+          logAudit(`Resolved ticket ${ticketId}`);
+          alert("Ticket resolved successfully!");
+        } catch (err) {
+          console.error("Error resolving ticket:", err);
+          alert("Failed to resolve ticket.");
         }
         hideSpinner();
-      });
-    });
-  }
+      }
+    };
 
-  // Respond to ticket
-  window.respondTicket = async ticketId => {
-    const response = prompt('Enter your response:');
-    if (!response) return;
-    showSpinner();
-    try {
-      await update(ref(db, `helpdesk/tickets/${ticketId}`), {
-        status: 'resolved',
-        resolvedAt: new Date.now(),
-        response: sanitizeInput(response)
-      });
-      logAudit(`Resolved ticket ${ticketId} with response: "${response}"`);
-      alert('Ticket resolved successfully!');
-    } catch (err) {
-      console.error('Error resolving ticket:', err);
-      alert('Failed to resolve ticket.');
-    }
-    hideSpinner();
-  };
-
-  // Populate course filter
-  function populateCourseFilter() {
-    courseFilter.innerHTML = '<option value="">All Courses</option>';
-    for (const id in courses) {
-      if (courses[id]?.?.providerId === auth?.currentUser?.uid && !courses[id]?.?.archived) {
-        const option = document.createElement("option");
-        option.value = id;
-        option.textContent = sanitizeInput(courses[id]?.name || 'Unknown');
-        courseFilter.appendChild(option);
+    // Populate course filter
+    function populateCourseFilter() {
+      courseFilter.innerHTML = '<option value="">All Courses</option>';
+      for (const id in courses) {
+        if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = sanitizeInput(courses[id].name);
+          courseFilter.appendChild(option);
+        }
       }
     }
-  }
 
-  // Audit logging
-  async function logAudit(eventAction) {
-    try {
-      await push(ref(db, "audit_logs"), {
-        userId: auth?.currentUser?.uid || 'unknown',
-        action: eventAction,
-        timestamp: new Date.now()
-      });
-    } catch (err) {
-      console.error('Error logging audit event:', err);
-    }
-  }
-
-  // Sign out functionality
-  signOutBtn.addEventListener('click', async () => {
-    showSpinner();
-    try {
-      await signOut(auth);
-      logAudit(`Provider ${user?.fullName || user?.email || 'unknown'} signed out`);
-      window.location.href = 'login.html';
-    } catch (err) {
-      console.error('Error signing out:', err);
-      alert('Failed to sign out. Please try again.');
-      hideSpinner();
-    }
-  });
-
-  // Authentication check
-  onAuthStateChanged(auth, async authUser => {
-    if (!authUser) {
-      alert('Unauthorized. Please log in.');
-      window.location.href = 'login.html';
-      return;
-    }
-    showSpinner();
-    try {
-      const userSnap = await get(ref(db, `users/${authUser.uid}`));
-      if (!userSnap.exists()) {
-        console.error('User data not found in database.');
-        alert('User account not found. Please contact support.');
-        await signOut(auth);
-        window.location.href = 'login.html';
-        return;
+    // Audit logging
+    async function logAudit(action) {
+      try {
+        await push(ref(db, "audit_logs"), {
+          userId: auth.currentUser.uid,
+          action,
+          timestamp: Date.now()
+        });
+      } catch (err) {
+        console.error("Error logging audit:", err);
       }
-      user = userSnap.val();
-      if (user?.role !== 'provider') {
-        console.error('Access denied: User is not a provider.');
-        alert('Access denied. Provider role required.');
-        await signOut(auth);
-        window.location.href = 'login.html';
-        return;
-      }
-      // Initialize dashboard
-      providerName.textContent = sanitizeInput(user?.fullName || user?.email || 'Provider');
-      loadOverview();
-      loadLearners();
-      loadCourses();
-      loadLearnerProgress();
-      loadAnalytics();
-      loadTickets();
-      hideSpinner();
-    } catch (err) {
-      console.error('Error during authentication check:', err);
-      alert('An error occurred during authentication. Please try again.');
-      await signOut(auth);
-      window.location.href = 'login.html';
-      hideSpinner();
     }
-  });
 
-  // Filter analytics on change
-  timeRange.addEventListener('change', renderAnalytics);
-  courseFilter.addEventListener('change', renderAnalytics);
-  groupFilterAnalytics.addEventListener('change', renderAnalytics);
-
-  // Ensure modals are closed when clicking outside
-  [window.addLearnerModal, bulkUploadModal, assignCoursesModal].forEach(modal => {
-    modal?.addEventListener('click', e => {
-      if (e.target === modal) {
-        modal.style.display = 'none';
-        modal.querySelector('form')?.reset();
-        if (modal === assignCoursesModal) {
-          assignCoursesForm.onsubmit = null;
+    // Authentication check
+    onAuthStateChanged(auth, async authUser => {
+      if (!authUser) {
+        alert("Unauthorized. Redirecting...");
+        window.location.href = "login.html";
+      } else {
+        try {
+          const userSnap = await get(ref(db, `users/${authUser.uid}`));
+          if (userSnap.exists()) {
+            user = userSnap.val();
+            if (user.role !== "provider") {
+              alert("Access denied. Provider role required. Redirecting...");
+              await signOut(auth);
+              window.location.href = "login.html";
+              return;
+            }
+            loadOverview();
+            loadLearners();
+            loadCourses();
+            loadLearnerProgress();
+            loadAnalytics();
+            loadTickets();
+          } else {
+            alert("User data not found. Redirecting...");
+            await signOut(auth);
+            window.location.href = "login.html";
+          }
+        } catch (err) {
+          console.error("Error fetching user data:", err);
+          alert("Failed to load user data. Redirecting...");
+          await signOut(auth);
+          window.location.href = "login.html";
         }
       }
     });
-  });
-</script>
- 
+
+    // Sign out
+    document.getElementById("signout-btn").addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        window.location.href = "login.html";
+      } catch (err) {
+        console.error("Sign-out failed:", err);
+        alert("Failed to sign out. Please try again.");
+      }
+    });
+
+    // Analytics filter change
+    timeRange.addEventListener("change", loadAnalytics);
+    courseFilter.addEventListener("change", loadAnalytics);
+    groupFilterAnalytics.addEventListener("change", loadAnalytics);
+  </script>
 </body>
 </html>
