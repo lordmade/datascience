@@ -264,6 +264,7 @@
           <li><button class="nav-button w-full text-left" data-section="assignments" data-tooltip="View Assignments"><i class="fas fa-tasks"></i> Assignments</button></li>
           <li><button class="nav-button w-full text-left" data-section="forums" data-tooltip="Course Discussions"><i class="fas fa-comments"></i> Forums</button></li>
           <li><button class="nav-button w-full text-left" data-section="quizzes" data-tooltip="Take Quizzes"><i class="fas fa-question-circle"></i> Quizzes</button></li>
+          <li><button class="nav-button w-full text-left" data-section="live-sessions" data-tooltip="Join Live Sessions"><i class="fas fa-video"></i> Live Sessions</button></li>
           <li><button class="nav-button w-full text-left" data-section="certificates" data-tooltip="View Certificates"><i class="fas fa-certificate"></i> Certificates</button></li>
           <li><button class="nav-button w-full text-left" data-section="helpdesk" data-tooltip="Support Tickets"><i class="fas fa-headset"></i> Helpdesk</button></li>
         </ul>
@@ -372,6 +373,32 @@
         </div>
       </div>
 
+      <!-- Live Sessions Section -->
+      <div id="live-sessions" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Live Sessions</h2>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Available Live Sessions</h3>
+          <select id="liveCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
+          <div id="liveSessionList" class="space-y-4"></div>
+        </div>
+        <div id="liveVideoContainer" class="card hidden mt-4">
+          <h3 class="text-lg font-semibold mb-2">Live Session</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="video-feed">
+              <div class="video-label">Provider</div>
+              <video id="providerVideo" autoplay></video>
+            </div>
+            <div class="video-feed">
+              <div class="video-label">You</div>
+              <video id="learnerVideo" autoplay muted></video>
+            </div>
+          </div>
+          <button id="leaveSession" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-3xl mt-4 hidden" data-tooltip="Leave session">Leave Session</button>
+        </div>
+      </div>
+
       <!-- Certificates Section -->
       <div id="certificates" class="section hidden">
         <h2 class="text-2xl font-semibold mb-4">Certificates</h2>
@@ -443,7 +470,7 @@
     import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 
     // Firebase configuration
-    const firebaseConfig = {
+   const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
       databaseURL: "https://fire-b-a8878.firebaseio.com",
@@ -486,7 +513,7 @@
     const ticketTitle = document.getElementById("ticketTitle");
     const ticketDescription = document.getElementById("ticketDescription");
     const ticketList = document.getElementById("ticketList");
-    const progressChart = document.getElementById("progress-chart").getContext("2d");
+    const progressChartCanvas = document.getElementById("progress-chart");
     const quizAttemptModal = document.getElementById("quiz-attempt-modal");
     const quizAttemptTitle = document.getElementById("quiz-attempt-title");
     const quizAttemptForm = document.getElementById("quiz-attempt-form");
@@ -501,9 +528,15 @@
     const toggleSidebar = document.getElementById("toggle-sidebar");
     const toggleContrast = document.getElementById("toggle-contrast");
     const loadingSpinner = document.getElementById("loading-spinner");
+    const liveCourseFilter = document.getElementById("liveCourseFilter");
+    const liveSessionList = document.getElementById("liveSessionList");
+    const liveVideoContainer = document.getElementById("liveVideoContainer");
+    const providerVideo = document.getElementById("providerVideo");
+    const learnerVideo = document.getElementById("learnerVideo");
+    const leaveSession = document.getElementById("leaveSession");
 
-    let user = null, courses = {}, contents = {}, assignments = {}, forums = {}, quizzes = {}, certificates = {}, tickets = {};
-    let progressChartInstance = null;
+    let user = null, courses = {}, contents = {}, assignments = {}, forums = {}, quizzes = {}, certificates = {}, tickets = {}, liveSessions = {};
+    let progressChartInstance = null, peer = null, liveStream = null, liveConnection = null, liveSessionId = null;
 
     // Show/hide loading spinner
     function showSpinner() { loadingSpinner.classList.remove("hidden"); }
@@ -567,14 +600,22 @@
         onValue(ref(db, "courses"), snap => {
           courses = snap.val() || {};
           let courseCount = 0, completedCount = 0;
-          const progressData = { labels: [], datasets: [{ label: "Progress (%)", data: [], backgroundColor: "#2563eb", borderRadius: 4 }] };
+          const progressData = {
+            labels: [],
+            datasets: [{
+              label: "Progress (%)",
+              data: [],
+              backgroundColor: "#2563eb",
+              borderRadius: 4
+            }]
+          };
 
           for (const id in courses) {
             if (courses[id].enrolled?.includes(auth.currentUser.uid)) {
               courseCount++;
               if (courses[id].completions?.includes(auth.currentUser.uid)) completedCount++;
               progressData.labels.push(courses[id].name);
-              progressData.datasets[0].data.push(user.progress?.[id] || 0);
+              progressData.datasets[0].data.push(user.progress?.[id]?.completed / user.progress?.[id]?.total * 100 || 0);
             }
           }
 
@@ -582,17 +623,21 @@
           coursesCompleted.textContent = completedCount;
 
           if (progressChartInstance) progressChartInstance.destroy();
-          progressChartInstance = new Chart(progressChart, {
-            type: "bar",
-            data: progressData,
-            options: {
-              scales: { y: { beginAtZero: true, max: 100 } },
-              plugins: {
-                datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
-              }
-            },
-            plugins: [ChartDataLabels]
-          });
+          if (progressChartCanvas) {
+            progressChartInstance = new Chart(progressChartCanvas, {
+              type: "bar",
+              data: progressData,
+              options: {
+                scales: { y: { beginAtZero: true, max: 100 } },
+                plugins: {
+                  datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
+                }
+              },
+              plugins: [ChartDataLabels]
+            });
+          } else {
+            console.error("Canvas element 'progress-chart' not found.");
+          }
 
           onValue(ref(db, "certifications"), snap => {
             certificates = snap.val() || {};
@@ -624,7 +669,7 @@
         courseItem.innerHTML = `
           <div>
             <p class="font-semibold">${sanitizeInput(c.name)}</p>
-            <p class="text-sm text-gray-600">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Progress: ${user.progress?.[id] || 0}%</p>
+            <p class="text-sm text-gray-600">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Progress: ${(user.progress?.[id]?.completed / user.progress?.[id]?.total * 100 || 0).toFixed(1)}%</p>
           </div>
         `;
         courseList.appendChild(courseItem);
@@ -634,7 +679,6 @@
       }
     }
 
-    // Search courses
     const searchCourses = debounce(filter => renderCourses(sanitizeInput(filter)), 300);
     courseSearch.addEventListener("input", () => searchCourses(courseSearch.value));
 
@@ -657,6 +701,7 @@
       forumCourseFilter.innerHTML = courseOptions;
       quizCourseFilter.innerHTML = courseOptions;
       forumCourse.innerHTML = '<option value="">Select Course</option>' + courseOptions;
+      liveCourseFilter.innerHTML = courseOptions;
     }
 
     function renderContent(filter = "", courseFilter = "") {
@@ -684,7 +729,6 @@
       }
     }
 
-    // Search content
     const searchContent = debounce((filter, course) => renderContent(sanitizeInput(filter), course), 300);
     contentSearch.addEventListener("input", () => searchContent(contentSearch.value, contentCourseFilter.value));
     contentCourseFilter.addEventListener("change", () => searchContent(contentSearch.value, contentCourseFilter.value));
@@ -714,11 +758,11 @@
               <p class="font-semibold">${sanitizeInput(a.title)}</p>
               <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[a.courseId]?.name || "Unknown")}</p>
               <p class="text-sm text-gray-600">Status: ${sanitizeInput(a.status)} | Due: ${new Date(a.dueDate).toLocaleDateString()}</p>
-              <p class="text-sm text-gray-600">Grade: ${a.grade ? a.grade : "Not graded"}</p>
+              <p class="text-sm text-gray-600">Grade: ${a.grade ? sanitizeInput(a.grade) : "Not graded"}</p>
               <p class="text-sm text-gray-600">Submission: ${a.submissionUrl ? `<a href="${sanitizeInput(a.submissionUrl)}" target="_blank" class="text-blue-600 hover:underline">View</a>` : "Not submitted"}</p>
             </div>
             <div class="flex gap-2">
-              ${a.status === "assigned" ? `<button onclick="submitAssignment('${id}', '${sanitizeInput(a.title)}')" class="text-blue-600 hover:underline" aria-label="Submit assignment ${sanitizeInput(a.title)}" data-tooltip="Submit assignment">Submit</button>` : ""}
+              ${a.status === "Assigned" ? `<button onclick="submitAssignment('${id}', '${sanitizeInput(a.title)}')" class="text-blue-600 hover:underline" aria-label="Submit assignment ${sanitizeInput(a.title)}" data-tooltip="Submit assignment">Submit</button>` : ""}
             </div>
           </div>
         `;
@@ -729,12 +773,10 @@
       }
     }
 
-    // Search assignments
     const searchAssignments = debounce((filter, course) => renderAssignments(sanitizeInput(filter), course), 300);
     assignmentSearch.addEventListener("input", () => searchAssignments(assignmentSearch.value, assignmentCourseFilter.value));
     assignmentCourseFilter.addEventListener("change", () => searchAssignments(assignmentSearch.value, assignmentCourseFilter.value));
 
-    // Submit assignment
     window.submitAssignment = async (assignmentId, title) => {
       assignmentSubmitTitle.textContent = title;
       assignmentSubmitModal.style.display = "block";
@@ -752,7 +794,7 @@
           const url = await getDownloadURL(fileRef);
           await update(ref(db, `assignments/${assignmentId}`), {
             submissionUrl: url,
-            status: "submitted",
+            status: "Submitted",
             submittedAt: Date.now()
           });
           logAudit(`Submitted assignment ${title}`);
@@ -810,12 +852,10 @@
       }
     }
 
-    // Search forums
     const searchForums = debounce((filter, course) => renderForums(sanitizeInput(filter), course), 300);
     forumSearch.addEventListener("input", () => searchForums(forumSearch.value, forumCourseFilter.value));
     forumCourseFilter.addEventListener("change", () => searchForums(forumSearch.value, forumCourseFilter.value));
 
-    // Create forum post
     forumPostForm.addEventListener("submit", async e => {
       e.preventDefault();
       const courseId = forumCourse.value;
@@ -831,7 +871,7 @@
           providerId: courses[courseId].providerId,
           courseId,
           title,
-          posts: [{ content, postedBy: auth.currentUser.uid, postedAt: Date.now() }],
+          posts: [{ content, authorId: auth.currentUser.uid, timestamp: Date.now() }],
           createdAt: Date.now()
         });
         logAudit(`Created forum thread ${title}`);
@@ -844,7 +884,6 @@
       hideSpinner();
     });
 
-    // View thread
     window.viewThread = async threadId => {
       const f = forums[threadId];
       const modal = document.createElement("div");
@@ -856,9 +895,9 @@
           <p class="text-sm text-gray-600 mb-2">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")}</p>
           <div class="space-y-2 mb-4">
             ${f.posts?.map(p => `
-              <div class="bg-gray-100 p-2 rounded">
+              <div class="bg-gray-50 p-2 rounded">
                 <p class="text-sm">${sanitizeInput(p.content)}</p>
-                <p class="text-xs text-gray-500">Posted by ${sanitizeInput(p.postedBy === auth.currentUser.uid ? "You" : "Provider")} on ${new Date(p.postedAt).toLocaleString()}</p>
+                <p class="text-xs text-gray-500">Posted by ${sanitizeInput(p.authorId === auth.currentUser.uid ? user.fullName || user.email : "Provider")} on ${new Date(p.timestamp).toLocaleString()}</p>
               </div>
             `).join("")}
           </div>
@@ -873,11 +912,14 @@
       document.getElementById(`post-form-${threadId}`).addEventListener("submit", async e => {
         e.preventDefault();
         const content = sanitizeInput(document.getElementById(`post-content-${threadId}`).value.trim());
-        if (!content) return;
+        if (!content) {
+          alert("Please enter post content.");
+          return;
+        }
         showSpinner();
         try {
           await update(ref(db, `forums/${threadId}`), {
-            posts: [...f.posts, { content, postedBy: auth.currentUser.uid, postedAt: Date.now() }]
+            posts: [...(f.posts || []), { content, authorId: auth.currentUser.uid, timestamp: Date.now() }]
           });
           logAudit(`Posted to thread ${f.title}`);
           modal.remove();
@@ -927,12 +969,10 @@
       }
     }
 
-    // Search quizzes
     const searchQuizzes = debounce((filter, course) => renderQuizzes(sanitizeInput(filter), course), 300);
     quizSearch.addEventListener("input", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
     quizCourseFilter.addEventListener("change", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
 
-    // Attempt quiz
     window.attemptQuiz = (quizId, title) => {
       const q = quizzes[quizId];
       quizAttemptTitle.textContent = title;
@@ -957,7 +997,7 @@
         });
         showSpinner();
         try {
-          const score = answers.reduce((total, ans, i) => total + (ans === q.questions[i].correct ? 1 : 0), 0);
+          const score = answers.reduce((total, ans, i) => total + (ans === q.questions[i].correctOption ? 1 : 0), 0);
           await push(ref(db, `quizzes/${quizId}/submissions`), {
             learnerId: auth.currentUser.uid,
             answers,
@@ -1016,7 +1056,6 @@
       }
     }
 
-    // Download certificate
     window.downloadCertificate = async certId => {
       const cert = certificates[certId];
       if (!cert) return;
@@ -1064,10 +1103,10 @@
         ticketItem.innerHTML = `
           <div class="flex justify-between items-center">
             <div>
-              <p class="font-semibold">${sanitizeInput(t.title)}</p>
+              <p class="font-semibold">${sanitizeInput(t.subject)}</p>
               <p class="text-sm text-gray-600">Description: ${sanitizeInput(t.description)}</p>
               <p class="text-sm text-gray-600">Status: ${sanitizeInput(t.status)} | Created: ${new Date(t.createdAt).toLocaleDateString()}</p>
-              ${t.response ? `<p class="text-sm text-gray-600">Response: ${sanitizeInput(t.response)}</p>` : ""}
+              ${t.responses?.length ? `<p class="text-sm text-gray-600">Latest Response: ${sanitizeInput(t.responses[t.responses.length - 1].content)}</p>` : ""}
             </div>
           </div>
         `;
@@ -1078,7 +1117,6 @@
       }
     }
 
-    // Submit ticket
     ticketForm.addEventListener("submit", async e => {
       e.preventDefault();
       const title = sanitizeInput(ticketTitle.value.trim());
@@ -1091,9 +1129,9 @@
       try {
         await push(ref(db, "tickets"), {
           learnerId: auth.currentUser.uid,
-          title,
+          subject: title,
           description,
-          status: "open",
+          status: "Open",
           createdAt: Date.now()
         });
         logAudit(`Submitted ticket ${title}`);
@@ -1106,11 +1144,159 @@
       hideSpinner();
     });
 
+    // Load live sessions
+    function loadLiveSessions() {
+      showSpinner();
+      onValue(ref(db, "liveSessions"), snap => {
+        liveSessions = snap.val() || {};
+        renderLiveSessions();
+        hideSpinner();
+      });
+    }
+
+    function populateLiveCourseFilter() {
+      liveCourseFilter.innerHTML = '<option value="">All Courses</option>';
+      for (const id in courses) {
+        if (courses[id].enrolled?.includes(auth.currentUser.uid)) {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = sanitizeInput(courses[id].name);
+          liveCourseFilter.appendChild(option);
+        }
+      }
+    }
+
+    function renderLiveSessions(courseFilter = "") {
+      liveSessionList.innerHTML = "";
+      for (const id in liveSessions) {
+        const s = liveSessions[id];
+        if (s.status !== "active" || !courses[s.courseId]?.enrolled?.includes(auth.currentUser.uid)) continue;
+        if (courseFilter && s.courseId !== courseFilter) continue;
+        const sessionItem = document.createElement("div");
+        sessionItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        sessionItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(s.title)}</p>
+              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[s.courseId]?.name || "Unknown")}</p>
+              <p class="text-sm text-gray-600">Started: ${new Date(s.createdAt).toLocaleDateString()}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="joinLiveSession('${id}', '${sanitizeInput(s.title)}', '${s.providerId}', '${s.courseId}')" class="text-blue-600 hover:underline" aria-label="Join live session ${sanitizeInput(s.title)}" data-tooltip="Join session">Join</button>
+            </div>
+          </div>
+        `;
+        liveSessionList.appendChild(sessionItem);
+      }
+      if (!liveSessionList.innerHTML) {
+        liveSessionList.innerHTML = '<p class="text-gray-600 text-center">No active live sessions available.</p>';
+      }
+    }
+
+    const searchLiveSessions = debounce(course => renderLiveSessions(sanitizeInput(course)), 300);
+    liveCourseFilter.addEventListener("change", () => searchLiveSessions(liveCourseFilter.value));
+
+    // Initialize PeerJS for WebRTC
+    function initializePeer() {
+      if (peer) peer.destroy();
+      peer = new Peer(auth.currentUser.uid, {
+        host: "peerjs-server-0.herokuapp.com",
+        secure: true,
+        port: 443
+      });
+
+      peer.on("open", id => {
+        console.log("PeerJS connection established with ID:", id);
+      });
+
+      peer.on("error", err => {
+        console.error("PeerJS error:", err);
+        alert("Failed to join live session: " + err.message);
+        leaveLiveSession();
+      });
+
+      peer.on("call", call => {
+        if (!liveSessionId) return; // Only accept calls during an active session
+        call.answer(liveStream);
+        call.on("stream", remoteStream => {
+          providerVideo.srcObject = remoteStream;
+        });
+        call.on("close", () => {
+          leaveLiveSession();
+        });
+        liveConnection = call;
+      });
+    }
+
+    // Join live session
+    window.joinLiveSession = async (sessionId, title, providerId, courseId) => {
+      if (!courses[courseId]?.enrolled?.includes(auth.currentUser.uid)) {
+        alert("You are not enrolled in this course.");
+        return;
+      }
+      showSpinner();
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        liveStream = stream;
+        learnerVideo.srcObject = stream;
+        initializePeer();
+
+        liveSessionId = sessionId;
+        liveVideoContainer.classList.remove("hidden");
+        leaveSession.classList.remove("hidden");
+
+        // Call the provider
+        const call = peer.call(providerId, liveStream);
+        call.on("stream", remoteStream => {
+          providerVideo.srcObject = remoteStream;
+        });
+        call.on("close", () => {
+          leaveLiveSession();
+        });
+        liveConnection = call;
+
+        logAudit(`Joined live session ${title}`);
+      } catch (err) {
+        console.error("Error joining live session:", err);
+        alert("Failed to join live session. Please ensure camera and microphone access is granted.");
+        leaveLiveSession();
+      }
+      hideSpinner();
+    };
+
+    // Leave live session
+    window.leaveLiveSession = () => {
+      if (liveStream) {
+        liveStream.getTracks().forEach(track => track.stop());
+        liveStream = null;
+        learnerVideo.srcObject = null;
+        providerVideo.srcObject = null;
+      }
+      if (liveConnection) {
+        liveConnection.close();
+        liveConnection = null;
+      }
+      if (peer) {
+        peer.destroy();
+        peer = null;
+      }
+      liveSessionId = null;
+      liveVideoContainer.classList.add("hidden");
+      leaveSession.classList.add("hidden");
+      logAudit("Left live session");
+    };
+
+    leaveSession.addEventListener("click", () => {
+      if (!confirm("Are you sure you want to leave the live session?")) return;
+      leaveLiveSession();
+      alert("Left live session successfully!");
+    });
+
     // Log audit events
     function logAudit(message) {
-      push(ref(db, "auditLogs"), {
+      push(ref(db, `auditLogs/${auth.currentUser.uid}`), {
         learnerId: auth.currentUser.uid,
-        message,
+        message: sanitizeInput(message),
         timestamp: Date.now()
       });
     }
@@ -1136,6 +1322,8 @@
         loadQuizzes();
         loadCertificates();
         loadTickets();
+        loadLiveSessions();
+        populateLiveCourseFilter();
       });
     });
 
@@ -1144,6 +1332,7 @@
       showSpinner();
       try {
         await signOut(auth);
+        logAudit("Signed out");
         window.location.href = "login.html";
       } catch (err) {
         console.error("Error signing out:", err);
