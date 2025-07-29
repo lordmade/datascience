@@ -1,247 +1,1155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CETA LMS - Learner</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CETA Learner Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <style>
     :root {
-      --primary-blue: #00A3FF;
-      --text-light: #E0E0E0;
-      --text-dark: #FFFFFF;
-      --border: #333333;
-      --background-dark: #0A0A0A;
-      --background-gradient: linear-gradient(135deg, #0A0A0A 0%, #1C2526 100%);
-      --glow: rgba(0, 163, 255, 0.3);
+      --primary: #1e40af;
+      --secondary: #10b981;
+      --background: #f3f4f6;
+      --card-bg: #ffffff;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --high-contrast-bg: #1a1a1a;
+      --high-contrast-text: #e5e5e5;
     }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      background: var(--background-gradient);
+      background: var(--background);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
       min-height: 100vh;
-      margin: 0;
-      padding: 0;
-      color: var(--text-light);
+      display: flex;
+      flex-direction: column;
     }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
+
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(to bottom, #111827, #1f2937);
+      color: white;
+      min-height: 100vh;
       padding: 1.5rem;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, width 0.3s ease;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 50;
     }
-    .btn {
-      background: var(--primary-blue);
-      color: var(--text-dark);
-      padding: 0.5rem 1.5rem;
-      border-radius: 20px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+
+    .sidebar-hidden {
+      transform: translateX(-100%);
+      width: 0;
     }
-    .btn:hover {
-      background: #33B5FF;
-      transform: scale(1.05);
-      box-shadow: 0 0 10px var(--glow);
+
+    .sidebar-open {
+      transform: translateX(0);
     }
-    .card {
-      background: #1C2526;
-      border: 1px solid var(--border);
+
+    .sidebar .nav-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
       border-radius: 0.375rem;
-      padding: 1rem;
-      margin-bottom: 1rem;
+      transition: background-color 0.2s ease;
     }
-    .custom-alert {
+
+    .sidebar .nav-button:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar .nav-button.active {
+      background: var(--primary);
+    }
+
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 2rem;
+      transition: margin-left 0.3s ease;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 260px;
+        transform: translateX(-100%);
+      }
+      .sidebar-open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .high-contrast {
+      background: #000 !important;
+      color: var(--high-contrast-text) !important;
+    }
+
+    .high-contrast .card {
+      background: var(--high-contrast-bg) !important;
+    }
+
+    .high-contrast .text-gray-600 {
+      color: var(--high-contrast-text) !important;
+    }
+
+    .high-contrast .bg-gray-50 {
+      background: #2d3748 !important;
+    }
+
+    .tooltip {
+      position: relative;
+    }
+
+    .tooltip:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      z-index: 10;
+    }
+
+    .modal {
       display: none;
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #1C2526;
-      padding: 1.5rem 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 163, 255, 0.2);
-      z-index: 1000;
-      color: var(--text-light);
-      font-weight: 500;
-      text-align: center;
-      max-width: 90%;
-      width: 340px;
-      animation: fadeIn 0.3s ease-out forwards;
-      border: 1px solid var(--border);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .custom-alert.active {
-      display: block;
+
+    .modal-content {
+      background: var(--card-bg);
+      margin: 0 auto;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 600px;
+      border-radius: 0.5rem;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     }
-    .custom-alert .close-btn {
+
+    .high-contrast .modal-content {
+      background: var(--high-contrast-bg) !important;
+      color: var(--high-contrast-text) !important;
+    }
+
+    .video-feed {
+      background: black;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 16 / 9;
+    }
+
+    .video-label {
       position: absolute;
-      top: 0.75rem;
-      right: 0.75rem;
-      width: 24px;
-      height: 24px;
-      background: none;
-      border: none;
-      color: var(--primary-blue);
-      cursor: pointer;
-      transition: transform 0.2s ease, color 0.2s ease;
+      top: 0.5rem;
+      left: 0.5rem;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
     }
-    .custom-alert .close-btn:hover {
-      transform: scale(1.2);
-      color: #33B5FF;
+
+    button:not(.nav-button) {
+      border-radius: 9999px;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
     }
-    @keyframes fadeIn {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
+
+    button:hover:not(.nav-button) {
+      transform: translateY(-1px);
     }
-    @media (max-width: 640px) {
-      .container {
-        padding: 1rem;
-      }
-      .btn {
-        width: 100%;
-        margin-bottom: 0.5rem;
-      }
+
+    input, select, textarea {
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2);
+    }
+
+    #loading-spinner {
+      z-index: 200;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto !important;
+    }
+
+    .section {
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .section::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .section::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    .section::-webkit-scrollbar-track {
+      background: #e5e7eb;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <nav class="flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold text-white">CETA LMS - Learner</h1>
-      <button id="logout-btn" class="btn">Logout</button>
-    </nav>
-    <div id="learner-section">
-      <h2 class="text-xl mb-4">Learner Dashboard</h2>
-      <div id="courses-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-bold flex items-center gap-2">
+          <i class="fas fa-graduation-cap"></i> CETA Learner
+        </h1>
+        <button id="toggle-sidebar" class="md:hidden text-white focus:outline-none" aria-label="Toggle sidebar">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+      <nav>
+        <ul class="space-y-2">
+          <li><button class="nav-button w-full text-left active" data-section="overview" data-tooltip="Dashboard Overview"><i class="fas fa-tachometer-alt"></i> Overview</button></li>
+          <li><button class="nav-button w-full text-left" data-section="courses" data-tooltip="View Courses"><i class="fas fa-book"></i> My Courses</button></li>
+          <li><button class="nav-button w-full text-left" data-section="progress" data-tooltip="Track Progress"><i class="fas fa-chart-line"></i> Progress</button></li>
+          <li><button class="nav-button w-full text-left" data-section="content" data-tooltip="Course Materials"><i class="fas fa-file-alt"></i> Course Content</button></li>
+          <li><button class="nav-button w-full text-left" data-section="assignments" data-tooltip="View Assignments"><i class="fas fa-tasks"></i> Assignments</button></li>
+          <li><button class="nav-button w-full text-left" data-section="forums" data-tooltip="Course Discussions"><i class="fas fa-comments"></i> Forums</button></li>
+          <li><button class="nav-button w-full text-left" data-section="quizzes" data-tooltip="Take Quizzes"><i class="fas fa-question-circle"></i> Quizzes</button></li>
+          <li><button class="nav-button w-full text-left" data-section="certificates" data-tooltip="View Certificates"><i class="fas fa-certificate"></i> Certificates</button></li>
+          <li><button class="nav-button w-full text-left" data-section="helpdesk" data-tooltip="Support Tickets"><i class="fas fa-headset"></i> Helpdesk</button></li>
+        </ul>
+      </nav>
+      <div class="mt-auto">
+        <button id="toggle-contrast" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-3xl mb-2" aria-label="Toggle high contrast mode" data-tooltip="Toggle High Contrast">Toggle High Contrast</button>
+        <button id="signout-btn" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-3xl" aria-label="Sign out" data-tooltip="Sign Out">Sign Out</button>
+      </div>
     </div>
-    <div id="custom-alert" class="custom-alert" role="alertdialog" aria-modal="true" aria-labelledby="alert-message" tabindex="-1">
-      <button class="close-btn" aria-label="Close alert" onclick="hideAlert()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-      <p id="alert-message">An error occurred. Please try again later.</p>
-      <button class="retry-btn" onclick="retryAction()">Retry</button>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Overview Section -->
+      <div id="overview" class="section">
+        <h2 class="text-2xl font-semibold mb-4">Welcome, <span id="learner-name">Learner</span></h2>
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div class="card">
+            <h3 class="text-lg font-semibold">Enrolled Courses</h3>
+            <p id="enrolled-courses" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+          <div class="card">
+            <h3 class="text-lg font-semibold">Courses Completed</h3>
+            <p id="courses-completed" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+          <div class="card">
+            <h3 class="text-lg font-semibold">Certificates Earned</h3>
+            <p id="certificates-earned" class="text-3xl font-bold text-blue-600">0</p>
+          </div>
+        </div>
+        <div class="mt-6 card">
+          <h3 class="text-lg font-semibold mb-2">Course Progress</h3>
+          <canvas id="progress-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Courses Section -->
+      <div id="courses" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">My Courses</h2>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Enrolled Courses</h3>
+          <input type="text" id="courseSearch" placeholder="Search courses..." class="border p-2 rounded w-full mb-4" aria-label="Search courses by name or tag" />
+          <div id="courseList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Course Content Section -->
+      <div id="content" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Course Content</h2>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Course Materials</h3>
+          <input type="text" id="contentSearch" placeholder="Search content..." class="border p-2 rounded w-full mb-4" aria-label="Search content by title" />
+          <select id="contentCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
+          <div id="contentList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Assignments Section -->
+      <div id="assignments" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Assignments</h2>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Your Assignments</h3>
+          <input type="text" id="assignmentSearch" placeholder="Search assignments..." class="border p-2 rounded w-full mb-4" aria-label="Search assignments by title" />
+          <select id="assignmentCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
+          <div id="assignmentList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Forums Section -->
+      <div id="forums" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Course Forums</h2>
+        <div class="mb-4 card">
+          <h3 class="text-lg font-semibold mb-2">Create Forum Post</h3>
+          <form id="forum-post-form">
+            <select id="forumCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
+              <option value="">Select Course</option>
+            </select>
+            <input type="text" id="threadTitle" placeholder="Thread Title" class="border p-2 rounded w-full mb-2" aria-label="Enter thread title" required />
+            <textarea id="threadContent" placeholder="Post Content" class="border p-2 rounded w-full mb-2" aria-label="Enter post content" required></textarea>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Create post">Create Post</button>
+          </form>
+        </div>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Forum Threads</h3>
+          <input type="text" id="forumSearch" placeholder="Search threads..." class="border p-2 rounded w-full mb-4" aria-label="Search threads by title" />
+          <select id="forumCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
+          <div id="forumList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Quizzes Section -->
+      <div id="quizzes" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Quizzes</h2>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Available Quizzes</h3>
+          <input type="text" id="quizSearch" placeholder="Search quizzes..." class="border p-2 rounded w-full mb-4" aria-label="Search quizzes by title" />
+          <select id="quizCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
+          <div id="quizList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Certificates Section -->
+      <div id="certificates" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Certificates</h2>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Earned Certificates</h3>
+          <div id="certificateList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Helpdesk Section -->
+      <div id="helpdesk" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Helpdesk</h2>
+        <div class="mb-4 card">
+          <h3 class="text-lg font-semibold mb-2">Submit Support Ticket</h3>
+          <form id="ticket-form">
+            <input type="text" id="ticketTitle" placeholder="Ticket Title" class="border p-2 rounded w-full mb-2" aria-label="Enter ticket title" required />
+            <textarea id="ticketDescription" placeholder="Describe your issue..." class="border p-2 rounded w-full mb-2" aria-label="Enter ticket description" required></textarea>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Submit ticket">Submit</button>
+          </form>
+        </div>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Your Tickets</h3>
+          <div id="ticketList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Quiz Attempt Modal -->
+      <div id="quiz-attempt-modal" class="modal">
+        <div class="modal-content">
+          <h3 class="text-lg font-semibold mb-4">Quiz: <span id="quiz-attempt-title"></span></h3>
+          <form id="quiz-attempt-form">
+            <div id="quiz-attempt-questions" class="space-y-4"></div>
+            <div class="flex gap-2">
+              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Submit quiz">Submit</button>
+              <button type="button" id="close-quiz-attempt" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Assignment Submission Modal -->
+      <div id="assignment-submit-modal" class="modal">
+        <div class="modal-content">
+          <h3 class="text-lg font-semibold mb-4">Submit Assignment: <span id="assignment-submit-title"></span></h3>
+          <form id="assignment-submit-form">
+            <input type="file" id="assignmentFile" accept=".pdf,.doc,.docx" class="border p-2 rounded w-full mb-2" aria-label="Upload assignment file" required />
+            <div class="flex gap-2">
+              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Submit assignment">Submit</button>
+              <button type="button" id="close-assignment-submit" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+      </div>
+
+      <noscript>
+        <p class="text-red-500 text-center">JavaScript is required to use this dashboard.</p>
+      </noscript>
     </div>
   </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getDatabase, ref, onValue, push, update, get, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
       databaseURL: "https://fire-b-a8878.firebaseio.com",
       projectId: "fire-b-a8878",
-      storageBucket: "fire-b-a8878.firebasestorage.app",
+      storageBucket: "fire-b-a8878.appspot.com",
       messagingSenderId: "658673187627",
-      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e"
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getDatabase(app);
+    const auth = getAuth(app);
+    const storage = getStorage(app);
 
+    // DOM elements
+    const learnerName = document.getElementById("learner-name");
+    const enrolledCourses = document.getElementById("enrolled-courses");
+    const coursesCompleted = document.getElementById("courses-completed");
+    const certificatesEarned = document.getElementById("certificates-earned");
+    const courseList = document.getElementById("courseList");
+    const courseSearch = document.getElementById("courseSearch");
+    const contentList = document.getElementById("contentList");
+    const contentSearch = document.getElementById("contentSearch");
+    const contentCourseFilter = document.getElementById("contentCourseFilter");
+    const assignmentList = document.getElementById("assignmentList");
+    const assignmentSearch = document.getElementById("assignmentSearch");
+    const assignmentCourseFilter = document.getElementById("assignmentCourseFilter");
+    const forumList = document.getElementById("forumList");
+    const forumSearch = document.getElementById("forumSearch");
+    const forumCourseFilter = document.getElementById("forumCourseFilter");
+    const forumPostForm = document.getElementById("forum-post-form");
+    const forumCourse = document.getElementById("forumCourse");
+    const threadTitle = document.getElementById("threadTitle");
+    const threadContent = document.getElementById("threadContent");
+    const quizList = document.getElementById("quizList");
+    const quizSearch = document.getElementById("quizSearch");
+    const quizCourseFilter = document.getElementById("quizCourseFilter");
+    const certificateList = document.getElementById("certificateList");
+    const ticketForm = document.getElementById("ticket-form");
+    const ticketTitle = document.getElementById("ticketTitle");
+    const ticketDescription = document.getElementById("ticketDescription");
+    const ticketList = document.getElementById("ticketList");
+    const progressChart = document.getElementById("progress-chart").getContext("2d");
+    const quizAttemptModal = document.getElementById("quiz-attempt-modal");
+    const quizAttemptTitle = document.getElementById("quiz-attempt-title");
+    const quizAttemptForm = document.getElementById("quiz-attempt-form");
+    const quizAttemptQuestions = document.getElementById("quiz-attempt-questions");
+    const closeQuizAttempt = document.getElementById("close-quiz-attempt");
+    const assignmentSubmitModal = document.getElementById("assignment-submit-modal");
+    const assignmentSubmitTitle = document.getElementById("assignment-submit-title");
+    const assignmentSubmitForm = document.getElementById("assignment-submit-form");
+    const assignmentFile = document.getElementById("assignmentFile");
+    const closeAssignmentSubmit = document.getElementById("close-assignment-submit");
+    const sidebar = document.getElementById("sidebar");
+    const toggleSidebar = document.getElementById("toggle-sidebar");
+    const toggleContrast = document.getElementById("toggle-contrast");
+    const loadingSpinner = document.getElementById("loading-spinner");
+
+    let user = null, courses = {}, contents = {}, assignments = {}, forums = {}, quizzes = {}, certificates = {}, tickets = {};
+    let progressChartInstance = null;
+
+    // Show/hide loading spinner
+    function showSpinner() { loadingSpinner.classList.remove("hidden"); }
+    function hideSpinner() { loadingSpinner.classList.add("hidden"); }
+
+    // Sidebar toggle
+    toggleSidebar.addEventListener("click", () => {
+      sidebar.classList.toggle("sidebar-hidden");
+      sidebar.classList.toggle("sidebar-open");
+    });
+
+    // High contrast toggle
+    toggleContrast.addEventListener("click", () => {
+      document.body.classList.toggle("high-contrast");
+      localStorage.setItem("highContrast", document.body.classList.contains("high-contrast"));
+    });
+
+    // Load high contrast preference
+    if (localStorage.getItem("highContrast") === "true") {
+      document.body.classList.add("high-contrast");
+    }
+
+    // Section switching
+    document.querySelectorAll(".nav-button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
+        document.getElementById(btn.dataset.section).classList.remove("hidden");
+        document.querySelectorAll(".nav-button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
+      });
+    });
+
+    // Debounce function for search
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // Sanitize input to prevent XSS
     function sanitizeInput(input) {
-      const div = document.createElement('div');
+      const div = document.createElement("div");
       div.textContent = input;
       return div.innerHTML;
     }
 
-    function showAlert(message, autoHide = true) {
-      const customAlert = document.getElementById("custom-alert");
-      const alertMessage = document.getElementById("alert-message");
-      alertMessage.textContent = message;
-      customAlert.classList.add("active");
-      customAlert.focus();
-      if (autoHide) {
-        setTimeout(hideAlert, 5000);
-      }
-    }
+    // Load overview metrics and chart
+    function loadOverview() {
+      showSpinner();
+      onValue(ref(db, `users/${auth.currentUser.uid}`), snap => {
+        user = snap.val();
+        learnerName.textContent = sanitizeInput(user.fullName || user.email);
 
-    function hideAlert() {
-      const customAlert = document.getElementById("custom-alert");
-      customAlert.classList.remove("active");
-    }
+        onValue(ref(db, "courses"), snap => {
+          courses = snap.val() || {};
+          let courseCount = 0, completedCount = 0;
+          const progressData = { labels: [], datasets: [{ label: "Progress (%)", data: [], backgroundColor: "#2563eb", borderRadius: 4 }] };
 
-    let retryActionCallback = null;
-
-    function retryAction() {
-      hideAlert();
-      if (retryActionCallback) retryActionCallback();
-    }
-
-    function renderLearnerSection() {
-      const coursesList = document.getElementById('courses-list');
-      onValue(ref(db, 'assignments'), snapshot => {
-        coursesList.innerHTML = '';
-        const assignments = snapshot.val();
-        const userCourses = [];
-        for (let assignmentId in assignments) {
-          if (assignments[assignmentId].learnerId === auth.currentUser.uid) {
-            userCourses.push(assignments[assignmentId].courseId);
-          }
-        }
-
-        if (userCourses.length === 0) {
-          coursesList.innerHTML = '<p class="text-gray-400">No courses enrolled.</p>';
-          return;
-        }
-
-        get(ref(db, 'courses')).then(courseSnapshot => {
-          const courses = courseSnapshot.val();
-          userCourses.forEach(courseId => {
-            if (courses[courseId]) {
-              const course = courses[courseId];
-              const completion = course.enrolled?.[auth.currentUser.uid]?.completionPercentage || 0;
-              const card = document.createElement('div');
-              card.className = 'card';
-              card.innerHTML = `
-                <h3 class="text-lg font-semibold">${sanitizeInput(course.name)}</h3>
-                <p>${sanitizeInput(course.description)}</p>
-                <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2">
-                  <div class="bg-[var(--primary-blue)] h-2.5 rounded-full" style="width: ${completion}%"></div>
-                </div>
-                <p class="mt-1">Progress: ${completion}%</p>
-                <button class="btn mt-2" onclick="viewCourse('${courseId}')">View Course</button>
-              `;
-              coursesList.appendChild(card);
+          for (const id in courses) {
+            if (courses[id].enrolled?.includes(auth.currentUser.uid)) {
+              courseCount++;
+              if (courses[id].completions?.includes(auth.currentUser.uid)) completedCount++;
+              progressData.labels.push(courses[id].name);
+              progressData.datasets[0].data.push(user.progress?.[id] || 0);
             }
+          }
+
+          enrolledCourses.textContent = courseCount;
+          coursesCompleted.textContent = completedCount;
+
+          if (progressChartInstance) progressChartInstance.destroy();
+          progressChartInstance = new Chart(progressChart, {
+            type: "bar",
+            data: progressData,
+            options: {
+              scales: { y: { beginAtZero: true, max: 100 } },
+              plugins: {
+                datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
+              }
+            },
+            plugins: [ChartDataLabels]
           });
-        }).catch(error => {
-          showAlert(`Error loading courses: ${error.message}`, false);
-          set(ref(db, `logs/${Date.now()}`), {
-            message: `Learner error: ${error.message}`,
-            timestamp: Date.now(),
-            userId: auth.currentUser.uid
+
+          onValue(ref(db, "certifications"), snap => {
+            certificates = snap.val() || {};
+            certificatesEarned.textContent = Object.values(certificates).filter(c => c.learnerId === auth.currentUser.uid).length;
+            hideSpinner();
           });
         });
       });
     }
 
-    window.viewCourse = function(courseId) {
-      // Placeholder for course viewing (e.g., redirect to course page or show content)
-      showAlert('Course viewing functionality to be implemented', true);
+    // Load courses
+    function loadCourses() {
+      showSpinner();
+      onValue(ref(db, "courses"), snap => {
+        courses = snap.val() || {};
+        renderCourses();
+        populateCourseFilters();
+        hideSpinner();
+      });
+    }
+
+    function renderCourses(filter = "") {
+      courseList.innerHTML = "";
+      for (const id in courses) {
+        const c = courses[id];
+        if (!c.enrolled?.includes(auth.currentUser.uid) || (filter && !c.name.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase())))) continue;
+        const courseItem = document.createElement("div");
+        courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow";
+        courseItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${sanitizeInput(c.name)}</p>
+            <p class="text-sm text-gray-600">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Progress: ${user.progress?.[id] || 0}%</p>
+          </div>
+        `;
+        courseList.appendChild(courseItem);
+      }
+      if (!courseList.innerHTML) {
+        courseList.innerHTML = '<p class="text-gray-600 text-center">No courses enrolled.</p>';
+      }
+    }
+
+    // Search courses
+    const searchCourses = debounce(filter => renderCourses(sanitizeInput(filter)), 300);
+    courseSearch.addEventListener("input", () => searchCourses(courseSearch.value));
+
+    // Load course content
+    function loadContent() {
+      showSpinner();
+      onValue(ref(db, "contents"), snap => {
+        contents = snap.val() || {};
+        renderContent();
+        hideSpinner();
+      });
+    }
+
+    function populateCourseFilters() {
+      const courseOptions = '<option value="">All Courses</option>' + Object.entries(courses)
+        .filter(([id]) => courses[id].enrolled?.includes(auth.currentUser.uid))
+        .map(([id, c]) => `<option value="${id}">${sanitizeInput(c.name)}</option>`).join("");
+      contentCourseFilter.innerHTML = courseOptions;
+      assignmentCourseFilter.innerHTML = courseOptions;
+      forumCourseFilter.innerHTML = courseOptions;
+      quizCourseFilter.innerHTML = courseOptions;
+      forumCourse.innerHTML = '<option value="">Select Course</option>' + courseOptions;
+    }
+
+    function renderContent(filter = "", courseFilter = "") {
+      contentList.innerHTML = "";
+      for (const id in contents) {
+        const c = contents[id];
+        if (!courses[c.courseId]?.enrolled?.includes(auth.currentUser.uid)) continue;
+        if (filter && !c.title.toLowerCase().includes(filter.toLowerCase())) continue;
+        if (courseFilter && c.courseId !== courseFilter) continue;
+        const contentItem = document.createElement("div");
+        contentItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        contentItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(c.title)}</p>
+              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[c.courseId]?.name || "Unknown")} | Type: ${sanitizeInput(c.type)}</p>
+              <p class="text-sm text-gray-600">URL: <a href="${sanitizeInput(c.url)}" target="_blank" class="text-blue-600 hover:underline">View</a></p>
+            </div>
+          </div>
+        `;
+        contentList.appendChild(contentItem);
+      }
+      if (!contentList.innerHTML) {
+        contentList.innerHTML = '<p class="text-gray-600 text-center">No content available.</p>';
+      }
+    }
+
+    // Search content
+    const searchContent = debounce((filter, course) => renderContent(sanitizeInput(filter), course), 300);
+    contentSearch.addEventListener("input", () => searchContent(contentSearch.value, contentCourseFilter.value));
+    contentCourseFilter.addEventListener("change", () => searchContent(contentSearch.value, contentCourseFilter.value));
+
+    // Load assignments
+    function loadAssignments() {
+      showSpinner();
+      onValue(ref(db, "assignments"), snap => {
+        assignments = snap.val() || {};
+        renderAssignments();
+        hideSpinner();
+      });
+    }
+
+    function renderAssignments(filter = "", courseFilter = "") {
+      assignmentList.innerHTML = "";
+      for (const id in assignments) {
+        const a = assignments[id];
+        if (a.learnerId !== auth.currentUser.uid) continue;
+        if (filter && !a.title.toLowerCase().includes(filter.toLowerCase())) continue;
+        if (courseFilter && a.courseId !== courseFilter) continue;
+        const assignmentItem = document.createElement("div");
+        assignmentItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        assignmentItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(a.title)}</p>
+              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[a.courseId]?.name || "Unknown")}</p>
+              <p class="text-sm text-gray-600">Status: ${sanitizeInput(a.status)} | Due: ${new Date(a.dueDate).toLocaleDateString()}</p>
+              <p class="text-sm text-gray-600">Grade: ${a.grade ? a.grade : "Not graded"}</p>
+              <p class="text-sm text-gray-600">Submission: ${a.submissionUrl ? `<a href="${sanitizeInput(a.submissionUrl)}" target="_blank" class="text-blue-600 hover:underline">View</a>` : "Not submitted"}</p>
+            </div>
+            <div class="flex gap-2">
+              ${a.status === "assigned" ? `<button onclick="submitAssignment('${id}', '${sanitizeInput(a.title)}')" class="text-blue-600 hover:underline" aria-label="Submit assignment ${sanitizeInput(a.title)}" data-tooltip="Submit assignment">Submit</button>` : ""}
+            </div>
+          </div>
+        `;
+        assignmentList.appendChild(assignmentItem);
+      }
+      if (!assignmentList.innerHTML) {
+        assignmentList.innerHTML = '<p class="text-gray-600 text-center">No assignments available.</p>';
+      }
+    }
+
+    // Search assignments
+    const searchAssignments = debounce((filter, course) => renderAssignments(sanitizeInput(filter), course), 300);
+    assignmentSearch.addEventListener("input", () => searchAssignments(assignmentSearch.value, assignmentCourseFilter.value));
+    assignmentCourseFilter.addEventListener("change", () => searchAssignments(assignmentSearch.value, assignmentCourseFilter.value));
+
+    // Submit assignment
+    window.submitAssignment = async (assignmentId, title) => {
+      assignmentSubmitTitle.textContent = title;
+      assignmentSubmitModal.style.display = "block";
+      assignmentSubmitForm.onsubmit = async e => {
+        e.preventDefault();
+        const file = assignmentFile.files[0];
+        if (!file) {
+          alert("Please select a file to submit.");
+          return;
+        }
+        showSpinner();
+        try {
+          const fileRef = storageRef(storage, `assignments/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
+          await uploadBytes(fileRef, file);
+          const url = await getDownloadURL(fileRef);
+          await update(ref(db, `assignments/${assignmentId}`), {
+            submissionUrl: url,
+            status: "submitted",
+            submittedAt: Date.now()
+          });
+          logAudit(`Submitted assignment ${title}`);
+          alert("Assignment submitted successfully!");
+          assignmentSubmitModal.style.display = "none";
+          assignmentSubmitForm.reset();
+        } catch (err) {
+          console.error("Error submitting assignment:", err);
+          alert("Failed to submit assignment.");
+        }
+        hideSpinner();
+      };
     };
 
-    document.getElementById('logout-btn').addEventListener('click', () => {
-      signOut(auth).then(() => window.location.replace('index.html'));
+    closeAssignmentSubmit.addEventListener("click", () => {
+      assignmentSubmitModal.style.display = "none";
+      assignmentSubmitForm.reset();
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-      auth.onAuthStateChanged(user => {
-        if (!user) {
-          window.location.replace('index.html');
-        } else {
-          get(ref(db, `users/${user.uid}`)).then(snapshot => {
-            if (snapshot.exists() && snapshot.val().role === 'learner') {
-              renderLearnerSection();
-            } else {
-              window.location.replace('index.html');
-            }
-          });
-        }
+    // Load forums
+    function loadForums() {
+      showSpinner();
+      onValue(ref(db, "forums"), snap => {
+        forums = snap.val() || {};
+        renderForums();
+        hideSpinner();
       });
+    }
+
+    function renderForums(filter = "", courseFilter = "") {
+      forumList.innerHTML = "";
+      for (const id in forums) {
+        const f = forums[id];
+        if (!courses[f.courseId]?.enrolled?.includes(auth.currentUser.uid)) continue;
+        if (filter && !f.title.toLowerCase().includes(filter.toLowerCase())) continue;
+        if (courseFilter && f.courseId !== courseFilter) continue;
+        const threadItem = document.createElement("div");
+        threadItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        threadItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(f.title)}</p>
+              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")} | Posts: ${f.posts?.length || 0}</p>
+              <p class="text-sm text-gray-600">Created: ${new Date(f.createdAt).toLocaleDateString()}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="viewThread('${id}')" class="text-blue-600 hover:underline" aria-label="View thread ${sanitizeInput(f.title)}" data-tooltip="View thread">View</button>
+            </div>
+          </div>
+        `;
+        forumList.appendChild(threadItem);
+      }
+      if (!forumList.innerHTML) {
+        forumList.innerHTML = '<p class="text-gray-600 text-center">No forum threads available.</p>';
+      }
+    }
+
+    // Search forums
+    const searchForums = debounce((filter, course) => renderForums(sanitizeInput(filter), course), 300);
+    forumSearch.addEventListener("input", () => searchForums(forumSearch.value, forumCourseFilter.value));
+    forumCourseFilter.addEventListener("change", () => searchForums(forumSearch.value, forumCourseFilter.value));
+
+    // Create forum post
+    forumPostForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const courseId = forumCourse.value;
+      const title = sanitizeInput(threadTitle.value.trim());
+      const content = sanitizeInput(threadContent.value.trim());
+      if (!courseId || !title || !content) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "forums"), {
+          providerId: courses[courseId].providerId,
+          courseId,
+          title,
+          posts: [{ content, postedBy: auth.currentUser.uid, postedAt: Date.now() }],
+          createdAt: Date.now()
+        });
+        logAudit(`Created forum thread ${title}`);
+        alert("Thread created successfully!");
+        forumPostForm.reset();
+      } catch (err) {
+        console.error("Error creating thread:", err);
+        alert("Failed to create thread.");
+      }
+      hideSpinner();
+    });
+
+    // View thread
+    window.viewThread = async threadId => {
+      const f = forums[threadId];
+      const modal = document.createElement("div");
+      modal.className = "modal";
+      modal.style.display = "block";
+      modal.innerHTML = `
+        <div class="modal-content">
+          <h3 class="text-lg font-semibold mb-4">${sanitizeInput(f.title)}</h3>
+          <p class="text-sm text-gray-600 mb-2">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")}</p>
+          <div class="space-y-2 mb-4">
+            ${f.posts?.map(p => `
+              <div class="bg-gray-100 p-2 rounded">
+                <p class="text-sm">${sanitizeInput(p.content)}</p>
+                <p class="text-xs text-gray-500">Posted by ${sanitizeInput(p.postedBy === auth.currentUser.uid ? "You" : "Provider")} on ${new Date(p.postedAt).toLocaleString()}</p>
+              </div>
+            `).join("")}
+          </div>
+          <form id="post-form-${threadId}" class="mb-4">
+            <textarea id="post-content-${threadId}" placeholder="Add a post..." class="border p-2 rounded w-full mb-2" aria-label="Add post to thread" required></textarea>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Post reply">Post</button>
+          </form>
+          <button class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" onclick="this.parentElement.parentElement.remove()" data-tooltip="Close thread">Close</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.getElementById(`post-form-${threadId}`).addEventListener("submit", async e => {
+        e.preventDefault();
+        const content = sanitizeInput(document.getElementById(`post-content-${threadId}`).value.trim());
+        if (!content) return;
+        showSpinner();
+        try {
+          await update(ref(db, `forums/${threadId}`), {
+            posts: [...f.posts, { content, postedBy: auth.currentUser.uid, postedAt: Date.now() }]
+          });
+          logAudit(`Posted to thread ${f.title}`);
+          modal.remove();
+          viewThread(threadId);
+        } catch (err) {
+          console.error("Error posting to thread:", err);
+          alert("Failed to post.");
+        }
+        hideSpinner();
+      });
+    };
+
+    // Load quizzes
+    function loadQuizzes() {
+      showSpinner();
+      onValue(ref(db, "quizzes"), snap => {
+        quizzes = snap.val() || {};
+        renderQuizzes();
+        hideSpinner();
+      });
+    }
+
+    function renderQuizzes(filter = "", courseFilter = "") {
+      quizList.innerHTML = "";
+      for (const id in quizzes) {
+        const q = quizzes[id];
+        if (!courses[q.courseId]?.enrolled?.includes(auth.currentUser.uid)) continue;
+        if (filter && !q.title.toLowerCase().includes(filter.toLowerCase())) continue;
+        if (courseFilter && q.courseId !== courseFilter) continue;
+        const quizItem = document.createElement("div");
+        quizItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        quizItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(q.title)}</p>
+              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[q.courseId]?.name || "Unknown")} | Questions: ${q.questions?.length || 0}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="attemptQuiz('${id}', '${sanitizeInput(q.title)}')" class="text-blue-600 hover:underline" aria-label="Attempt quiz ${sanitizeInput(q.title)}" data-tooltip="Attempt quiz">Attempt</button>
+            </div>
+          </div>
+        `;
+        quizList.appendChild(quizItem);
+      }
+      if (!quizList.innerHTML) {
+        quizList.innerHTML = '<p class="text-gray-600 text-center">No quizzes available.</p>';
+      }
+    }
+
+    // Search quizzes
+    const searchQuizzes = debounce((filter, course) => renderQuizzes(sanitizeInput(filter), course), 300);
+    quizSearch.addEventListener("input", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
+    quizCourseFilter.addEventListener("change", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
+
+    // Attempt quiz
+    window.attemptQuiz = (quizId, title) => {
+      const q = quizzes[quizId];
+      quizAttemptTitle.textContent = title;
+      quizAttemptQuestions.innerHTML = q.questions.map((ques, i) => `
+        <div class="bg-gray-50 p-2 rounded">
+          <p class="font-semibold">Question ${i + 1}: ${sanitizeInput(ques.text)}</p>
+          ${ques.options.map((opt, j) => `
+            <label class="flex items-center gap-2">
+              <input type="radio" name="question-${i}" value="${j}" required aria-label="Option ${j + 1} for question ${i + 1}" />
+              ${sanitizeInput(opt)}
+            </label>
+          `).join("")}
+        </div>
+      `).join("");
+      quizAttemptModal.style.display = "block";
+      quizAttemptForm.onsubmit = async e => {
+        e.preventDefault();
+        const answers = [];
+        q.questions.forEach((_, i) => {
+          const selected = document.querySelector(`input[name="question-${i}"]:checked`);
+          answers.push(selected ? parseInt(selected.value) : -1);
+        });
+        showSpinner();
+        try {
+          const score = answers.reduce((total, ans, i) => total + (ans === q.questions[i].correct ? 1 : 0), 0);
+          await push(ref(db, `quizzes/${quizId}/submissions`), {
+            learnerId: auth.currentUser.uid,
+            answers,
+            score: (score / q.questions.length * 100).toFixed(1),
+            submittedAt: Date.now()
+          });
+          logAudit(`Submitted quiz ${title} with score ${score}/${q.questions.length}`);
+          alert(`Quiz submitted! Score: ${score}/${q.questions.length}`);
+          quizAttemptModal.style.display = "none";
+          quizAttemptForm.reset();
+        } catch (err) {
+          console.error("Error submitting quiz:", err);
+          alert("Failed to submit quiz.");
+        }
+        hideSpinner();
+      };
+    };
+
+    closeQuizAttempt.addEventListener("click", () => {
+      quizAttemptModal.style.display = "none";
+      quizAttemptForm.reset();
+    });
+
+    // Load certificates
+    function loadCertificates() {
+      showSpinner();
+      onValue(ref(db, "certifications"), snap => {
+        certificates = snap.val() || {};
+        renderCertificates();
+        hideSpinner();
+      });
+    }
+
+    function renderCertificates() {
+      certificateList.innerHTML = "";
+      for (const id in certificates) {
+        const c = certificates[id];
+        if (c.learnerId !== auth.currentUser.uid) continue;
+        const certItem = document.createElement("div");
+        certItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        certItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(courses[c.courseId]?.name || "Unknown Course")}</p>
+              <p class="text-sm text-gray-600">Issued: ${new Date(c.issuedAt).toLocaleDateString()}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="downloadCertificate('${id}')" class="text-blue-600 hover:underline" aria-label="Download certificate for ${sanitizeInput(courses[c.courseId]?.name)}" data-tooltip="Download certificate">Download</button>
+            </div>
+          </div>
+        `;
+        certificateList.appendChild(certItem);
+      }
+      if (!certificateList.innerHTML) {
+        certificateList.innerHTML = '<p class="text-gray-600 text-center">No certificates earned.</p>';
+      }
+    }
+
+    // Download certificate
+    window.downloadCertificate = async certId => {
+      const cert = certificates[certId];
+      if (!cert) return;
+      showSpinner();
+      try {
+        const docDefinition = {
+          content: [
+            { text: "Certificate of Completion", style: "header" },
+            { text: `This certifies that ${sanitizeInput(user.fullName || user.email)} has successfully completed the course ${sanitizeInput(courses[cert.courseId]?.name || "Course")}.`, style: "body" },
+            { text: `Issued on: ${new Date(cert.issuedAt).toLocaleDateString()}`, style: "footer" },
+            { text: `Provider: ${sanitizeInput(courses[cert.courseId]?.providerId || "Provider")}`, style: "footer" }
+          ],
+          styles: {
+            header: { fontSize: 22, bold: true, alignment: "center", margin: [0, 0, 0, 20] },
+            body: { fontSize: 16, alignment: "center", margin: [0, 0, 0, 20] },
+            footer: { fontSize: 12, alignment: "center" }
+          }
+        };
+        pdfMake.createPdf(docDefinition).download(`certificate_${certId}.pdf`);
+        logAudit(`Downloaded certificate ${certId}`);
+      } catch (err) {
+        console.error("Error downloading certificate:", err);
+        alert("Failed to download certificate.");
+      }
+      hideSpinner();
+    };
+
+    // Load tickets
+    function loadTickets() {
+      showSpinner();
+      onValue(ref(db, "tickets"), snap => {
+        tickets = snap.val() || {};
+        renderTickets();
+        hideSpinner();
+      });
+    }
+
+    function renderTickets() {
+      ticketList.innerHTML = "";
+      for (const id in tickets) {
+        const t = tickets[id];
+        if (t.learnerId !== auth.currentUser.uid) continue;
+        const ticketItem = document.createElement("div");
+        ticketItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        ticketItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(t.title)}</p>
+              <p class="text-sm text-gray-600">Description: ${sanitizeInput(t.description)}</p>
+              <p class="text-sm text-gray-600">Status: ${sanitizeInput(t.status)} | Created: ${new Date(t.createdAt).toLocaleDateString()}</p>
+              ${t.response ? `<p class="text-sm text-gray-600">Response: ${sanitizeInput(t.response)}</p>` : ""}
+            </div>
+          </div>
+        `;
+        ticketList.appendChild(ticketItem);
+      }
+      if (!ticketList.innerHTML) {
+        ticketList.innerHTML = '<p class="text-gray-600 text-center">No tickets submitted.</p>';
+      }
+    }
+
+    // Submit ticket
+    ticketForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const title = sanitizeInput(ticketTitle.value.trim());
+      const description = sanitizeInput(ticketDescription.value.trim());
+      if (!title || !description) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "tickets"), {
+          learnerId: auth.currentUser.uid,
+          title,
+          description,
+          status: "open",
+          createdAt: Date.now()
+        });
+        logAudit(`Submitted ticket ${title}`);
+        alert("Ticket submitted successfully!");
+        ticketForm.reset();
+      } catch (err) {
+        console.error("Error submitting ticket:", err);
+        alert("Failed to submit ticket.");
+      }
+      hideSpinner();
+    });
+
+    // Log audit events
+    function logAudit(message) {
+      push(ref(db, "auditLogs"), {
+        learnerId: auth.currentUser.uid,
+        message,
+        timestamp: Date.now()
+      });
+    }
+
+    // Auth state listener
+    onAuthStateChanged(auth, u => {
+      if (!u) {
+        window.location.href = "login.html";
+        return;
+      }
+      onValue(ref(db, `users/${u.uid}`), snap => {
+        user = snap.val();
+        if (user?.role !== "learner") {
+          signOut(auth);
+          window.location.href = "login.html";
+          return;
+        }
+        loadOverview();
+        loadCourses();
+        loadContent();
+        loadAssignments();
+        loadForums();
+        loadQuizzes();
+        loadCertificates();
+        loadTickets();
+      });
+    });
+
+    // Sign out
+    document.getElementById("signout-btn").addEventListener("click", async () => {
+      showSpinner();
+      try {
+        await signOut(auth);
+        window.location.href = "login.html";
+      } catch (err) {
+        console.error("Error signing out:", err);
+        alert("Failed to sign out.");
+      }
+      hideSpinner();
     });
   </script>
 </body>
