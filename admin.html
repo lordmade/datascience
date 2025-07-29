@@ -1,0 +1,279 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CETA LMS - Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary-blue: #00A3FF;
+      --text-light: #E0E0E0;
+      --text-dark: #FFFFFF;
+      --border: #333333;
+      --background-dark: #0A0A0A;
+      --background-gradient: linear-gradient(135deg, #0A0A0A 0%, #1C2526 100%);
+      --glow: rgba(0, 163, 255, 0.3);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: var(--background-gradient);
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      color: var(--text-light);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    .btn {
+      background: var(--primary-blue);
+      color: var(--text-dark);
+      padding: 0.5rem 1.5rem;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn:hover {
+      background: #33B5FF;
+      transform: scale(1.05);
+      box-shadow: 0 0 10px var(--glow);
+    }
+    input, select {
+      background: #0A0A0A;
+      color: var(--text-light);
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+    }
+    .custom-alert {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1C2526;
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 163, 255, 0.2);
+      z-index: 1000;
+      color: var(--text-light);
+      font-weight: 500;
+      text-align: center;
+      max-width: 90%;
+      width: 340px;
+      animation: fadeIn 0.3s ease-out forwards;
+      border: 1px solid var(--border);
+    }
+    .custom-alert.active {
+      display: block;
+    }
+    .custom-alert .close-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 24px;
+      height: 24px;
+      background: none;
+      border: none;
+      color: var(--primary-blue);
+      cursor: pointer;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+    .custom-alert .close-btn:hover {
+      transform: scale(1.2);
+      color: #33B5FF;
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    @media (max-width: 640px) {
+      .container {
+        padding: 1rem;
+      }
+      input, select, .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <nav class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold text-white">CETA LMS - Admin</h1>
+      <button id="logout-btn" class="btn">Logout</button>
+    </nav>
+    <div id="admin-section">
+      <h2 class="text-xl mb-4">Admin Dashboard</h2>
+      <div class="mb-4 bg-[#1C2526] p-4 rounded shadow">
+        <h3 class="text-lg">Create User</h3>
+        <input id="user-name" type="text" placeholder="Full Name" class="mr-2">
+        <input id="user-email" type="email" placeholder="Email" class="mr-2">
+        <select id="user-role" class="mr-2">
+          <option value="learner">Learner</option>
+          <option value="provider">Provider</option>
+        </select>
+        <button id="create-user-btn" class="btn">Create</button>
+      </div>
+      <div class="mb-4 bg-[#1C2526] p-4 rounded shadow">
+        <h3 class="text-lg">Analytics</h3>
+        <canvas id="analytics-chart" class="w-full h-64"></canvas>
+      </div>
+    </div>
+    <div id="custom-alert" class="custom-alert" role="alertdialog" aria-modal="true" aria-labelledby="alert-message" tabindex="-1">
+      <button class="close-btn" aria-label="Close alert" onclick="hideAlert()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <p id="alert-message">An error occurred. Please try again later.</p>
+      <button class="retry-btn" onclick="retryAction()">Retry</button>
+    </div>
+  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+      authDomain: "fire-b-a8878.firebaseapp.com",
+      databaseURL: "https://fire-b-a8878.firebaseio.com",
+      projectId: "fire-b-a8878",
+      storageBucket: "fire-b-a8878.firebasestorage.app",
+      messagingSenderId: "658673187627",
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    function sanitizeInput(input) {
+      const div = document.createElement('div');
+      div.textContent = input;
+      return div.innerHTML;
+    }
+
+    function showAlert(message, autoHide = true) {
+      const customAlert = document.getElementById("custom-alert");
+      const alertMessage = document.getElementById("alert-message");
+      alertMessage.textContent = message;
+      customAlert.classList.add("active");
+      customAlert.focus();
+      if (autoHide) {
+        setTimeout(hideAlert, 5000);
+      }
+    }
+
+    function hideAlert() {
+      const customAlert = document.getElementById("custom-alert");
+      customAlert.classList.remove("active");
+    }
+
+    let retryActionCallback = null;
+
+    function retryAction() {
+      hideAlert();
+      if (retryActionCallback) retryActionCallback();
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      signOut(auth).then(() => window.location.replace('index.html'));
+    });
+
+    function renderAdminSection() {
+      document.getElementById('create-user-btn').addEventListener('click', async () => {
+        const name = sanitizeInput(document.getElementById('user-name').value);
+        const email = document.getElementById('user-email').value;
+        const role = document.getElementById('user-role').value;
+
+        retryActionCallback = async () => {
+          try {
+            const cred = await createUserWithEmailAndPassword(auth, email, 'temporaryPassword123');
+            await set(ref(db, `users/${cred.user.uid}`), {
+              fullName: name,
+              email: email,
+              role: role,
+              metadata: { contact: '', tags: [] }
+            });
+            await set(ref(db, `auditLogs/${auth.currentUser.uid}/${Date.now()}`), {
+              message: `Created user ${email}`,
+              timestamp: Date.now(),
+              userId: cred.user.uid
+            });
+            showAlert('User created successfully', true);
+          } catch (error) {
+            showAlert(`Error: ${error.message}`, false);
+            await set(ref(db, `logs/${Date.now()}`), {
+              message: `Admin error: ${error.message}`,
+              timestamp: Date.now(),
+              userId: auth.currentUser.uid
+            });
+          }
+        };
+        retryActionCallback();
+      });
+
+      get(ref(db, 'users')).then(snapshot => {
+        const users = snapshot.val();
+        const roles = { admin: 0, provider: 0, learner: 0 };
+        for (let user in users) {
+          roles[users[user].role]++;
+        }
+        new Chart(document.getElementById('analytics-chart'), {
+          type: 'bar',
+          data: {
+            labels: ['Admins', 'Providers', 'Learners'],
+            datasets: [{
+              label: 'User Roles',
+              data: [roles.admin, roles.provider, roles.learner],
+              backgroundColor: '#00A3FF'
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: '#E0E0E0' } } },
+            scales: {
+              x: { ticks: { color: '#E0E0E0' } },
+              y: { ticks: { color: '#E0E0E0' } }
+            }
+          }
+        });
+      }).catch(error => {
+        showAlert(`Error loading analytics: ${error.message}`, false);
+        set(ref(db, `logs/${Date.now()}`), {
+          message: `Admin error: ${error.message}`,
+          timestamp: Date.now(),
+          userId: auth.currentUser.uid
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      auth.onAuthStateChanged(user => {
+        if (!user) {
+          window.location.replace('index.html');
+        } else {
+          get(ref(db, `users/${user.uid}`)).then(snapshot => {
+            if (snapshot.exists() && snapshot.val().role === 'admin') {
+              renderAdminSection();
+            } else {
+              window.location.replace('index.html');
+            }
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+```
