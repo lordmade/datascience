@@ -1,2376 +1,308 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CETA Provider Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CETA LMS - Provider</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-  <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <style>
-    /* Root variables for consistent theming */
     :root {
-      --primary: #1e40af;
-      --secondary: #10b981;
-      --background: #f3f4f6;
-      --card-bg: #ffffff;
-      --text-primary: #1f2937;
-      --text-secondary: #6b7280;
-      --high-contrast-bg: #1a1a1a;
-      --high-contrast-text: #e5e5e5;
+      --primary-blue: #00A3FF;
+      --text-light: #E0E0E0;
+      --text-dark: #FFFFFF;
+      --border: #333333;
+      --background-dark: #0A0A0A;
+      --background-gradient: linear-gradient(135deg, #0A0A0A 0%, #1C2526 100%);
+      --glow: rgba(0, 163, 255, 0.3);
     }
-
     body {
-      background: var(--background);
-      color: var(--text-primary);
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: var(--background-gradient);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      margin: 0;
+      padding: 0;
+      color: var(--text-light);
     }
-
-    .sidebar {
-      width: 260px;
-      background: linear-gradient(to bottom, #111827, #1f2937);
-      color: white;
-      min-height: 100vh;
-      padding: 1.5rem;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease, width 0.3s ease;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 50;
-    }
-
-    .sidebar-hidden {
-      transform: translateX(-100%);
-      width: 0;
-    }
-
-    .sidebar-open {
-      transform: translateX(0);
-    }
-
-    .sidebar .nav-button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1rem;
-      border-radius: 0.375rem;
-      transition: background-color 0.2s ease;
-    }
-
-    .sidebar .nav-button:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .sidebar .nav-button.active {
-      background: var(--primary);
-    }
-
-    .main-content {
-      flex: 1;
-      margin-left: 260px;
-      padding: 2rem;
-      transition: margin-left 0.3s ease;
-      min-height: 100vh;
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        width: 260px;
-        transform: translateX(-100%);
-      }
-      .sidebar-open {
-        transform: translateX(0);
-      }
-      .main-content {
-        margin-left: 0;
-      }
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      padding: 1.5rem;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .high-contrast {
-      background: #000 !important;
-      color: var(--high-contrast-text) !important;
-    }
-
-    .high-contrast .card {
-      background: var(--high-contrast-bg) !important;
-    }
-
-    .high-contrast .text-gray-600 {
-      color: var(--high-contrast-text) !important;
-    }
-
-    .high-contrast .bg-gray-50 {
-      background: #2d3748 !important;
-    }
-
-    .tooltip {
-      position: relative;
-    }
-
-    .tooltip:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1f2937;
-      color: white;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-      font-size: 0.75rem;
-      white-space: nowrap;
-      z-index: 10;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-content {
-      background: var(--card-bg);
+    .container {
+      max-width: 1200px;
       margin: 0 auto;
       padding: 1.5rem;
-      width: 90%;
-      max-width: 600px;
-      border-radius: 0.5rem;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     }
-
-    .high-contrast .modal-content {
-      background: var(--high-contrast-bg) !important;
-      color: var(--high-contrast-text) !important;
+    .btn {
+      background: var(--primary-blue);
+      color: var(--text-dark);
+      padding: 0.5rem 1.5rem;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     }
-
-    .video-feed {
-      background: black;
-      border-radius: 0.5rem;
-      overflow: hidden;
-      position: relative;
-      aspect-ratio: 16 / 9;
+    .btn:hover {
+      background: #33B5FF;
+      transform: scale(1.05);
+      box-shadow: 0 0 10px var(--glow);
     }
-
-    .video-label {
+    input, select {
+      background: #0A0A0A;
+      color: var(--text-light);
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+    }
+    .custom-alert {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1C2526;
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 163, 255, 0.2);
+      z-index: 1000;
+      color: var(--text-light);
+      font-weight: 500;
+      text-align: center;
+      max-width: 90%;
+      width: 340px;
+      animation: fadeIn 0.3s ease-out forwards;
+      border: 1px solid var(--border);
+    }
+    .custom-alert.active {
+      display: block;
+    }
+    .custom-alert .close-btn {
       position: absolute;
-      top: 0.5rem;
-      left: 0.5rem;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-      font-size: 0.875rem;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 24px;
+      height: 24px;
+      background: none;
+      border: none;
+      color: var(--primary-blue);
+      cursor: pointer;
+      transition: transform 0.2s ease, color 0.2s ease;
     }
-
-    button:not(.nav-button) {
-      border-radius: 9999px;
-      transition: background-color 0.2s ease, transform 0.2s ease;
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
+    .custom-alert .close-btn:hover {
+      transform: scale(1.2);
+      color: #33B5FF;
     }
-
-    button:hover:not(.nav-button) {
-      transform: translateY(-1px);
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
     }
-
-    input, select, textarea {
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2);
-    }
-
-    #loading-spinner {
-      z-index: 200;
-    }
-
-    canvas {
-      max-width: 100%;
-      height: auto !important;
-    }
-
-    .section {
-      max-height: calc(100vh - 4rem);
-      overflow-y: auto;
-      padding-right: 0.5rem;
-    }
-
-    .section::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .section::-webkit-scrollbar-thumb {
-      background: var(--primary);
-      border-radius: 4px;
-    }
-
-    .section::-webkit-scrollbar-track {
-      background: #e5e7eb;
+    @media (max-width: 640px) {
+      .container {
+        padding: 1rem;
+      }
+      input, select, .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <div id="sidebar" class="sidebar">
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-xl font-bold flex items-center gap-2">
-          <i class="fas fa-graduation-cap"></i> CETA Provider
-        </h1>
-        <button id="toggle-sidebar" class="md:hidden text-white focus:outline-none" aria-label="Toggle sidebar">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+  <div class="container">
+    <nav class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold text-white">CETA LMS - Provider</h1>
+      <button id="logout-btn" class="btn">Logout</button>
+    </nav>
+    <div id="provider-section">
+      <h2 class="text-xl mb-4">Provider Dashboard</h2>
+      <div class="mb-4 bg-[#1C2526] p-4 rounded shadow">
+        <h3 class="text-lg">Create Course</h3>
+        <input id="course-name" type="text" placeholder="Course Name" class="mr-2">
+        <input id="course-desc" type="text" placeholder="Description" class="mr-2">
+        <button id="create-course-btn" class="btn">Create Course</button>
       </div>
-      <nav>
-        <ul class="space-y-2">
-          <li><button class="nav-button w-full text-left" data-section="overview" data-tooltip="Dashboard Overview"><i class="fas fa-tachometer-alt"></i> Overview</button></li>
-          <li><button class="nav-button w-full text-left" data-section="learners" data-tooltip="Manage Learners"><i class="fas fa-users"></i> Manage Learners</button></li>
-          <li><button class="nav-button w-full text-left" data-section="courses" data-tooltip="Manage Courses"><i class="fas fa-book"></i> Manage Courses</button></li>
-          <li><button class="nav-button w-full text-left" data-section="progress" data-tooltip="Learner Progress"><i class="fas fa-chart-line"></i> Learner Progress</button></li>
-          <li><button class="nav-button w-full text-left" data-section="analytics" data-tooltip="Advanced Analytics"><i class="fas fa-chart-bar"></i> Analytics</button></li>
-          <li><button class="nav-button w-full text-left" data-section="helpdesk" data-tooltip="Support Tickets"><i class="fas fa-headset"></i> Helpdesk</button></li>
-          <li><button class="nav-button w-full text-left" data-section="video-monitoring" data-tooltip="Live Video Monitoring"><i class="fas fa-video"></i> Video Monitoring</button></li>
-          <li><button class="nav-button w-full text-left" data-section="content" data-tooltip="Manage Course Content"><i class="fas fa-file-alt"></i> Course Content</button></li>
-          <li><button class="nav-button w-full text-left" data-section="assignments" data-tooltip="Manage Assignments"><i class="fas fa-tasks"></i> Assignments</button></li>
-          <li><button class="nav-button w-full text-left" data-section="forums" data-tooltip="Course Forums"><i class="fas fa-comments"></i> Forums</button></li>
-          <li><button class="nav-button w-full text-left" data-section="quizzes" data-tooltip="Manage Quizzes"><i class="fas fa-question-circle"></i> Quizzes</button></li>
-          <li><button class="nav-button w-full text-left" data-section="live-session" data-tooltip="Go Live with Learners"><i class="fas fa-broadcast-tower"></i> Go Live</button></li>
-        </ul>
-      </nav>
-      <div class="mt-auto">
-        <button id="toggle-contrast" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-3xl mb-2" aria-label="Toggle high contrast mode" data-tooltip="Toggle High Contrast">Toggle High Contrast</button>
-        <button id="signout-btn" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-3xl" aria-label="Sign out of provider account" data-tooltip="Sign Out">Sign Out</button>
+      <div class="mb-4 bg-[#1C2526] p-4 rounded shadow">
+        <h3 class="text-lg">Upload Content</h3>
+        <select id="course-select" class="mr-2">
+          <option value="">Select a Course</option>
+        </select>
+        <input id="content-file" type="file" accept=".mp4,.pdf" class="mr-2">
+        <button id="upload-content-btn" class="btn">Upload Content</button>
       </div>
     </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-      <!-- Overview Section -->
-      <div id="overview" class="section">
-        <h2 class="text-2xl font-semibold mb-4">Welcome, <span id="provider-name">Provider</span></h2>
-        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div class="card">
-            <h3 class="text-lg font-semibold">Courses Offered</h3>
-            <p id="courses-offered" class="text-3xl font-bold text-blue-600">0</p>
-          </div>
-          <div class="card">
-            <h3 class="text-lg font-semibold">Enrolled Learners</h3>
-            <p id="enrolled-learners" class="text-3xl font-bold text-blue-600">0</p>
-          </div>
-          <div class="card">
-            <h3 class="text-lg font-semibold">Completion Rate</h3>
-            <p id="completion-rate" class="text-3xl font-bold text-blue-600">0%</p>
-          </div>
-          <div class="card">
-            <h3 class="text-lg font-semibold">Certificates Issued</h3>
-            <p id="certificates-issued" class="text-3xl font-bold text-blue-600">0</p>
-          </div>
-        </div>
-        <div class="mt-6 card">
-          <h3 class="text-lg font-semibold mb-2">Course Completion Rates</h3>
-          <canvas id="completion-chart"></canvas>
-        </div>
-        <div class="mt-6 card">
-          <h3 class="text-lg font-semibold mb-2">Enrollment Trends</h3>
-          <canvas id="enrollment-trend-chart"></canvas>
-        </div>
-      </div>
-
-      <!-- Learners Section -->
-      <div id="learners" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Manage Learners</h2>
-        <div class="mb-4 card">
-          <h3 class="text-lg font-semibold mb-2">Add New Learner</h3>
-          <button id="open-add-learner" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Add new learner">Add Learner</button>
-          <button id="open-bulk-upload" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl ml-2" data-tooltip="Upload learners via CSV">Bulk Upload</button>
-        </div>
-        <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Learner List</h3>
-          <input type="text" id="learnerSearch" placeholder="Search learners..." class="border p-2 rounded w-full mb-4" aria-label="Search learners by name, email, or tag" />
-          <select id="groupFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by group">
-            <option value="">All Groups</option>
-          </select>
-          <div id="learnerList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Courses Section -->
-      <div id="courses" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Manage Courses</h2>
-        <div class="mb-4 card">
-          <h3 class="text-lg font-semibold mb-2">Add New Course</h3>
-          <form id="course-form">
-            <input type="text" id="courseName" placeholder="Course Name" class="border p-2 rounded w-full mb-2" aria-label="Enter course name" required />
-            <input type="text" id="courseTags" placeholder="Tags (comma-separated)" class="border p-2 rounded w-full mb-2" aria-label="Enter course tags" />
-            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Add new course">Add Course</button>
-          </form>
-        </div>
-        <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Course List</h3>
-          <input type="text" id="courseSearch" placeholder="Search courses..." class="border p-2 rounded w-full mb-4" aria-label="Search courses by name or tag" />
-          <div id="courseList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Course Content Section -->
-      <div id="content" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Manage Course Content</h2>
-        <div class="mb-4 card">
-          <h3 class="text-lg font-semibold mb-2">Upload Content</h3>
-          <form id="content-upload-form">
-            <select id="contentCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
-              <option value="">Select Course</option>
-            </select>
-            <input type="text" id="contentTitle" placeholder="Content Title" class="border p-2 rounded w-full mb-2" aria-label="Enter content title" required />
-            <select id="contentType" class="border p-2 rounded w-full mb-2" aria-label="Select content type" required>
-              <option value="video">Video</option>
-              <option value="pdf">PDF</option>
-              <option value="text">Text</option>
-            </select>
-            <input type="file" id="contentFile" accept="video/*,application/pdf,.txt" class="border p-2 rounded w-full mb-2" aria-label="Upload content file" required />
-            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Upload content">Upload</button>
-          </form>
-        </div>
-        <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Content List</h3>
-          <input type="text" id="contentSearch" placeholder="Search content..." class="border p-2 rounded w-full mb-4" aria-label="Search content by title" />
-          <select id="contentCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
-            <option value="">All Courses</option>
-          </select>
-          <div id="contentList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Assignments Section -->
-      <div id="assignments" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Manage Assignments</h2>
-        <div class="mb-4 card">
-          <h3 class="text-lg font-semibold mb-2">Create Assignment</h3>
-          <form id="assignment-form">
-            <select id="assignmentCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
-              <option value="">Select Course</option>
-            </select>
-            <input type="text" id="assignmentTitle" placeholder="Assignment Title" class="border p-2 rounded w-full mb-2" aria-label="Enter assignment title" required />
-            <textarea id="assignmentDescription" placeholder="Description" class="border p-2 rounded w-full mb-2" aria-label="Enter assignment description" required></textarea>
-            <input type="date" id="assignmentDueDate" class="border p-2 rounded w-full mb-2" aria-label="Select due date" required />
-            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Create assignment">Create</button>
-          </form>
-        </div>
-        <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Assignment Submissions</h3>
-          <input type="text" id="assignmentSearch" placeholder="Search assignments..." class="border p-2 rounded w-full mb-4" aria-label="Search assignments by title or learner" />
-          <select id="assignmentCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
-            <option value="">All Courses</option>
-          </select>
-          <div id="assignmentList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Forums Section -->
-      <div id="forums" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Course Forums</h2>
-        <div class="mb-4 card">
-          <h3 class="text-lg font-semibold mb-2">Create Forum Thread</h3>
-          <form id="forum-thread-form">
-            <select id="forumCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
-              <option value="">Select Course</option>
-            </select>
-            <input type="text" id="threadTitle" placeholder="Thread Title" class="border p-2 rounded w-full mb-2" aria-label="Enter thread title" required />
-            <textarea id="threadContent" placeholder="Initial Post Content" class="border p-2 rounded w-full mb-2" aria-label="Enter initial post content" required></textarea>
-            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Create thread">Create Thread</button>
-          </form>
-        </div>
-        <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Forum Threads</h3>
-          <input type="text" id="forumSearch" placeholder="Search threads..." class="border p-2 rounded w-full mb-4" aria-label="Search threads by title" />
-          <select id="forumCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
-            <option value="">All Courses</option>
-          </select>
-          <div id="forumList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Quizzes Section -->
-      <div id="quizzes" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Manage Quizzes</h2>
-        <div class="mb-4 card">
-          <h3 class="text-lg font-semibold mb-2">Create Quiz</h3>
-          <form id="quiz-form">
-            <select id="quizCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
-              <option value="">Select Course</option>
-            </select>
-            <input type="text" id="quizTitle" placeholder="Quiz Title" class="border p-2 rounded w-full mb-2" aria-label="Enter quiz title" required />
-            <div id="quizQuestions" class="space-y-2"></div>
-            <button type="button" id="add-quiz-question" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl mt-2" data-tooltip="Add question">Add Question</button>
-            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl mt-2" data-tooltip="Create quiz">Create Quiz</button>
-          </form>
-        </div>
-        <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Quiz List</h3>
-          <input type="text" id="quizSearch" placeholder="Search quizzes..." class="border p-2 rounded w-full mb-4" aria-label="Search quizzes by title" />
-          <select id="quizCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
-            <option value="">All Courses</option>
-          </select>
-          <div id="quizList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Learner Progress Section -->
-      <div id="progress" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Learner Progress</h2>
-        <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Learner Progress</h3>
-          <input type="text" id="progressSearch" placeholder="Search learners..." class="border p-2 rounded w-full mb-4" aria-label="Search learners by name or email" />
-          <div id="progressList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Analytics Section -->
-      <div id="analytics" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Advanced Analytics</h2>
-        <div class="mb-4 card">
-          <h3 class="text-lg font-semibold mb-2">Filter Analytics</h3>
-          <div class="flex flex-wrap gap-4 mb-4">
-            <select id="timeRange" class="border p-2 rounded w-full md:w-auto" aria-label="Select time range">
-              <option value="30">Last 30 Days</option>
-              <option value="90">Last 90 Days</option>
-              <option value="365">Last Year</option>
-              <option value="all">All Time</option>
-            </select>
-            <select id="courseFilter" class="border p-2 rounded w-full md:w-auto" aria-label="Select course"></select>
-            <select id="groupFilterAnalytics" class="border p-2 rounded w-full md:w-auto" aria-label="Select learner group">
-              <option value="">All Groups</option>
-            </select>
-            <button id="export-analytics" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Export analytics to PDF">Export to PDF</button>
-          </div>
-        </div>
-        <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Course Performance</h3>
-          <canvas id="analytics-chart"></canvas>
-          <h3 class="text-lg font-semibold mt-4 mb-2">Learner Activity Heatmap</h3>
-          <canvas id="heatmap-chart"></canvas>
-          <h3 class="text-lg font-semibold mt-4 mb-2">Statistical Metrics</h3>
-          <div id="analytics-details" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Helpdesk Section -->
-      <div id="helpdesk" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Helpdesk</h2>
-        <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Support Tickets</h3>
-          <div id="ticketList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Video Monitoring Section -->
-      <div id="video-monitoring" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Live Video Monitoring</h2>
-        <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Learner Video Feeds</h3>
-          <input type="text" id="videoSearch" placeholder="Search learners..." class="border p-2 rounded w-full mb-4" aria-label="Search learners by name or email" />
-          <select id="videoCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
-            <option value="">All Courses</option>
-          </select>
-          <div id="videoFeedList" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
-        </div>
-      </div>
-
-      <!-- Live Session Section -->
-      <div id="live-session" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4">Go Live</h2>
-        <div class="mb-4 card">
-          <h3 class="text-lg font-semibold mb-2">Start Live Session</h3>
-          <form id="live-session-form">
-            <select id="liveCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course for live session" required>
-              <option value="">Select Course</option>
-            </select>
-            <input type="text" id="sessionTitle" placeholder="Session Title" class="border p-2 rounded w-full mb-2" aria-label="Enter session title" required />
-            <button type="submit" id="start-live-session" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Start live session">Start Live Session</button>
-            <button type="button" id="stop-live-session" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-3xl hidden" data-tooltip="Stop live session">Stop Live Session</button>
-          </form>
-        </div>
-        <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Live Session Status</h3>
-          <div class="video-feed mb-4">
-            <div class="video-label">Provider Feed</div>
-            <video id="provider-video" autoplay muted></video>
-          </div>
-          <h3 class="text-lg font-semibold mb-2">Connected Learners</h3>
-          <div id="live-learners-list" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
-        </div>
-      </div>
-
-      <!-- Add Learner Modal -->
-      <div id="add-learner-modal" class="modal">
-        <div class="modal-content">
-          <h3 class="text-lg font-semibold mb-4">Add New Learner</h3>
-          <form id="add-learner-form">
-            <input type="text" id="learnerFullName" placeholder="Full Name" class="border p-2 rounded w-full mb-2" aria-label="Enter learner full name" required />
-            <input type="email" id="learnerEmail" placeholder="Email" class="border p-2 rounded w-full mb-2" aria-label="Enter learner email" required />
-            <input type="text" id="learnerContact" placeholder="Contact Number (optional)" class="border p-2 rounded w-full mb-2" aria-label="Enter learner contact number" />
-            <input type="text" id="learnerTags" placeholder="Tags (comma-separated, optional)" class="border p-2 rounded w-full mb-2" aria-label="Enter learner tags" />
-            <select id="learnerCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course">
-              <option value="">Select Course (optional)</option>
-            </select>
-            <div class="flex gap-2">
-              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Save learner">Save</button>
-              <button type="button" id="close-add-learner" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Bulk Upload Modal -->
-      <div id="bulk-upload-modal" class="modal">
-        <div class="modal-content">
-          <h3 class="text-lg font-semibold mb-4">Bulk Upload Learners</h3>
-          <form id="bulk-upload-form">
-            <input type="file" id="learnerCSV" accept=".csv" class="border p-2 rounded w-full mb-2" aria-label="Upload CSV file" required />
-            <p class="text-sm text-gray-600 mb-2">CSV format: fullName,email,contact,tags,courseId</p>
-            <div class="flex gap-2">
-              <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Upload CSV">Upload</button>
-              <button type="button" id="close-bulk-upload" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Quiz Question Modal -->
-      <div id="quiz-question-modal" class="modal">
-        <div class="modal-content">
-          <h3 class="text-lg font-semibold mb-4">Add Quiz Question</h3>
-          <form id="quiz-question-form">
-            <input type="text" id="questionText" placeholder="Question Text" class="border p-2 rounded w-full mb-2" aria-label="Enter question text" required />
-            <input type="text" id="questionOptions" placeholder="Options (comma-separated)" class="border p-2 rounded w-full mb-2" aria-label="Enter question options" required />
-            <input type="number" id="correctOption" placeholder="Correct Option Index (0-based)" class="border p-2 rounded w-full mb-2" aria-label="Enter correct option index" required />
-            <div class="flex gap-2">
-              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Save question">Save</button>
-              <button type="button" id="close-quiz-question" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-content-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
-      </div>
-
-      <noscript>
-        <p class="text-red-500 text-center">JavaScript is required to use this dashboard.</p>
-      </noscript>
+    <div id="custom-alert" class="custom-alert" role="alertdialog" aria-modal="true" aria-labelledby="alert-message" tabindex="-1">
+      <button class="close-btn" aria-label="Close alert" onclick="hideAlert()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <p id="alert-message">An error occurred. Please try again later.</p>
+      <button class="retry-btn" onclick="retryAction()">Retry</button>
     </div>
   </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, onValue, push, update, set, get, remove, runTransaction } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
     import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
       databaseURL: "https://fire-b-a8878.firebaseio.com",
       projectId: "fire-b-a8878",
-      storageBucket: "fire-b-a8878.appspot.com",
+      storageBucket: "fire-b-a8878.firebasestorage.app",
       messagingSenderId: "658673187627",
-      appId: "1:658673187627:web:6e4c29af661785f0afa36e"
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
     const auth = getAuth(app);
+    const db = getDatabase(app);
     const storage = getStorage(app);
 
-    // DOM elements
-    const providerName = document.getElementById("provider-name");
-    const coursesOffered = document.getElementById("courses-offered");
-    const enrolledLearners = document.getElementById("enrolled-learners");
-    const completionRate = document.getElementById("completion-rate");
-    const certificatesIssued = document.getElementById("certificates-issued");
-    const courseList = document.getElementById("courseList");
-    const courseSearch = document.getElementById("courseSearch");
-    const learnerList = document.getElementById("learnerList");
-    const learnerSearch = document.getElementById("learnerSearch");
-    const groupFilter = document.getElementById("groupFilter");
-    const progressList = document.getElementById("progressList");
-    const progressSearch = document.getElementById("progressSearch");
-    const ticketList = document.getElementById("ticketList");
-    const courseForm = document.getElementById("course-form");
-    const courseName = document.getElementById("courseName");
-    const courseTags = document.getElementById("courseTags");
-    const addLearnerModal = document.getElementById("add-learner-modal");
-    const addLearnerForm = document.getElementById("add-learner-form");
-    const learnerFullName = document.getElementById("learnerFullName");
-    const learnerEmail = document.getElementById("learnerEmail");
-    const learnerContact = document.getElementById("learnerContact");
-    const learnerTags = document.getElementById("learnerTags");
-    const learnerCourse = document.getElementById("learnerCourse");
-    const closeAddLearner = document.getElementById("close-add-learner");
-    const bulkUploadModal = document.getElementById("bulk-upload-modal");
-    const bulkUploadForm = document.getElementById("bulk-upload-form");
-    const learnerCSV = document.getElementById("learnerCSV");
-    const closeBulkUpload = document.getElementById("close-bulk-upload");
-    const completionChart = document.getElementById("completion-chart").getContext("2d");
-    const enrollmentTrendChart = document.getElementById("enrollment-trend-chart").getContext("2d");
-    const analyticsChart = document.getElementById("analytics-chart").getContext("2d");
-    const heatmapChart = document.getElementById("heatmap-chart").getContext("2d");
-    const analyticsDetails = document.getElementById("analytics-details");
-    const timeRange = document.getElementById("timeRange");
-    const courseFilter = document.getElementById("courseFilter");
-    const groupFilterAnalytics = document.getElementById("groupFilterAnalytics");
-    const exportAnalytics = document.getElementById("export-analytics");
-    const loadingSpinner = document.getElementById("loading-spinner");
-    const sidebar = document.getElementById("sidebar");
-    const toggleSidebar = document.getElementById("toggle-sidebar");
-    const toggleContrast = document.getElementById("toggle-contrast");
-    const openAddLearner = document.getElementById("open-add-learner");
-    const openBulkUpload = document.getElementById("open-bulk-upload");
-    const contentUploadForm = document.getElementById("content-upload-form");
-    const contentCourse = document.getElementById("contentCourse");
-    const contentTitle = document.getElementById("contentTitle");
-    const contentType = document.getElementById("contentType");
-    const contentFile = document.getElementById("contentFile");
-    const contentList = document.getElementById("contentList");
-    const contentSearch = document.getElementById("contentSearch");
-    const contentCourseFilter = document.getElementById("contentCourseFilter");
-    const assignmentForm = document.getElementById("assignment-form");
-    const assignmentCourse = document.getElementById("assignmentCourse");
-    const assignmentTitle = document.getElementById("assignmentTitle");
-    const assignmentDescription = document.getElementById("assignmentDescription");
-    const assignmentDueDate = document.getElementById("assignmentDueDate");
-    const assignmentList = document.getElementById("assignmentList");
-    const assignmentSearch = document.getElementById("assignmentSearch");
-    const assignmentCourseFilter = document.getElementById("assignmentCourseFilter");
-    const forumThreadForm = document.getElementById("forum-thread-form");
-    const forumCourse = document.getElementById("forumCourse");
-    const threadTitle = document.getElementById("threadTitle");
-    const threadContent = document.getElementById("threadContent");
-    const forumList = document.getElementById("forumList");
-    const forumSearch = document.getElementById("forumSearch");
-    const forumCourseFilter = document.getElementById("forumCourseFilter");
-    const quizForm = document.getElementById("quiz-form");
-    const quizCourse = document.getElementById("quizCourse");
-    const quizTitle = document.getElementById("quizTitle");
-    const quizQuestions = document.getElementById("quizQuestions");
-    const addQuizQuestion = document.getElementById("add-quiz-question");
-    const quizQuestionModal = document.getElementById("quiz-question-modal");
-    const quizQuestionForm = document.getElementById("quiz-question-form");
-    const questionText = document.getElementById("questionText");
-    const questionOptions = document.getElementById("questionOptions");
-    const correctOption = document.getElementById("correctOption");
-    const closeQuizQuestion = document.getElementById("close-quiz-question");
-    const quizList = document.getElementById("quizList");
-    const quizSearch = document.getElementById("quizSearch");
-    const quizCourseFilter = document.getElementById("quizCourseFilter");
-    const videoFeedList = document.getElementById("videoFeedList");
-    const videoSearch = document.getElementById("videoSearch");
-    const videoCourseFilter = document.getElementById("videoCourseFilter");
-    const liveSessionForm = document.getElementById("live-session-form");
-    const liveCourse = document.getElementById("liveCourse");
-    const sessionTitle = document.getElementById("sessionTitle");
-    const startLiveSession = document.getElementById("start-live-session");
-    const stopLiveSession = document.getElementById("stop-live-session");
-    const providerVideo = document.getElementById("provider-video");
-    const liveLearnersList = document.getElementById("live-learners-list");
-
-    let user = null, courses = {}, learners = {}, assessments = {}, certifications = {}, tickets = {}, notifications = [], contents = {}, assignments = {}, forums = {}, quizzes = {};
-    let completionChartInstance = null, enrollmentTrendChartInstance = null, analyticsChartInstance = null, heatmapChartInstance = null;
-    let currentQuizQuestions = [];
-    let peer = null, liveStream = null, liveConnections = [], liveSessionId = null;
-
-    // Show/hide loading spinner
-    function showSpinner() { loadingSpinner.classList.remove("hidden"); }
-    function hideSpinner() { loadingSpinner.classList.add("hidden"); }
-
-    // Sidebar toggle
-    toggleSidebar.addEventListener("click", () => {
-      sidebar.classList.toggle("sidebar-hidden");
-      sidebar.classList.toggle("sidebar-open");
-    });
-
-    // High contrast toggle
-    toggleContrast.addEventListener("click", () => {
-      document.body.classList.toggle("high-contrast");
-      localStorage.setItem("highContrast", document.body.classList.contains("high-contrast"));
-    });
-
-    // Load high contrast preference
-    if (localStorage.getItem("highContrast") === "true") {
-      document.body.classList.add("high-contrast");
-    }
-
-    // Section switching
-    document.querySelectorAll(".nav-button").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
-        document.getElementById(btn.dataset.section).classList.remove("hidden");
-        if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
-      });
-    });
-
-    // Debounce function for search
-    function debounce(func, wait) {
-      let timeout;
-      return function executedFunction(...args) {
-        const later = () => {
-          clearTimeout(timeout);
-          func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-      };
-    }
-
-    // Sanitize input to prevent XSS
     function sanitizeInput(input) {
-      const div = document.createElement("div");
+      const div = document.createElement('div');
       div.textContent = input;
       return div.innerHTML;
     }
 
-    // Load overview metrics and charts
-    function loadOverview() {
-      showSpinner();
-      onValue(ref(db, `users/${auth.currentUser.uid}`), snap => {
-        user = snap.val();
-        providerName.textContent = sanitizeInput(user.fullName || user.email);
+    function showAlert(message, autoHide = true) {
+      const customAlert = document.getElementById("custom-alert");
+      const alertMessage = document.getElementById("alert-message");
+      alertMessage.textContent = message;
+      customAlert.classList.add("active");
+      customAlert.focus();
+      if (autoHide) {
+        setTimeout(hideAlert, 5000);
+      }
+    }
+
+    function hideAlert() {
+      const customAlert = document.getElementById("custom-alert");
+      customAlert.classList.remove("active");
+    }
+
+    let retryActionCallback = null;
+
+    function retryAction() {
+      hideAlert();
+      if (retryActionCallback) retryActionCallback();
+    }
+
+    function renderProviderSection() {
+      // Populate course dropdown
+      const courseSelect = document.getElementById('course-select');
+      onValue(ref(db, 'courses'), snapshot => {
+        courseSelect.innerHTML = '<option value="">Select a Course</option>';
+        const courses = snapshot.val();
+        for (let courseId in courses) {
+          if (courses[courseId].providerId === auth.currentUser.uid) {
+            const option = document.createElement('option');
+            option.value = courseId;
+            option.textContent = sanitizeInput(courses[courseId].name);
+            courseSelect.appendChild(option);
+          }
+        }
       });
 
-      onValue(ref(db, "courses"), snap => {
-        courses = snap.val() || {};
-        let courseCount = 0, learnerCount = 0, completedCount = 0, certCount = 0;
-        const completionData = { labels: [], datasets: [{ label: "Completion Rate (%)", data: [], backgroundColor: "#2563eb", borderRadius: 4 }] };
-        const enrollmentData = { labels: [], datasets: [{ label: "Enrollments", data: [], backgroundColor: "#10b981", borderRadius: 4 }] };
+      // Create course
+      document.getElementById('create-course-btn').addEventListener('click', async () => {
+        const name = sanitizeInput(document.getElementById('course-name').value);
+        const desc = sanitizeInput(document.getElementById('course-desc').value);
+        const courseId = push(ref(db, 'courses')).key;
 
-        const now = Date.now();
-        const days = 30;
-        const timePoints = Array.from({ length: days }, (_, i) => {
-          const date = new Date(now - (days - i - 1) * 24 * 60 * 60 * 1000);
-          return date.toLocaleDateString();
-        });
-
-        const enrollmentsByDay = timePoints.map(() => 0);
-
-        for (const id in courses) {
-          if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
-            courseCount++;
-            const enrolled = courses[id].enrolled?.length || 0;
-            learnerCount += enrolled;
-            const completion = courses[id].completions?.length || 0;
-            completionData.labels.push(courses[id].name);
-            completionData.datasets[0].data.push(enrolled > 0 ? (completion / enrolled * 100).toFixed(1) : 0);
-            completedCount += completion;
-
-            courses[id].enrolled?.forEach(learnerId => {
-              const enrollmentDate = learners[learnerId]?.enrollmentDate || now;
-              const daysSince = Math.floor((now - enrollmentDate) / (24 * 60 * 60 * 1000));
-              if (daysSince < days) enrollmentsByDay[days - daysSince - 1]++;
+        retryActionCallback = async () => {
+          try {
+            await set(ref(db, `courses/${courseId}`), {
+              name: name,
+              description: desc,
+              providerId: auth.currentUser.uid,
+              tags: [],
+              content: [],
+              quizzes: {},
+              schedule: {},
+              enrolled: {}
+            });
+            await set(ref(db, `auditLogs/${auth.currentUser.uid}/${Date.now()}`), {
+              message: `Created course ${name}`,
+              timestamp: Date.now(),
+              userId: auth.currentUser.uid
+            });
+            showAlert('Course created successfully', true);
+          } catch (error) {
+            showAlert(`Error: ${error.message}`, false);
+            await set(ref(db, `logs/${Date.now()}`), {
+              message: `Provider error: ${error.message}`,
+              timestamp: Date.now(),
+              userId: auth.currentUser.uid
             });
           }
-        }
-
-        coursesOffered.textContent = courseCount;
-        enrolledLearners.textContent = learnerCount;
-        completionRate.textContent = learnerCount > 0 ? (completedCount / learnerCount * 100).toFixed(1) + "%" : "0%";
-
-        if (completionChartInstance) completionChartInstance.destroy();
-        completionChartInstance = new Chart(completionChart, {
-          type: "bar",
-          data: completionData,
-          options: {
-            scales: { y: { beginAtZero: true, max: 100 } },
-            plugins: {
-              datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
-            }
-          },
-          plugins: [ChartDataLabels]
-        });
-
-        if (enrollmentTrendChartInstance) enrollmentTrendChartInstance.destroy();
-        enrollmentTrendChartInstance = new Chart(enrollmentTrendChart, {
-          type: "line",
-          data: {
-            labels: timePoints,
-            datasets: [{ label: "Enrollments", data: enrollmentsByDay, borderColor: "#10b981", fill: false }]
-          },
-          options: {
-            scales: { y: { beginAtZero: true } },
-            plugins: { tooltip: { mode: "index", intersect: false } }
-          }
-        });
-
-        onValue(ref(db, "certifications"), snap => {
-          certifications = snap.val() || {};
-          certCount = Object.values(certifications).filter(c => courses[c.courseId]?.providerId === auth.currentUser.uid).length;
-          certificatesIssued.textContent = certCount;
-          hideSpinner();
-        });
+        };
+        retryActionCallback();
       });
-    }
-//load learners
-  function loadLearners() {
-      showSpinner();
-      onValue(ref(db, "users"), snap => {
-        learners = snap.val() || {};
-        onValue(ref(db, "assignments"), snap => {
-          const assignments = snap.val() || {};
-          onValue(ref(db, "courses"), snap => {
-            courses = snap.val() || {};
-            renderLearners();
-            populateGroupFilter();
-            populateCourseFilter();
-            populateLearnerCourseDropdown();
-            populateContentCourseDropdown();
-            populateAssignmentCourseDropdown();
-            populateForumCourseDropdown();
-            populateQuizCourseDropdown();
-            populateLiveCourseDropdown();
-            hideSpinner();
-          });
-        });
-      });
-    }
 
-  function renderLearners(filter = "", group = "") {
-  learnerList.innerHTML = "";
-  onValue(ref(db, "assignments"), snap => {
-    const assignments = snap.val() || {};
-    let hasLearners = false;
-    for (const id in learners) {
-      const l = learners[id];
-      const isAssigned = l.providerId === auth.currentUser.uid || Object.values(assignments).some(a => a.learnerId === id && a.providerId === auth.currentUser.uid);
-      if (l.role !== "learner" || !isAssigned) continue;
-      if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase()) && !l.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) continue;
-      if (group && !l.metadata?.tags?.includes(group)) continue;
-      hasLearners = true;
-      const learnerItem = document.createElement("div");
-      learnerItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-      const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
-      learnerItem.innerHTML = `
-        <div class="flex justify-between items-center">
-          <div>
-            <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p>
-            <p class="text-sm text-gray-600">Email: ${sanitizeInput(l.email)} | Contact: ${sanitizeInput(l.metadata?.contact || "-")} | Tags: ${sanitizeInput(l.metadata?.tags?.join(", ") || "-")}</p>
-            <p class="text-sm text-gray-600">Courses: ${enrolledCourses.map(c => sanitizeInput(c.name)).join(", ") || "None"}</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="viewLearnerProfile('${id}')" class="text-blue-600 hover:underline" aria-label="View profile for ${sanitizeInput(l.fullName || l.email)}" data-tooltip="View profile">Profile</button>
-            <button onclick="editLearner('${id}')" class="text-blue-600 hover:underline" aria-label="Edit learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Edit learner">Edit</button>
-            <button onclick="assignCourseToLearner('${id}')" class="text-green-600 hover:underline" aria-label="Assign course to ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Assign course">Assign Course</button>
-            <button onclick="deleteLearner('${id}')" class="text-red-600 hover:underline" aria-label="Delete learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Delete learner">Delete</button>
-          </div>
-        </div>
-      `;
-      learnerList.appendChild(learnerItem);
-    }
-    if (!hasLearners) {
-      learnerList.innerHTML = '<p class="text-gray-600 text-center">No learners assigned to you yet.</p>';
-    }
-  });
-}
+      // Upload content
+      document.getElementById('upload-content-btn').addEventListener('click', async () => {
+        const file = document.getElementById('content-file').files[0];
+        const courseId = document.getElementById('course-select').value;
 
-    // Search learners
-    const searchLearners = debounce((filter, group) => renderLearners(sanitizeInput(filter), group), 300);
-    learnerSearch.addEventListener("input", () => searchLearners(learnerSearch.value, groupFilter.value));
-    groupFilter.addEventListener("change", () => searchLearners(learnerSearch.value, groupFilter.value));
-
-    // Populate group filter
-    function populateGroupFilter() {
-      const groups = new Set();
-      for (const id in learners) {
-        if (learners[id].role === "learner" && learners[id].providerId === auth.currentUser.uid) {
-          learners[id].metadata?.tags?.forEach(tag => groups.add(tag));
-        }
-      }
-      groupFilter.innerHTML = '<option value="">All Groups</option>';
-      groups.forEach(group => {
-        const option = document.createElement("option");
-        option.value = group;
-        option.textContent = sanitizeInput(group);
-        groupFilter.appendChild(option);
-      });
-      groupFilterAnalytics.innerHTML = groupFilter.innerHTML;
-    }
-
-    // Populate learner course dropdown
-    function populateLearnerCourseDropdown() {
-      learnerCourse.innerHTML = '<option value="">Select Course (optional)</option>';
-      for (const id in courses) {
-        if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
-          const option = document.createElement("option");
-          option.value = id;
-          option.textContent = sanitizeInput(courses[id].name);
-          learnerCourse.appendChild(option);
-        }
-      }
-    }
-
-    // Add learner
-    openAddLearner.addEventListener("click", () => {
-      addLearnerModal.style.display = "block";
-      learnerFullName.focus();
-    });
-
-    closeAddLearner.addEventListener("click", () => {
-      addLearnerModal.style.display = "none";
-      addLearnerForm.reset();
-    });
-
-    addLearnerForm.addEventListener("submit", async e => {
-      e.preventDefault();
-      const fullName = sanitizeInput(learnerFullName.value.trim());
-      const email = sanitizeInput(learnerEmail.value.trim());
-      const contact = sanitizeInput(learnerContact.value.trim());
-      const tags = learnerTags.value.split(",").map(t => sanitizeInput(t.trim())).filter(t => t);
-      const courseId = learnerCourse.value;
-      if (!fullName || !email) {
-        alert("Please enter full name and email.");
-        return;
-      }
-      showSpinner();
-      try {
-        const { user: newUser } = await createUserWithEmailAndPassword(auth, email, generateTempPassword());
-        await set(ref(db, `users/${newUser.uid}`), {
-          fullName,
-          email,
-          role: "learner",
-          providerId: auth.currentUser.uid,
-          enrollmentDate: Date.now(),
-          progress: {},
-          metadata: { contact: contact || null, tags, version: "1.0" }
-        });
-        if (courseId) {
-          await runTransaction(ref(db, `courses/${courseId}`), course => {
-            course = course || { enrolled: [] };
-            course.enrolled = course.enrolled || [];
-            if (!course.enrolled.includes(newUser.uid)) course.enrolled.push(newUser.uid);
-            return course;
-          });
-        }
-        logAudit(`Added learner ${fullName} (${email})`);
-        alert("Learner added successfully!");
-        addLearnerModal.style.display = "none";
-        addLearnerForm.reset();
-      } catch (err) {
-        console.error("Error adding learner:", err);
-        alert("Failed to add learner.");
-      }
-      hideSpinner();
-    });
-
-    // Generate temporary password
-    function generateTempPassword() {
-      return Math.random().toString(36).slice(-8);
-    }
-
-    // Bulk upload learners
-    openBulkUpload.addEventListener("click", () => {
-      bulkUploadModal.style.display = "block";
-    });
-
-    closeBulkUpload.addEventListener("click", () => {
-      bulkUploadModal.style.display = "none";
-      bulkUploadForm.reset();
-    });
-
-    bulkUploadForm.addEventListener("submit", async e => {
-      e.preventDefault();
-      const file = learnerCSV.files[0];
-      if (!file) {
-        alert("Please select a CSV file.");
-        return;
-      }
-      showSpinner();
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: async results => {
-          try {
-            for (const row of results.data) {
-              const fullName = sanitizeInput(row.fullName?.trim() || "");
-              const email = sanitizeInput(row.email?.trim() || "");
-              const contact = sanitizeInput(row.contact?.trim() || "");
-              const tags = row.tags ? row.tags.split(",").map(t => sanitizeInput(t.trim())).filter(t => t) : [];
-              const courseId = row.courseId?.trim();
-              if (!fullName || !email) continue;
-              const { user: newUser } = await createUserWithEmailAndPassword(auth, email, generateTempPassword());
-              await set(ref(db, `users/${newUser.uid}`), {
-                fullName,
-                email,
-                role: "learner",
-                providerId: auth.currentUser.uid,
-                enrollmentDate: Date.now(),
-                progress: {},
-                metadata: { contact: contact || null, tags, version: "1.0" }
-              });
-              if (courseId && courses[courseId]?.providerId === auth.currentUser.uid) {
-                await runTransaction(ref(db, `courses/${courseId}`), course => {
-                  course = course || { enrolled: [] };
-                  course.enrolled = course.enrolled || [];
-                  if (!course.enrolled.includes(newUser.uid)) course.enrolled.push(newUser.uid);
-                  return course;
-                });
-              }
-              logAudit(`Bulk added learner ${fullName} (${email})`);
-            }
-            alert("Bulk upload completed!");
-            bulkUploadModal.style.display = "none";
-            bulkUploadForm.reset();
-          } catch (err) {
-            console.error("Error during bulk upload:", err);
-            alert("Failed to upload some learners.");
-          }
-          hideSpinner();
-        },
-        error: err => {
-          console.error("CSV parsing error:", err);
-          alert("Failed to parse CSV file.");
-          hideSpinner();
-        }
-      });
-    });
-
-    // Edit learner
-    window.editLearner = async learnerId => {
-      const l = learners[learnerId];
-      learnerFullName.value = l.fullName || "";
-      learnerEmail.value = l.email;
-      learnerContact.value = l.metadata?.contact || "";
-      learnerTags.value = l.metadata?.tags?.join(", ") || "";
-      learnerCourse.value = Object.keys(courses).find(id => courses[id].enrolled?.includes(learnerId)) || "";
-      addLearnerModal.style.display = "block";
-      addLearnerForm.onsubmit = async e => {
-        e.preventDefault();
-        const fullName = sanitizeInput(learnerFullName.value.trim());
-        const email = sanitizeInput(learnerEmail.value.trim());
-        const contact = sanitizeInput(learnerContact.value.trim());
-        const tags = learnerTags.value.split(",").map(t => sanitizeInput(t.trim())).filter(t => t);
-        const newCourseId = learnerCourse.value;
-        if (!fullName || !email) {
-          alert("Please enter full name and email.");
+        if (!courseId) {
+          showAlert('Please select a course', true);
           return;
         }
-        showSpinner();
-        try {
-          await update(ref(db, `users/${learnerId}`), {
-            fullName,
-            email,
-            metadata: { contact: contact || null, tags, version: "1.1" }
-          });
-          const oldCourseId = Object.keys(courses).find(id => courses[id].enrolled?.includes(learnerId));
-          if (oldCourseId !== newCourseId) {
-            if (oldCourseId) {
-              await runTransaction(ref(db, `courses/${oldCourseId}`), course => {
-                course = course || { enrolled: [] };
-                course.enrolled = course.enrolled.filter(id => id !== learnerId);
-                return course;
+
+        if (file && file.size <= 100 * 1024 * 1024) {
+          if (!['video/mp4', 'application/pdf'].includes(file.type)) {
+            showAlert('Only MP4 and PDF files are allowed', true);
+            return;
+          }
+
+          retryActionCallback = async () => {
+            try {
+              const fileRef = storageRef(storage, `content/${courseId}/${file.name}`);
+              await uploadBytes(fileRef, file);
+              const url = await getDownloadURL(fileRef);
+              const contentId = push(ref(db, `courses/${courseId}/content`)).key;
+              await set(ref(db, `courses/${courseId}/content/${contentId}`), {
+                type: file.type === 'video/mp4' ? 'video' : 'document',
+                url: url,
+                title: sanitizeInput(file.name),
+                uploadedAt: Date.now()
+              });
+              showAlert('Content uploaded successfully', true);
+            } catch (error) {
+              showAlert(`Error: ${error.message}`, false);
+              await set(ref(db, `logs/${Date.now()}`), {
+                message: `Provider error: ${error.message}`,
+                timestamp: Date.now(),
+                userId: auth.currentUser.uid
               });
             }
-            if (newCourseId) {
-              await runTransaction(ref(db, `courses/${newCourseId}`), course => {
-                course = course || { enrolled: [] };
-                course.enrolled = course.enrolled || [];
-                if (!course.enrolled.includes(learnerId)) course.enrolled.push(learnerId);
-                return course;
-              });
+          };
+          retryActionCallback();
+        } else {
+          showAlert('File size exceeds 100MB limit', true);
+        }
+      });
+
+      // Logout
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        signOut(auth).then(() => window.location.replace('index.html'));
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      auth.onAuthStateChanged(user => {
+        if (!user) {
+          window.location.replace('index.html');
+        } else {
+          get(ref(db, `users/${user.uid}`)).then(snapshot => {
+            if (snapshot.exists() && snapshot.val().role === 'provider') {
+              renderProviderSection();
+            } else {
+              window.location.replace('index.html');
             }
-          }
-          logAudit(`Edited learner ${fullName} (${email})`);
-          alert("Learner updated successfully!");
-          addLearnerModal.style.display = "none";
-          addLearnerForm.reset();
-          addLearnerForm.onsubmit = null; // Reset to default add behavior
-        } catch (err) {
-          console.error("Error editing learner:", err);
-          alert("Failed to edit learner.");
-        }
-        hideSpinner();
-      };
-    };
-
-    // Assign course to learner
-    window.assignCourseToLearner = async learnerId => {
-      const courseId = prompt("Enter course ID to assign:", "");
-      if (!courseId || !courses[courseId] || courses[courseId].providerId !== auth.currentUser.uid) {
-        alert("Invalid course ID.");
-        return;
-      }
-      if (!confirm(`Assign ${courses[courseId].name} to ${learners[learnerId].fullName || learners[learnerId].email}?`)) return;
-      showSpinner();
-      try {
-        await runTransaction(ref(db, `courses/${courseId}`), course => {
-          course = course || { enrolled: [] };
-          course.enrolled = course.enrolled || [];
-          if (!course.enrolled.includes(learnerId)) course.enrolled.push(learnerId);
-          return course;
-        });
-        logAudit(`Assigned course ${courses[courseId].name} to learner ${learners[learnerId].fullName || learners[learnerId].email}`);
-        alert("Course assigned successfully!");
-      } catch (err) {
-        console.error("Error assigning course:", err);
-        alert("Failed to assign course.");
-      }
-      hideSpinner();
-    };
-
-    // Delete learner
-    window.deleteLearner = async learnerId => {
-      if (!confirm("Are you sure you want to delete this learner?")) return;
-      showSpinner();
-      try {
-        await remove(ref(db, `users/${learnerId}`));
-        for (const courseId in courses) {
-          if (courses[courseId].enrolled?.includes(learnerId)) {
-            await runTransaction(ref(db, `courses/${courseId}`), course => {
-              course = course || { enrolled: [] };
-              course.enrolled = course.enrolled.filter(id => id !== learnerId);
-              return course;
-            });
-          }
-        }
-        logAudit(`Deleted learner ${learners[learnerId].fullName || learners[learnerId].email}`);
-        alert("Learner deleted successfully!");
-      } catch (err) {
-        console.error("Error deleting learner:", err);
-        alert("Failed to delete learner.");
-      }
-      hideSpinner();
-    };
-
-    // View learner profile
-    window.viewLearnerProfile = learnerId => {
-      const l = learners[learnerId];
-      const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(learnerId));
-      const certs = Object.values(certifications).filter(c => c.learnerId === learnerId && courses[c.courseId]?.providerId === auth.currentUser.uid);
-      const activityLogs = notifications.filter(n => n.learnerId === learnerId);
-      const assignments = Object.values(assignments).filter(a => a.learnerId === learnerId);
-      const modal = document.createElement("div");
-      modal.className = "modal";
-      modal.style.display = "block";
-      modal.innerHTML = `
-        <div class="modal-content">
-          <h3 class="text-lg font-semibold mb-4">Learner Profile: ${sanitizeInput(l.fullName || l.email)}</h3>
-          <p class="text-sm text-gray-600">Email: ${sanitizeInput(l.email)}</p>
-          <p class="text-sm text-gray-600">Contact: ${sanitizeInput(l.metadata?.contact || "-")}</p>
-          <p class="text-sm text-gray-600">Tags: ${sanitizeInput(l.metadata?.tags?.join(", ") || "-")}</p>
-          <p class="text-sm text-gray-600">Enrolled Courses: ${enrolledCourses.map(c => sanitizeInput(c.name)).join(", ") || "None"}</p>
-          <p class="text-sm text-gray-600">Certificates: ${certs.map(c => `<a href="#" onclick="downloadCertificate('${c.id}')" class="text-blue-600 hover:underline">${sanitizeInput(courses[c.courseId].name)}</a>`).join(", ") || "None"}</p>
-          <h4 class="text-md font-semibold mt-4 mb-2">Assignments</h4>
-          <ul class="text-sm text-gray-600 space-y-1">${assignments.map(a => `<li>${sanitizeInput(a.title)}: ${a.status} (Submitted: ${a.submittedAt ? new Date(a.submittedAt).toLocaleDateString() : "Not submitted"})</li>`).join("") || "No assignments"}</ul>
-          <h4 class="text-md font-semibold mt-4 mb-2">Activity Log</h4>
-          <ul class="text-sm text-gray-600 space-y-1">${activityLogs.map(n => `<li>${sanitizeInput(n.message)} (${new Date(n.timestamp).toLocaleString()})</li>`).join("") || "No activity"}</ul>
-          <button class="bg-gray-600 text-white px-4 py-2 rounded-3xl mt-4" onclick="this.parentElement.parentElement.remove()" data-tooltip="Close profile">Close</button>
-        </div>
-      `;
-      document.body.appendChild(modal);
-    };
-
-    // Load courses
-    function loadCourses() {
-      showSpinner();
-      onValue(ref(db, "courses"), snap => {
-        courses = snap.val() || {};
-        renderCourses();
-        populateCourseFilter();
-        populateLearnerCourseDropdown();
-        populateContentCourseDropdown();
-        populateAssignmentCourseDropdown();
-        populateForumCourseDropdown();
-        populateQuizCourseDropdown();
-        populateLiveCourseDropdown();
-        hideSpinner();
-      });
-    }
-
-    function renderCourses(filter = "") {
-      courseList.innerHTML = "";
-      for (const id in courses) {
-        const c = courses[id];
-        if (c.providerId !== auth.currentUser.uid || (filter && !c.name.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase())))) continue;
-        const courseItem = document.createElement("div");
-        courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow";
-        courseItem.innerHTML = `
-          <div>
-            <p class="font-semibold">${sanitizeInput(c.name)}</p>
-            <p class="text-sm text-gray-600">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Enrolled: ${c.enrolled?.length || 0}</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="editCourse('${id}')" class="text-blue-600 hover:underline" aria-label="Edit course ${sanitizeInput(c.name)}" data-tooltip="Edit course">Edit</button>
-            <button onclick="archiveCourse('${id}')" class="text-red-600 hover:underline" aria-label="${c.archived ? "Unarchive" : "Archive"} course ${sanitizeInput(c.name)}" data-tooltip="${c.archived ? "Unarchive" : "Archive"} course">${c.archived ? "Unarchive" : "Archive"}</button>
-          </div>
-        `;
-        courseList.appendChild(courseItem);
-      }
-    }
-
-    // Search courses
-    const searchCourses = debounce(filter => renderCourses(sanitizeInput(filter)), 300);
-    courseSearch.addEventListener("input", () => searchCourses(courseSearch.value));
-
-    // Add course
-    courseForm.addEventListener("submit", async e => {
-      e.preventDefault();
-      const name = sanitizeInput(courseName.value.trim());
-      const tags = courseTags.value.split(",").map(t => sanitizeInput(t.trim())).filter(t => t);
-      if (!name) {
-        alert("Please enter a course name.");
-        return;
-      }
-      showSpinner();
-      try {
-        await push(ref(db, "courses"), {
-          providerId: auth.currentUser.uid,
-          name,
-          metadata: { tags, version: "1.0" },
-          enrolled: [],
-          completions: [],
-          archived: false,
-          createdAt: Date.now()
-        });
-        logAudit(`Added course ${name}`);
-        alert("Course added successfully!");
-        courseForm.reset();
-      } catch (err) {
-        console.error("Error adding course:", err);
-        alert("Failed to add course.");
-      }
-      hideSpinner();
-    });
-
-    // Edit course
-    window.editCourse = async courseId => {
-      const c = courses[courseId];
-      const newName = prompt("Edit course name:", c.name);
-      const newTags = prompt("Edit tags (comma-separated):", c.metadata?.tags?.join(", ") || "");
-      if (newName && newTags) {
-        showSpinner();
-        try {
-          await update(ref(db, `courses/${courseId}`), {
-            name: sanitizeInput(newName),
-            metadata: { tags: newTags.split(",").map(t => sanitizeInput(t.trim())), version: "1.1" }
           });
-          logAudit(`Edited course ${newName}`);
-          alert("Course updated successfully!");
-        } catch (err) {
-          console.error("Error editing course:", err);
-          alert("Failed to edit course.");
-        }
-        hideSpinner();
-      }
-    };
-
-    // Archive/unarchive course
-    window.archiveCourse = async courseId => {
-      showSpinner();
-      try {
-        await update(ref(db, `courses/${courseId}`), { archived: !courses[courseId].archived });
-        logAudit(`Course ${courses[courseId].name} ${courses[courseId].archived ? "unarchived" : "archived"}`);
-        alert(`Course ${courses[courseId].archived ? "unarchived" : "archived"} successfully!`);
-      } catch (err) {
-        console.error("Error archiving course:", err);
-        alert("Failed to archive course.");
-      }
-      hideSpinner();
-    };
-
-    // Load course content
-    function loadContent() {
-      showSpinner();
-      onValue(ref(db, "contents"), snap => {
-        contents = snap.val() || {};
-        renderContent();
-        hideSpinner();
-      });
-    }
-
-    function populateContentCourseDropdown() {
-      contentCourse.innerHTML = '<option value="">Select Course</option>';
-      contentCourseFilter.innerHTML = '<option value="">All Courses</option>';
-      for (const id in courses) {
-        if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
-          const option = document.createElement("option");
-          option.value = id;
-          option.textContent = sanitizeInput(courses[id].name);
-          contentCourse.appendChild(option);
-          contentCourseFilter.appendChild(option.cloneNode(true));
-        }
-      }
-    }
-
-    function renderContent(filter = "", courseFilter = "") {
-      contentList.innerHTML = "";
-      for (const id in contents) {
-        const c = contents[id];
-        if (c.providerId !== auth.currentUser.uid) continue;
-        if (filter && !c.title.toLowerCase().includes(filter.toLowerCase())) continue;
-        if (courseFilter && c.courseId !== courseFilter) continue;
-        const contentItem = document.createElement("div");
-        contentItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-        contentItem.innerHTML = `
-          <div class="flex justify-between items-center">
-            <div>
-              <p class="font-semibold">${sanitizeInput(c.title)}</p>
-              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[c.courseId]?.name || "Unknown")} | Type: ${sanitizeInput(c.type)}</p>
-              <p class="text-sm text-gray-600">URL: <a href="${sanitizeInput(c.url)}" target="_blank" class="text-blue-600 hover:underline">View</a></p>
-            </div>
-            <div class="flex gap-2">
-              <button onclick="deleteContent('${id}')" class="text-red-600 hover:underline" aria-label="Delete content ${sanitizeInput(c.title)}" data-tooltip="Delete content">Delete</button>
-            </div>
-          </div>
-        `;
-        contentList.appendChild(contentItem);
-      }
-    }
-
-    // Search content
-    const searchContent = debounce((filter, course) => renderContent(sanitizeInput(filter), course), 300);
-    contentSearch.addEventListener("input", () => searchContent(contentSearch.value, contentCourseFilter.value));
-    contentCourseFilter.addEventListener("change", () => searchContent(contentSearch.value, contentCourseFilter.value));
-
-    // Upload content
-    contentUploadForm.addEventListener("submit", async e => {
-      e.preventDefault();
-      const courseId = contentCourse.value;
-      const title = sanitizeInput(contentTitle.value.trim());
-      const type = contentType.value;
-      const file = contentFile.files[0];
-      if (!courseId || !title || !file) {
-        alert("Please select a course, enter a title, and upload a file.");
-        return;
-      }
-      showSpinner();
-      try {
-        const fileRef = storageRef(storage, `content/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
-        await uploadBytes(fileRef, file);
-        const url = await getDownloadURL(fileRef);
-        await push(ref(db, "contents"), {
-          providerId: auth.currentUser.uid,
-          courseId,
-          title,
-          type,
-          url,
-          createdAt: Date.now()
-        });
-        logAudit(`Uploaded content ${title} for course ${courses[courseId].name}`);
-        alert("Content uploaded successfully!");
-        contentUploadForm.reset();
-      } catch (err) {
-        console.error("Error uploading content:", err);
-        alert("Failed to upload content.");
-      }
-      hideSpinner();
-    });
-
-    // Delete content
-    window.deleteContent = async contentId => {
-      if (!confirm("Are you sure you want to delete this content?")) return;
-      showSpinner();
-      try {
-        await remove(ref(db, `contents/${contentId}`));
-        logAudit(`Deleted content ${contents[contentId].title}`);
-        alert("Content deleted successfully!");
-      } catch (err) {
-        console.error("Error deleting content:", err);
-        alert("Failed to delete content.");
-      }
-      hideSpinner();
-    };
-
-    // Load assignments
-  function loadAssignments() {
-    showSpinner();
-    onValue(ref(db, "assignments"), snap => {
-      assignments = snap.val() || {};
-      renderAssignments();
-      hideSpinner();
-    });
-  }
-
-  function populateAssignmentCourseDropdown() {
-    assignmentCourse.innerHTML = '<option value="">Select Course</option>';
-    assignmentCourseFilter.innerHTML = '<option value="">All Courses</option>';
-    for (const id in courses) {
-      if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
-        const option = document.createElement("option");
-        option.value = id;
-        option.textContent = sanitizeInput(courses[id].name);
-        assignmentCourse.appendChild(option);
-        assignmentCourseFilter.appendChild(option.cloneNode(true));
-      }
-    }
-  }
-
-  function renderAssignments(filter = "", courseFilter = "") {
-    assignmentList.innerHTML = "";
-    for (const id in assignments) {
-      const a = assignments[id];
-      if (a.providerId !== auth.currentUser.uid) continue;
-      if (filter && !a.title.toLowerCase().includes(filter.toLowerCase()) && !learners[a.learnerId]?.fullName?.toLowerCase().includes(filter.toLowerCase())) continue;
-      if (courseFilter && a.courseId !== courseFilter) continue;
-      const assignmentItem = document.createElement("div");
-      assignmentItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-      assignmentItem.innerHTML = `
-        <div class="flex justify-between items-center">
-          <div>
-            <p class="font-semibold">${sanitizeInput(a.title)}</p>
-            <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[a.courseId]?.name || "Unknown")}</p>
-            <p class="text-sm text-gray-600">Learner: ${sanitizeInput(learners[a.learnerId]?.fullName || learners[a.learnerId]?.email || "Unknown")}</p>
-            <p class="text-sm text-gray-600">Status: ${a.status} | Due: ${new Date(a.dueDate).toLocaleDateString()}</p>
-            ${a.submissionUrl ? `<p class="text-sm text-gray-600">Submission: <a href="${sanitizeInput(a.submissionUrl)}" target="_blank" class="text-blue-600 hover:underline">View</a></p>` : ""}
-          </div>
-          <div class="flex gap-2">
-            <button onclick="gradeAssignment('${id}')" class="text-blue-600 hover:underline" aria-label="Grade assignment ${sanitizeInput(a.title)}" data-tooltip="Grade assignment">Grade</button>
-            <button onclick="deleteAssignment('${id}')" class="text-red-600 hover:underline" aria-label="Delete assignment ${sanitizeInput(a.title)}" data-tooltip="Delete assignment">Delete</button>
-          </div>
-        </div>
-      `;
-      assignmentList.appendChild(assignmentItem);
-    }
-  }
-
-  // Search assignments
-  const searchAssignments = debounce((filter, course) => renderAssignments(sanitizeInput(filter), course), 300);
-  assignmentSearch.addEventListener("input", () => searchAssignments(assignmentSearch.value, assignmentCourseFilter.value));
-  assignmentCourseFilter.addEventListener("change", () => searchAssignments(assignmentSearch.value, assignmentCourseFilter.value));
-
-  // Create assignment
-  assignmentForm.addEventListener("submit", async e => {
-    e.preventDefault();
-    const courseId = assignmentCourse.value;
-    const title = sanitizeInput(assignmentTitle.value.trim());
-    const description = sanitizeInput(assignmentDescription.value.trim());
-    const dueDate = assignmentDueDate.value;
-    if (!courseId || !title || !description || !dueDate) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-    showSpinner();
-    try {
-      const learnerIds = courses[courseId]?.enrolled || [];
-      for (const learnerId of learnerIds) {
-        await push(ref(db, "assignments"), {
-          providerId: auth.currentUser.uid,
-          courseId,
-          learnerId,
-          title,
-          description,
-          dueDate,
-          status: "Assigned",
-          createdAt: Date.now()
-        });
-      }
-      logAudit(`Created assignment ${title} for course ${courses[courseId].name}`);
-      alert("Assignment created successfully!");
-      assignmentForm.reset();
-    } catch (err) {
-      console.error("Error creating assignment:", err);
-      alert("Failed to create assignment.");
-    }
-    hideSpinner();
-  });
-
-  // Grade assignment
-  window.gradeAssignment = async assignmentId => {
-    const a = assignments[assignmentId];
-    const grade = prompt(`Enter grade for ${a.title} (${learners[a.learnerId]?.fullName || "Unknown"}):`, a.grade || "");
-    if (grade === null) return;
-    showSpinner();
-    try {
-      await update(ref(db, `assignments/${assignmentId}`), { grade: sanitizeInput(grade), status: "Graded" });
-      logAudit(`Graded assignment ${a.title} for ${learners[a.learnerId]?.fullName || "Unknown"}`);
-      alert("Assignment graded successfully!");
-    } catch (err) {
-      console.error("Error grading assignment:", err);
-      alert("Failed to grade assignment.");
-    }
-    hideSpinner();
-  };
-
-  // Delete assignment
-  window.deleteAssignment = async assignmentId => {
-    if (!confirm("Are you sure you want to delete this assignment?")) return;
-    showSpinner();
-    try {
-      await remove(ref(db, `assignments/${assignmentId}`));
-      logAudit(`Deleted assignment ${assignments[assignmentId].title}`);
-      alert("Assignment deleted successfully!");
-    } catch (err) {
-      console.error("Error deleting assignment:", err);
-      alert("Failed to delete assignment.");
-    }
-    hideSpinner();
-  };
-
-  // Load forums
-  function loadForums() {
-    showSpinner();
-    onValue(ref(db, "forums"), snap => {
-      forums = snap.val() || {};
-      renderForums();
-      hideSpinner();
-    });
-  }
-
-  function populateForumCourseDropdown() {
-    forumCourse.innerHTML = '<option value="">Select Course</option>';
-    forumCourseFilter.innerHTML = '<option value="">All Courses</option>';
-    for (const id in courses) {
-      if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
-        const option = document.createElement("option");
-        option.value = id;
-        option.textContent = sanitizeInput(courses[id].name);
-        forumCourse.appendChild(option);
-        forumCourseFilter.appendChild(option.cloneNode(true));
-      }
-    }
-  }
-
-  function renderForums(filter = "", courseFilter = "") {
-    forumList.innerHTML = "";
-    for (const id in forums) {
-      const f = forums[id];
-      if (f.providerId !== auth.currentUser.uid) continue;
-      if (filter && !f.title.toLowerCase().includes(filter.toLowerCase())) continue;
-      if (courseFilter && f.courseId !== courseFilter) continue;
-      const threadItem = document.createElement("div");
-      threadItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-      threadItem.innerHTML = `
-        <div class="flex justify-between items-center">
-          <div>
-            <p class="font-semibold">${sanitizeInput(f.title)}</p>
-            <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")}</p>
-            <p class="text-sm text-gray-600">Posts: ${f.posts?.length || 0}</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="viewForumThread('${id}')" class="text-blue-600 hover:underline" aria-label="View thread ${sanitizeInput(f.title)}" data-tooltip="View thread">View</button>
-            <button onclick="deleteForumThread('${id}')" class="text-red-600 hover:underline" aria-label="Delete thread ${sanitizeInput(f.title)}" data-tooltip="Delete thread">Delete</button>
-          </div>
-        </div>
-      `;
-      forumList.appendChild(threadItem);
-    }
-  }
-
-  // Search forums
-  const searchForums = debounce((filter, course) => renderForums(sanitizeInput(filter), course), 300);
-  forumSearch.addEventListener("input", () => searchForums(forumSearch.value, forumCourseFilter.value));
-  forumCourseFilter.addEventListener("change", () => searchForums(forumSearch.value, forumCourseFilter.value));
-
-  // Create forum thread
-  forumThreadForm.addEventListener("submit", async e => {
-    e.preventDefault();
-    const courseId = forumCourse.value;
-    const title = sanitizeInput(threadTitle.value.trim());
-    const content = sanitizeInput(threadContent.value.trim());
-    if (!courseId || !title || !content) {
-      alert("Please fill in all required fields.");
-      return;
-    }
-    showSpinner();
-    try {
-      await push(ref(db, "forums"), {
-        providerId: auth.currentUser.uid,
-        courseId,
-        title,
-        posts: [{ content, authorId: auth.currentUser.uid, timestamp: Date.now() }],
-        createdAt: Date.now()
-      });
-      logAudit(`Created forum thread ${title} for course ${courses[courseId].name}`);
-      alert("Forum thread created successfully!");
-      forumThreadForm.reset();
-    } catch (err) {
-      console.error("Error creating forum thread:", err);
-      alert("Failed to create forum thread.");
-    }
-    hideSpinner();
-  });
-
-  // View forum thread
-  window.viewForumThread = threadId => {
-    const f = forums[threadId];
-    const modal = document.createElement("div");
-    modal.className = "modal";
-    modal.style.display = "block";
-    modal.innerHTML = `
-      <div class="modal-content">
-        <h3 class="text-lg font-semibold mb-4">Thread: ${sanitizeInput(f.title)}</h3>
-        <p class="text-sm text-gray-600 mb-2">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")}</p>
-        <div class="space-y-2 mb-4">
-          ${f.posts?.map(p => `
-            <div class="bg-gray-50 p-2 rounded">
-              <p class="text-sm">${sanitizeInput(p.content)}</p>
-              <p class="text-xs text-gray-500">By ${sanitizeInput(learners[p.authorId]?.fullName || p.authorId === auth.currentUser.uid ? user.fullName : "Unknown")} on ${new Date(p.timestamp).toLocaleString()}</p>
-            </div>
-          `).join("")}
-        </div>
-        <form id="add-post-form-${threadId}" class="mb-4">
-          <textarea id="new-post-${threadId}" placeholder="Add a post..." class="border p-2 rounded w-full mb-2" aria-label="Add new post" required></textarea>
-          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Post reply">Post</button>
-        </form>
-        <button class="bg-gray-600 text-white px-4 py-2 rounded-3xl" onclick="this.parentElement.parentElement.remove()" data-tooltip="Close thread">Close</button>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    document.getElementById(`add-post-form-${threadId}`).addEventListener("submit", async e => {
-      e.preventDefault();
-      const content = sanitizeInput(document.getElementById(`new-post-${threadId}`).value.trim());
-      if (!content) {
-        alert("Please enter post content.");
-        return;
-      }
-      showSpinner();
-      try {
-        await runTransaction(ref(db, `forums/${threadId}`), thread => {
-          thread = thread || { posts: [] };
-          thread.posts = thread.posts || [];
-          thread.posts.push({ content, authorId: auth.currentUser.uid, timestamp: Date.now() });
-          return thread;
-        });
-        logAudit(`Posted in thread ${f.title}`);
-        alert("Post added successfully!");
-        modal.remove();
-      } catch (err) {
-        console.error("Error adding post:", err);
-        alert("Failed to add post.");
-      }
-      hideSpinner();
-    });
-  };
-
-  // Delete forum thread
-  window.deleteForumThread = async threadId => {
-    if (!confirm("Are you sure you want to delete this thread?")) return;
-    showSpinner();
-    try {
-      await remove(ref(db, `forums/${threadId}`));
-      logAudit(`Deleted forum thread ${forums[threadId].title}`);
-      alert("Thread deleted successfully!");
-    } catch (err) {
-      console.error("Error deleting thread:", err);
-      alert("Failed to delete thread.");
-    }
-    hideSpinner();
-  };
-
-  // Load quizzes
-  function loadQuizzes() {
-    showSpinner();
-    onValue(ref(db, "quizzes"), snap => {
-      quizzes = snap.val() || {};
-      renderQuizzes();
-      hideSpinner();
-    });
-  }
-
-  function populateQuizCourseDropdown() {
-    quizCourse.innerHTML = '<option value="">Select Course</option>';
-    quizCourseFilter.innerHTML = '<option value="">All Courses</option>';
-    for (const id in courses) {
-      if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
-        const option = document.createElement("option");
-        option.value = id;
-        option.textContent = sanitizeInput(courses[id].name);
-        quizCourse.appendChild(option);
-        quizCourseFilter.appendChild(option.cloneNode(true));
-      }
-    }
-  }
-
-  function renderQuizzes(filter = "", courseFilter = "") {
-    quizList.innerHTML = "";
-    for (const id in quizzes) {
-      const q = quizzes[id];
-      if (q.providerId !== auth.currentUser.uid) continue;
-      if (filter && !q.title.toLowerCase().includes(filter.toLowerCase())) continue;
-      if (courseFilter && q.courseId !== courseFilter) continue;
-      const quizItem = document.createElement("div");
-      quizItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-      quizItem.innerHTML = `
-        <div class="flex justify-between items-center">
-          <div>
-            <p class="font-semibold">${sanitizeInput(q.title)}</p>
-            <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[q.courseId]?.name || "Unknown")}</p>
-            <p class="text-sm text-gray-600">Questions: ${q.questions?.length || 0}</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="viewQuiz('${id}')" class="text-blue-600 hover:underline" aria-label="View quiz ${sanitizeInput(q.title)}" data-tooltip="View quiz">View</button>
-            <button onclick="deleteQuiz('${id}')" class="text-red-600 hover:underline" aria-label="Delete quiz ${sanitizeInput(q.title)}" data-tooltip="Delete quiz">Delete</button>
-          </div>
-        </div>
-      `;
-      quizList.appendChild(quizItem);
-    }
-  }
-
-  // Search quizzes
-  const searchQuizzes = debounce((filter, course) => renderQuizzes(sanitizeInput(filter), course), 300);
-  quizSearch.addEventListener("input", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
-  quizCourseFilter.addEventListener("change", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
-
-  // Add quiz question
-  addQuizQuestion.addEventListener("click", () => {
-    quizQuestionModal.style.display = "block";
-    questionText.focus();
-  });
-
-  closeQuizQuestion.addEventListener("click", () => {
-    quizQuestionModal.style.display = "none";
-    quizQuestionForm.reset();
-  });
-
-  quizQuestionForm.addEventListener("submit", e => {
-    e.preventDefault();
-    const text = sanitizeInput(questionText.value.trim());
-    const options = questionOptions.value.split(",").map(o => sanitizeInput(o.trim())).filter(o => o);
-    const correct = parseInt(correctOption.value, 10);
-    if (!text || options.length < 2 || isNaN(correct) || correct < 0 || correct >= options.length) {
-      alert("Please provide a question, at least two options, and a valid correct option index.");
-      return;
-    }
-    currentQuizQuestions.push({ text, options, correctOption: correct });
-    quizQuestionModal.style.display = "none";
-    quizQuestionForm.reset();
-    updateQuizQuestionsDisplay();
-  });
-
-  function updateQuizQuestionsDisplay() {
-    quizQuestions.innerHTML = currentQuizQuestions.map((q, i) => `
-      <div class="bg-gray-50 p-2 rounded">
-        <p class="text-sm font-semibold">${sanitizeInput(q.text)}</p>
-        <p class="text-sm">Options: ${sanitizeInput(q.options.join(", "))}</p>
-        <p class="text-sm">Correct: ${sanitizeInput(q.options[q.correctOption])}</p>
-        <button onclick="removeQuizQuestion(${i})" class="text-red-600 hover:underline" aria-label="Remove question ${sanitizeInput(q.text)}" data-tooltip="Remove question">Remove</button>
-      </div>
-    `).join("");
-  }
-
-  window.removeQuizQuestion = index => {
-    currentQuizQuestions.splice(index, 1);
-    updateQuizQuestionsDisplay();
-  };
-
-  // Create quiz
-  quizForm.addEventListener("submit", async e => {
-    e.preventDefault();
-    const courseId = quizCourse.value;
-    const title = sanitizeInput(quizTitle.value.trim());
-    if (!courseId || !title || currentQuizQuestions.length === 0) {
-      alert("Please select a course, enter a title, and add at least one question.");
-      return;
-    }
-    showSpinner();
-    try {
-      await push(ref(db, "quizzes"), {
-        providerId: auth.currentUser.uid,
-        courseId,
-        title,
-        questions: currentQuizQuestions,
-        createdAt: Date.now()
-      });
-      logAudit(`Created quiz ${title} for course ${courses[courseId].name}`);
-      alert("Quiz created successfully!");
-      quizForm.reset();
-      currentQuizQuestions = [];
-      updateQuizQuestionsDisplay();
-    } catch (err) {
-      console.error("Error creating quiz:", err);
-      alert("Failed to create quiz.");
-    }
-    hideSpinner();
-  });
-
-  // View quiz
-  window.viewQuiz = quizId => {
-    const q = quizzes[quizId];
-    const modal = document.createElement("div");
-    modal.className = "modal";
-    modal.style.display = "block";
-    modal.innerHTML = `
-      <div class="modal-content">
-        <h3 class="text-lg font-semibold mb-4">Quiz: ${sanitizeInput(q.title)}</h3>
-        <p class="text-sm text-gray-600 mb-2">Course: ${sanitizeInput(courses[q.courseId]?.name || "Unknown")}</p>
-        <div class="space-y-2 mb-4">
-          ${q.questions.map((ques, i) => `
-            <div class="bg-gray-50 p-2 rounded">
-              <p class="text-sm font-semibold">${i + 1}. ${sanitizeInput(ques.text)}</p>
-              <ul class="text-sm list-disc pl-5">${ques.options.map((opt, j) => `<li class="${j === ques.correctOption ? "text-green-600" : ""}">${sanitizeInput(opt)}</li>`).join("")}</ul>
-            </div>
-          `).join("")}
-        </div>
-        <button class="bg-gray-600 text-white px-4 py-2 rounded-3xl" onclick="this.parentElement.parentElement.remove()" data-tooltip="Close quiz">Close</button>
-      </div>
-    `;
-    document.body.appendChild(modal);
-  };
-
-  // Delete quiz
-  window.deleteQuiz = async quizId => {
-    if (!confirm("Are you sure you want to delete this quiz?")) return;
-    showSpinner();
-    try {
-      await remove(ref(db, `quizzes/${quizId}`));
-      logAudit(`Deleted quiz ${quizzes[quizId].title}`);
-      alert("Quiz deleted successfully!");
-    } catch (err) {
-      console.error("Error deleting quiz:", err);
-      alert("Failed to delete quiz.");
-    }
-    hideSpinner();
-  };
-
-  // Load learner progress
-  function loadProgress() {
-    showSpinner();
-    onValue(ref(db, "users"), snap => {
-      learners = snap.val() || {};
-      renderProgress();
-      hideSpinner();
-    });
-  }
-
-  function renderProgress(filter = "") {
-    progressList.innerHTML = "";
-    for (const id in learners) {
-      const l = learners[id];
-      if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
-      if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase())) continue;
-      const progressItem = document.createElement("div");
-      progressItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-      const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
-      const progressDetails = enrolledCourses.map(c => {
-        const progress = l.progress?.[c.id] || { completed: 0, total: 100 };
-        const percentage = (progress.completed / progress.total * 100).toFixed(1);
-        return `
-          <p class="text-sm">${sanitizeInput(c.name)}: ${percentage}% completed</p>
-          ${progress.completed >= progress.total ? `<button onclick="issueCertificate('${id}', '${c.id}')" class="text-blue-600 hover:underline" aria-label="Issue certificate for ${sanitizeInput(c.name)}" data-tooltip="Issue certificate">Issue Certificate</button>` : ""}
-        `;
-      }).join("");
-      progressItem.innerHTML = `
-        <div>
-          <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p>
-          <div class="text-sm text-gray-600">${progressDetails || "No enrolled courses"}</div>
-        </div>
-      `;
-      progressList.appendChild(progressItem);
-    }
-  }
-
-  // Search progress
-  const searchProgress = debounce(filter => renderProgress(sanitizeInput(filter)), 300);
-  progressSearch.addEventListener("input", () => searchProgress(progressSearch.value));
-
-  // Issue certificate
-  window.issueCertificate = async (learnerId, courseId) => {
-    if (!confirm(`Issue certificate for ${learners[learnerId].fullName || learners[learnerId].email} in ${courses[courseId].name}?`)) return;
-    showSpinner();
-    try {
-      const certId = await push(ref(db, "certifications"), {
-        learnerId,
-        courseId,
-        providerId: auth.currentUser.uid,
-        issuedAt: Date.now()
-      });
-      await runTransaction(ref(db, `courses/${courseId}`), course => {
-        course = course || { completions: [] };
-        course.completions = course.completions || [];
-        if (!course.completions.includes(learnerId)) course.completions.push(learnerId);
-        return course;
-      });
-      logAudit(`Issued certificate for ${learners[learnerId].fullName || learners[learnerId].email} in ${courses[courseId].name}`);
-      alert("Certificate issued successfully!");
-    } catch (err) {
-      console.error("Error issuing certificate:", err);
-      alert("Failed to issue certificate.");
-    }
-    hideSpinner();
-  };
-
-  // Download certificate
-  window.downloadCertificate = async certId => {
-    const c = certifications[certId];
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text("Certificate of Completion", 105, 50, { align: "center" });
-    doc.setFontSize(16);
-    doc.text(`This certifies that ${learners[c.learnerId]?.fullName || learners[c.learnerId]?.email || "Unknown"}`, 105, 80, { align: "center" });
-    doc.text(`has successfully completed the course "${courses[c.courseId]?.name || "Unknown"}"`, 105, 100, { align: "center" });
-    doc.text(`on ${new Date(c.issuedAt).toLocaleDateString()}`, 105, 120, { align: "center" });
-    doc.text(`Issued by ${user.fullName || user.email}`, 105, 140, { align: "center" });
-    doc.save(`certificate_${certId}.pdf`);
-    logAudit(`Downloaded certificate ${certId}`);
-  };
-
-  // Load analytics
-  function loadAnalytics() {
-    showSpinner();
-    populateCourseFilter();
-    renderAnalytics();
-    hideSpinner();
-  }
-
-  function populateCourseFilter() {
-    courseFilter.innerHTML = '<option value="">All Courses</option>';
-    for (const id in courses) {
-      if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
-        const option = document.createElement("option");
-        option.value = id;
-        option.textContent = sanitizeInput(courses[id].name);
-        courseFilter.appendChild(option);
-      }
-    }
-  }
-
-  function renderAnalytics() {
-    const range = timeRange.value;
-    const courseId = courseFilter.value;
-    const group = groupFilterAnalytics.value;
-    const now = Date.now();
-    const days = range === "all" ? Infinity : parseInt(range, 10);
-    const startDate = now - days * 24 * 60 * 60 * 1000;
-
-    const performanceData = { labels: [], datasets: [{ label: "Completion Rate (%)", data: [], backgroundColor: "#2563eb", borderRadius: 4 }] };
-    const activityData = { labels: [], datasets: [{ label: "Activity", data: [], backgroundColor: "#10b981", borderRadius: 4 }] };
-
-    const timePoints = days === Infinity ? [] : Array.from({ length: days }, (_, i) => {
-      const date = new Date(now - (days - i - 1) * 24 * 60 * 60 * 1000);
-      return date.toLocaleDateString();
-    });
-
-    const activityByDay = timePoints.map(() => 0);
-    let totalCompletions = 0, totalEnrollments = 0, totalTimeSpent = 0, totalActivities = 0;
-
-    for (const id in courses) {
-      if (courseId && id !== courseId) continue;
-      if (courses[id].providerId !== auth.currentUser.uid || courses[id].archived) continue;
-      const enrolled = courses[id].enrolled?.filter(lid => !group || learners[lid]?.metadata?.tags?.includes(group)) || [];
-      const completions = courses[id].completions?.filter(lid => !group || learners[lid]?.metadata?.tags?.includes(group)) || [];
-      performanceData.labels.push(courses[id].name);
-      performanceData.datasets[0].data.push(enrolled.length > 0 ? (completions.length / enrolled.length * 100).toFixed(1) : 0);
-      totalCompletions += completions.length;
-      totalEnrollments += enrolled.length;
-
-      enrolled.forEach(lid => {
-        const progress = learners[lid]?.progress?.[id] || { timeSpent: 0 };
-        totalTimeSpent += progress.timeSpent || 0;
-        const enrollmentDate = learners[lid]?.enrollmentDate || now;
-        if (enrollmentDate >= startDate) {
-          const daysSince = Math.floor((now - enrollmentDate) / (24 * 60 * 60 * 1000));
-          if (daysSince < timePoints.length) activityByDay[days - daysSince - 1]++;
         }
       });
-    }
-
-    if (analyticsChartInstance) analyticsChartInstance.destroy();
-    analyticsChartInstance = new Chart(analyticsChart, {
-      type: "bar",
-      data: performanceData,
-      options: {
-        scales: { y: { beginAtZero: true, max: 100 } },
-        plugins: {
-          datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
-        }
-      },
-      plugins: [ChartDataLabels]
     });
-
-    if (heatmapChartInstance) heatmapChartInstance.destroy();
-    heatmapChartInstance = new Chart(heatmapChart, {
-      type: "line",
-      data: {
-        labels: timePoints,
-        datasets: [{ label: "Activity", data: activityByDay, borderColor: "#10b981", fill: false }]
-      },
-      options: {
-        scales: { y: { beginAtZero: true } },
-        plugins: { tooltip: { mode: "index", intersect: false } }
-      }
-    });
-
-    analyticsDetails.innerHTML = `
-      <p>Total Enrollments: ${totalEnrollments}</p>
-      <p>Total Completions: ${totalCompletions}</p>
-      <p>Average Completion Rate: ${totalEnrollments > 0 ? (totalCompletions / totalEnrollments * 100).toFixed(1) : 0}%</p>
-      <p>Total Time Spent: ${(totalTimeSpent / 3600).toFixed(1)} hours</p>
-    `;
-  }
-
-  timeRange.addEventListener("change", renderAnalytics);
-  courseFilter.addEventListener("change", renderAnalytics);
-  groupFilterAnalytics.addEventListener("change", renderAnalytics);
-
-  // Export analytics to PDF
-  exportAnalytics.addEventListener("click", () => {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("Analytics Report", 20, 20);
-    doc.setFontSize(12);
-    doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 30);
-    doc.text(`Provider: ${user.fullName || user.email}`, 20, 40);
-    doc.text(analyticsDetails.textContent, 20, 50);
-    doc.save("analytics_report.pdf");
-    logAudit("Exported analytics to PDF");
-  });
-
-  // Load helpdesk tickets
-  function loadHelpdesk() {
-    showSpinner();
-    onValue(ref(db, "tickets"), snap => {
-      tickets = snap.val() || {};
-      renderTickets();
-      hideSpinner();
-    });
-  }
-
-  function renderTickets() {
-    ticketList.innerHTML = "";
-    for (const id in tickets) {
-      const t = tickets[id];
-      if (t.providerId !== auth.currentUser.uid) continue;
-      const ticketItem = document.createElement("div");
-      ticketItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-      ticketItem.innerHTML = `
-        <div class="flex justify-between items-center">
-          <div>
-            <p class="font-semibold">${sanitizeInput(t.subject)}</p>
-            <p class="text-sm text-gray-600">From: ${sanitizeInput(learners[t.learnerId]?.fullName || learners[t.learnerId]?.email || "Unknown")}</p>
-            <p class="text-sm text-gray-600">Status: ${t.status} | Created: ${new Date(t.createdAt).toLocaleDateString()}</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="viewTicket('${id}')" class="text-blue-600 hover:underline" aria-label="View ticket ${sanitizeInput(t.subject)}" data-tooltip="View ticket">View</button>
-            <button onclick="resolveTicket('${id}')" class="text-green-600 hover:underline" aria-label="Resolve ticket ${sanitizeInput(t.subject)}" data-tooltip="Resolve ticket">Resolve</button>
-          </div>
-        </div>
-      `;
-      ticketList.appendChild(ticketItem);
-    }
-  }
-
-  // View ticket
-  window.viewTicket = ticketId => {
-    const t = tickets[ticketId];
-    const modal = document.createElement("div");
-    modal.className = "modal";
-    modal.style.display = "block";
-    modal.innerHTML = `
-      <div class="modal-content">
-        <h3 class="text-lg font-semibold mb-4">Ticket: ${sanitizeInput(t.subject)}</h3>
-        <p class="text-sm text-gray-600">From: ${sanitizeInput(learners[t.learnerId]?.fullName || learners[t.learnerId]?.email || "Unknown")}</p>
-        <p class="text-sm text-gray-600">Status: ${t.status}</p>
-        <p class="text-sm text-gray-600 mb-2">Created: ${new Date(t.createdAt).toLocaleString()}</p>
-        <p class="text-sm mb-4">${sanitizeInput(t.description)}</p>
-        <form id="ticket-response-form-${ticketId}" class="mb-4">
-          <textarea id="ticket-response-${ticketId}" placeholder="Add response..." class="border p-2 rounded w-full mb-2" aria-label="Add ticket response" required></textarea>
-          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Send response">Send</button>
-        </form>
-        <button class="bg-gray-600 text-white px-4 py-2 rounded-3xl" onclick="this.parentElement.parentElement.remove()" data-tooltip="Close ticket">Close</button>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    document.getElementById(`ticket-response-form-${ticketId}`).addEventListener("submit", async e => {
-      e.preventDefault();
-      const response = sanitizeInput(document.getElementById(`ticket-response-${ticketId}`).value.trim());
-      if (!response) {
-        alert("Please enter a response.");
-        return;
-      }
-      showSpinner();
-      try {
-        await runTransaction(ref(db, `tickets/${ticketId}`), ticket => {
-          ticket = ticket || { responses: [] };
-          ticket.responses = ticket.responses || [];
-          ticket.responses.push({ content: response, authorId: auth.currentUser.uid, timestamp: Date.now() });
-          return ticket;
-        });
-        logAudit(`Responded to ticket ${t.subject}`);
-        alert("Response sent successfully!");
-        modal.remove();
-      } catch (err) {
-        console.error("Error responding to ticket:", err);
-        alert("Failed to send response.");
-      }
-      hideSpinner();
-    });
-  };
-
-  // Resolve ticket
-  window.resolveTicket = async ticketId => {
-    if (!confirm("Are you sure you want to resolve this ticket?")) return;
-    showSpinner();
-    try {
-      await update(ref(db, `tickets/${ticketId}`), { status: "Resolved" });
-      logAudit(`Resolved ticket ${tickets[ticketId].subject}`);
-      alert("Ticket resolved successfully!");
-    } catch (err) {
-      console.error("Error resolving ticket:", err);
-      alert("Failed to resolve ticket.");
-    }
-    hideSpinner();
-  };
-
-  // Load video monitoring
-  function loadVideoMonitoring() {
-    showSpinner();
-    onValue(ref(db, "users"), snap => {
-      learners = snap.val() || {};
-      renderVideoFeeds();
-      hideSpinner();
-    });
-  }
-
-  function renderVideoFeeds(filter = "", courseFilter = "") {
-    videoFeedList.innerHTML = "";
-    for (const id in learners) {
-      const l = learners[id];
-      if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
-      if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase())) continue;
-      if (courseFilter && !Object.keys(courses).some(cid => courses[cid].enrolled?.includes(id) && cid === courseFilter)) continue;
-      const videoItem = document.createElement("div");
-      videoItem.className = "video-feed";
-      videoItem.innerHTML = `
-        <div class="video-label">${sanitizeInput(l.fullName || l.email)}</div>
-        <video id="video-${id}" autoplay muted></video>
-      `;
-      videoFeedList.appendChild(videoItem);
-      // Placeholder for video feed (not implemented in this version)
-    }
-  }
-
-  // Search video feeds
-  const searchVideoFeeds = debounce((filter, course) => renderVideoFeeds(sanitizeInput(filter), course), 300);
-  videoSearch.addEventListener("input", () => searchVideoFeeds(videoSearch.value, videoCourseFilter.value));
-  videoCourseFilter.addEventListener("change", () => searchVideoFeeds(videoSearch.value, videoCourseFilter.value));
-
-  // Populate live course dropdown
-  function populateLiveCourseDropdown() {
-    liveCourse.innerHTML = '<option value="">Select Course</option>';
-    for (const id in courses) {
-      if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
-        const option = document.createElement("option");
-        option.value = id;
-        option.textContent = sanitizeInput(courses[id].name);
-        liveCourse.appendChild(option);
-      }
-    }
-  }
-
-  // Initialize PeerJS for WebRTC
-  function initializePeer() {
-    if (peer) peer.destroy();
-    peer = new Peer(auth.currentUser.uid, {
-      host: "peerjs-server-0.herokuapp.com",
-      secure: true,
-      port: 443
-    });
-
-    peer.on("open", id => {
-      console.log("PeerJS connection established with ID:", id);
-    });
-
-    peer.on("error", err => {
-      console.error("PeerJS error:", err);
-      alert("Failed to initialize live session: " + err.message);
-    });
-
-    peer.on("call", call => {
-      if (!liveSessionId) return; // Only accept calls during an active session
-      call.answer(liveStream);
-      call.on("stream", remoteStream => {
-        const learnerId = call.peer;
-        if (!learners[learnerId] || !courses[liveCourse.value]?.enrolled?.includes(learnerId)) return;
-        addLearnerVideo(learnerId, remoteStream);
-      });
-      call.on("close", () => {
-        removeLearnerVideo(call.peer);
-      });
-      liveConnections.push(call);
-    });
-  }
-
-  // Start live session
-  liveSessionForm.addEventListener("submit", async e => {
-    e.preventDefault();
-    const courseId = liveCourse.value;
-    const title = sanitizeInput(sessionTitle.value.trim());
-    if (!courseId || !title) {
-      alert("Please select a course and enter a session title.");
-      return;
-    }
-    showSpinner();
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      liveStream = stream;
-      providerVideo.srcObject = stream;
-      initializePeer();
-
-      const sessionRef = await push(ref(db, "liveSessions"), {
-        providerId: auth.currentUser.uid,
-        courseId,
-        title,
-        status: "active",
-        createdAt: Date.now()
-      });
-      liveSessionId = sessionRef.key;
-
-      startLiveSession.disabled = true;
-      stopLiveSession.classList.remove("hidden");
-
-      const learnerIds = courses[courseId]?.enrolled || [];
-      for (const learnerId of learnerIds) {
-        await push(ref(db, `notifications/${learnerId}`), {
-          message: `Live session "${title}" started for ${courses[courseId].name}. Join now!`,
-          timestamp: Date.now(),
-          type: "live_session",
-          sessionId: liveSessionId
-        });
-      }
-
-      logAudit(`Started live session ${title} for course ${courses[courseId].name}`);
-      alert("Live session started successfully!");
-    } catch (err) {
-      console.error("Error starting live session:", err);
-      alert("Failed to start live session. Please ensure camera and microphone access is granted.");
-      if (liveStream) {
-        liveStream.getTracks().forEach(track => track.stop());
-      }
-      liveStream = null;
-      providerVideo.srcObject = null;
-    }
-    hideSpinner();
-  });
-
-  // Stop live session
-  stopLiveSession.addEventListener("click", async () => {
-    if (!confirm("Are you sure you want to stop the live session?")) return;
-    showSpinner();
-    try {
-      if (liveStream) {
-        liveStream.getTracks().forEach(track => track.stop());
-        liveStream = null;
-        providerVideo.srcObject = null;
-      }
-      liveConnections.forEach(call => call.close());
-      liveConnections = [];
-      liveLearnersList.innerHTML = "";
-      if (peer) {
-        peer.destroy();
-        peer = null;
-      }
-      if (liveSessionId) {
-        await update(ref(db, `liveSessions/${liveSessionId}`), { status: "ended" });
-        logAudit(`Ended live session ${sessionTitle.value || "Untitled"}`);
-      }
-      liveSessionId = null;
-      startLiveSession.disabled = false;
-      stopLiveSession.classList.add("hidden");
-      liveSessionForm.reset();
-      alert("Live session stopped successfully!");
-    } catch (err) {
-      console.error("Error stopping live session:", err);
-      alert("Failed to stop live session.");
-    }
-    hideSpinner();
-  });
-
-  // Add learner video feed
-  function addLearnerVideo(learnerId, stream) {
-    const videoItem = document.createElement("div");
-    videoItem.className = "video-feed";
-    videoItem.id = `live-video-${learnerId}`;
-    videoItem.innerHTML = `
-      <div class="video-label">${sanitizeInput(learners[learnerId]?.fullName || learners[learnerId]?.email || "Unknown")}</div>
-      <video autoplay></video>
-    `;
-    liveLearnersList.appendChild(videoItem);
-    videoItem.querySelector("video").srcObject = stream;
-  }
-
-  // Remove learner video feed
-  function removeLearnerVideo(learnerId) {
-    const videoItem = document.getElementById(`live-video-${learnerId}`);
-    if (videoItem) videoItem.remove();
-  }
-
-  // Log audit events
-  function logAudit(message) {
-    push(ref(db, `auditLogs/${auth.currentUser.uid}`), {
-      message: sanitizeInput(message),
-      timestamp: Date.now(),
-      userId: auth.currentUser.uid
-    });
-  }
-
-  // Auth state listener
-  onAuthStateChanged(auth, u => {
-    if (!u) {
-      window.location.href = "login.html";
-      return;
-    }
-    user = u;
-    loadOverview();
-    loadLearners();
-    loadCourses();
-    loadContent();
-    loadAssignments();
-    loadForums();
-    loadQuizzes();
-    loadProgress();
-    loadAnalytics();
-    loadHelpdesk();
-    loadVideoMonitoring();
-  });
-
-  // Sign out
-  document.getElementById("signout-btn").addEventListener("click", async () => {
-    try {
-      await signOut(auth);
-      logAudit("Signed out");
-      window.location.href = "login.html";
-    } catch (err) {
-      console.error("Error signing out:", err);
-      alert("Failed to sign out.");
-    }
-  });
-</script>
+  </script>
 </body>
 </html>
