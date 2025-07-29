@@ -846,30 +846,31 @@
         });
       });
     }
+//load learners
+  let assignments = {}; // Define globally at the top of the script, alongside `learners` and `courses`
 
-    // Load learners
-    function loadLearners() {
-      showSpinner();
-      onValue(ref(db, "users"), snap => {
-        learners = snap.val() || {};
-        onValue(ref(db, "assignments"), snap => {
-          const assignments = snap.val() || {};
-          onValue(ref(db, "courses"), snap => {
-            courses = snap.val() || {};
-            renderLearners();
-            populateGroupFilter();
-            populateCourseFilter();
-            populateLearnerCourseDropdown();
-            populateContentCourseDropdown();
-            populateAssignmentCourseDropdown();
-            populateForumCourseDropdown();
-            populateQuizCourseDropdown();
-            populateLiveCourseDropdown();
-            hideSpinner();
-          });
-        });
+function loadLearners() {
+  showSpinner();
+  onValue(ref(db, "users"), snap => {
+    learners = snap.val() || {};
+    onValue(ref(db, "assignments"), snap => {
+      assignments = snap.val() || {}; // Update global `assignments`
+      onValue(ref(db, "courses"), snap => {
+        courses = snap.val() || {};
+        renderLearners();
+        populateGroupFilter();
+        populateCourseFilter();
+        populateLearnerCourseDropdown();
+        populateContentCourseDropdown();
+        populateAssignmentCourseDropdown();
+        populateForumCourseDropdown();
+        populateQuizCourseDropdown();
+        populateLiveCourseDropdown();
+        hideSpinner();
       });
-    }
+    });
+  });
+}
 
   function renderLearners(filter = "", group = "") {
   learnerList.innerHTML = "";
