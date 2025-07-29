@@ -6,54 +6,86 @@
   <title>CETA Learner Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <style>
-    .sidebar {
-      transition: transform 0.3s ease, width 0.3s ease;
-      transform: translateX(0);
+    /* Root variables for consistent theming */
+    :root {
+      --primary: #1e40af; /* Blue for buttons and accents */
+      --secondary: #10b981; /* Green for success actions */
+      --background: #f3f4f6; /* Light gray background */
+      --card-bg: #ffffff; /* White for cards */
+      --text-primary: #1f2937; /* Dark gray for text */
+      --text-secondary: #6b7280; /* Lighter gray for secondary text */
+      --dark-mode-bg: #1a1a1a; /* Dark background for dark mode */
+      --dark-mode-text: #e5e5e5; /* Light text for dark mode */
     }
+
+    /* Base styles */
+    body {
+      background: var(--background);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(to bottom, #111827, #1f2937);
+      color: white;
+      min-height: 100vh;
+      padding: 1.5rem;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, width 0.3s ease;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 50;
+    }
+
     .sidebar-hidden {
       transform: translateX(-100%);
       width: 0;
     }
+
+    .sidebar-open {
+      transform: translateX(0);
+    }
+
+    .sidebar .nav-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      transition: background-color 0.2s ease;
+    }
+
+    .sidebar .nav-button:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar .nav-button.active {
+      background: var(--primary);
+    }
+
+    /* Main content */
     .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 2rem;
       transition: margin-left 0.3s ease;
+      min-height: 100vh;
     }
-    .dark-mode {
-      background: #1f2937;
-      color: #f3f4f6;
-    }
-    .dark-mode .bg-white {
-      background: #374151;
-    }
-    .dark-mode .bg-gray-50 {
-      background: #4b5563;
-    }
-    .dark-mode .text-gray-600 {
-      color: #d1d5db;
-    }
-    .tooltip {
-      position: relative;
-    }
-    .tooltip:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1f2937;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      white-space: nowrap;
-      z-index: 10;
-    }
+
     @media (max-width: 768px) {
       .sidebar {
-        position: fixed;
-        z-index: 50;
-        width: 256px;
+        width: 260px;
         transform: translateX(-100%);
       }
       .sidebar-open {
@@ -63,14 +95,154 @@
         margin-left: 0;
       }
     }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Dark mode */
+    .dark-mode {
+      background: var(--dark-mode-bg) !important;
+      color: var(--dark-mode-text) !important;
+    }
+
+    .dark-mode .card {
+      background: #2d3748 !important;
+    }
+
+    .dark-mode .text-gray-600 {
+      color: var(--dark-mode-text) !important;
+    }
+
+    .dark-mode .bg-gray-50 {
+      background: #4b5563 !important;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: relative;
+    }
+
+    .tooltip:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      z-index: 10;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      margin: 0 auto;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 600px;
+      border-radius: 0.5rem;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .dark-mode .modal-content {
+      background: #2d3748 !important;
+      color: var(--dark-mode-text) !important;
+    }
+
+    /* Buttons */
+    button:not(.nav-button) {
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    button:hover:not(.nav-button) {
+      transform: translateY(-1px);
+    }
+
+    /* Form elements */
+    input, select, textarea {
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2);
+    }
+
+    /* Loading spinner */
+    #loading-spinner {
+      z-index: 200;
+    }
+
+    /* Ensure charts fit */
+    canvas {
+      max-width: 100%;
+      height: auto !important;
+    }
+
+    /* Scrollable sections */
+    .section {
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .section::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .section::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    .section::-webkit-scrollbar-track {
+      background: #e5e7eb;
+    }
+
+    /* Notification banner */
+    .notification-banner {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
   </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans min-h-screen transition-colors duration-300">
-  <div class="flex">
+<body>
+  <div class="flex min-h-screen">
     <!-- Sidebar -->
-    <div id="sidebar" class="sidebar bg-gradient-to-b from-gray-800 to-gray-900 text-white w-64 min-h-screen p-4 shadow-lg">
+    <div id="sidebar" class="sidebar">
       <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold flex items-center gap-2">
+        <h1 class="text-xl font-bold flex items-center gap-2">
           <i class="fas fa-graduation-cap"></i> CETA Learner
         </h1>
         <button id="toggle-sidebar" class="md:hidden text-white focus:outline-none" aria-label="Toggle sidebar">
@@ -81,25 +253,28 @@
       </div>
       <nav>
         <ul class="space-y-2">
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="overview" data-tooltip="Dashboard Overview"><i class="fas fa-tachometer-alt"></i> Overview</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="courses" data-tooltip="View Programs"><i class="fas fa-book"></i> My Programs</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="assessments" data-tooltip="View Assessments"><i class="fas fa-tasks"></i> Assessments</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="certifications" data-tooltip="View Certificates"><i class="fas fa-certificate"></i> Certificates</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="notices" data-tooltip="Notice Board"><i class="fas fa-bell"></i> Notices</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="helpdesk" data-tooltip="Submit Helpdesk Ticket"><i class="fas fa-headset"></i> Helpdesk</button></li>
+          <li><button class="nav-button w-full text-left active" data-section="overview" data-tooltip="Dashboard Overview"><i class="fas fa-tachometer-alt"></i> Overview</button></li>
+          <li><button class="nav-button w-full text-left" data-section="courses" data-tooltip="View Programs"><i class="fas fa-book"></i> My Programs</button></li>
+          <li><button class="nav-button w-full text-left" data-section="content" data-tooltip="Course Content"><i class="fas fa-file-alt"></i> Course Content</button></li>
+          <li><button class="nav-button w-full text-left" data-section="assessments" data-tooltip="View Assessments"><i class="fas fa-tasks"></i> Assessments</button></li>
+          <li><button class="nav-button w-full text-left" data-section="forums" data-tooltip="Course Forums"><i class="fas fa-comments"></i> Forums</button></li>
+          <li><button class="nav-button w-full text-left" data-section="quizzes" data-tooltip="Take Quizzes"><i class="fas fa-question-circle"></i> Quizzes</button></li>
+          <li><button class="nav-button w-full text-left" data-section="certifications" data-tooltip="View Certificates"><i class="fas fa-certificate"></i> Certificates</button></li>
+          <li><button class="nav-button w-full text-left" data-section="notices" data-tooltip="Notice Board"><i class="fas fa-bell"></i> Notices</button></li>
+          <li><button class="nav-button w-full text-left" data-section="helpdesk" data-tooltip="Submit Helpdesk Ticket"><i class="fas fa-headset"></i> Helpdesk</button></li>
         </ul>
       </nav>
       <div class="mt-auto">
-        <button id="toggle-dark-mode" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded mb-2" aria-label="Toggle dark mode">Toggle Dark Mode</button>
-        <button id="signout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" aria-label="Sign out">Sign Out</button>
+        <button id="toggle-dark-mode" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded mb-2" aria-label="Toggle dark mode" data-tooltip="Toggle Dark Mode">Toggle Dark Mode</button>
+        <button id="signout-btn" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" aria-label="Sign out" data-tooltip="Sign Out">Sign Out</button>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="main-content flex-1 p-6 md:ml-64">
+    <div class="main-content">
       <!-- Notifications -->
-      <div id="notifications" class="mb-4 hidden">
-        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded shadow">
+      <div id="notifications" class="notification-banner mb-6 hidden">
+        <div class="card bg-blue-100 border-l-4 border-blue-500 text-blue-700">
           <h3 class="text-lg font-semibold">Notifications</h3>
           <ul id="notification-list" class="space-y-2"></ul>
         </div>
@@ -107,26 +282,26 @@
 
       <!-- Overview Section -->
       <div id="overview" class="section">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h2>
-        <div class="grid gap-6 md:grid-cols-3">
-          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h2>
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div class="card">
             <h3 class="text-lg font-semibold">Enrolled Programs</h3>
-            <p id="total-courses" class="text-4xl font-bold text-indigo-600">0</p>
+            <p id="total-courses" class="text-3xl font-bold text-blue-600">0</p>
           </div>
-          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-            <h3 class="text-lg font-semibold">Progress</h3>
-            <p id="learner-progress" class="text-4xl font-bold text-indigo-600">0%</p>
+          <div class="card">
+            <h3 class="text-lg font-semibold">Overall Progress</h3>
+            <p id="learner-progress" class="text-3xl font-bold text-blue-600">0%</p>
           </div>
-          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+          <div class="card">
             <h3 class="text-lg font-semibold">Certificates Earned</h3>
-            <p id="total-certificates" class="text-4xl font-bold text-indigo-600">0</p>
+            <p id="total-certificates" class="text-3xl font-bold text-blue-600">0</p>
           </div>
         </div>
-        <div class="mt-6 bg-white p-6 rounded-lg shadow-lg">
+        <div class="mt-6 card">
           <h3 class="text-lg font-semibold mb-2">Course Progress</h3>
-          <canvas id="progress-chart" class="w-full h-64"></canvas>
+          <canvas id="progress-chart"></canvas>
         </div>
-        <div class="mt-6 bg-white p-6 rounded-lg shadow-lg">
+        <div class="mt-6 card">
           <h3 class="text-lg font-semibold mb-2">Recent Notices</h3>
           <div id="recent-notices" class="space-y-4"></div>
         </div>
@@ -134,27 +309,72 @@
 
       <!-- My Programs Section -->
       <div id="courses" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-book"></i> My Programs</h2>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-book"></i> My Programs</h2>
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">Enrolled Programs</h3>
           <input type="text" id="courseSearch" placeholder="Search programs..." class="border p-2 rounded w-full mb-4" aria-label="Search programs by name or tag" />
           <div id="courseList" class="space-y-4"></div>
         </div>
       </div>
 
+      <!-- Course Content Section -->
+      <div id="content" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-file-alt"></i> Course Content</h2>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Course Content</h3>
+          <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+            <input type="text" id="contentSearch" placeholder="Search content..." class="border p-2 rounded w-full md:w-1/2" aria-label="Search content by title" />
+            <select id="contentCourseFilter" class="border p-2 rounded w-full md:w-auto" aria-label="Filter by course">
+              <option value="">All Courses</option>
+            </select>
+          </div>
+          <div id="contentList" class="space-y-4"></div>
+        </div>
+      </div>
+
       <!-- Assessments Section -->
       <div id="assessments" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Assessments</h2>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-tasks"></i> Assessments</h2>
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">My Assessments</h3>
+          <input type="text" id="assessmentSearch" placeholder="Search assessments..." class="border p-2 rounded w-full mb-4" aria-label="Search assessments by title" />
+          <select id="assessmentCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
           <div id="assessmentList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Forums Section -->
+      <div id="forums" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-comments"></i> Course Forums</h2>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Forum Threads</h3>
+          <input type="text" id="forumSearch" placeholder="Search threads..." class="border p-2 rounded w-full mb-4" aria-label="Search threads by title" />
+          <select id="forumCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
+          <div id="forumList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Quizzes Section -->
+      <div id="quizzes" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-question-circle"></i> Quizzes</h2>
+        <div class="card">
+          <h3 class="text-lg font-semibold mb-2">Available Quizzes</h3>
+          <input type="text" id="quizSearch" placeholder="Search quizzes..." class="border p-2 rounded w-full mb-4" aria-label="Search quizzes by title" />
+          <select id="quizCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
+          <div id="quizList" class="space-y-4"></div>
         </div>
       </div>
 
       <!-- Certificates Section -->
       <div id="certifications" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-certificate"></i> My Certificates</h2>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-certificate"></i> My Certificates</h2>
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">Certificates</h3>
           <div id="certificationList" class="space-y-4"></div>
         </div>
@@ -162,8 +382,8 @@
 
       <!-- Notices Section -->
       <div id="notices" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-bell"></i> Notice Board</h2>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-bell"></i> Notice Board</h2>
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">Notices</h3>
           <input type="text" id="noticeSearch" placeholder="Search notices..." class="border p-2 rounded w-full mb-4" aria-label="Search notices by title" />
           <div id="noticeList" class="space-y-4" aria-live="polite"></div>
@@ -172,31 +392,84 @@
 
       <!-- Helpdesk Section -->
       <div id="helpdesk" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-headset"></i> Helpdesk</h2>
-        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-headset"></i> Helpdesk</h2>
+        <div class="mb-6 card">
           <h3 class="text-lg font-semibold mb-2">Submit Ticket</h3>
-          <div class="flex flex-wrap gap-4 mb-4">
-            <input type="text" id="ticketIssue" placeholder="Issue Description" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter issue description" />
-            <select id="ticketPriority" class="border p-2 rounded min-w-[150px]" aria-label="Select priority">
+          <form id="ticket-form">
+            <input type="text" id="ticketIssue" placeholder="Issue Description" class="border p-2 rounded w-full mb-2" aria-label="Enter issue description" required />
+            <select id="ticketPriority" class="border p-2 rounded w-full mb-2" aria-label="Select priority" required>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </select>
-            <button onclick="submitTicket()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Submit ticket">Submit Ticket</button>
-          </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" data-tooltip="Submit ticket">Submit Ticket</button>
+          </form>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">My Tickets</h3>
           <div id="ticketList" class="space-y-4"></div>
         </div>
       </div>
 
+      <!-- Course Content Modal -->
+      <div id="content-view-modal" class="modal">
+        <div class="modal-content">
+          <h3 class="text-lg font-semibold mb-4">Course Content</h3>
+          <div id="content-view" class="space-y-4"></div>
+          <button type="button" id="close-content-view" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded mt-4" data-tooltip="Close">Close</button>
+        </div>
+      </div>
+
+      <!-- Assessment Submission Modal -->
+      <div id="assessment-submit-modal" class="modal">
+        <div class="modal-content">
+          <h3 class="text-lg font-semibold mb-4">Submit Assessment</h3>
+          <form id="assessment-submit-form">
+            <p id="assessment-title" class="font-semibold mb-2"></p>
+            <input type="file" id="assessmentFile" accept="application/pdf,.txt" class="border p-2 rounded w-full mb-2" aria-label="Upload assessment file" required />
+            <div class="flex gap-2">
+              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Submit assessment">Submit</button>
+              <button type="button" id="close-assessment-submit" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" data-tooltip="Cancel">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Forum View Modal -->
+      <div id="forum-view-modal" class="modal">
+        <div class="modal-content">
+          <h3 class="text-lg font-semibold mb-4">Forum</h3>
+          <div id="forum-posts" class="space-y-2 mb-4"></div>
+          <form id="forum-post-form">
+            <textarea id="new-post" placeholder="Add a new post..." class="border p-2 rounded w-full mb-2" aria-label="Enter new post content" required></textarea>
+            <div class="flex gap-2">
+              <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" data-tooltip="Post reply">Post</button>
+              <button type="button" id="close-forum-view" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" data-tooltip="Close">Close</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Quiz Taking Modal -->
+      <div id="quiz-take-modal" class="modal">
+        <div class="modal-content">
+          <h3 class="text-lg font-semibold mb-4">Take Quiz</h3>
+          <form id="quiz-take-form">
+            <div id="quiz-questions" class="space-y-4"></div>
+            <div class="flex gap-2">
+              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Submit quiz">Submit</button>
+              <button type="button" id="close-quiz-take" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" data-tooltip="Cancel">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-indigo-600"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
       </div>
 
       <noscript>
-        <p class="text-red-600 text-center">JavaScript is required to use this dashboard.</p>
+        <p class="text-red-500 text-center">JavaScript is required to use this dashboard.</p>
       </noscript>
     </div>
   </div>
@@ -204,7 +477,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, onValue, push, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getDatabase, ref, onValue, push, get, update, runTransaction } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 
     // Firebase configuration
     const firebaseConfig = {
@@ -220,15 +494,28 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const auth = getAuth(app);
+    const storage = getStorage(app);
 
     // DOM elements
     const courseList = document.getElementById("courseList");
     const courseSearch = document.getElementById("courseSearch");
+    const contentList = document.getElementById("contentList");
+    const contentSearch = document.getElementById("contentSearch");
+    const contentCourseFilter = document.getElementById("contentCourseFilter");
     const assessmentList = document.getElementById("assessmentList");
+    const assessmentSearch = document.getElementById("assessmentSearch");
+    const assessmentCourseFilter = document.getElementById("assessmentCourseFilter");
+    const forumList = document.getElementById("forumList");
+    const forumSearch = document.getElementById("forumSearch");
+    const forumCourseFilter = document.getElementById("forumCourseFilter");
+    const quizList = document.getElementById("quizList");
+    const quizSearch = document.getElementById("quizSearch");
+    const quizCourseFilter = document.getElementById("quizCourseFilter");
     const certificationList = document.getElementById("certificationList");
     const noticeList = document.getElementById("noticeList");
     const noticeSearch = document.getElementById("noticeSearch");
     const ticketList = document.getElementById("ticketList");
+    const ticketForm = document.getElementById("ticket-form");
     const totalCourses = document.getElementById("total-courses");
     const learnerProgress = document.getElementById("learner-progress");
     const totalCertificates = document.getElementById("total-certificates");
@@ -240,13 +527,66 @@
     const toggleDarkMode = document.getElementById("toggle-dark-mode");
     const notifications = document.getElementById("notifications");
     const notificationList = document.getElementById("notification-list");
+    const contentViewModal = document.getElementById("content-view-modal");
+    const contentView = document.getElementById("content-view");
+    const closeContentView = document.getElementById("close-content-view");
+    const assessmentSubmitModal = document.getElementById("assessment-submit-modal");
+    const assessmentSubmitForm = document.getElementById("assessment-submit-form");
+    const assessmentTitle = document.getElementById("assessment-title");
+    const assessmentFile = document.getElementById("assessmentFile");
+    const closeAssessmentSubmit = document.getElementById("close-assessment-submit");
+    const forumViewModal = document.getElementById("forum-view-modal");
+    const forumPosts = document.getElementById("forum-posts");
+    const forumPostForm = document.getElementById("forum-post-form");
+    const newPost = document.getElementById("new-post");
+    const closeForumView = document.getElementById("close-forum-view");
+    const quizTakeModal = document.getElementById("quiz-take-modal");
+    const quizQuestions = document.getElementById("quiz-questions");
+    const quizTakeForm = document.getElementById("quiz-take-form");
+    const closeQuizTake = document.getElementById("close-quiz-take");
 
-    let userData = {}, courses = {}, assessments = {}, certifications = {}, notices = {}, tickets = {};
+    let userData = {}, courses = {}, contents = {}, assignments = {}, forums = {}, quizzes = {}, certifications = {}, notices = {}, tickets = {};
     let currentUserId = null;
+
+    // Sanitize input to prevent XSS
+    function sanitizeInput(input) {
+      const div = document.createElement("div");
+      div.textContent = input;
+      return div.innerHTML;
+    }
 
     // Show/hide loading spinner
     function showSpinner() { loadingSpinner.classList.remove("hidden"); }
     function hideSpinner() { loadingSpinner.classList.add("hidden"); }
+
+    // Initialize UI state
+    function initializeUI() {
+      // Ensure only Overview section is visible
+      document.querySelectorAll(".section").forEach(section => {
+        section.classList.add("hidden");
+      });
+      document.getElementById("overview").classList.remove("hidden");
+
+      // Ensure all modals are hidden
+      [contentViewModal, assessmentSubmitModal, forumViewModal, quizTakeModal].forEach(modal => {
+        modal.style.display = "none";
+      });
+
+      // Set active navigation button
+      document.querySelectorAll(".nav-button").forEach(btn => {
+        btn.classList.remove("active");
+      });
+      document.querySelector('.nav-button[data-section="overview"]').classList.add("active");
+
+      // Initialize sidebar state
+      if (window.innerWidth < 768) {
+        sidebar.classList.add("sidebar-hidden");
+        sidebar.classList.remove("sidebar-open");
+      } else {
+        sidebar.classList.remove("sidebar-hidden");
+        sidebar.classList.add("sidebar-open");
+      }
+    }
 
     // Sidebar toggle
     toggleSidebar.addEventListener("click", () => {
@@ -270,7 +610,16 @@
       btn.addEventListener("click", () => {
         document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
         document.getElementById(btn.dataset.section).classList.remove("hidden");
-        if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
+        document.querySelectorAll(".nav-button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        if (window.innerWidth < 768) {
+          sidebar.classList.remove("sidebar-open");
+          sidebar.classList.add("sidebar-hidden");
+        }
+        // Ensure all modals are closed when switching sections
+        [contentViewModal, assessmentSubmitModal, forumViewModal, quizTakeModal].forEach(modal => {
+          modal.style.display = "none";
+        });
         logAudit(`Viewed ${btn.dataset.section} section`);
       });
     });
@@ -290,7 +639,8 @@
 
     // Load notifications
     function loadNotifications() {
-      onValue(ref(db, "audit_logs"), snap => {
+      showSpinner();
+      onValue(ref(db, `auditLogs/${currentUserId}`), snap => {
         notificationList.innerHTML = "";
         const data = snap.val() || {};
         const recentLogs = Object.entries(data)
@@ -302,10 +652,11 @@
         }
         recentLogs.forEach(([_, log]) => {
           const item = document.createElement("li");
-          item.className = "text-sm";
-          item.innerHTML = `<i class="fas fa-bell mr-2"></i> ${log.action} at ${new Date(log.timestamp).toLocaleString()}`;
+          item.className = "text-sm flex items-center gap-2";
+          item.innerHTML = `<i class="fas fa-bell"></i> ${sanitizeInput(log.message)} at ${new Date(log.timestamp).toLocaleString()}`;
           notificationList.appendChild(item);
         });
+        hideSpinner();
       });
     }
 
@@ -314,17 +665,18 @@
       showSpinner();
       const userSnap = await get(ref(db, `users/${currentUserId}`));
       userData = userSnap.val() || {};
-      learnerProgress.textContent = `${userData.progress || 0}%`;
+      const totalProgress = userData.progress ? Object.values(userData.progress).reduce((sum, p) => sum + (p.completed / p.total * 100), 0) / Object.keys(userData.progress).length : 0;
+      learnerProgress.textContent = `${totalProgress.toFixed(1)}%`;
 
       onValue(ref(db, "courses"), snap => {
         courses = snap.val() || {};
-        const enrolled = Object.keys(courses).filter(id => userData.enrolledCourses?.includes(id));
+        const enrolled = Object.keys(courses).filter(id => userData.enrolled?.includes(id));
         totalCourses.textContent = enrolled.length;
 
         // Progress chart
         const progressData = enrolled.map(id => ({
           name: courses[id].name,
-          progress: userData.courseProgress?.[id] || 0
+          progress: userData.progress?.[id]?.completed / userData.progress?.[id]?.total * 100 || 0
         }));
         new Chart(progressChartCanvas, {
           type: "bar",
@@ -333,14 +685,18 @@
             datasets: [{
               label: "Progress (%)",
               data: progressData.map(p => p.progress),
-              backgroundColor: "#2563eb",
+              backgroundColor: "#1e40af",
               borderRadius: 4
             }]
           },
           options: {
             scales: { y: { beginAtZero: true, max: 100 } },
-            plugins: { legend: { display: true } }
-          }
+            plugins: { 
+              legend: { display: true },
+              datalabels: { anchor: "end", align: "top", color: "#1f2937", font: { weight: "bold" } }
+            }
+          },
+          plugins: [ChartDataLabels]
         });
       });
 
@@ -354,7 +710,7 @@
         recentNotices.innerHTML = "";
         const data = snap.val();
         if (!data) {
-          recentNotices.innerHTML = "<p class='text-gray-600'>No recent notices.</p>";
+          recentNotices.innerHTML = "<p class='text-gray-600 dark:text-gray-300'>No recent notices.</p>";
           hideSpinner();
           return;
         }
@@ -363,15 +719,30 @@
           .slice(0, 3);
         recent.forEach(([_, notice]) => {
           const noticeItem = document.createElement("div");
-          noticeItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow";
+          noticeItem.className = "bg-gray-50 dark:bg-gray-600 p-4 rounded-lg shadow hover:shadow-md transition-shadow";
           noticeItem.innerHTML = `
-            <h4 class="text-md font-semibold">${notice.title}</h4>
-            <p class="text-gray-700">${notice.content.substring(0, 100)}${notice.content.length > 100 ? "..." : ""}</p>
-            <p class="text-sm text-gray-500 mt-2">Posted on ${new Date(notice.createdAt).toLocaleDateString()}</p>
+            <h4 class="text-md font-semibold">${sanitizeInput(notice.title)}</h4>
+            <p class="text-gray-700 dark:text-gray-300">${sanitizeInput(notice.content.substring(0, 100))}${notice.content.length > 100 ? "..." : ""}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Posted on ${new Date(notice.createdAt).toLocaleDateString()}</p>
           `;
           recentNotices.appendChild(noticeItem);
         });
         hideSpinner();
+      });
+    }
+
+    // Populate course filters
+    function populateCourseFilters() {
+      [contentCourseFilter, assessmentCourseFilter, forumCourseFilter, quizCourseFilter].forEach(filter => {
+        filter.innerHTML = '<option value="">All Courses</option>';
+        Object.entries(courses)
+          .filter(([id]) => userData.enrolled?.includes(id))
+          .forEach(([id, course]) => {
+            const option = document.createElement("option");
+            option.value = id;
+            option.textContent = sanitizeInput(course.name);
+            filter.appendChild(option);
+          });
       });
     }
 
@@ -381,53 +752,159 @@
       onValue(ref(db, "courses"), snap => {
         courses = snap.val() || {};
         courseList.innerHTML = "";
-        const enrolled = Object.keys(courses).filter(id => userData.enrolledCourses?.includes(id));
+        const enrolled = Object.keys(courses).filter(id => userData.enrolled?.includes(id));
         enrolled.forEach(id => {
           const c = courses[id];
-          if (c.name.toLowerCase().includes(filter.toLowerCase()) || c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) {
-            const courseItem = document.createElement("div");
-            courseItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-            courseItem.innerHTML = `
-              <div>
-                <p class="font-semibold">${c.name}</p>
-                <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"} | Progress: ${userData.courseProgress?.[id] || 0}%</p>
-              </div>
-              <div>
-                <button onclick="viewCourse('${id}')" class="text-blue-600 hover:underline" aria-label="View program ${c.name}" data-tooltip="View program">View</button>
-              </div>
-            `;
-            courseList.appendChild(courseItem);
-          }
+          if (filter && !c.name.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) return;
+          const courseItem = document.createElement("div");
+          courseItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
+          courseItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${sanitizeInput(c.name)}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Progress: ${userData.progress?.[id]?.completed / userData.progress?.[id]?.total * 100 || 0}%</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="viewCourse('${id}')" class="text-blue-600 hover:underline" aria-label="View program ${sanitizeInput(c.name)}" data-tooltip="View program">View</button>
+            </div>
+          `;
+          courseList.appendChild(courseItem);
         });
+        populateCourseFilters();
         hideSpinner();
       });
     }
 
-    // Load assessments
-    function loadAssessments() {
+    // Load course content
+    function loadContent(filter = "", courseFilter = "") {
       showSpinner();
-      onValue(ref(db, "assessments"), snap => {
-        assessments = snap.val() || {};
-        assessmentList.innerHTML = "";
-        for (const id in assessments) {
-          const a = assessments[id];
-          if (userData.enrolledCourses?.includes(a.courseId) && !a.archived) {
-            const assessmentItem = document.createElement("div");
-            assessmentItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-            assessmentItem.innerHTML = `
-              <div>
-                <p class="font-semibold">${a.title}</p>
-                <p class="text-sm text-gray-600">Course: ${courses[a.courseId]?.name || "-"}</p>
-              </div>
-              <div>
-                <button onclick="viewAssessment('${id}')" class="text-blue-600 hover:underline" aria-label="View assessment ${a.title}" data-tooltip="View assessment">View</button>
-              </div>
-            `;
-            assessmentList.appendChild(assessmentItem);
-          }
-        }
+      onValue(ref(db, "contents"), snap => {
+        contents = snap.val() || {};
+        renderContent(filter, courseFilter);
         hideSpinner();
       });
+    }
+
+    function renderContent(filter = "", courseFilter = "") {
+      contentList.innerHTML = "";
+      for (const id in contents) {
+        const c = contents[id];
+        if (!userData.enrolled?.includes(c.courseId)) continue;
+        if (filter && !c.title.toLowerCase().includes(filter.toLowerCase())) continue;
+        if (courseFilter && c.courseId !== courseFilter) continue;
+        const contentItem = document.createElement("div");
+        contentItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
+        contentItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${sanitizeInput(c.title)}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[c.courseId]?.name || "Unknown")} | Type: ${sanitizeInput(c.type)}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Uploaded: ${new Date(c.uploadedAt).toLocaleDateString()}</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="viewContent('${id}')" class="text-blue-600 hover:underline" aria-label="View content ${sanitizeInput(c.title)}" data-tooltip="View content">View</button>
+          </div>
+        `;
+        contentList.appendChild(contentItem);
+      }
+    }
+
+    // Load assessments
+    function loadAssessments(filter = "", courseFilter = "") {
+      showSpinner();
+      onValue(ref(db, "assignments"), snap => {
+        assignments = snap.val() || {};
+        renderAssessments(filter, courseFilter);
+        hideSpinner();
+      });
+    }
+
+    function renderAssessments(filter = "", courseFilter = "") {
+      assessmentList.innerHTML = "";
+      for (const id in assignments) {
+        const a = assignments[id];
+        if (!userData.enrolled?.includes(a.courseId) || a.archived) continue;
+        if (filter && !a.title.toLowerCase().includes(filter.toLowerCase())) continue;
+        if (courseFilter && a.courseId !== courseFilter) continue;
+        const assessmentItem = document.createElement("div");
+        assessmentItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
+        assessmentItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${sanitizeInput(a.title)}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[a.courseId]?.name || "Unknown")}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Due: ${a.dueDate ? new Date(a.dueDate).toLocaleDateString() : "-"} | Status: ${sanitizeInput(a.submissions?.[currentUserId]?.status || "Not Submitted")}</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="submitAssessment('${id}')" class="text-blue-600 hover:underline" aria-label="Submit assessment ${sanitizeInput(a.title)}" data-tooltip="Submit assessment">Submit</button>
+            ${a.submissions?.[currentUserId] ? `<button onclick="viewAssessment('${id}')" class="text-blue-600 hover:underline" aria-label="View assessment ${sanitizeInput(a.title)}" data-tooltip="View submission">View</button>` : ""}
+          </div>
+        `;
+        assessmentList.appendChild(assessmentItem);
+      }
+    }
+
+    // Load forums
+    function loadForums(filter = "", courseFilter = "") {
+      showSpinner();
+      onValue(ref(db, "forums"), snap => {
+        forums = snap.val() || {};
+        renderForums(filter, courseFilter);
+        hideSpinner();
+      });
+    }
+
+    function renderForums(filter = "", courseFilter = "") {
+      forumList.innerHTML = "";
+      for (const id in forums) {
+        const f = forums[id];
+        if (!userData.enrolled?.includes(f.courseId)) continue;
+        if (filter && !f.title.toLowerCase().includes(filter.toLowerCase())) continue;
+        if (courseFilter && f.courseId !== courseFilter) continue;
+        const forumItem = document.createElement("div");
+        forumItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
+        forumItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${sanitizeInput(f.title)}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")} | Posts: ${f.posts?.length || 0}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Created: ${new Date(f.createdAt).toLocaleDateString()}</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="viewForum('${id}')" class="text-blue-600 hover:underline" aria-label="View forum ${sanitizeInput(f.title)}" data-tooltip="View forum">View</button>
+          </div>
+        `;
+        forumList.appendChild(forumItem);
+      }
+    }
+
+    // Load quizzes
+    function loadQuizzes(filter = "", courseFilter = "") {
+      showSpinner();
+      onValue(ref(db, "quizzes"), snap => {
+        quizzes = snap.val() || {};
+        renderQuizzes(filter, courseFilter);
+        hideSpinner();
+      });
+    }
+
+    function renderQuizzes(filter = "", courseFilter = "") {
+      quizList.innerHTML = "";
+      for (const id in quizzes) {
+        const q = quizzes[id];
+        if (!userData.enrolled?.includes(q.courseId)) continue;
+        if (filter && !q.title.toLowerCase().includes(filter.toLowerCase())) continue;
+        if (courseFilter && q.courseId !== courseFilter) continue;
+        const quizItem = document.createElement("div");
+        quizItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
+        quizItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${sanitizeInput(q.title)}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[q.courseId]?.name || "Unknown")} | Questions: ${q.questions?.length || 0}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Created: ${new Date(q.createdAt).toLocaleDateString()}</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="takeQuiz('${id}')" class="text-blue-600 hover:underline" aria-label="Take quiz ${sanitizeInput(q.title)}" data-tooltip="Take quiz">Take</button>
+          </div>
+        `;
+        quizList.appendChild(quizItem);
+      }
     }
 
     // Load certifications
@@ -438,20 +915,19 @@
         certificationList.innerHTML = "";
         for (const id in certifications) {
           const c = certifications[id];
-          if (c.learnerId === currentUserId) {
-            const certItem = document.createElement("div");
-            certItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-            certItem.innerHTML = `
-              <div>
-                <p class="font-semibold">${c.template}</p>
-                <p class="text-sm text-gray-600">Course: ${courses[c.courseId]?.name || "-"} | Issued: ${new Date(c.issuedAt).toLocaleDateString()}</p>
-              </div>
-              <div>
-                <button onclick="viewCertificate('${id}')" class="text-blue-600 hover:underline" aria-label="View certificate" data-tooltip="View certificate">View</button>
-              </div>
-            `;
-            certificationList.appendChild(certItem);
-          }
+          if (c.learnerId !== currentUserId) continue;
+          const certItem = document.createElement("div");
+          certItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
+          certItem.innerHTML = `
+            <div>
+              <p class="font-semibold">${sanitizeInput(courses[c.courseId]?.name || "Certificate")}</p>
+              <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[c.courseId]?.name || "Unknown")} | Issued: ${new Date(c.issuedAt).toLocaleDateString()}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="downloadCertificate('${id}')" class="text-blue-600 hover:underline" aria-label="Download certificate" data-tooltip="Download certificate">Download</button>
+            </div>
+          `;
+          certificationList.appendChild(certItem);
         }
         hideSpinner();
       });
@@ -470,21 +946,20 @@
     function renderNotices(filter = "") {
       noticeList.innerHTML = "";
       const filteredNotices = Object.entries(notices)
-        .filter(([_, notice]) => notice.title.toLowerCase().includes(filter.toLowerCase()))
+        .filter(([_, notice]) => !filter || notice.title.toLowerCase().includes(filter.toLowerCase()))
         .sort((a, b) => b[1].createdAt - a[1].createdAt);
       if (filteredNotices.length === 0) {
-        noticeList.innerHTML = "<p class='text-gray-600'>No notices found.</p>";
+        noticeList.innerHTML = "<p class='text-gray-600 dark:text-gray-300'>No notices found.</p>";
         return;
       }
       filteredNotices.forEach(([id, n]) => {
         const expiry = n.expiryDate ? new Date(n.expiryDate).toLocaleDateString() : "-";
         const noticeItem = document.createElement("div");
-        noticeItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow";
+        noticeItem.className = "card bg-gray-50 dark:bg-gray-600";
         noticeItem.innerHTML = `
-          <h4 class="text-md font-semibold">${n.title}</h4>
-          <p class="text-gray-700">${n.content}</p>
-          <p class="text-sm text-gray-500 mt-2">Posted on ${new Date(n.createdAt).toLocaleDateString()}
-          ${n.expiryDate ? ` | Expires on ${expiry}` : ""}</p>
+          <h4 class="text-md font-semibold">${sanitizeInput(n.title)}</h4>
+          <p class="text-gray-700 dark:text-gray-300">${sanitizeInput(n.content)}</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Posted on ${new Date(n.createdAt).toLocaleDateString()}${n.expiryDate ? ` | Expires on ${expiry}` : ""}</p>
         `;
         noticeList.appendChild(noticeItem);
       });
@@ -493,30 +968,271 @@
     // Load tickets
     function loadTickets() {
       showSpinner();
-      onValue(ref(db, "helpdesk"), snap => {
+      onValue(ref(db, "tickets"), snap => {
         tickets = snap.val() || {};
-        ticketList.innerHTML = "";
-        for (const id in tickets) {
-          const t = tickets[id];
-          if (t.userId === currentUserId) {
-            const ticketItem = document.createElement("div");
-            ticketItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-            ticketItem.innerHTML = `
-              <div>
-                <p class="font-semibold">${t.issue}</p>
-                <p class="text-sm text-gray-600">Status: ${t.status} | Priority: ${t.priority}</p>
-              </div>
-            `;
-            ticketList.appendChild(ticketItem);
-          }
-        }
+        renderTickets();
         hideSpinner();
       });
     }
 
+    function renderTickets() {
+      ticketList.innerHTML = "";
+      for (const id in tickets) {
+        const t = tickets[id];
+        if (t.learnerId !== currentUserId) continue;
+        const ticketItem = document.createElement("div");
+        ticketItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
+        ticketItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${sanitizeInput(t.title)}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Status: ${sanitizeInput(t.status)} | Priority: ${sanitizeInput(t.priority)}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">${sanitizeInput(t.description)}</p>
+            ${t.resolution ? `<p class="text-sm text-gray-600 dark:text-gray-300">Resolution: ${sanitizeInput(t.resolution)}</p>` : ""}
+          </div>
+        `;
+        ticketList.appendChild(ticketItem);
+      }
+    }
+
+    // View course content
+    window.viewCourse = async courseId => {
+      document.getElementById("content").classList.remove("hidden");
+      document.querySelectorAll(".section").forEach(s => { if (s.id !== "content") s.classList.add("hidden"); });
+      document.querySelectorAll(".nav-button").forEach(btn => btn.classList.remove("active"));
+      document.querySelector('.nav-button[data-section="content"]').classList.add("active");
+      contentCourseFilter.value = courseId;
+      contentSearch.value = ""; // Reset search input
+      renderContent("", courseId);
+      logAudit(`Viewed content for course ${courses[courseId].name}`);
+    };
+
+    // View content
+    window.viewContent = async contentId => {
+      const c = contents[contentId];
+      contentView.innerHTML = `
+        <p class="font-semibold">${sanitizeInput(c.title)}</p>
+        <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[c.courseId]?.name || "Unknown")} | Type: ${sanitizeInput(c.type)}</p>
+        ${c.type === "video" ? `<video controls class="w-full mt-2" src="${sanitizeInput(c.url)}"></video>` : 
+         c.type === "pdf" ? `<embed src="${sanitizeInput(c.url)}" type="application/pdf" width="100%" height="400px" class="mt-2" />` :
+         `<pre class="text-sm text-gray-700 dark:text-gray-300 mt-2">${sanitizeInput(c.text)}</pre>`}
+      `;
+      contentViewModal.style.display = "flex";
+      logAudit(`Viewed content ${c.title}`);
+    };
+
+    closeContentView.addEventListener("click", () => {
+      contentViewModal.style.display = "none";
+      contentView.innerHTML = "";
+    });
+
+    // Submit assessment
+    window.submitAssessment = async assessmentId => {
+      assessmentTitle.textContent = sanitizeInput(assignments[assessmentId].title);
+      assessmentSubmitModal.style.display = "flex";
+      assessmentSubmitForm.onsubmit = async e => {
+        e.preventDefault();
+        const file = assessmentFile.files[0];
+        if (!file) {
+          alert("Please select a file to submit.");
+          return;
+        }
+        showSpinner();
+        try {
+          const fileRef = storageRef(storage, `submissions/${currentUserId}/${assessmentId}/${file.name}`);
+          await uploadBytes(fileRef, file);
+          const url = await getDownloadURL(fileRef);
+          await update(ref(db, `assignments/${assessmentId}/submissions/${currentUserId}`), {
+            fileUrl: url,
+            submittedAt: Date.now(),
+            status: "submitted"
+          });
+          logAudit(`Submitted assessment ${assignments[assessmentId].title}`);
+          alert("Assessment submitted successfully!");
+          assessmentSubmitModal.style.display = "none";
+          assessmentSubmitForm.reset();
+          renderAssessments();
+        } catch (err) {
+          console.error("Error submitting assessment:", err);
+          alert("Failed to submit assessment.");
+        }
+        hideSpinner();
+      };
+    };
+
+    closeAssessmentSubmit.addEventListener("click", () => {
+      assessmentSubmitModal.style.display = "none";
+      assessmentSubmitForm.reset();
+    });
+
+    // View assessment submission
+    window.viewAssessment = async assessmentId => {
+      const submission = assignments[assessmentId].submissions?.[currentUserId];
+      alert(`Assessment: ${sanitizeInput(assignments[assessmentId].title)}\nStatus: ${sanitizeInput(submission.status)}\nFile: ${sanitizeInput(submission.fileUrl)}\nFeedback: ${sanitizeInput(submission.feedback || "None")}\nGrade: ${submission.grade || "N/A"}`);
+      logAudit(`Viewed submission for assessment ${assignments[assessmentId].title}`);
+    };
+
+    // View forum
+    window.viewForum = async forumId => {
+      const f = forums[forumId];
+      forumPosts.innerHTML = "";
+      f.posts?.forEach(post => {
+        const postDiv = document.createElement("div");
+        postDiv.className = "border-l-2 border-blue-600 pl-2";
+        postDiv.innerHTML = `
+          <p class="text-sm">${sanitizeInput(post.content)}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">By ${sanitizeInput(userData[post.postedBy]?.fullName || "User")} on ${new Date(post.timestamp).toLocaleString()}</p>
+        `;
+        forumPosts.appendChild(postDiv);
+      });
+      forumViewModal.style.display = "flex";
+      forumPostForm.onsubmit = async e => {
+        e.preventDefault();
+        const content = sanitizeInput(newPost.value.trim());
+        if (!content) {
+          alert("Please enter post content.");
+          return;
+        }
+        showSpinner();
+        try {
+          await runTransaction(ref(db, `forums/${forumId}`), forum => {
+            forum = forum || { posts: [] };
+            forum.posts = forum.posts || [];
+            forum.posts.push({ content, postedBy: currentUserId, timestamp: Date.now() });
+            return forum;
+          });
+          logAudit(`Posted in forum ${f.title}`);
+          forumViewModal.style.display = "none";
+          newPost.value = "";
+          viewForum(forumId);
+        } catch (err) {
+          console.error("Error posting to forum:", err);
+          alert("Failed to post to forum.");
+        }
+        hideSpinner();
+      };
+    };
+
+    closeForumView.addEventListener("click", () => {
+      forumViewModal.style.display = "none";
+      forumPosts.innerHTML = "";
+    });
+
+    // Take quiz
+    window.takeQuiz = async quizId => {
+      const q = quizzes[quizId];
+      quizQuestions.innerHTML = "";
+      q.questions.forEach((question, index) => {
+        const questionDiv = document.createElement("div");
+        questionDiv.innerHTML = `
+          <p class="font-semibold">${sanitizeInput(question.question)}</p>
+          <div class="space-y-2 mt-2">
+            ${question.options.map((option, i) => `
+              <label class="flex items-center gap-2">
+                <input type="radio" name="q${index}" value="${i}" required class="text-blue-600">
+                <span>${sanitizeInput(option)}</span>
+              </label>
+            `).join("")}
+          </div>
+        `;
+        quizQuestions.appendChild(questionDiv);
+      });
+      quizTakeModal.style.display = "flex";
+      quizTakeForm.onsubmit = async e => {
+        e.preventDefault();
+        const answers = Array.from(quizTakeForm.querySelectorAll("input:checked")).map(input => parseInt(input.value));
+        if (answers.length !== q.questions.length) {
+          alert("Please answer all questions.");
+          return;
+        }
+        showSpinner();
+        try {
+          const score = answers.reduce((total, answer, i) => total + (answer === q.questions[i].correct ? 1 : 0), 0);
+          const percentage = (score / q.questions.length * 100).toFixed(1);
+          await push(ref(db, `quizResults`), {
+            learnerId: currentUserId,
+            quizId,
+            score,
+            percentage,
+            submittedAt: Date.now()
+          });
+          logAudit(`Submitted quiz ${q.title} with score ${percentage}%`);
+          alert(`Quiz submitted! Score: ${score}/${q.questions.length} (${percentage}%)`);
+          quizTakeModal.style.display = "none";
+          quizTakeForm.reset();
+        } catch (err) {
+          console.error("Error submitting quiz:", err);
+          alert("Failed to submit quiz.");
+        }
+        hideSpinner();
+      };
+    };
+
+    closeQuizTake.addEventListener("click", () => {
+      quizTakeModal.style.display = "none";
+      quizQuestions.innerHTML = "";
+    });
+
+    // Download certificate
+    window.downloadCertificate = async certId => {
+      const cert = certifications[certId];
+      const course = courses[cert.courseId];
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(20);
+      doc.text("Certificate of Completion", 20, 20);
+      doc.setFontSize(14);
+      doc.text(`Awarded to: ${sanitizeInput(userData.fullName || userData.email)}`, 20, 40);
+      doc.text(`Course: ${sanitizeInput(course.name)}`, 20, 50);
+      doc.text(`Issued on: ${new Date(cert.issuedAt).toLocaleDateString()}`, 20, 60);
+      doc.save(`certificate_${userData.email}_${course.name}.pdf`);
+      logAudit(`Downloaded certificate for course ${course.name}`);
+    };
+
+    // Submit helpdesk ticket
+    ticketForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const issue = sanitizeInput(document.getElementById("ticketIssue").value.trim());
+      const priority = document.getElementById("ticketPriority").value;
+      if (!issue) {
+        alert("Please enter an issue description.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "tickets"), {
+          learnerId: currentUserId,
+          providerId: userData.providerId,
+          title: issue,
+          description: issue,
+          priority,
+          status: "open",
+          createdAt: Date.now()
+        });
+        logAudit(`Submitted helpdesk ticket: ${issue}`);
+        alert("Ticket submitted successfully!");
+        ticketForm.reset();
+      } catch (err) {
+        console.error("Error submitting ticket:", err);
+        alert("Failed to submit ticket.");
+      }
+      hideSpinner();
+    });
+
     // Search handlers
     const searchCourses = debounce(filter => loadCourses(filter), 300);
     courseSearch.addEventListener("input", () => searchCourses(courseSearch.value));
+    const searchContent = debounce(filter => renderContent(filter, contentCourseFilter.value), 300);
+    contentSearch.addEventListener("input", () => searchContent(contentSearch.value));
+    contentCourseFilter.addEventListener("change", () => renderContent(contentSearch.value, contentCourseFilter.value));
+    const searchAssessments = debounce(filter => renderAssessments(filter, assessmentCourseFilter.value), 300);
+    assessmentSearch.addEventListener("input", () => searchAssessments(assessmentSearch.value));
+    assessmentCourseFilter.addEventListener("change", () => renderAssessments(assessmentSearch.value, assessmentCourseFilter.value));
+    const searchForums = debounce(filter => renderForums(filter, forumCourseFilter.value), 300);
+    forumSearch.addEventListener("input", () => searchForums(forumSearch.value));
+    forumCourseFilter.addEventListener("change", () => renderForums(forumSearch.value, forumCourseFilter.value));
+    const searchQuizzes = debounce(filter => renderQuizzes(filter, quizCourseFilter.value), 300);
+    quizSearch.addEventListener("input", () => searchQuizzes(quizSearch.value));
+    quizCourseFilter.addEventListener("change", () => renderQuizzes(quizSearch.value, quizCourseFilter.value));
     const searchNotices = debounce(filter => renderNotices(filter), 300);
     noticeSearch.addEventListener("input", () => searchNotices(noticeSearch.value));
 
@@ -528,16 +1244,21 @@
       } else {
         currentUserId = user.uid;
         const userSnap = await get(ref(db, `users/${user.uid}`));
-        if (userSnap.val()?.role !== "learner") {
+        userData = userSnap.val() || {};
+        if (userData.role !== "learner") {
           alert("Access restricted to learners only.");
           await signOut(auth);
           window.location.href = "login.html";
           return;
         }
+        initializeUI();
         loadNotifications();
         loadOverview();
         loadCourses();
+        loadContent();
         loadAssessments();
+        loadForums();
+        loadQuizzes();
         loadCertifications();
         loadNotices();
         loadTickets();
@@ -555,60 +1276,21 @@
       }
     });
 
-    // Course and assessment actions
-    window.viewCourse = id => {
-      alert(`Viewing course: ${courses[id].name}\nContent: ${JSON.stringify(courses[id].content || {}, null, 2)}`);
-    };
-
-    window.viewAssessment = id => {
-      alert(`Viewing assessment: ${assessments[id].title}\nCourse: ${courses[assessments[id].courseId]?.name || "-"}`);
-    };
-
-    window.viewCertificate = id => {
-      const cert = certifications[id];
-      alert(`Certificate: ${cert.template}\nCourse: ${courses[cert.courseId]?.name || "-"}`);
-    };
-
-    // Submit helpdesk ticket
-    window.submitTicket = async () => {
-      const issue = document.getElementById("ticketIssue").value.trim();
-      const priority = document.getElementById("ticketPriority").value;
-      if (!issue) {
-        alert("Please enter an issue description.");
-        return;
-      }
-      showSpinner();
-      try {
-        await push(ref(db, "helpdesk"), {
-          userId: currentUserId,
-          issue,
-          priority,
-          status: "open",
-          createdAt: Date.now(),
-          metadata: { tags: ["ticket"], version: "1.0" }
-        });
-        logAudit(`Submitted helpdesk ticket: ${issue}`);
-        document.getElementById("ticketIssue").value = "";
-        document.getElementById("ticketPriority").value = "low";
-      } catch (err) {
-        console.error("Error submitting ticket:", err);
-        alert("Failed to submit ticket.");
-      }
-      hideSpinner();
-    };
-
     // Audit logging
-    async function logAudit(action) {
+    async function logAudit(message) {
       try {
-        await push(ref(db, "audit_logs"), {
+        await push(ref(db, `auditLogs/${currentUserId}`), {
+          message: sanitizeInput(message),
           userId: currentUserId,
-          action,
           timestamp: Date.now()
         });
       } catch (err) {
         console.error("Error logging audit:", err);
       }
     }
+
+    // Run UI initialization on page load
+    document.addEventListener("DOMContentLoaded", initializeUI);
   </script>
 </body>
 </html>
