@@ -871,43 +871,43 @@
       });
     }
 
-    function renderLearners(filter = "", group = "") {
-      learnerList.innerHTML = "";
-      onValue(ref(db, "assignments"), snap => {
-        const assignments = snap.val() || {};
-        let hasLearners = false;
-        for (const id in learners) {
-          const l = learners[id];
-          const isAssigned = l.providerId === auth.currentUser.uid || Object.values(assignments).some(a => a.learnerId === id && a.providerId === auth.currentUser.uid);
-          if (l.role !== "learner" || !isAssigned) continue;
-          if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase()) && !l.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) continue;
-          if (group && !l.metadata?.tags?.includes(group)) continue;
-          hasLearners = true;
-          const learnerItem = document.createElement("div");
-          learnerItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-          const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
-          learnerItem.innerHTML = `
-            <div class="flex justify-between items-center">
-              <div>
-                <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p>
-                <p class="text-sm text-gray-600">Email: ${sanitizeInput(l.email)} | Contact: ${sanitizeInput(l.metadata?.contact || "-")} | Tags: ${sanitizeInput(l.metadata?.tags?.join(", ") || "-")}</p>
-                <p class="text-sm text-gray-600">Courses: ${enrolledCourses.map(c => sanitizeInput(c.name)).join(", ") || "None"}</p>
-              </div>
-              <div class="flex gap-2">
-                <button onclick="viewLearnerProfile('${id}')" class="text-blue-600 hover:underline" aria-label="View profile for ${sanitizeInput(l.fullName || l.email)}" data-tooltip="View profile">Profile</button>
-                <button onclick="editLearner('${id}')" class="text-blue-600 hover:underline" aria-label="Edit learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Edit learner">Edit</button>
-                <button onclick="assignCourseToLearner('${id}')" class="text-green-600 hover:underline" aria-label="Assign course to ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Assign course">Assign Course</button>
-                <button onclick="deleteLearner('${id}')" class="text-red-600 hover:underline" aria-label="Delete learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Delete learner">Delete</button>
-              </div>
-            </div>
-          `;
-          learnerList.appendChild(learnerItem);
-        }
-        if (!hasLearners) {
-          learnerList.innerHTML = '<p class="text-gray-600 text-center">No learners assigned to you yet.</p>';
-        }
-      });
+  function renderLearners(filter = "", group = "") {
+  learnerList.innerHTML = "";
+  onValue(ref(db, "assignments"), snap => {
+    const assignments = snap.val() || {};
+    let hasLearners = false;
+    for (const id in learners) {
+      const l = learners[id];
+      const isAssigned = l.providerId === auth.currentUser.uid || Object.values(assignments).some(a => a.learnerId === id && a.providerId === auth.currentUser.uid);
+      if (l.role !== "learner" || !isAssigned) continue;
+      if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase()) && !l.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) continue;
+      if (group && !l.metadata?.tags?.includes(group)) continue;
+      hasLearners = true;
+      const learnerItem = document.createElement("div");
+      learnerItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+      const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
+      learnerItem.innerHTML = `
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p>
+            <p class="text-sm text-gray-600">Email: ${sanitizeInput(l.email)} | Contact: ${sanitizeInput(l.metadata?.contact || "-")} | Tags: ${sanitizeInput(l.metadata?.tags?.join(", ") || "-")}</p>
+            <p class="text-sm text-gray-600">Courses: ${enrolledCourses.map(c => sanitizeInput(c.name)).join(", ") || "None"}</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="viewLearnerProfile('${id}')" class="text-blue-600 hover:underline" aria-label="View profile for ${sanitizeInput(l.fullName || l.email)}" data-tooltip="View profile">Profile</button>
+            <button onclick="editLearner('${id}')" class="text-blue-600 hover:underline" aria-label="Edit learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Edit learner">Edit</button>
+            <button onclick="assignCourseToLearner('${id}')" class="text-green-600 hover:underline" aria-label="Assign course to ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Assign course">Assign Course</button>
+            <button onclick="deleteLearner('${id}')" class="text-red-600 hover:underline" aria-label="Delete learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Delete learner">Delete</button>
+          </div>
+        </div>
+      `;
+      learnerList.appendChild(learnerItem);
     }
+    if (!hasLearners) {
+      learnerList.innerHTML = '<p class="text-gray-600 text-center">No learners assigned to you yet.</p>';
+    }
+  });
+}
 
     // Search learners
     const searchLearners = debounce((filter, group) => renderLearners(sanitizeInput(filter), group), 300);
