@@ -15,7 +15,6 @@
       --background-gradient: linear-gradient(135deg, #0A0A0A 0%, #1C2526 100%);
       --glow: rgba(0, 163, 255, 0.3);
     }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       background: var(--background-gradient);
@@ -28,17 +27,14 @@
       overflow: hidden;
       transition: opacity 0.5s ease;
     }
-
     body.fade-out {
       opacity: 0;
     }
-
     .splash-container {
       text-align: center;
       position: relative;
       z-index: 10;
     }
-
     .logo-container {
       display: flex;
       flex-direction: column;
@@ -46,14 +42,12 @@
       gap: 1.5rem;
       margin: 0 auto;
     }
-
     .twitter-logo {
       width: 100px;
       height: 100px;
       object-fit: contain;
       animation: fadeInRotate 1.5s ease-out forwards;
     }
-
     .loader {
       width: 60px;
       height: 60px;
@@ -63,7 +57,6 @@
       animation: spin 1.2s linear infinite, glow 1.5s ease-in-out infinite;
       position: relative;
     }
-
     .loader::before {
       content: '';
       position: absolute;
@@ -77,22 +70,18 @@
       opacity: 0.5;
       animation: spin 1.8s linear infinite reverse;
     }
-
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
     @keyframes glow {
       0%, 100% { box-shadow: 0 0 10px var(--glow); }
       50% { box-shadow: 0 0 20px var(--glow); }
     }
-
     @keyframes fadeInRotate {
       0% { opacity: 0; transform: scale(0.7) rotate(0deg); }
       100% { opacity: 1; transform: scale(1) rotate(10deg); }
     }
-
     .splash-text {
       color: var(--text-dark);
       font-weight: 800;
@@ -102,7 +91,6 @@
       animation: fadeInUp 1s ease-out 0.5s forwards;
       opacity: 0;
     }
-
     .custom-alert {
       display: none;
       position: fixed;
@@ -122,15 +110,12 @@
       animation: fadeIn 0.3s ease-out forwards;
       border: 1px solid var(--border);
     }
-
     .custom-alert.active {
       display: block;
     }
-
     .custom-alert[role="alertdialog"] {
       outline: none;
     }
-
     .custom-alert .close-btn {
       position: absolute;
       top: 0.75rem;
@@ -143,19 +128,16 @@
       cursor: pointer;
       transition: transform 0.2s ease, color 0.2s ease;
     }
-
     .custom-alert .close-btn:hover,
     .custom-alert .close-btn:focus {
       transform: scale(1.2);
       color: #33B5FF;
       outline: none;
     }
-
     .custom-alert .close-btn svg {
       width: 100%;
       height: 100%;
     }
-
     .custom-alert .retry-btn {
       margin-top: 1rem;
       padding: 0.5rem 1.5rem;
@@ -167,7 +149,6 @@
       cursor: pointer;
       transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     }
-
     .custom-alert .retry-btn:hover,
     .custom-alert .retry-btn:focus {
       background: #33B5FF;
@@ -175,41 +156,33 @@
       box-shadow: 0 0 10px var(--glow);
       outline: none;
     }
-
     @keyframes fadeInUp {
       0% { opacity: 0; transform: translateY(20px); }
       100% { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes fadeIn {
       0% { opacity: 0; }
       100% { opacity: 1; }
     }
-
     @media (max-width: 640px) {
       .logo-container {
         gap: 1rem;
       }
-
       .twitter-logo {
         width: 80px;
         height: 80px;
       }
-
       .loader {
         width: 50px;
         height: 50px;
       }
-
       .splash-text {
         font-size: 1.5rem;
       }
-
       .custom-alert {
         width: 85%;
         padding: 1rem;
       }
-
       .custom-alert .retry-btn {
         padding: 0.4rem 1.2rem;
         font-size: 0.9rem;
@@ -220,7 +193,6 @@
 <body>
   <div class="splash-container" role="main">
     <div class="logo-container">
-      <!-- Optional logo -->
       <img src="https://via.placeholder.com/100?text=Logo" class="twitter-logo" alt="CETA LMS Logo" />
       <div class="loader" aria-label="Loading"></div>
     </div>
@@ -243,19 +215,19 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+      authDomain: "fire-b-a8878.firebaseapp.com",
+      databaseURL: "https://fire-b-a8878.firebaseio.com",
+      projectId: "fire-b-a8878",
+      storageBucket: "fire-b-a8878.firebasestorage.app",
+      messagingSenderId: "658673187627",
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
+    };
+
     let auth, db;
 
     try {
-      const firebaseConfig = {
-        apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
-        authDomain: "fire-b-a8878.firebaseapp.com",
-        databaseURL: "https://fire-b-a8878.firebaseio.com",
-        projectId: "fire-b-a8878",
-        storageBucket: "fire-b-a8878.firebasestorage.app",
-        messagingSenderId: "658673187627",
-        appId: "1:658673187627:web:6e4c29af661785f0afa36e",
-      };
-
       const app = initializeApp(firebaseConfig);
       auth = getAuth(app);
       db = getDatabase(app);
@@ -297,7 +269,7 @@
           const snapshot = await get(userRef);
           if (snapshot.exists()) {
             const userData = snapshot.val();
-            const destination = userData.role === 'admin' ? 'program.html' : 'dashboard.html';
+            const destination = `${userData.role}.html`; // Redirect to admin.html, provider.html, or learner.html
             document.body.classList.add("fade-out");
             setTimeout(() => {
               window.location.replace(destination);
@@ -328,6 +300,8 @@
 
       onAuthStateChanged(auth, (user) => {
         if (user) {
+          // Set session timeout (30 minutes)
+          const sessionTimeout = setTimeout(() => auth.signOut(), 30 * 60 * 1000);
           checkUserData(user);
         } else {
           document.body.classList.add("fade-out");
