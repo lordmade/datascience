@@ -201,9 +201,12 @@
       font-size: 0.875rem;
     }
 
-    /* Buttons */
+    /* Pill-shaped buttons */
     button:not(.nav-button) {
+      border-radius: 9999px; /* Pill shape */
       transition: background-color 0.2s ease, transform 0.2s ease;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
     }
 
     button:hover:not(.nav-button) {
@@ -283,8 +286,8 @@
         </ul>
       </nav>
       <div class="mt-auto">
-        <button id="toggle-contrast" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded mb-2" aria-label="Toggle high contrast mode" data-tooltip="Toggle High Contrast">Toggle High Contrast</button>
-        <button id="signout-btn" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" aria-label="Sign out of provider account" data-tooltip="Sign Out">Sign Out</button>
+        <button id="toggle-contrast" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-3xl mb-2" aria-label="Toggle high contrast mode" data-tooltip="Toggle High Contrast">Toggle High Contrast</button>
+        <button id="signout-btn" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-3xl" aria-label="Sign out of provider account" data-tooltip="Sign Out">Sign Out</button>
       </div>
     </div>
 
@@ -326,8 +329,8 @@
         <h2 class="text-2xl font-semibold mb-4">Manage Learners</h2>
         <div class="mb-4 card">
           <h3 class="text-lg font-semibold mb-2">Add New Learner</h3>
-          <button id="open-add-learner" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Add new learner">Add Learner</button>
-          <button id="open-bulk-upload" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded ml-2" data-tooltip="Upload learners via CSV">Bulk Upload</button>
+          <button id="open-add-learner" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Add new learner">Add Learner</button>
+          <button id="open-bulk-upload" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl ml-2" data-tooltip="Upload learners via CSV">Bulk Upload</button>
         </div>
         <div class="card">
           <h3 class="text-lg font-semibold mb-2">Learner List</h3>
@@ -347,7 +350,7 @@
           <form id="course-form">
             <input type="text" id="courseName" placeholder="Course Name" class="border p-2 rounded w-full mb-2" aria-label="Enter course name" required />
             <input type="text" id="courseTags" placeholder="Tags (comma-separated)" class="border p-2 rounded w-full mb-2" aria-label="Enter course tags" />
-            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Add new course">Add Course</button>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Add new course">Add Course</button>
           </form>
         </div>
         <div class="card">
@@ -373,7 +376,7 @@
               <option value="text">Text</option>
             </select>
             <input type="file" id="contentFile" accept="video/*,application/pdf,.txt" class="border p-2 rounded w-full mb-2" aria-label="Upload content file" required />
-            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" data-tooltip="Upload content">Upload</button>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Upload content">Upload</button>
           </form>
         </div>
         <div class="card">
@@ -398,7 +401,7 @@
             <input type="text" id="assignmentTitle" placeholder="Assignment Title" class="border p-2 rounded w-full mb-2" aria-label="Enter assignment title" required />
             <textarea id="assignmentDescription" placeholder="Description" class="border p-2 rounded w-full mb-2" aria-label="Enter assignment description" required></textarea>
             <input type="date" id="assignmentDueDate" class="border p-2 rounded w-full mb-2" aria-label="Select due date" required />
-            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Create assignment">Create</button>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Create assignment">Create</button>
           </form>
         </div>
         <div class="card">
@@ -422,7 +425,7 @@
             </select>
             <input type="text" id="threadTitle" placeholder="Thread Title" class="border p-2 rounded w-full mb-2" aria-label="Enter thread title" required />
             <textarea id="threadContent" placeholder="Initial Post Content" class="border p-2 rounded w-full mb-2" aria-label="Enter initial post content" required></textarea>
-            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" data-tooltip="Create thread">Create Thread</button>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Create thread">Create Thread</button>
           </form>
         </div>
         <div class="card">
@@ -446,8 +449,8 @@
             </select>
             <input type="text" id="quizTitle" placeholder="Quiz Title" class="border p-2 rounded w-full mb-2" aria-label="Enter quiz title" required />
             <div id="quizQuestions" class="space-y-2"></div>
-            <button type="button" id="add-quiz-question" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-2" data-tooltip="Add question">Add Question</button>
-            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-2" data-tooltip="Create quiz">Create Quiz</button>
+            <button type="button" id="add-quiz-question" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl mt-2" data-tooltip="Add question">Add Question</button>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl mt-2" data-tooltip="Create quiz">Create Quiz</button>
           </form>
         </div>
         <div class="card">
@@ -486,7 +489,7 @@
             <select id="groupFilterAnalytics" class="border p-2 rounded w-full md:w-auto" aria-label="Select learner group">
               <option value="">All Groups</option>
             </select>
-            <button id="export-analytics" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded" data-tooltip="Export analytics to PDF">Export to PDF</button>
+            <button id="export-analytics" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Export analytics to PDF">Export to PDF</button>
           </div>
         </div>
         <div class="card">
@@ -534,8 +537,8 @@
               <option value="">Select Course (optional)</option>
             </select>
             <div class="flex gap-2">
-              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Save learner">Save</button>
-              <button type="button" id="close-add-learner" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" data-tooltip="Cancel">Cancel</button>
+              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Save learner">Save</button>
+              <button type="button" id="close-add-learner" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
             </div>
           </form>
         </div>
@@ -549,8 +552,8 @@
             <input type="file" id="learnerCSV" accept=".csv" class="border p-2 rounded w-full mb-2" aria-label="Upload CSV file" required />
             <p class="text-sm text-gray-600 mb-2">CSV format: fullName,email,contact,tags,courseId</p>
             <div class="flex gap-2">
-              <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" data-tooltip="Upload CSV">Upload</button>
-              <button type="button" id="close-bulk-upload" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" data-tooltip="Cancel">Cancel</button>
+              <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Upload CSV">Upload</button>
+              <button type="button" id="close-bulk-upload" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
             </div>
           </form>
         </div>
@@ -565,8 +568,8 @@
             <input type="text" id="questionOptions" placeholder="Options (comma-separated)" class="border p-2 rounded w-full mb-2" aria-label="Enter question options" required />
             <input type="number" id="correctOption" placeholder="Correct Option Index (0-based)" class="border p-2 rounded w-full mb-2" aria-label="Enter correct option index" required />
             <div class="flex gap-2">
-              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Save question">Save</button>
-              <button type="button" id="close-quiz-question" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" data-tooltip="Cancel">Cancel</button>
+              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Save question">Save</button>
+              <button type="button" id="close-quiz-question" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
             </div>
           </form>
         </div>
@@ -685,6 +688,9 @@
     const quizList = document.getElementById("quizList");
     const quizSearch = document.getElementById("quizSearch");
     const quizCourseFilter = document.getElementById("quizCourseFilter");
+    const videoFeedList = document.getElementById("videoFeedList");
+    const videoSearch = document.getElementById("videoSearch");
+    const videoCourseFilter = document.getElementById("videoCourseFilter");
 
     let user = null, courses = {}, learners = {}, assessments = {}, certifications = {}, tickets = {}, notifications = [], contents = {}, assignments = {}, forums = {}, quizzes = {};
     let completionChartInstance = null, enrollmentTrendChartInstance = null, analyticsChartInstance = null, heatmapChartInstance = null;
@@ -825,47 +831,60 @@
       showSpinner();
       onValue(ref(db, "users"), snap => {
         learners = snap.val() || {};
-        onValue(ref(db, "courses"), snap => {
-          courses = snap.val() || {};
-          renderLearners();
-          populateGroupFilter();
-          populateCourseFilter();
-          populateLearnerCourseDropdown();
-          populateContentCourseDropdown();
-          populateAssignmentCourseDropdown();
-          populateForumCourseDropdown();
-          populateQuizCourseDropdown();
-          hideSpinner();
+        onValue(ref(db, "assignments"), snap => {
+          const assignments = snap.val() || {};
+          onValue(ref(db, "courses"), snap => {
+            courses = snap.val() || {};
+            renderLearners();
+            populateGroupFilter();
+            populateCourseFilter();
+            populateLearnerCourseDropdown();
+            populateContentCourseDropdown();
+            populateAssignmentCourseDropdown();
+            populateForumCourseDropdown();
+            populateQuizCourseDropdown();
+            hideSpinner();
+          });
         });
       });
     }
 
     function renderLearners(filter = "", group = "") {
       learnerList.innerHTML = "";
-      for (const id in learners) {
-        const l = learners[id];
-        if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
-        if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase()) && !l.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) continue;
-        if (group && !l.metadata?.tags?.includes(group)) continue;
-        const learnerItem = document.createElement("div");
-        learnerItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-        const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
-        learnerItem.innerHTML = `
-          <div class="flex justify-between items-center">
-            <div>
-              <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p>
-              <p class="text-sm text-gray-600">Email: ${sanitizeInput(l.email)} | Contact: ${sanitizeInput(l.metadata?.contact || "-")} | Tags: ${sanitizeInput(l.metadata?.tags?.join(", ") || "-")}</p>
-              <p class="text-sm text-gray-600">Courses: ${enrolledCourses.map(c => sanitizeInput(c.name)).join(", ") || "None"}</p>
+      onValue(ref(db, "assignments"), snap => {
+        const assignments = snap.val() || {};
+        let hasLearners = false;
+        for (const id in learners) {
+          const l = learners[id];
+          const isAssigned = l.providerId === auth.currentUser.uid || Object.values(assignments).some(a => a.learnerId === id && a.providerId === auth.currentUser.uid);
+          if (l.role !== "learner" || !isAssigned) continue;
+          if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase()) && !l.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) continue;
+          if (group && !l.metadata?.tags?.includes(group)) continue;
+          hasLearners = true;
+          const learnerItem = document.createElement("div");
+          learnerItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+          const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
+          learnerItem.innerHTML = `
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p>
+                <p class="text-sm text-gray-600">Email: ${sanitizeInput(l.email)} | Contact: ${sanitizeInput(l.metadata?.contact || "-")} | Tags: ${sanitizeInput(l.metadata?.tags?.join(", ") || "-")}</p>
+                <p class="text-sm text-gray-600">Courses: ${enrolledCourses.map(c => sanitizeInput(c.name)).join(", ") || "None"}</p>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="viewLearnerProfile('${id}')" class="text-blue-600 hover:underline" aria-label="View profile for ${sanitizeInput(l.fullName || l.email)}" data-tooltip="View profile">Profile</button>
+                <button onclick="editLearner('${id}')" class="text-blue-600 hover:underline" aria-label="Edit learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Edit learner">Edit</button>
+                <button onclick="assignCourseToLearner('${id}')" class="text-green-600 hover:underline" aria-label="Assign course to ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Assign course">Assign Course</button>
+                <button onclick="deleteLearner('${id}')" class="text-red-600 hover:underline" aria-label="Delete learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Delete learner">Delete</button>
+              </div>
             </div>
-            <div class="flex gap-2">
-              <button onclick="viewLearnerProfile('${id}')" class="text-blue-600 hover:underline" aria-label="View profile for ${sanitizeInput(l.fullName || l.email)}" data-tooltip="View profile">Profile</button>
-              <button onclick="editLearner('${id}')" class="text-blue-600 hover:underline" aria-label="Edit learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Edit learner">Edit</button>
-              <button onclick="deleteLearner('${id}')" class="text-red-600 hover:underline" aria-label="Delete learner ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Delete learner">Delete</button>
-            </div>
-          </div>
-        `;
-        learnerList.appendChild(learnerItem);
-      }
+          `;
+          learnerList.appendChild(learnerItem);
+        }
+        if (!hasLearners) {
+          learnerList.innerHTML = '<p class="text-gray-600 text-center">No learners assigned to you yet.</p>';
+        }
+      });
     }
 
     // Search learners
@@ -1087,6 +1106,31 @@
       };
     };
 
+    // Assign course to learner
+    window.assignCourseToLearner = async learnerId => {
+      const courseId = prompt("Enter course ID to assign:", "");
+      if (!courseId || !courses[courseId] || courses[courseId].providerId !== auth.currentUser.uid) {
+        alert("Invalid course ID.");
+        return;
+      }
+      if (!confirm(`Assign ${courses[courseId].name} to ${learners[learnerId].fullName || learners[learnerId].email}?`)) return;
+      showSpinner();
+      try {
+        await runTransaction(ref(db, `courses/${courseId}`), course => {
+          course = course || { enrolled: [] };
+          course.enrolled = course.enrolled || [];
+          if (!course.enrolled.includes(learnerId)) course.enrolled.push(learnerId);
+          return course;
+        });
+        logAudit(`Assigned course ${courses[courseId].name} to learner ${learners[learnerId].fullName || learners[learnerId].email}`);
+        alert("Course assigned successfully!");
+      } catch (err) {
+        console.error("Error assigning course:", err);
+        alert("Failed to assign course.");
+      }
+      hideSpinner();
+    };
+
     // Delete learner
     window.deleteLearner = async learnerId => {
       if (!confirm("Are you sure you want to delete this learner?")) return;
@@ -1133,7 +1177,7 @@
           <ul class="text-sm text-gray-600 space-y-1">${assignments.map(a => `<li>${sanitizeInput(a.title)}: ${a.status} (Submitted: ${a.submittedAt ? new Date(a.submittedAt).toLocaleDateString() : "Not submitted"})</li>`).join("") || "No assignments"}</ul>
           <h4 class="text-md font-semibold mt-4 mb-2">Activity Log</h4>
           <ul class="text-sm text-gray-600 space-y-1">${activityLogs.map(n => `<li>${sanitizeInput(n.message)} (${new Date(n.timestamp).toLocaleString()})</li>`).join("") || "No activity"}</ul>
-          <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 mt-4" onclick="this.parentElement.parentElement.remove()" data-tooltip="Close profile">Close</button>
+          <button class="bg-gray-600 text-white px-4 py-2 rounded-3xl mt-4" onclick="this.parentElement.parentElement.remove()" data-tooltip="Close profile">Close</button>
         </div>
       `;
       document.body.appendChild(modal);
@@ -1391,7 +1435,7 @@
               <p class="text-sm text-gray-600">Submission: ${a.submissionUrl ? `<a href="${sanitizeInput(a.submissionUrl)}" target="_blank" class="text-blue-600 hover:underline">View</a>` : "Not submitted"}</p>
             </div>
             <div class="flex gap-2">
-              ${a.status === "submitted" ? `<button onclick="reviewAssignment('${id}')" class="text-blue-600 hover:underline" aria-label="Review assignment ${sanitizeInput(a.title)}" data-tooltip="Review assignment">Review</button>` : ""}
+              <button onclick="gradeAssignment('${id}')" class="text-blue-600 hover:underline" aria-label="Grade assignment ${sanitizeInput(a.title)}" data-tooltip="Grade assignment">Grade</button>
               <button onclick="deleteAssignment('${id}')" class="text-red-600 hover:underline" aria-label="Delete assignment ${sanitizeInput(a.title)}" data-tooltip="Delete assignment">Delete</button>
             </div>
           </div>
@@ -1411,7 +1455,7 @@
       const courseId = assignmentCourse.value;
       const title = sanitizeInput(assignmentTitle.value.trim());
       const description = sanitizeInput(assignmentDescription.value.trim());
-      const dueDate = new Date(assignmentDueDate.value).getTime();
+      const dueDate = assignmentDueDate.value;
       if (!courseId || !title || !description || !dueDate) {
         alert("Please fill in all required fields.");
         return;
@@ -1423,7 +1467,7 @@
           courseId,
           title,
           description,
-          dueDate,
+          dueDate: new Date(dueDate).getTime(),
           status: "assigned",
           createdAt: Date.now()
         });
@@ -1437,29 +1481,28 @@
       hideSpinner();
     });
 
-    // Review assignment
-    window.reviewAssignment = async assignmentId => {
-      const feedback = prompt("Enter feedback for the assignment:");
-      const grade = prompt("Enter grade (0-100):");
-      if (feedback && grade && !isNaN(grade) && grade >= 0 && grade <= 100) {
-        showSpinner();
-        try {
-          await update(ref(db, `assignments/${assignmentId}`), {
-            status: "graded",
-            feedback: sanitizeInput(feedback),
-            grade: parseInt(grade),
-            reviewedAt: Date.now()
-          });
-          logAudit(`Reviewed assignment ${assignments[assignmentId].title}`);
-          alert("Assignment reviewed successfully!");
-        } catch (err) {
-          console.error("Error reviewing assignment:", err);
-          alert("Failed to review assignment.");
-        }
-        hideSpinner();
-      } else {
-        alert("Invalid feedback or grade.");
+    // Grade assignment
+    window.gradeAssignment = async assignmentId => {
+      const a = assignments[assignmentId];
+      const grade = prompt(`Enter grade for ${sanitizeInput(a.title)} (0-100):`, "");
+      if (!grade || isNaN(grade) || grade < 0 || grade > 100) {
+        alert("Please enter a valid grade (0-100).");
+        return;
       }
+      showSpinner();
+      try {
+        await update(ref(db, `assignments/${assignmentId}`), {
+          grade: parseInt(grade),
+          status: "graded",
+          gradedAt: Date.now()
+        });
+        logAudit(`Graded assignment ${a.title} with ${grade}`);
+        alert("Assignment graded successfully!");
+      } catch (err) {
+        console.error("Error grading assignment:", err);
+        alert("Failed to grade assignment.");
+      }
+      hideSpinner();
     };
 
     // Delete assignment
@@ -1501,713 +1544,760 @@
       }
     }
 
-   function renderForums(filter = "", courseFilter = "") {
-  forumList.innerHTML = "";
-  for (const id in forums) {
-    const f = forums[id];
-    if (f.providerId !== auth.currentUser.uid) continue;
-    if (filter && !f.title.toLowerCase().includes(filter.toLowerCase())) continue;
-    if (courseFilter && f.courseId !== courseFilter) continue;
-    const forumItem = document.createElement("div");
-    forumItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-    forumItem.innerHTML = `
-      <div class="flex justify-between items-center">
-        <div>
-          <p class="font-semibold">${sanitizeInput(f.title)}</p>
-          <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")} | Posts: ${f.posts?.length || 0}</p>
-          <p class="text-sm text-gray-600">Created: ${new Date(f.createdAt).toLocaleDateString()}</p>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="viewForum('${id}')" class="text-blue-600 hover:underline" aria-label="View forum ${sanitizeInput(f.title)}" data-tooltip="View forum">View</button>
-          <button onclick="deleteForum('${id}')" class="text-red-600 hover:underline" aria-label="Delete forum ${sanitizeInput(f.title)}" data-tooltip="Delete forum">Delete</button>
-        </div>
-      </div>
-    `;
-    forumList.appendChild(forumItem);
-  }
-}
-
-// Search forums
-const searchForums = debounce((filter, course) => renderForums(sanitizeInput(filter), course), 300);
-forumSearch.addEventListener("input", () => searchForums(forumSearch.value, forumCourseFilter.value));
-forumCourseFilter.addEventListener("change", () => searchForums(forumSearch.value, forumCourseFilter.value));
-
-// Create forum thread
-forumThreadForm.addEventListener("submit", async e => {
-  e.preventDefault();
-  const courseId = forumCourse.value;
-  const title = sanitizeInput(threadTitle.value.trim());
-  const content = sanitizeInput(threadContent.value.trim());
-  if (!courseId || !title || !content) {
-    alert("Please fill in all required fields.");
-    return;
-  }
-  showSpinner();
-  try {
-    await push(ref(db, "forums"), {
-      providerId: auth.currentUser.uid,
-      courseId,
-      title,
-      posts: [{ content, postedBy: auth.currentUser.uid, timestamp: Date.now() }],
-      createdAt: Date.now()
-    });
-    logAudit(`Created forum thread ${title} for course ${courses[courseId].name}`);
-    alert("Forum thread created successfully!");
-    forumThreadForm.reset();
-  } catch (err) {
-    console.error("Error creating forum thread:", err);
-    alert("Failed to create forum thread.");
-  }
-  hideSpinner();
-});
-
-// View forum
-window.viewForum = async forumId => {
-  const f = forums[forumId];
-  const modal = document.createElement("div");
-  modal.className = "modal";
-  modal.style.display = "block";
-  modal.innerHTML = `
-    <div class="modal-content">
-      <h3 class="text-lg font-semibold mb-4">Forum: ${sanitizeInput(f.title)}</h3>
-      <p class="text-sm text-gray-600 mb-2">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")}</p>
-      <div id="forumPosts" class="space-y-2 mb-4"></div>
-      <form id="post-form" class="mb-4">
-        <textarea id="newPost" placeholder="Add a new post..." class="border p-2 rounded w-full mb-2" aria-label="Enter new post content" required></textarea>
-        <div class="flex gap-2">
-          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Post reply">Post</button>
-          <button type="button" onclick="this.closest('.modal').remove()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-tooltip="Close forum">Close</button>
-        </div>
-      </form>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  const forumPosts = modal.querySelector("#forumPosts");
-  f.posts?.forEach(post => {
-    const postDiv = document.createElement("div");
-    postDiv.className = "border-l-2 border-blue-600 pl-2";
-    postDiv.innerHTML = `
-      <p class="text-sm">${sanitizeInput(post.content)}</p>
-      <p class="text-xs text-gray-500">By ${sanitizeInput(learners[post.postedBy]?.fullName || "Provider")} on ${new Date(post.timestamp).toLocaleString()}</p>
-    `;
-    forumPosts.appendChild(postDiv);
-  });
-  modal.querySelector("#post-form").addEventListener("submit", async e => {
-    e.preventDefault();
-    const content = sanitizeInput(modal.querySelector("#newPost").value.trim());
-    if (!content) {
-      alert("Please enter post content.");
-      return;
-    }
-    showSpinner();
-    try {
-      await runTransaction(ref(db, `forums/${forumId}`), forum => {
-        forum = forum || { posts: [] };
-        forum.posts = forum.posts || [];
-        forum.posts.push({ content, postedBy: auth.currentUser.uid, timestamp: Date.now() });
-        return forum;
-      });
-      logAudit(`Posted in forum ${f.title}`);
-      modal.remove();
-      viewForum(forumId); // Refresh forum view
-    } catch (err) {
-      console.error("Error posting to forum:", err);
-      alert("Failed to post to forum.");
-    }
-    hideSpinner();
-  });
-};
-
-// Delete forum
-window.deleteForum = async forumId => {
-  if (!confirm("Are you sure you want to delete this forum thread?")) return;
-  showSpinner();
-  try {
-    await remove(ref(db, `forums/${forumId}`));
-    logAudit(`Deleted forum ${forums[forumId].title}`);
-    alert("Forum thread deleted successfully!");
-  } catch (err) {
-    console.error("Error deleting forum:", err);
-    alert("Failed to delete forum thread.");
-  }
-  hideSpinner();
-};
-
-// Load quizzes
-function loadQuizzes() {
-  showSpinner();
-  onValue(ref(db, "quizzes"), snap => {
-    quizzes = snap.val() || {};
-    renderQuizzes();
-    hideSpinner();
-  });
-}
-
-function populateQuizCourseDropdown() {
-  quizCourse.innerHTML = '<option value="">Select Course</option>';
-  quizCourseFilter.innerHTML = '<option value="">All Courses</option>';
-  for (const id in courses) {
-    if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
-      const option = document.createElement("option");
-      option.value = id;
-      option.textContent = sanitizeInput(courses[id].name);
-      quizCourse.appendChild(option);
-      quizCourseFilter.appendChild(option.cloneNode(true));
-    }
-  }
-}
-
-function renderQuizzes(filter = "", courseFilter = "") {
-  quizList.innerHTML = "";
-  for (const id in quizzes) {
-    const q = quizzes[id];
-    if (q.providerId !== auth.currentUser.uid) continue;
-    if (filter && !q.title.toLowerCase().includes(filter.toLowerCase())) continue;
-    if (courseFilter && q.courseId !== courseFilter) continue;
-    const quizItem = document.createElement("div");
-    quizItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-    quizItem.innerHTML = `
-      <div class="flex justify-between items-center">
-        <div>
-          <p class="font-semibold">${sanitizeInput(q.title)}</p>
-          <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[q.courseId]?.name || "Unknown")} | Questions: ${q.questions?.length || 0}</p>
-          <p class="text-sm text-gray-600">Created: ${new Date(q.createdAt).toLocaleDateString()}</p>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="viewQuiz('${id}')" class="text-blue-600 hover:underline" aria-label="View quiz ${sanitizeInput(q.title)}" data-tooltip="View quiz">View</button>
-          <button onclick="deleteQuiz('${id}')" class="text-red-600 hover:underline" aria-label="Delete quiz ${sanitizeInput(q.title)}" data-tooltip="Delete quiz">Delete</button>
-        </div>
-      </div>
-    `;
-    quizList.appendChild(quizItem);
-  }
-}
-
-// Search quizzes
-const searchQuizzes = debounce((filter, course) => renderQuizzes(sanitizeInput(filter), course), 300);
-quizSearch.addEventListener("input", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
-quizCourseFilter.addEventListener("change", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
-
-// Add quiz question
-addQuizQuestion.addEventListener("click", () => {
-  quizQuestionModal.style.display = "block";
-  questionText.focus();
-});
-
-closeQuizQuestion.addEventListener("click", () => {
-  quizQuestionModal.style.display = "none";
-  quizQuestionForm.reset();
-});
-
-quizQuestionForm.addEventListener("submit", e => {
-  e.preventDefault();
-  const question = sanitizeInput(questionText.value.trim());
-  const options = questionOptions.value.split(",").map(o => sanitizeInput(o.trim())).filter(o => o);
-  const correct = parseInt(correctOption.value);
-  if (!question || options.length < 2 || isNaN(correct) || correct < 0 || correct >= options.length) {
-    alert("Please enter a valid question, at least two options, and a correct option index.");
-    return;
-  }
-  currentQuizQuestions.push({ question, options, correct });
-  quizQuestionModal.style.display = "none";
-  quizQuestionForm.reset();
-  renderQuizQuestions();
-});
-
-function renderQuizQuestions() {
-  quizQuestions.innerHTML = "";
-  currentQuizQuestions.forEach((q, index) => {
-    const questionDiv = document.createElement("div");
-    questionDiv.className = "border p-2 rounded";
-    questionDiv.innerHTML = `
-      <p class="font-semibold">${sanitizeInput(q.question)}</p>
-      <p class="text-sm text-gray-600">Options: ${sanitizeInput(q.options.join(", "))}</p>
-      <p class="text-sm text-gray-600">Correct: ${sanitizeInput(q.options[q.correct])}</p>
-      <button onclick="removeQuizQuestion(${index})" class="text-red-600 hover:underline text-sm" aria-label="Remove question" data-tooltip="Remove question">Remove</button>
-    `;
-    quizQuestions.appendChild(questionDiv);
-  });
-}
-
-window.removeQuizQuestion = index => {
-  currentQuizQuestions.splice(index, 1);
-  renderQuizQuestions();
-};
-
-// Create quiz
-quizForm.addEventListener("submit", async e => {
-  e.preventDefault();
-  const courseId = quizCourse.value;
-  const title = sanitizeInput(quizTitle.value.trim());
-  if (!courseId || !title || currentQuizQuestions.length === 0) {
-    alert("Please select a course, enter a title, and add at least one question.");
-    return;
-  }
-  showSpinner();
-  try {
-    await push(ref(db, "quizzes"), {
-      providerId: auth.currentUser.uid,
-      courseId,
-      title,
-      questions: currentQuizQuestions,
-      createdAt: Date.now()
-    });
-    logAudit(`Created quiz ${title} for course ${courses[courseId].name}`);
-    alert("Quiz created successfully!");
-    quizForm.reset();
-    currentQuizQuestions = [];
-    quizQuestions.innerHTML = "";
-  } catch (err) {
-    console.error("Error creating quiz:", err);
-    alert("Failed to create quiz.");
-  }
-  hideSpinner();
-});
-
-// View quiz
-window.viewQuiz = async quizId => {
-  const q = quizzes[quizId];
-  const modal = document.createElement("div");
-  modal.className = "modal";
-  modal.style.display = "block";
-  modal.innerHTML = `
-    <div class="modal-content">
-      <h3 class="text-lg font-semibold mb-4">Quiz: ${sanitizeInput(q.title)}</h3>
-      <p class="text-sm text-gray-600 mb-2">Course: ${sanitizeInput(courses[q.courseId]?.name || "Unknown")}</p>
-      <div id="quizQuestionsView" class="space-y-2 mb-4"></div>
-      <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" onclick="this.closest('.modal').remove()" data-tooltip="Close quiz">Close</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  const questionsView = modal.querySelector("#quizQuestionsView");
-  q.questions.forEach(q => {
-    const questionDiv = document.createElement("div");
-    questionDiv.className = "border p-2 rounded";
-    questionDiv.innerHTML = `
-      <p class="font-semibold">${sanitizeInput(q.question)}</p>
-      <p class="text-sm text-gray-600">Options: ${sanitizeInput(q.options.join(", "))}</p>
-      <p class="text-sm text-gray-600">Correct: ${sanitizeInput(q.options[q.correct])}</p>
-    `;
-    questionsView.appendChild(questionDiv);
-  });
-};
-
-// Delete quiz
-window.deleteQuiz = async quizId => {
-  if (!confirm("Are you sure you want to delete this quiz?")) return;
-  showSpinner();
-  try {
-    await remove(ref(db, `quizzes/${quizId}`));
-    logAudit(`Deleted quiz ${quizzes[quizId].title}`);
-    alert("Quiz deleted successfully!");
-  } catch (err) {
-    console.error("Error deleting quiz:", err);
-    alert("Failed to delete quiz.");
-  }
-  hideSpinner();
-};
-
-// Load progress
-function loadProgress() {
-  showSpinner();
-  onValue(ref(db, "users"), snap => {
-    learners = snap.val() || {};
-    renderProgress();
-    hideSpinner();
-  });
-}
-
-function renderProgress(filter = "") {
-  progressList.innerHTML = "";
-  for (const id in learners) {
-    const l = learners[id];
-    if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
-    if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase())) continue;
-    const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
-    const progressItem = document.createElement("div");
-    progressItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-    let progressHTML = "";
-    enrolledCourses.forEach(c => {
-      const progress = l.progress?.[c.id] || { completed: 0, total: 100, milestones: [] };
-      const percentage = (progress.completed / progress.total * 100).toFixed(1);
-      progressHTML += `
-        <div class="mt-2">
-          <p class="font-semibold">${sanitizeInput(c.name)}</p>
-          <p class="text-sm text-gray-600">Progress: ${percentage}%</p>
-          <p class="text-sm text-gray-600">Milestones: ${sanitizeInput(progress.milestones?.join(", ") || "None")}</p>
-          <button onclick="updateProgress('${id}', '${c.id}')" class="text-blue-600 hover:underline text-sm" aria-label="Update progress for ${sanitizeInput(l.fullName || l.email)} in ${sanitizeInput(c.name)}" data-tooltip="Update progress">Update</button>
-        </div>
-      `;
-    });
-    progressItem.innerHTML = `
-      <div>
-        <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p>
-        <p class="text-sm text-gray-600">Email: ${sanitizeInput(l.email)}</p>
-        ${progressHTML}
-      </div>
-    `;
-    progressList.appendChild(progressItem);
-  }
-}
-
-// Search progress
-const searchProgress = debounce(filter => renderProgress(sanitizeInput(filter)), 300);
-progressSearch.addEventListener("input", () => searchProgress(progressSearch.value));
-
-// Update progress
-window.updateProgress = async (learnerId, courseId) => {
-  const l = learners[learnerId];
-  const c = courses[courseId];
-  const currentProgress = l.progress?.[courseId] || { completed: 0, total: 100, milestones: [] };
-  const completed = prompt("Enter completed percentage (0-100):", currentProgress.completed);
-  const milestones = prompt("Enter milestones (comma-separated, optional):", currentProgress.milestones.join(", "));
-  if (completed && !isNaN(completed) && completed >= 0 && completed <= 100) {
-    showSpinner();
-    try {
-      const updates = {};
-      updates[`users/${learnerId}/progress/${courseId}`] = {
-        completed: parseInt(completed),
-        total: 100,
-        milestones: milestones ? milestones.split(",").map(m => sanitizeInput(m.trim())).filter(m => m) : []
-      };
-      await update(ref(db, "/"), updates);
-      if (completed == 100 && !c.completions?.includes(learnerId)) {
-        await runTransaction(ref(db, `courses/${courseId}`), course => {
-          course = course || { completions: [] };
-          course.completions = course.completions || [];
-          if (!course.completions.includes(learnerId)) course.completions.push(learnerId);
-          return course;
-        });
-        if (confirm("Issue certificate for course completion?")) {
-          await push(ref(db, "certifications"), {
-            learnerId,
-            courseId,
-            issuedAt: Date.now(),
-            providerId: auth.currentUser.uid
-          });
-          logAudit(`Issued certificate to ${l.fullName || l.email} for course ${c.name}`);
-        }
+    function renderForums(filter = "", courseFilter = "") {
+      forumList.innerHTML = "";
+      for (const id in forums) {
+        const f = forums[id];
+        if (f.providerId !== auth.currentUser.uid) continue;
+        if (filter && !f.title.toLowerCase().includes(filter.toLowerCase())) continue;
+        if (courseFilter && f.courseId !== courseFilter) continue;
+        const threadItem = document.createElement("div");
+        threadItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        threadItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(f.title)}</p>
+              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")} | Posts: ${f.posts?.length || 0}</p>
+              <p class="text-sm text-gray-600">Created: ${new Date(f.createdAt).toLocaleDateString()}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="viewThread('${id}')" class="text-blue-600 hover:underline" aria-label="View thread ${sanitizeInput(f.title)}" data-tooltip="View thread">View</button>
+              <button onclick="deleteThread('${id}')" class="text-red-600 hover:underline" aria-label="Delete thread ${sanitizeInput(f.title)}" data-tooltip="Delete thread">Delete</button>
+            </div>
+          </div>
+        `;
+        forumList.appendChild(threadItem);
       }
-      logAudit(`Updated progress for ${l.fullName || l.email} in course ${c.name}`);
-      alert("Progress updated successfully!");
-    } catch (err) {
-      console.error("Error updating progress:", err);
-      alert("Failed to update progress.");
     }
-    hideSpinner();
-  } else {
-    alert("Invalid progress value.");
-  }
-};
 
-// Load analytics
-function loadAnalytics() {
-  showSpinner();
-  onValue(ref(db, "courses"), snap => {
-    courses = snap.val() || {};
-    onValue(ref(db, "users"), snap => {
-      learners = snap.val() || {};
-      renderAnalytics();
+    // Search forums
+    const searchForums = debounce((filter, course) => renderForums(sanitizeInput(filter), course), 300);
+    forumSearch.addEventListener("input", () => searchForums(forumSearch.value, forumCourseFilter.value));
+    forumCourseFilter.addEventListener("change", () => searchForums(forumSearch.value, forumCourseFilter.value));
+
+    // Create forum thread
+    forumThreadForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const courseId = forumCourse.value;
+      const title = sanitizeInput(threadTitle.value.trim());
+      const content = sanitizeInput(threadContent.value.trim());
+      if (!courseId || !title || !content) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "forums"), {
+          providerId: auth.currentUser.uid,
+          courseId,
+          title,
+          posts: [{ content, postedBy: auth.currentUser.uid, postedAt: Date.now() }],
+          createdAt: Date.now()
+        });
+        logAudit(`Created forum thread ${title} for course ${courses[courseId].name}`);
+        alert("Thread created successfully!");
+        forumThreadForm.reset();
+      } catch (err) {
+        console.error("Error creating thread:", err);
+        alert("Failed to create thread.");
+      }
       hideSpinner();
     });
-  });
-}
 
-function renderAnalytics() {
-  const time = timeRange.value;
-  const courseId = courseFilter.value;
-  const group = groupFilterAnalytics.value;
-
-  const now = Date.now();
-  const days = time === "all" ? Infinity : parseInt(time);
-  const filteredCourses = Object.entries(courses).filter(([id, c]) => c.providerId === auth.currentUser.uid && !c.archived && (!courseId || id === courseId));
-
-  const analyticsData = {
-    labels: filteredCourses.map(([_, c]) => c.name),
-    datasets: [
-      {
-        label: "Enrollments",
-        data: filteredCourses.map(([_, c]) => c.enrolled?.length || 0),
-        backgroundColor: "#2563eb",
-        borderRadius: 4
-      },
-      {
-        label: "Completions",
-        data: filteredCourses.map(([_, c]) => c.completions?.length || 0),
-        backgroundColor: "#10b981",
-        borderRadius: 4
-      }
-    ]
-  };
-
-  if (analyticsChartInstance) analyticsChartInstance.destroy();
-  analyticsChartInstance = new Chart(analyticsChart, {
-    type: "bar",
-    data: analyticsData,
-    options: {
-      scales: { y: { beginAtZero: true } },
-      plugins: {
-        datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
-      }
-    },
-    plugins: [ChartDataLabels]
-  });
-
-  const heatmapData = Array(24).fill(0).map(() => Array(7).fill(0));
-  for (const id in learners) {
-    const l = learners[id];
-    if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
-    if (group && !l.metadata?.tags?.includes(group)) continue;
-    notifications.filter(n => n.learnerId === id && (!courseId || n.courseId === courseId) && (time === "all" || now - n.timestamp <= days * 24 * 60 * 60 * 1000))
-      .forEach(n => {
-        const date = new Date(n.timestamp);
-        const hour = date.getHours();
-        const day = date.getDay();
-        heatmapData[hour][day]++;
-      });
-  }
-
-  if (heatmapChartInstance) heatmapChartInstance.destroy();
-  heatmapChartInstance = new Chart(heatmapChart, {
-    type: "matrix",
-    data: {
-      datasets: [{
-        label: "Activity Heatmap",
-        data: heatmapData.flatMap((row, h) => row.map((val, d) => ({ x: d, y: h, v: val }))),
-        backgroundColor: c => {
-          const value = c.raw.v;
-          const alpha = Math.min(value / 10, 1);
-          return `rgba(37, 99, 235, ${alpha})`;
-        },
-        width: ({ chart }) => chart.chartArea.width / 7,
-        height: ({ chart }) => chart.chartArea.height / 24
-      }]
-    },
-    options: {
-      scales: {
-        x: { type: "category", labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] },
-        y: { type: "category", labels: Array(24).fill(0).map((_, i) => `${i}:00`) }
-      },
-      plugins: { tooltip: { callbacks: { label: ctx => `Activity: ${ctx.raw.v}` } } }
-    }
-  });
-
-  let totalEnrollments = 0, totalCompletions = 0, totalActivity = 0;
-  filteredCourses.forEach(([_, c]) => {
-    totalEnrollments += c.enrolled?.length || 0;
-    totalCompletions += c.completions?.length || 0;
-  });
-  notifications.forEach(n => {
-    if (time === "all" || now - n.timestamp <= days * 24 * 60 * 60 * 1000) {
-      if ((!courseId || n.courseId === courseId) && learners[n.learnerId]?.providerId === auth.currentUser.uid && (!group || learners[n.learnerId]?.metadata?.tags?.includes(group))) {
-        totalActivity++;
-      }
-    }
-  });
-
-  analyticsDetails.innerHTML = `
-    <p>Total Enrollments: ${totalEnrollments}</p>
-    <p>Total Completions: ${totalCompletions}</p>
-    <p>Completion Rate: ${totalEnrollments > 0 ? (totalCompletions / totalEnrollments * 100).toFixed(1) : 0}%</p>
-    <p>Total Activity Events: ${totalActivity}</p>
-  `;
-}
-
-// Export analytics to PDF
-exportAnalytics.addEventListener("click", () => {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.setFontSize(16);
-  doc.text("CETA Provider Analytics", 20, 20);
-  doc.setFontSize(12);
-  doc.text(`Time Range: ${timeRange.options[timeRange.selectedIndex].text}`, 20, 30);
-  doc.text(`Course: ${courseFilter.value ? courses[courseFilter.value]?.name : "All"}`, 20, 40);
-  doc.text(`Group: ${groupFilterAnalytics.value || "All"}`, 20, 50);
-  doc.text(analyticsDetails.textContent, 20, 60);
-  doc.save("analytics_report.pdf");
-});
-
-// Load helpdesk tickets
-function loadHelpdesk() {
-  showSpinner();
-  onValue(ref(db, "tickets"), snap => {
-    tickets = snap.val() || {};
-    renderTickets();
-    hideSpinner();
-  });
-}
-
-function renderTickets() {
-  ticketList.innerHTML = "";
-  for (const id in tickets) {
-    const t = tickets[id];
-    if (t.providerId !== auth.currentUser.uid) continue;
-    const ticketItem = document.createElement("div");
-    ticketItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-    ticketItem.innerHTML = `
-      <div class="flex justify-between items-center">
-        <div>
-          <p class="font-semibold">${sanitizeInput(t.title)}</p>
-          <p class="text-sm text-gray-600">Learner: ${sanitizeInput(learners[t.learnerId]?.fullName || "Unknown")} | Status: ${sanitizeInput(t.status)}</p>
-          <p class="text-sm text-gray-600">${sanitizeInput(t.description)}</p>
+    // View thread
+    window.viewThread = threadId => {
+      const f = forums[threadId];
+      const modal = document.createElement("div");
+      modal.className = "modal";
+      modal.style.display = "block";
+      modal.innerHTML = `
+        <div class="modal-content">
+          <h3 class="text-lg font-semibold mb-4">${sanitizeInput(f.title)}</h3>
+          <p class="text-sm text-gray-600 mb-2">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")}</p>
+          <div class="space-y-2 mb-4">
+            ${f.posts?.map(p => `
+              <div class="bg-gray-100 p-2 rounded">
+                <p class="text-sm">${sanitizeInput(p.content)}</p>
+                <p class="text-xs text-gray-500">Posted by ${sanitizeInput(learners[p.postedBy]?.fullName || "Provider")} on ${new Date(p.postedAt).toLocaleString()}</p>
+              </div>
+            `).join("")}
+          </div>
+          <form id="post-form-${threadId}" class="mb-4">
+            <textarea id="post-content-${threadId}" placeholder="Add a post..." class="border p-2 rounded w-full mb-2" aria-label="Add post to thread" required></textarea>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Post reply">Post</button>
+          </form>
+          <button class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" onclick="this.parentElement.parentElement.remove()" data-tooltip="Close thread">Close</button>
         </div>
-        <div class="flex gap-2">
-          <button onclick="resolveTicket('${id}')" class="text-blue-600 hover:underline" aria-label="Resolve ticket ${sanitizeInput(t.title)}" data-tooltip="Resolve ticket">Resolve</button>
-          <button onclick="deleteTicket('${id}')" class="text-red-600 hover:underline" aria-label="Delete ticket ${sanitizeInput(t.title)}" data-tooltip="Delete ticket">Delete</button>
-        </div>
-      </div>
-    `;
-    ticketList.appendChild(ticketItem);
-  }
-}
-
-// Resolve ticket
-window.resolveTicket = async ticketId => {
-  const resolution = prompt("Enter resolution notes:");
-  if (resolution) {
-    showSpinner();
-    try {
-      await update(ref(db, `tickets/${ticketId}`), {
-        status: "resolved",
-        resolution: sanitizeInput(resolution),
-        resolvedAt: Date.now()
-      });
-      logAudit(`Resolved ticket ${tickets[ticketId].title}`);
-      alert("Ticket resolved successfully!");
-    } catch (err) {
-      console.error("Error resolving ticket:", err);
-      alert("Failed to resolve ticket.");
-    }
-    hideSpinner();
-  }
-};
-
-// Delete ticket
-window.deleteTicket = async ticketId => {
-  if (!confirm("Are you sure you want to delete this ticket?")) return;
-  showSpinner();
-  try {
-    await remove(ref(db, `tickets/${ticketId}`));
-    logAudit(`Deleted ticket ${tickets[ticketId].title}`);
-    alert("Ticket deleted successfully!");
-  } catch (err) {
-    console.error("Error deleting ticket:", err);
-    alert("Failed to delete ticket.");
-  }
-  hideSpinner();
-};
-
-// Load video feeds
-function loadVideoFeeds() {
-  showSpinner();
-  onValue(ref(db, "courses"), snap => {
-    courses = snap.val() || {};
-    renderVideoFeeds();
-    hideSpinner();
-  });
-}
-
-function renderVideoFeeds(filter = "", courseFilter = "") {
-  videoFeedList.innerHTML = "";
-  const peer = new Peer();
-  peer.on("open", id => {
-    for (const id in learners) {
-      const l = learners[id];
-      if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
-      if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase())) continue;
-      const enrolledCourses = Object.keys(courses).filter(cId => courses[cId].enrolled?.includes(id) && (!courseFilter || cId === courseFilter));
-      if (enrolledCourses.length === 0) continue;
-      const videoItem = document.createElement("div");
-      videoItem.className = "video-feed relative";
-      videoItem.innerHTML = `
-        <div class="video-label">${sanitizeInput(l.fullName || l.email)}</div>
-        <video id="video-${id}" autoplay muted playsinline class="w-full h-48 object-cover"></video>
       `;
-      videoFeedList.appendChild(videoItem);
-      // Simulate video feed connection (placeholder for actual WebRTC implementation)
-      console.log(`Connecting to video feed for learner ${l.email} with peer ID ${id}`);
+      document.body.appendChild(modal);
+      document.getElementById(`post-form-${threadId}`).addEventListener("submit", async e => {
+        e.preventDefault();
+        const content = sanitizeInput(document.getElementById(`post-content-${threadId}`).value.trim());
+        if (!content) return;
+        showSpinner();
+        try {
+          await runTransaction(ref(db, `forums/${threadId}`), thread => {
+            thread = thread || { posts: [] };
+            thread.posts = thread.posts || [];
+            thread.posts.push({ content, postedBy: auth.currentUser.uid, postedAt: Date.now() });
+            return thread;
+          });
+          logAudit(`Posted to thread ${f.title}`);
+          modal.remove();
+          viewThread(threadId);
+        } catch (err) {
+          console.error("Error posting to thread:", err);
+          alert("Failed to post.");
+        }
+        hideSpinner();
+      });
+    };
+
+    // Delete thread
+    window.deleteThread = async threadId => {
+      if (!confirm("Are you sure you want to delete this thread?")) return;
+      showSpinner();
+      try {
+        await remove(ref(db, `forums/${threadId}`));
+        logAudit(`Deleted thread ${forums[threadId].title}`);
+        alert("Thread deleted successfully!");
+      } catch (err) {
+        console.error("Error deleting thread:", err);
+        alert("Failed to delete thread.");
+      }
+      hideSpinner();
+    };
+
+    // Load quizzes
+    function loadQuizzes() {
+      showSpinner();
+      onValue(ref(db, "quizzes"), snap => {
+        quizzes = snap.val() || {};
+        renderQuizzes();
+        hideSpinner();
+      });
     }
-  });
-}
 
-// Search video feeds
-const searchVideoFeeds = debounce((filter, course) => renderVideoFeeds(sanitizeInput(filter), course), 300);
-videoSearch.addEventListener("input", () => searchVideoFeeds(videoSearch.value, videoCourseFilter.value));
-videoCourseFilter.addEventListener("change", () => searchVideoFeeds(videoSearch.value, videoCourseFilter.value));
-
-// Download certificate
-window.downloadCertificate = async certId => {
-  const cert = certifications[certId];
-  const learner = learners[cert.learnerId];
-  const course = courses[cert.courseId];
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.setFontSize(20);
-  doc.text("Certificate of Completion", 20, 20);
-  doc.setFontSize(14);
-  doc.text(`Awarded to: ${sanitizeInput(learner.fullName || learner.email)}`, 20, 40);
-  doc.text(`Course: ${sanitizeInput(course.name)}`, 20, 50);
-  doc.text(`Issued on: ${new Date(cert.issuedAt).toLocaleDateString()}`, 20, 60);
-  doc.save(`certificate_${learner.email}_${course.name}.pdf`);
-};
-
-// Audit logging
-function logAudit(message) {
-  push(ref(db, `auditLogs/${auth.currentUser.uid}`), {
-    message: sanitizeInput(message),
-    timestamp: Date.now(),
-    userId: auth.currentUser.uid
-  });
-}
-
-// Populate course filter
-function populateCourseFilter() {
-  courseFilter.innerHTML = '<option value="">All Courses</option>';
-  videoCourseFilter.innerHTML = '<option value="">All Courses</option>';
-  for (const id in courses) {
-    if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
-      const option = document.createElement("option");
-      option.value = id;
-      option.textContent = sanitizeInput(courses[id].name);
-      courseFilter.appendChild(option);
-      videoCourseFilter.appendChild(option.cloneNode(true));
+    function populateQuizCourseDropdown() {
+      quizCourse.innerHTML = '<option value="">Select Course</option>';
+      quizCourseFilter.innerHTML = '<option value="">All Courses</option>';
+      for (const id in courses) {
+        if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = sanitizeInput(courses[id].name);
+          quizCourse.appendChild(option);
+          quizCourseFilter.appendChild(option.cloneNode(true));
+        }
+      }
     }
-  }
-}
 
-// Initialize
-onAuthStateChanged(auth, u => {
-  if (u) {
-    user = u;
-    loadOverview();
-    loadLearners();
-    loadCourses();
-    loadContent();
-    loadAssignments();
-    loadForums();
-    loadQuizzes();
-    loadProgress();
-    loadAnalytics();
-    loadHelpdesk();
-    loadVideoFeeds();
-    onValue(ref(db, "notifications"), snap => {
-      notifications = Object.values(snap.val() || {}).filter(n => courses[n.courseId]?.providerId === u.uid);
+    function renderQuizzes(filter = "", courseFilter = "") {
+      quizList.innerHTML = "";
+      for (const id in quizzes) {
+        const q = quizzes[id];
+        if (q.providerId !== auth.currentUser.uid) continue;
+        if (filter && !q.title.toLowerCase().includes(filter.toLowerCase())) continue;
+        if (courseFilter && q.courseId !== courseFilter) continue;
+        const quizItem = document.createElement("div");
+        quizItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        quizItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(q.title)}</p>
+              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[q.courseId]?.name || "Unknown")} | Questions: ${q.questions?.length || 0}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="editQuiz('${id}')" class="text-blue-600 hover:underline" aria-label="Edit quiz ${sanitizeInput(q.title)}" data-tooltip="Edit quiz">Edit</button>
+              <button onclick="deleteQuiz('${id}')" class="text-red-600 hover:underline" aria-label="Delete quiz ${sanitizeInput(q.title)}" data-tooltip="Delete quiz">Delete</button>
+            </div>
+          </div>
+        `;
+        quizList.appendChild(quizItem);
+      }
+    }
+
+    // Search quizzes
+    const searchQuizzes = debounce((filter, course) => renderQuizzes(sanitizeInput(filter), course), 300);
+    quizSearch.addEventListener("input", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
+    quizCourseFilter.addEventListener("change", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
+
+    // Add quiz question
+    addQuizQuestion.addEventListener("click", () => {
+      quizQuestionModal.style.display = "block";
+      questionText.focus();
     });
-  } else {
-    window.location.href = "login.html";
-  }
-});
 
-// Sign out
-document.getElementById("signout-btn").addEventListener("click", async () => {
-  try {
-    await signOut(auth);
-    window.location.href = "login.html";
-  } catch (err) {
-    console.error("Sign out error:", err);
-    alert("Failed to sign out.");
-  }
-});
+    closeQuizQuestion.addEventListener("click", () => {
+      quizQuestionModal.style.display = "none";
+      quizQuestionForm.reset();
+    });
+
+    quizQuestionForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const text = sanitizeInput(questionText.value.trim());
+      const options = questionOptions.value.split(",").map(o => sanitizeInput(o.trim())).filter(o => o);
+      const correct = parseInt(correctOption.value);
+      if (!text || options.length < 2 || isNaN(correct) || correct < 0 || correct >= options.length) {
+        alert("Please provide a question, at least two options, and a valid correct option index.");
+        return;
+      }
+      currentQuizQuestions.push({ text, options, correct });
+      quizQuestionModal.style.display = "none";
+      quizQuestionForm.reset();
+      renderQuizQuestions();
+    });
+
+    function renderQuizQuestions() {
+      quizQuestions.innerHTML = currentQuizQuestions.map((q, i) => `
+        <div class="bg-gray-50 p-2 rounded">
+          <p class="font-semibold">Question ${i + 1}: ${sanitizeInput(q.text)}</p>
+          <p class="text-sm text-gray-600">Options: ${sanitizeInput(q.options.join(", "))}</p>
+          <p class="text-sm text-gray-600">Correct: ${sanitizeInput(q.options[q.correct])}</p>
+          <button onclick="removeQuizQuestion(${i})" class="text-red-600 hover:underline" aria-label="Remove question ${i + 1}" data-tooltip="Remove question">Remove</button>
+        </div>
+      `).join("");
+    }
+
+    window.removeQuizQuestion = index => {
+      currentQuizQuestions.splice(index, 1);
+      renderQuizQuestions();
+    };
+
+    // Create quiz
+    quizForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const courseId = quizCourse.value;
+      const title = sanitizeInput(quizTitle.value.trim());
+      if (!courseId || !title || currentQuizQuestions.length === 0) {
+        alert("Please select a course, enter a title, and add at least one question.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "quizzes"), {
+          providerId: auth.currentUser.uid,
+          courseId,
+          title,
+          questions: currentQuizQuestions,
+          createdAt: Date.now()
+        });
+        logAudit(`Created quiz ${title} for course ${courses[courseId].name}`);
+        alert("Quiz created successfully!");
+        quizForm.reset();
+        currentQuizQuestions = [];
+        renderQuizQuestions();
+      } catch (err) {
+        console.error("Error creating quiz:", err);
+        alert("Failed to create quiz.");
+      }
+      hideSpinner();
+    });
+
+    // Edit quiz
+    window.editQuiz = async quizId => {
+      const q = quizzes[quizId];
+      quizCourse.value = q.courseId;
+      quizTitle.value = q.title;
+      currentQuizQuestions = q.questions || [];
+      renderQuizQuestions();
+      quizForm.onsubmit = async e => {
+        e.preventDefault();
+        const courseId = quizCourse.value;
+        const title = sanitizeInput(quizTitle.value.trim());
+        if (!courseId || !title || currentQuizQuestions.length === 0) {
+          alert("Please select a course, enter a title, and add at least one question.");
+          return;
+        }
+        showSpinner();
+        try {
+          await update(ref(db, `quizzes/${quizId}`), {
+            courseId,
+            title,
+            questions: currentQuizQuestions,
+            updatedAt: Date.now()
+          });
+          logAudit(`Edited quiz ${title}`);
+          alert("Quiz updated successfully!");
+          quizForm.reset();
+          currentQuizQuestions = [];
+          renderQuizQuestions();
+          quizForm.onsubmit = null; // Reset to default create behavior
+        } catch (err) {
+          console.error("Error editing quiz:", err);
+          alert("Failed to edit quiz.");
+        }
+        hideSpinner();
+      };
+    };
+
+    // Delete quiz
+    window.deleteQuiz = async quizId => {
+      if (!confirm("Are you sure you want to delete this quiz?")) return;
+      showSpinner();
+      try {
+        await remove(ref(db, `quizzes/${quizId}`));
+        logAudit(`Deleted quiz ${quizzes[quizId].title}`);
+        alert("Quiz deleted successfully!");
+      } catch (err) {
+        console.error("Error deleting quiz:", err);
+        alert("Failed to delete quiz.");
+      }
+      hideSpinner();
+    };
+
+    // Load learner progress
+    function loadProgress() {
+      showSpinner();
+      onValue(ref(db, "users"), snap => {
+        learners = snap.val() || {};
+        onValue(ref(db, "courses"), snap => {
+          courses = snap.val() || {};
+          renderProgress();
+          hideSpinner();
+        });
+      });
+    }
+
+    function renderProgress(filter = "") {
+      progressList.innerHTML = "";
+      onValue(ref(db, "assignments"), snap => {
+        const assignments = snap.val() || {};
+        let hasProgress = false;
+        for (const id in learners) {
+          const l = learners[id];
+          const isAssigned = l.providerId === auth.currentUser.uid || Object.values(assignments).some(a => a.learnerId === id && a.providerId === auth.currentUser.uid);
+          if (l.role !== "learner" || !isAssigned) continue;
+          if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase())) continue;
+          hasProgress = true;
+          const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
+          const progressItem = document.createElement("div");
+          progressItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+          progressItem.innerHTML = `
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p>
+                <p class="text-sm text-gray-600">Courses: ${enrolledCourses.map(c => sanitizeInput(c.name)).join(", ") || "None"}</p>
+                <p class="text-sm text-gray-600">Progress: ${l.progress ? Object.entries(l.progress).map(([courseId, p]) => `${sanitizeInput(courses[courseId]?.name || courseId)}: ${p}%`).join(", ") : "No progress"}</p>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="updateProgress('${id}')" class="text-blue-600 hover:underline" aria-label="Update progress for ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Update progress">Update</button>
+                <button onclick="issueCertificate('${id}')" class="text-green-600 hover:underline" aria-label="Issue certificate for ${sanitizeInput(l.fullName || l.email)}" data-tooltip="Issue certificate">Certificate</button>
+              </div>
+            </div>
+          `;
+          progressList.appendChild(progressItem);
+        }
+        if (!hasProgress) {
+          progressList.innerHTML = '<p class="text-gray-600 text-center">No learner progress available.</p>';
+        }
+      });
+    }
+
+    // Search progress
+    const searchProgress = debounce(filter => renderProgress(sanitizeInput(filter)), 300);
+    progressSearch.addEventListener("input", () => searchProgress(progressSearch.value));
+
+    // Update learner progress
+    window.updateProgress = async learnerId => {
+      const l = learners[learnerId];
+      const courseId = prompt(`Enter course ID to update progress for ${sanitizeInput(l.fullName || l.email)}:`, "");
+      if (!courseId || !courses[courseId] || courses[courseId].providerId !== auth.currentUser.uid) {
+        alert("Invalid course ID.");
+        return;
+      }
+      const progress = prompt(`Enter progress (0-100) for ${sanitizeInput(courses[courseId].name)}:`, l.progress?.[courseId] || "");
+      if (!progress || isNaN(progress) || progress < 0 || progress > 100) {
+        alert("Please enter a valid progress percentage (0-100).");
+        return;
+      }
+      showSpinner();
+      try {
+        await update(ref(db, `users/${learnerId}/progress`), { [courseId]: parseInt(progress) });
+        if (progress === "100") {
+          await runTransaction(ref(db, `courses/${courseId}`), course => {
+            course = course || { completions: [] };
+            course.completions = course.completions || [];
+            if (!course.completions.includes(learnerId)) course.completions.push(learnerId);
+            return course;
+          });
+        }
+        logAudit(`Updated progress for ${l.fullName || l.email} in ${courses[courseId].name} to ${progress}%`);
+        alert("Progress updated successfully!");
+      } catch (err) {
+        console.error("Error updating progress:", err);
+        alert("Failed to update progress.");
+      }
+      hideSpinner();
+    };
+
+    // Issue certificate
+    window.issueCertificate = async learnerId => {
+      const l = learners[learnerId];
+      const courseId = prompt(`Enter course ID to issue certificate for ${sanitizeInput(l.fullName || l.email)}:`, "");
+      if (!courseId || !courses[courseId] || courses[courseId].providerId !== auth.currentUser.uid) {
+        alert("Invalid course ID.");
+        return;
+      }
+      if (!courses[courseId].completions?.includes(learnerId)) {
+        alert("Learner has not completed this course.");
+        return;
+      }
+      showSpinner();
+      try {
+        const certId = push(ref(db, "certifications")).key;
+        await set(ref(db, `certifications/${certId}`), {
+          learnerId,
+          courseId,
+          issuedAt: Date.now(),
+          providerId: auth.currentUser.uid
+        });
+        logAudit(`Issued certificate for ${l.fullName || l.email} in ${courses[courseId].name}`);
+        alert("Certificate issued successfully!");
+      } catch (err) {
+        console.error("Error issuing certificate:", err);
+        alert("Failed to issue certificate.");
+      }
+      hideSpinner();
+    };
+
+    // Download certificate
+    window.downloadCertificate = async certId => {
+      const cert = certifications[certId];
+      if (!cert) return;
+      showSpinner();
+      try {
+        const docDefinition = {
+          content: [
+            { text: "Certificate of Completion", style: "header" },
+            { text: `This certifies that ${sanitizeInput(learners[cert.learnerId]?.fullName || "Learner")} has successfully completed the course ${sanitizeInput(courses[cert.courseId]?.name || "Course")}.`, style: "body" },
+            { text: `Issued on: ${new Date(cert.issuedAt).toLocaleDateString()}`, style: "footer" },
+            { text: `Provider: ${sanitizeInput(user.fullName || user.email)}`, style: "footer" }
+          ],
+          styles: {
+            header: { fontSize: 22, bold: true, alignment: "center", margin: [0, 0, 0, 20] },
+            body: { fontSize: 16, alignment: "center", margin: [0, 0, 0, 20] },
+            footer: { fontSize: 12, alignment: "center" }
+          }
+        };
+        pdfMake.createPdf(docDefinition).download(`certificate_${certId}.pdf`);
+        logAudit(`Downloaded certificate ${certId} for ${learners[cert.learnerId]?.fullName || "Learner"}`);
+      } catch (err) {
+        console.error("Error downloading certificate:", err);
+        alert("Failed to download certificate.");
+      }
+      hideSpinner();
+    };
+
+    // Load analytics
+    function loadAnalytics() {
+      showSpinner();
+      onValue(ref(db, "users"), snap => {
+        learners = snap.val() || {};
+        onValue(ref(db, "courses"), snap => {
+          courses = snap.val() || {};
+          renderAnalytics();
+          hideSpinner();
+        });
+      });
+    }
+
+    function populateCourseFilter() {
+      courseFilter.innerHTML = '<option value="">All Courses</option>';
+      videoCourseFilter.innerHTML = '<option value="">All Courses</option>';
+      for (const id in courses) {
+        if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = sanitizeInput(courses[id].name);
+          courseFilter.appendChild(option);
+          videoCourseFilter.appendChild(option.cloneNode(true));
+        }
+      }
+    }
+
+    function renderAnalytics(time = "30", courseId = "", group = "") {
+      const now = Date.now();
+      const days = parseInt(time);
+      const startTime = days === "all" ? 0 : now - days * 24 * 60 * 60 * 1000;
+      const performanceData = { labels: [], datasets: [{ label: "Average Progress (%)", data: [], backgroundColor: "#2563eb", borderRadius: 4 }] };
+      const heatmapData = { labels: [], datasets: [] };
+
+      const coursesToShow = courseId ? { [courseId]: courses[courseId] } : Object.fromEntries(Object.entries(courses).filter(([id, c]) => c.providerId === auth.currentUser.uid && !c.archived));
+      for (const id in coursesToShow) {
+        const c = coursesToShow[id];
+        let totalProgress = 0, learnerCount = 0;
+        c.enrolled?.forEach(learnerId => {
+          if (group && !learners[learnerId]?.metadata?.tags?.includes(group)) return;
+          if (learners[learnerId]?.progress?.[id] && learners[learnerId].enrollmentDate >= startTime) {
+            totalProgress += learners[learnerId].progress[id];
+            learnerCount++;
+          }
+        });
+        performanceData.labels.push(c.name);
+        performanceData.datasets[0].data.push(learnerCount > 0 ? (totalProgress / learnerCount).toFixed(1) : 0);
+      }
+
+      const daysLabels = Array.from({ length: Math.min(days, 30) }, (_, i) => {
+        const date = new Date(now - (Math.min(days, 30) - i - 1) * 24 * 60 * 60 * 1000);
+        return date.toLocaleDateString();
+      });
+      const heatmapDatasets = [];
+      for (const id in coursesToShow) {
+        const data = daysLabels.map(() => 0);
+        coursesToShow[id].enrolled?.forEach(learnerId => {
+          if (group && !learners[learnerId]?.metadata?.tags?.includes(group)) return;
+          const enrollmentDate = learners[learnerId]?.enrollmentDate || now;
+          if (enrollmentDate >= startTime) {
+            const daysSince = Math.floor((now - enrollmentDate) / (24 * 60 * 60 * 1000));
+            if (daysSince < Math.min(days, 30)) data[Math.min(days, 30) - daysSince - 1]++;
+          }
+        });
+        heatmapDatasets.push({ label: coursesToShow[id].name, data, backgroundColor: `#${Math.floor(Math.random() * 16777215).toString(16)}80` });
+      }
+      heatmapData.labels = daysLabels;
+      heatmapData.datasets = heatmapDatasets;
+
+      if (analyticsChartInstance) analyticsChartInstance.destroy();
+      analyticsChartInstance = new Chart(analyticsChart, {
+        type: "bar",
+        data: performanceData,
+        options: {
+          scales: { y: { beginAtZero: true, max: 100 } },
+          plugins: {
+            datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
+          }
+        },
+        plugins: [ChartDataLabels]
+      });
+
+      if (heatmapChartInstance) heatmapChartInstance.destroy();
+      heatmapChartInstance = new Chart(heatmapChart, {
+        type: "line",
+        data: heatmapData,
+        options: {
+          scales: { y: { beginAtZero: true } },
+          plugins: { tooltip: { mode: "index", intersect: false } }
+        }
+      });
+
+      let totalProgress = 0, totalLearners = 0, totalCompletions = 0, totalAssignments = 0, totalSubmissions = 0;
+      for (const id in coursesToShow) {
+        const c = coursesToShow[id];
+        c.enrolled?.forEach(learnerId => {
+          if (group && !learners[learnerId]?.metadata?.tags?.includes(group)) return;
+          if (learners[learnerId]?.enrollmentDate >= startTime) {
+            totalLearners++;
+            totalProgress += learners[learnerId]?.progress?.[id] || 0;
+            if (courses[id].completions?.includes(learnerId)) totalCompletions++;
+          }
+        });
+        totalAssignments += Object.values(assignments).filter(a => a.courseId === id && a.createdAt >= startTime).length;
+        totalSubmissions += Object.values(assignments).filter(a => a.courseId === id && a.submittedAt >= startTime).length;
+      }
+      analyticsDetails.innerHTML = `
+        <p>Average Progress: ${totalLearners > 0 ? (totalProgress / totalLearners).toFixed(1) : 0}%</p>
+        <p>Total Enrollments: ${totalLearners}</p>
+        <p>Completion Rate: ${totalLearners > 0 ? (totalCompletions / totalLearners * 100).toFixed(1) : 0}%</p>
+        <p>Assignments Submitted: ${totalSubmissions}/${totalAssignments}</p>
+      `;
+    }
+
+    // Filter analytics
+    const filterAnalytics = debounce(() => renderAnalytics(timeRange.value, courseFilter.value, groupFilterAnalytics.value), 300);
+    timeRange.addEventListener("change", filterAnalytics);
+    courseFilter.addEventListener("change", filterAnalytics);
+    groupFilterAnalytics.addEventListener("change", filterAnalytics);
+
+    // Export analytics to PDF
+    exportAnalytics.addEventListener("click", () => {
+      showSpinner();
+      try {
+        const docDefinition = {
+          content: [
+            { text: "CETA Provider Analytics", style: "header" },
+            { text: `Generated on: ${new Date().toLocaleString()}`, style: "subheader" },
+            { text: `Time Range: ${timeRange.options[timeRange.selectedIndex].text}`, style: "subheader" },
+            { text: `Course: ${courseFilter.value ? sanitizeInput(courses[courseFilter.value].name) : "All"}`, style: "subheader" },
+            { text: `Group: ${groupFilterAnalytics.value || "All"}`, style: "subheader" },
+            { canvas: [{ type: "bar", x: 0, y: 0, w: 500, h: 200, data: analyticsChartInstance.toBase64Image() }] },
+            { canvas: [{ type: "line", x: 0, y: 0, w: 500, h: 200, data: heatmapChartInstance.toBase64Image() }] },
+            { text: analyticsDetails.innerText, style: "body" }
+          ],
+          styles: {
+            header: { fontSize: 22, bold: true, alignment: "center", margin: [0, 0, 0, 20] },
+            subheader: { fontSize: 14, margin: [0, 0, 0, 10] },
+            body: { fontSize: 12 }
+          }
+        };
+        pdfMake.createPdf(docDefinition).download("analytics_report.pdf");
+        logAudit("Exported analytics report");
+      } catch (err) {
+        console.error("Error exporting analytics:", err);
+        alert("Failed to export analytics.");
+      }
+      hideSpinner();
+    });
+
+    // Load helpdesk tickets
+    function loadTickets() {
+      showSpinner();
+      onValue(ref(db, "tickets"), snap => {
+        tickets = snap.val() || {};
+        renderTickets();
+        hideSpinner();
+      });
+    }
+
+    function renderTickets() {
+      ticketList.innerHTML = "";
+      for (const id in tickets) {
+        const t = tickets[id];
+        if (t.providerId !== auth.currentUser.uid) continue;
+        const ticketItem = document.createElement("div");
+        ticketItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        ticketItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(t.title)}</p>
+              <p class="text-sm text-gray-600">Learner: ${sanitizeInput(learners[t.learnerId]?.fullName || "Unknown")}</p>
+              <p class="text-sm text-gray-600">Status: ${sanitizeInput(t.status)} | Created: ${new Date(t.createdAt).toLocaleDateString()}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="respondTicket('${id}')" class="text-blue-600 hover:underline" aria-label="Respond to ticket ${sanitizeInput(t.title)}" data-tooltip="Respond to ticket">Respond</button>
+              <button onclick="closeTicket('${id}')" class="text-green-600 hover:underline" aria-label="Close ticket ${sanitizeInput(t.title)}" data-tooltip="Close ticket">Close</button>
+            </div>
+          </div>
+        `;
+        ticketList.appendChild(ticketItem);
+      }
+    }
+
+    // Respond to ticket
+    window.respondTicket = async ticketId => {
+      const response = prompt("Enter your response:");
+      if (!response) return;
+      showSpinner();
+      try {
+        await update(ref(db, `tickets/${ticketId}`), {
+          response: sanitizeInput(response),
+          status: "responded",
+          respondedAt: Date.now()
+        });
+        logAudit(`Responded to ticket ${tickets[ticketId].title}`);
+        alert("Response sent successfully!");
+      } catch (err) {
+        console.error("Error responding to ticket:", err);
+        alert("Failed to respond to ticket.");
+      }
+      hideSpinner();
+    };
+
+    // Close ticket
+    window.closeTicket = async ticketId => {
+      showSpinner();
+      try {
+        await update(ref(db, `tickets/${ticketId}`), {
+          status: "closed",
+          closedAt: Date.now()
+        });
+        logAudit(`Closed ticket ${tickets[ticketId].title}`);
+        alert("Ticket closed successfully!");
+      } catch (err) {
+        console.error("Error closing ticket:", err);
+        alert("Failed to close ticket.");
+      }
+      hideSpinner();
+    };
+
+    // Load video feeds (placeholder for WebRTC)
+    function loadVideoFeeds() {
+      showSpinner();
+      onValue(ref(db, "users"), snap => {
+        learners = snap.val() || {};
+        onValue(ref(db, "courses"), snap => {
+          courses = snap.val() || {};
+          renderVideoFeeds();
+          hideSpinner();
+        });
+      });
+    }
+
+    function renderVideoFeeds(filter = "", courseFilter = "") {
+      videoFeedList.innerHTML = "";
+      for (const id in learners) {
+        const l = learners[id];
+        const isAssigned = l.providerId === auth.currentUser.uid;
+        if (l.role !== "learner" || !isAssigned) continue;
+        if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase())) continue;
+        const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
+        if (courseFilter && !enrolledCourses.some(c => c.id === courseFilter)) continue;
+        const videoItem = document.createElement("div");
+        videoItem.className = "video-feed";
+        videoItem.innerHTML = `
+          <div class="video-label">${sanitizeInput(l.fullName || l.email)}</div>
+          <video id="video-${id}" autoplay muted></video>
+          <p class="text-sm text-gray-600 mt-2">Courses: ${enrolledCourses.map(c => sanitizeInput(c.name)).join(", ") || "None"}</p>
+        `;
+        videoFeedList.appendChild(videoItem);
+        // Placeholder for WebRTC stream
+        console.log(`Placeholder: Initialize WebRTC stream for learner ${id}`);
+      }
+    }
+
+    // Search video feeds
+    const searchVideos = debounce((filter, course) => renderVideoFeeds(sanitizeInput(filter), course), 300);
+    videoSearch.addEventListener("input", () => searchVideos(videoSearch.value, videoCourseFilter.value));
+    videoCourseFilter.addEventListener("change", () => searchVideos(videoSearch.value, videoCourseFilter.value));
+
+    // Log audit events
+    function logAudit(message) {
+      push(ref(db, "auditLogs"), {
+        providerId: auth.currentUser.uid,
+        message,
+        timestamp: Date.now()
+      });
+    }
+
+    // Auth state listener
+    onAuthStateChanged(auth, u => {
+      if (!u) {
+        window.location.href = "/login.html";
+        return;
+      }
+      onValue(ref(db, `users/${u.uid}`), snap => {
+        user = snap.val();
+        if (user?.role !== "provider") {
+          signOut(auth);
+          window.location.href = "/login.html";
+          return;
+        }
+        loadOverview();
+        loadLearners();
+        loadCourses();
+        loadContent();
+        loadAssignments();
+        loadForums();
+        loadQuizzes();
+        loadProgress();
+        loadAnalytics();
+        loadTickets();
+        loadVideoFeeds();
+      });
+    });
+
+    // Sign out
+    document.getElementById("signout-btn").addEventListener("click", async () => {
+      showSpinner();
+      try {
+        await signOut(auth);
+        window.location.href = "/login.html";
+      } catch (err) {
+        console.error("Error signing out:", err);
+        alert("Failed to sign out.");
+      }
+      hideSpinner();
+    });
   </script>
 </body>
 </html>
