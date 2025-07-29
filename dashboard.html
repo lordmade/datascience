@@ -8,7 +8,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <style>
     :root {
       --primary: #1e40af;
@@ -17,8 +20,8 @@
       --card-bg: #ffffff;
       --text-primary: #1f2937;
       --text-secondary: #6b7280;
-      --dark-mode-bg: #1a1a1a;
-      --dark-mode-text: #e5e5e5;
+      --high-contrast-bg: #1a1a1a;
+      --high-contrast-text: #e5e5e5;
     }
 
     body {
@@ -28,7 +31,6 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     .sidebar {
@@ -105,21 +107,21 @@
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }
 
-    .dark-mode {
-      background: var(--dark-mode-bg) !important;
-      color: var(--dark-mode-text) !important;
+    .high-contrast {
+      background: #000 !important;
+      color: var(--high-contrast-text) !important;
     }
 
-    .dark-mode .card {
+    .high-contrast .card {
+      background: var(--high-contrast-bg) !important;
+    }
+
+    .high-contrast .text-gray-600 {
+      color: var(--high-contrast-text) !important;
+    }
+
+    .high-contrast .bg-gray-50 {
       background: #2d3748 !important;
-    }
-
-    .dark-mode .text-gray-600 {
-      color: var(--dark-mode-text) !important;
-    }
-
-    .dark-mode .bg-gray-50 {
-      background: #4b5563 !important;
     }
 
     .tooltip {
@@ -165,9 +167,28 @@
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     }
 
-    .dark-mode .modal-content {
-      background: #2d3748 !important;
-      color: var(--dark-mode-text) !important;
+    .high-contrast .modal-content {
+      background: var(--high-contrast-bg) !important;
+      color: var(--high-contrast-text) !important;
+    }
+
+    .video-feed {
+      background: black;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 16 / 9;
+    }
+
+    .video-label {
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
     }
 
     button:not(.nav-button) {
@@ -218,12 +239,6 @@
     .section::-webkit-scrollbar-track {
       background: #e5e7eb;
     }
-
-    .notification-banner {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
   </style>
 </head>
 <body>
@@ -243,100 +258,97 @@
       <nav>
         <ul class="space-y-2">
           <li><button class="nav-button w-full text-left active" data-section="overview" data-tooltip="Dashboard Overview"><i class="fas fa-tachometer-alt"></i> Overview</button></li>
-          <li><button class="nav-button w-full text-left" data-section="courses" data-tooltip="View Programs"><i class="fas fa-book"></i> My Programs</button></li>
-          <li><button class="nav-button w-full text-left" data-section="content" data-tooltip="Course Content"><i class="fas fa-file-alt"></i> Course Content</button></li>
-          <li><button class="nav-button w-full text-left" data-section="assessments" data-tooltip="View Assessments"><i class="fas fa-tasks"></i> Assessments</button></li>
-          <li><button class="nav-button w-full text-left" data-section="forums" data-tooltip="Course Forums"><i class="fas fa-comments"></i> Forums</button></li>
+          <li><button class="nav-button w-full text-left" data-section="courses" data-tooltip="View Courses"><i class="fas fa-book"></i> My Courses</button></li>
+          <li><button class="nav-button w-full text-left" data-section="progress" data-tooltip="Track Progress"><i class="fas fa-chart-line"></i> Progress</button></li>
+          <li><button class="nav-button w-full text-left" data-section="content" data-tooltip="Course Materials"><i class="fas fa-file-alt"></i> Course Content</button></li>
+          <li><button class="nav-button w-full text-left" data-section="assignments" data-tooltip="View Assignments"><i class="fas fa-tasks"></i> Assignments</button></li>
+          <li><button class="nav-button w-full text-left" data-section="forums" data-tooltip="Course Discussions"><i class="fas fa-comments"></i> Forums</button></li>
           <li><button class="nav-button w-full text-left" data-section="quizzes" data-tooltip="Take Quizzes"><i class="fas fa-question-circle"></i> Quizzes</button></li>
-          <li><button class="nav-button w-full text-left" data-section="certifications" data-tooltip="View Certificates"><i class="fas fa-certificate"></i> Certificates</button></li>
-          <li><button class="nav-button w-full text-left" data-section="notices" data-tooltip="Notice Board"><i class="fas fa-bell"></i> Notices</button></li>
-          <li><button class="nav-button w-full text-left" data-section="helpdesk" data-tooltip="Submit Helpdesk Ticket"><i class="fas fa-headset"></i> Helpdesk</button></li>
+          <li><button class="nav-button w-full text-left" data-section="certificates" data-tooltip="View Certificates"><i class="fas fa-certificate"></i> Certificates</button></li>
+          <li><button class="nav-button w-full text-left" data-section="helpdesk" data-tooltip="Support Tickets"><i class="fas fa-headset"></i> Helpdesk</button></li>
         </ul>
       </nav>
       <div class="mt-auto">
-        <button id="toggle-dark-mode" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-3xl mb-2" aria-label="Toggle dark mode" data-tooltip="Toggle Dark Mode">Toggle Dark Mode</button>
+        <button id="toggle-contrast" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-3xl mb-2" aria-label="Toggle high contrast mode" data-tooltip="Toggle High Contrast">Toggle High Contrast</button>
         <button id="signout-btn" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-3xl" aria-label="Sign out" data-tooltip="Sign Out">Sign Out</button>
       </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
-      <!-- Notifications -->
-      <div id="notifications" class="notification-banner mb-6 hidden">
-        <div class="card bg-blue-100 border-l-4 border-blue-500 text-blue-700">
-          <h3 class="text-lg font-semibold">Notifications</h3>
-          <ul id="notification-list" class="space-y-2"></ul>
-        </div>
-      </div>
-
       <!-- Overview Section -->
       <div id="overview" class="section">
-        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h2>
+        <h2 class="text-2xl font-semibold mb-4">Welcome, <span id="learner-name">Learner</span></h2>
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <div class="card">
-            <h3 class="text-lg font-semibold">Enrolled Programs</h3>
-            <p id="total-courses" class="text-3xl font-bold text-blue-600">0</p>
+            <h3 class="text-lg font-semibold">Enrolled Courses</h3>
+            <p id="enrolled-courses" class="text-3xl font-bold text-blue-600">0</p>
           </div>
           <div class="card">
-            <h3 class="text-lg font-semibold">Overall Progress</h3>
-            <p id="learner-progress" class="text-3xl font-bold text-blue-600">0%</p>
+            <h3 class="text-lg font-semibold">Courses Completed</h3>
+            <p id="courses-completed" class="text-3xl font-bold text-blue-600">0</p>
           </div>
           <div class="card">
             <h3 class="text-lg font-semibold">Certificates Earned</h3>
-            <p id="total-certificates" class="text-3xl font-bold text-blue-600">0</p>
+            <p id="certificates-earned" class="text-3xl font-bold text-blue-600">0</p>
           </div>
         </div>
         <div class="mt-6 card">
           <h3 class="text-lg font-semibold mb-2">Course Progress</h3>
           <canvas id="progress-chart"></canvas>
         </div>
-        <div class="mt-6 card">
-          <h3 class="text-lg font-semibold mb-2">Recent Notices</h3>
-          <div id="recent-notices" class="space-y-4"></div>
-        </div>
       </div>
 
-      <!-- My Programs Section -->
+      <!-- Courses Section -->
       <div id="courses" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-book"></i> My Programs</h2>
+        <h2 class="text-2xl font-semibold mb-4">My Courses</h2>
         <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Enrolled Programs</h3>
-          <input type="text" id="courseSearch" placeholder="Search programs..." class="border p-2 rounded w-full mb-4" aria-label="Search programs by name or tag" />
+          <h3 class="text-lg font-semibold mb-2">Enrolled Courses</h3>
+          <input type="text" id="courseSearch" placeholder="Search courses..." class="border p-2 rounded w-full mb-4" aria-label="Search courses by name or tag" />
           <div id="courseList" class="space-y-4"></div>
         </div>
       </div>
 
       <!-- Course Content Section -->
       <div id="content" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-file-alt"></i> Course Content</h2>
+        <h2 class="text-2xl font-semibold mb-4">Course Content</h2>
         <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Course Content</h3>
-          <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
-            <input type="text" id="contentSearch" placeholder="Search content..." class="border p-2 rounded w-full md:w-1/2" aria-label="Search content by title" />
-            <select id="contentCourseFilter" class="border p-2 rounded w-full md:w-auto" aria-label="Filter by course">
-              <option value="">All Courses</option>
-            </select>
-          </div>
+          <h3 class="text-lg font-semibold mb-2">Course Materials</h3>
+          <input type="text" id="contentSearch" placeholder="Search content..." class="border p-2 rounded w-full mb-4" aria-label="Search content by title" />
+          <select id="contentCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
           <div id="contentList" class="space-y-4"></div>
         </div>
       </div>
 
-      <!-- Assessments Section -->
-      <div id="assessments" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-tasks"></i> Assessments</h2>
+      <!-- Assignments Section -->
+      <div id="assignments" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Assignments</h2>
         <div class="card">
-          <h3 class="text-lg font-semibold mb-2">My Assessments</h3>
-          <input type="text" id="assessmentSearch" placeholder="Search assessments..." class="border p-2 rounded w-full mb-4" aria-label="Search assessments by title" />
-          <select id="assessmentCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
+          <h3 class="text-lg font-semibold mb-2">Your Assignments</h3>
+          <input type="text" id="assignmentSearch" placeholder="Search assignments..." class="border p-2 rounded w-full mb-4" aria-label="Search assignments by title" />
+          <select id="assignmentCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
             <option value="">All Courses</option>
           </select>
-          <div id="assessmentList" class="space-y-4"></div>
+          <div id="assignmentList" class="space-y-4"></div>
         </div>
       </div>
 
       <!-- Forums Section -->
       <div id="forums" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-comments"></i> Course Forums</h2>
+        <h2 class="text-2xl font-semibold mb-4">Course Forums</h2>
+        <div class="mb-4 card">
+          <h3 class="text-lg font-semibold mb-2">Create Forum Post</h3>
+          <form id="forum-post-form">
+            <select id="forumCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
+              <option value="">Select Course</option>
+            </select>
+            <input type="text" id="threadTitle" placeholder="Thread Title" class="border p-2 rounded w-full mb-2" aria-label="Enter thread title" required />
+            <textarea id="threadContent" placeholder="Post Content" class="border p-2 rounded w-full mb-2" aria-label="Enter post content" required></textarea>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Create post">Create Post</button>
+          </form>
+        </div>
         <div class="card">
           <h3 class="text-lg font-semibold mb-2">Forum Threads</h3>
           <input type="text" id="forumSearch" placeholder="Search threads..." class="border p-2 rounded w-full mb-4" aria-label="Search threads by title" />
@@ -349,7 +361,7 @@
 
       <!-- Quizzes Section -->
       <div id="quizzes" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-question-circle"></i> Quizzes</h2>
+        <h2 class="text-2xl font-semibold mb-4">Quizzes</h2>
         <div class="card">
           <h3 class="text-lg font-semibold mb-2">Available Quizzes</h3>
           <input type="text" id="quizSearch" placeholder="Search quizzes..." class="border p-2 rounded w-full mb-4" aria-label="Search quizzes by title" />
@@ -361,93 +373,54 @@
       </div>
 
       <!-- Certificates Section -->
-      <div id="certifications" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-certificate"></i> My Certificates</h2>
+      <div id="certificates" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Certificates</h2>
         <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Certificates</h3>
-          <div id="certificationList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Notices Section -->
-      <div id="notices" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-bell"></i> Notice Board</h2>
-        <div class="card">
-          <h3 class="text-lg font-semibold mb-2">Notices</h3>
-          <input type="text" id="noticeSearch" placeholder="Search notices..." class="border p-2 rounded w-full mb-4" aria-label="Search notices by title" />
-          <div id="noticeList" class="space-y-4" aria-live="polite"></div>
+          <h3 class="text-lg font-semibold mb-2">Earned Certificates</h3>
+          <div id="certificateList" class="space-y-4"></div>
         </div>
       </div>
 
       <!-- Helpdesk Section -->
       <div id="helpdesk" class="section hidden">
-        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2"><i class="fas fa-headset"></i> Helpdesk</h2>
-        <div class="mb-6 card">
-          <h3 class="text-lg font-semibold mb-2">Submit Ticket</h3>
+        <h2 class="text-2xl font-semibold mb-4">Helpdesk</h2>
+        <div class="mb-4 card">
+          <h3 class="text-lg font-semibold mb-2">Submit Support Ticket</h3>
           <form id="ticket-form">
-            <input type="text" id="ticketIssue" placeholder="Issue Description" class="border p-2 rounded w-full mb-2" aria-label="Enter issue description" required />
-            <select id="ticketPriority" class="border p-2 rounded w-full mb-2" aria-label="Select priority" required>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
-            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Submit ticket">Submit Ticket</button>
+            <input type="text" id="ticketTitle" placeholder="Ticket Title" class="border p-2 rounded w-full mb-2" aria-label="Enter ticket title" required />
+            <textarea id="ticketDescription" placeholder="Describe your issue..." class="border p-2 rounded w-full mb-2" aria-label="Enter ticket description" required></textarea>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Submit ticket">Submit</button>
           </form>
         </div>
         <div class="card">
-          <h3 class="text-lg font-semibold mb-2">My Tickets</h3>
+          <h3 class="text-lg font-semibold mb-2">Your Tickets</h3>
           <div id="ticketList" class="space-y-4"></div>
         </div>
       </div>
 
-      <!-- Course Content Modal -->
-      <div id="content-view-modal" class="modal">
+      <!-- Quiz Attempt Modal -->
+      <div id="quiz-attempt-modal" class="modal">
         <div class="modal-content">
-          <h3 class="text-lg font-semibold mb-4">Course Content</h3>
-          <div id="content-view" class="space-y-4"></div>
-          <button type="button" id="close-content-view" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl mt-4" data-tooltip="Close">Close</button>
-        </div>
-      </div>
-
-      <!-- Assessment Submission Modal -->
-      <div id="assessment-submit-modal" class="modal">
-        <div class="modal-content">
-          <h3 class="text-lg font-semibold mb-4">Submit Assessment</h3>
-          <form id="assessment-submit-form">
-            <p id="assessment-title" class="font-semibold mb-2"></p>
-            <input type="file" id="assessmentFile" accept="application/pdf,.txt" class="border p-2 rounded w-full mb-2" aria-label="Upload assessment file" required />
-            <div class="flex gap-2">
-              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Submit assessment">Submit</button>
-              <button type="button" id="close-assessment-submit" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Forum View Modal -->
-      <div id="forum-view-modal" class="modal">
-        <div class="modal-content">
-          <h3 id="forum-title" class="text-lg font-semibold mb-4">Forum</h3>
-          <div id="forum-posts" class="space-y-2 mb-4"></div>
-          <form id="forum-post-form">
-            <textarea id="new-post" placeholder="Add a new post..." class="border p-2 rounded w-full mb-2" aria-label="Enter new post content" required></textarea>
-            <div class="flex gap-2">
-              <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Post reply">Post</button>
-              <button type="button" id="close-forum-view" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Close">Close</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- Quiz Taking Modal -->
-      <div id="quiz-take-modal" class="modal">
-        <div class="modal-content">
-          <h3 id="quiz-title" class="text-lg font-semibold mb-4">Take Quiz</h3>
-          <form id="quiz-take-form">
-            <div id="quiz-questions" class="space-y-4"></div>
+          <h3 class="text-lg font-semibold mb-4">Quiz: <span id="quiz-attempt-title"></span></h3>
+          <form id="quiz-attempt-form">
+            <div id="quiz-attempt-questions" class="space-y-4"></div>
             <div class="flex gap-2">
               <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Submit quiz">Submit</button>
-              <button type="button" id="close-quiz-take" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
+              <button type="button" id="close-quiz-attempt" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Assignment Submission Modal -->
+      <div id="assignment-submit-modal" class="modal">
+        <div class="modal-content">
+          <h3 class="text-lg font-semibold mb-4">Submit Assignment: <span id="assignment-submit-title"></span></h3>
+          <form id="assignment-submit-form">
+            <input type="file" id="assignmentFile" accept=".pdf,.doc,.docx" class="border p-2 rounded w-full mb-2" aria-label="Upload assignment file" required />
+            <div class="flex gap-2">
+              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Submit assignment">Submit</button>
+              <button type="button" id="close-assignment-submit" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
             </div>
           </form>
         </div>
@@ -466,9 +439,10 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, onValue, push, get, update, runTransaction } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getDatabase, ref, onValue, push, update, get, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
     import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
@@ -484,113 +458,86 @@
     const auth = getAuth(app);
     const storage = getStorage(app);
 
+    // DOM elements
+    const learnerName = document.getElementById("learner-name");
+    const enrolledCourses = document.getElementById("enrolled-courses");
+    const coursesCompleted = document.getElementById("courses-completed");
+    const certificatesEarned = document.getElementById("certificates-earned");
     const courseList = document.getElementById("courseList");
     const courseSearch = document.getElementById("courseSearch");
     const contentList = document.getElementById("contentList");
     const contentSearch = document.getElementById("contentSearch");
     const contentCourseFilter = document.getElementById("contentCourseFilter");
-    const assessmentList = document.getElementById("assessmentList");
-    const assessmentSearch = document.getElementById("assessmentSearch");
-    const assessmentCourseFilter = document.getElementById("assessmentCourseFilter");
+    const assignmentList = document.getElementById("assignmentList");
+    const assignmentSearch = document.getElementById("assignmentSearch");
+    const assignmentCourseFilter = document.getElementById("assignmentCourseFilter");
     const forumList = document.getElementById("forumList");
     const forumSearch = document.getElementById("forumSearch");
     const forumCourseFilter = document.getElementById("forumCourseFilter");
+    const forumPostForm = document.getElementById("forum-post-form");
+    const forumCourse = document.getElementById("forumCourse");
+    const threadTitle = document.getElementById("threadTitle");
+    const threadContent = document.getElementById("threadContent");
     const quizList = document.getElementById("quizList");
     const quizSearch = document.getElementById("quizSearch");
     const quizCourseFilter = document.getElementById("quizCourseFilter");
-    const certificationList = document.getElementById("certificationList");
-    const noticeList = document.getElementById("noticeList");
-    const noticeSearch = document.getElementById("noticeSearch");
-    const ticketList = document.getElementById("ticketList");
+    const certificateList = document.getElementById("certificateList");
     const ticketForm = document.getElementById("ticket-form");
-    const totalCourses = document.getElementById("total-courses");
-    const learnerProgress = document.getElementById("learner-progress");
-    const totalCertificates = document.getElementById("total-certificates");
-    const recentNotices = document.getElementById("recent-notices");
-    const progressChartCanvas = document.getElementById("progress-chart");
-    const loadingSpinner = document.getElementById("loading-spinner");
+    const ticketTitle = document.getElementById("ticketTitle");
+    const ticketDescription = document.getElementById("ticketDescription");
+    const ticketList = document.getElementById("ticketList");
+    const progressChart = document.getElementById("progress-chart").getContext("2d");
+    const quizAttemptModal = document.getElementById("quiz-attempt-modal");
+    const quizAttemptTitle = document.getElementById("quiz-attempt-title");
+    const quizAttemptForm = document.getElementById("quiz-attempt-form");
+    const quizAttemptQuestions = document.getElementById("quiz-attempt-questions");
+    const closeQuizAttempt = document.getElementById("close-quiz-attempt");
+    const assignmentSubmitModal = document.getElementById("assignment-submit-modal");
+    const assignmentSubmitTitle = document.getElementById("assignment-submit-title");
+    const assignmentSubmitForm = document.getElementById("assignment-submit-form");
+    const assignmentFile = document.getElementById("assignmentFile");
+    const closeAssignmentSubmit = document.getElementById("close-assignment-submit");
     const sidebar = document.getElementById("sidebar");
     const toggleSidebar = document.getElementById("toggle-sidebar");
-    const toggleDarkMode = document.getElementById("toggle-dark-mode");
-    const notifications = document.getElementById("notifications");
-    const notificationList = document.getElementById("notification-list");
-    const contentViewModal = document.getElementById("content-view-modal");
-    const contentView = document.getElementById("content-view");
-    const closeContentView = document.getElementById("close-content-view");
-    const assessmentSubmitModal = document.getElementById("assessment-submit-modal");
-    const assessmentSubmitForm = document.getElementById("assessment-submit-form");
-    const assessmentTitle = document.getElementById("assessment-title");
-    const assessmentFile = document.getElementById("assessmentFile");
-    const closeAssessmentSubmit = document.getElementById("close-assessment-submit");
-    const forumViewModal = document.getElementById("forum-view-modal");
-    const forumTitle = document.getElementById("forum-title");
-    const forumPosts = document.getElementById("forum-posts");
-    const forumPostForm = document.getElementById("forum-post-form");
-    const newPost = document.getElementById("new-post");
-    const closeForumView = document.getElementById("close-forum-view");
-    const quizTakeModal = document.getElementById("quiz-take-modal");
-    const quizTitle = document.getElementById("quiz-title");
-    const quizQuestions = document.getElementById("quiz-questions");
-    const quizTakeForm = document.getElementById("quiz-take-form");
-    const closeQuizTake = document.getElementById("close-quiz-take");
+    const toggleContrast = document.getElementById("toggle-contrast");
+    const loadingSpinner = document.getElementById("loading-spinner");
 
-    let userData = {}, courses = {}, contents = {}, assignments = {}, forums = {}, quizzes = {}, certifications = {}, notices = {}, tickets = {}, users = {};
-    let currentUserId = null;
+    let user = null, courses = {}, contents = {}, assignments = {}, forums = {}, quizzes = {}, certificates = {}, tickets = {};
     let progressChartInstance = null;
 
-    function sanitizeInput(input) {
-      const div = document.createElement("div");
-      div.textContent = input;
-      return div.innerHTML;
-    }
-
+    // Show/hide loading spinner
     function showSpinner() { loadingSpinner.classList.remove("hidden"); }
     function hideSpinner() { loadingSpinner.classList.add("hidden"); }
 
-    function initializeUI() {
-      document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
-      document.getElementById("overview").classList.remove("hidden");
-      [contentViewModal, assessmentSubmitModal, forumViewModal, quizTakeModal].forEach(modal => modal.style.display = "none");
-      document.querySelectorAll(".nav-button").forEach(btn => btn.classList.remove("active"));
-      document.querySelector('.nav-button[data-section="overview"]').classList.add("active");
-      if (window.innerWidth < 768) {
-        sidebar.classList.add("sidebar-hidden");
-        sidebar.classList.remove("sidebar-open");
-      } else {
-        sidebar.classList.remove("sidebar-hidden");
-        sidebar.classList.add("sidebar-open");
-      }
-    }
-
+    // Sidebar toggle
     toggleSidebar.addEventListener("click", () => {
       sidebar.classList.toggle("sidebar-hidden");
       sidebar.classList.toggle("sidebar-open");
     });
 
-    toggleDarkMode.addEventListener("click", () => {
-      document.body.classList.toggle("dark-mode");
-      localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+    // High contrast toggle
+    toggleContrast.addEventListener("click", () => {
+      document.body.classList.toggle("high-contrast");
+      localStorage.setItem("highContrast", document.body.classList.contains("high-contrast"));
     });
 
-    if (localStorage.getItem("darkMode") === "true") {
-      document.body.classList.add("dark-mode");
+    // Load high contrast preference
+    if (localStorage.getItem("highContrast") === "true") {
+      document.body.classList.add("high-contrast");
     }
 
+    // Section switching
     document.querySelectorAll(".nav-button").forEach(btn => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
         document.getElementById(btn.dataset.section).classList.remove("hidden");
         document.querySelectorAll(".nav-button").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
-        if (window.innerWidth < 768) {
-          sidebar.classList.remove("sidebar-open");
-          sidebar.classList.add("sidebar-hidden");
-        }
-        [contentViewModal, assessmentSubmitModal, forumViewModal, quizTakeModal].forEach(modal => modal.style.display = "none");
-        logAudit(`Viewed ${btn.dataset.section} section`);
+        if (window.innerWidth < 768) sidebar.classList.remove("sidebar-open");
       });
     });
 
+    // Debounce function for search
     function debounce(func, wait) {
       let timeout;
       return function executedFunction(...args) {
@@ -603,379 +550,501 @@
       };
     }
 
-    function loadNotifications() {
-      showSpinner();
-      onValue(ref(db, `auditLogs/${currentUserId}`), snap => {
-        notificationList.innerHTML = "";
-        const data = snap.val() || {};
-        const recentLogs = Object.entries(data)
-          .filter(([_, log]) => log.userId === currentUserId)
-          .sort((a, b) => b[1].timestamp - a[1].timestamp)
-          .slice(0, 5);
-        if (recentLogs.length > 0) {
-          notifications.classList.remove("hidden");
-        } else {
-          notifications.classList.add("hidden");
-        }
-        recentLogs.forEach(([_, log]) => {
-          const item = document.createElement("li");
-          item.className = "text-sm flex items-center gap-2";
-          item.innerHTML = `<i class="fas fa-bell"></i> ${sanitizeInput(log.message)} at ${new Date(log.timestamp).toLocaleString()}`;
-          notificationList.appendChild(item);
-        });
-        hideSpinner();
-      });
+    // Sanitize input to prevent XSS
+    function sanitizeInput(input) {
+      const div = document.createElement("div");
+      div.textContent = input;
+      return div.innerHTML;
     }
 
-    async function loadOverview() {
+    // Load overview metrics and chart
+    function loadOverview() {
       showSpinner();
-      const userSnap = await get(ref(db, `users/${currentUserId}`));
-      userData = userSnap.val() || {};
-      onValue(ref(db, "courses"), snap => {
-        courses = snap.val() || {};
-        onValue(ref(db, "assignments"), snap => {
-          assignments = snap.val() || {};
-          const enrolled = Object.keys(courses).filter(id => 
-            (userData.enrolled?.includes(id) && courses[id].providerId === userData.providerId) ||
-            Object.values(assignments).some(a => a.learnerId === currentUserId && a.courseId === id)
-          );
-          totalCourses.textContent = enrolled.length;
-          const totalProgress = enrolled.reduce((sum, id) => sum + (userData.progress?.[id] || 0), 0);
-          learnerProgress.textContent = enrolled.length ? `${(totalProgress / enrolled.length).toFixed(1)}%` : "0%";
+      onValue(ref(db, `users/${auth.currentUser.uid}`), snap => {
+        user = snap.val();
+        learnerName.textContent = sanitizeInput(user.fullName || user.email);
+
+        onValue(ref(db, "courses"), snap => {
+          courses = snap.val() || {};
+          let courseCount = 0, completedCount = 0;
+          const progressData = { labels: [], datasets: [{ label: "Progress (%)", data: [], backgroundColor: "#2563eb", borderRadius: 4 }] };
+
+          for (const id in courses) {
+            if (courses[id].enrolled?.includes(auth.currentUser.uid)) {
+              courseCount++;
+              if (courses[id].completions?.includes(auth.currentUser.uid)) completedCount++;
+              progressData.labels.push(courses[id].name);
+              progressData.datasets[0].data.push(user.progress?.[id] || 0);
+            }
+          }
+
+          enrolledCourses.textContent = courseCount;
+          coursesCompleted.textContent = completedCount;
 
           if (progressChartInstance) progressChartInstance.destroy();
-          progressChartInstance = new Chart(progressChartCanvas, {
+          progressChartInstance = new Chart(progressChart, {
             type: "bar",
-            data: {
-              labels: enrolled.map(id => courses[id].name),
-              datasets: [{
-                label: "Progress (%)",
-                data: enrolled.map(id => userData.progress?.[id] || 0),
-                backgroundColor: "#1e40af",
-                borderRadius: 4
-              }]
-            },
+            data: progressData,
             options: {
               scales: { y: { beginAtZero: true, max: 100 } },
               plugins: {
-                legend: { display: true },
-                datalabels: { anchor: "end", align: "top", color: "#1f2937", font: { weight: "bold" } }
+                datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
               }
             },
             plugins: [ChartDataLabels]
           });
-        });
-      });
 
-      onValue(ref(db, "certifications"), snap => {
-        certifications = snap.val() || {};
-        const userCerts = Object.values(certifications).filter(c => c.learnerId === currentUserId);
-        totalCertificates.textContent = userCerts.length;
-      });
-
-      onValue(ref(db, "notices"), snap => {
-        recentNotices.innerHTML = "";
-        const data = snap.val() || {};
-        const recent = Object.entries(data)
-          .sort((a, b) => b[1].createdAt - a[1].createdAt)
-          .slice(0, 3);
-        if (recent.length === 0) {
-          recentNotices.innerHTML = "<p class='text-gray-600 dark:text-gray-300'>No recent notices.</p>";
-          hideSpinner();
-          return;
-        }
-        recent.forEach(([_, notice]) => {
-          const noticeItem = document.createElement("div");
-          noticeItem.className = "bg-gray-50 dark:bg-gray-600 p-4 rounded-lg shadow hover:shadow-md transition-shadow";
-          noticeItem.innerHTML = `
-            <h4 class="text-md font-semibold">${sanitizeInput(notice.title)}</h4>
-            <p class="text-gray-700 dark:text-gray-300">${sanitizeInput(notice.content.substring(0, 100))}${notice.content.length > 100 ? "..." : ""}</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Posted on ${new Date(notice.createdAt).toLocaleDateString()}</p>
-          `;
-          recentNotices.appendChild(noticeItem);
-        });
-        hideSpinner();
-      });
-    }
-
-    function populateCourseFilters() {
-      [contentCourseFilter, assessmentCourseFilter, forumCourseFilter, quizCourseFilter].forEach(filter => {
-        filter.innerHTML = '<option value="">All Courses</option>';
-        Object.entries(courses)
-          .filter(([id]) => 
-            (userData.enrolled?.includes(id) && courses[id].providerId === userData.providerId) ||
-            Object.values(assignments).some(a => a.learnerId === currentUserId && a.courseId === id)
-          )
-          .forEach(([id, course]) => {
-            const option = document.createElement("option");
-            option.value = id;
-            option.textContent = sanitizeInput(course.name);
-            filter.appendChild(option);
-          });
-      });
-    }
-
-    function loadCourses(filter = "") {
-      showSpinner();
-      onValue(ref(db, "users"), snap => {
-        users = snap.val() || {};
-        onValue(ref(db, "courses"), snap => {
-          courses = snap.val() || {};
-          onValue(ref(db, "assignments"), snap => {
-            assignments = snap.val() || {};
-            renderCourses(filter);
-            populateCourseFilters();
+          onValue(ref(db, "certifications"), snap => {
+            certificates = snap.val() || {};
+            certificatesEarned.textContent = Object.values(certificates).filter(c => c.learnerId === auth.currentUser.uid).length;
             hideSpinner();
           });
         });
       });
     }
 
-    function renderCourses(filter = "") {
-      courseList.innerHTML = "";
-      const enrolled = Object.keys(courses).filter(id => 
-        (userData.enrolled?.includes(id) && courses[id].providerId === userData.providerId) ||
-        Object.values(assignments).some(a => a.learnerId === currentUserId && a.courseId === id)
-      );
-      if (enrolled.length === 0) {
-        courseList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No courses assigned.</p>";
-        return;
-      }
-      enrolled.forEach(id => {
-        const c = courses[id];
-        if (filter && !c.name.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) return;
-        const courseItem = document.createElement("div");
-        courseItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
-        const provider = users[c.providerId]?.fullName || users[c.providerId]?.email || "Unknown";
-        courseItem.innerHTML = `
-          <div>
-            <p class="font-semibold">${sanitizeInput(c.name)}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Provider: ${sanitizeInput(provider)}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Progress: ${userData.progress?.[id] || 0}%</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="viewCourse('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" aria-label="View program ${sanitizeInput(c.name)}" data-tooltip="View program">View</button>
-          </div>
-        `;
-        courseList.appendChild(courseItem);
+    // Load courses
+    function loadCourses() {
+      showSpinner();
+      onValue(ref(db, "courses"), snap => {
+        courses = snap.val() || {};
+        renderCourses();
+        populateCourseFilters();
+        hideSpinner();
       });
     }
 
-    function loadContent(filter = "", courseFilter = "") {
+    function renderCourses(filter = "") {
+      courseList.innerHTML = "";
+      for (const id in courses) {
+        const c = courses[id];
+        if (!c.enrolled?.includes(auth.currentUser.uid) || (filter && !c.name.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase())))) continue;
+        const courseItem = document.createElement("div");
+        courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow";
+        courseItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${sanitizeInput(c.name)}</p>
+            <p class="text-sm text-gray-600">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Progress: ${user.progress?.[id] || 0}%</p>
+          </div>
+        `;
+        courseList.appendChild(courseItem);
+      }
+      if (!courseList.innerHTML) {
+        courseList.innerHTML = '<p class="text-gray-600 text-center">No courses enrolled.</p>';
+      }
+    }
+
+    // Search courses
+    const searchCourses = debounce(filter => renderCourses(sanitizeInput(filter)), 300);
+    courseSearch.addEventListener("input", () => searchCourses(courseSearch.value));
+
+    // Load course content
+    function loadContent() {
       showSpinner();
       onValue(ref(db, "contents"), snap => {
         contents = snap.val() || {};
-        renderContent(filter, courseFilter);
+        renderContent();
         hideSpinner();
       });
+    }
+
+    function populateCourseFilters() {
+      const courseOptions = '<option value="">All Courses</option>' + Object.entries(courses)
+        .filter(([id]) => courses[id].enrolled?.includes(auth.currentUser.uid))
+        .map(([id, c]) => `<option value="${id}">${sanitizeInput(c.name)}</option>`).join("");
+      contentCourseFilter.innerHTML = courseOptions;
+      assignmentCourseFilter.innerHTML = courseOptions;
+      forumCourseFilter.innerHTML = courseOptions;
+      quizCourseFilter.innerHTML = courseOptions;
+      forumCourse.innerHTML = '<option value="">Select Course</option>' + courseOptions;
     }
 
     function renderContent(filter = "", courseFilter = "") {
       contentList.innerHTML = "";
-      let hasContent = false;
       for (const id in contents) {
         const c = contents[id];
-        if (!((userData.enrolled?.includes(c.courseId) && courses[c.courseId]?.providerId === userData.providerId) ||
-              Object.values(assignments).some(a => a.learnerId === currentUserId && a.courseId === c.courseId))) continue;
+        if (!courses[c.courseId]?.enrolled?.includes(auth.currentUser.uid)) continue;
         if (filter && !c.title.toLowerCase().includes(filter.toLowerCase())) continue;
         if (courseFilter && c.courseId !== courseFilter) continue;
-        hasContent = true;
         const contentItem = document.createElement("div");
-        contentItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
+        contentItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
         contentItem.innerHTML = `
-          <div>
-            <p class="font-semibold">${sanitizeInput(c.title)}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[c.courseId]?.name || "Unknown")} | Type: ${sanitizeInput(c.type)}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Uploaded: ${new Date(c.uploadedAt).toLocaleDateString()}</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="viewContent('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" aria-label="View content ${sanitizeInput(c.title)}" data-tooltip="View content">View</button>
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(c.title)}</p>
+              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[c.courseId]?.name || "Unknown")} | Type: ${sanitizeInput(c.type)}</p>
+              <p class="text-sm text-gray-600">URL: <a href="${sanitizeInput(c.url)}" target="_blank" class="text-blue-600 hover:underline">View</a></p>
+            </div>
           </div>
         `;
         contentList.appendChild(contentItem);
       }
-      if (!hasContent) {
-        contentList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No content available.</p>";
+      if (!contentList.innerHTML) {
+        contentList.innerHTML = '<p class="text-gray-600 text-center">No content available.</p>';
       }
     }
 
-    function loadAssessments(filter = "", courseFilter = "") {
+    // Search content
+    const searchContent = debounce((filter, course) => renderContent(sanitizeInput(filter), course), 300);
+    contentSearch.addEventListener("input", () => searchContent(contentSearch.value, contentCourseFilter.value));
+    contentCourseFilter.addEventListener("change", () => searchContent(contentSearch.value, contentCourseFilter.value));
+
+    // Load assignments
+    function loadAssignments() {
       showSpinner();
       onValue(ref(db, "assignments"), snap => {
         assignments = snap.val() || {};
-        renderAssessments(filter, courseFilter);
+        renderAssignments();
         hideSpinner();
       });
     }
 
-    function renderAssessments(filter = "", courseFilter = "") {
-      assessmentList.innerHTML = "";
-      let hasAssessments = false;
+    function renderAssignments(filter = "", courseFilter = "") {
+      assignmentList.innerHTML = "";
       for (const id in assignments) {
         const a = assignments[id];
-        if (!(a.learnerId === currentUserId || 
-              (userData.enrolled?.includes(a.courseId) && courses[a.courseId]?.providerId === userData.providerId)) ||
-            a.archived) continue;
+        if (a.learnerId !== auth.currentUser.uid) continue;
         if (filter && !a.title.toLowerCase().includes(filter.toLowerCase())) continue;
         if (courseFilter && a.courseId !== courseFilter) continue;
-        hasAssessments = true;
-        const assessmentItem = document.createElement("div");
-        assessmentItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
-        assessmentItem.innerHTML = `
-          <div>
-            <p class="font-semibold">${sanitizeInput(a.title)}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[a.courseId]?.name || "Unknown")}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Due: ${a.dueDate ? new Date(a.dueDate).toLocaleDateString() : "-"} | Status: ${sanitizeInput(a.submissions?.[currentUserId]?.status || "Not Submitted")}${a.submissions?.[currentUserId]?.grade ? ` | Grade: ${a.submissions[currentUserId].grade}` : ""}</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="submitAssessment('${id}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" aria-label="Submit assessment ${sanitizeInput(a.title)}" data-tooltip="Submit assessment">Submit</button>
-            ${a.submissions?.[currentUserId] ? `<button onclick="viewAssessment('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" aria-label="View assessment ${sanitizeInput(a.title)}" data-tooltip="View submission">View</button>` : ""}
+        const assignmentItem = document.createElement("div");
+        assignmentItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        assignmentItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(a.title)}</p>
+              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[a.courseId]?.name || "Unknown")}</p>
+              <p class="text-sm text-gray-600">Status: ${sanitizeInput(a.status)} | Due: ${new Date(a.dueDate).toLocaleDateString()}</p>
+              <p class="text-sm text-gray-600">Grade: ${a.grade ? a.grade : "Not graded"}</p>
+              <p class="text-sm text-gray-600">Submission: ${a.submissionUrl ? `<a href="${sanitizeInput(a.submissionUrl)}" target="_blank" class="text-blue-600 hover:underline">View</a>` : "Not submitted"}</p>
+            </div>
+            <div class="flex gap-2">
+              ${a.status === "assigned" ? `<button onclick="submitAssignment('${id}', '${sanitizeInput(a.title)}')" class="text-blue-600 hover:underline" aria-label="Submit assignment ${sanitizeInput(a.title)}" data-tooltip="Submit assignment">Submit</button>` : ""}
+            </div>
           </div>
         `;
-        assessmentList.appendChild(assessmentItem);
+        assignmentList.appendChild(assignmentItem);
       }
-      if (!hasAssessments) {
-        assessmentList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No assessments available.</p>";
+      if (!assignmentList.innerHTML) {
+        assignmentList.innerHTML = '<p class="text-gray-600 text-center">No assignments available.</p>';
       }
     }
 
-    function loadForums(filter = "", courseFilter = "") {
+    // Search assignments
+    const searchAssignments = debounce((filter, course) => renderAssignments(sanitizeInput(filter), course), 300);
+    assignmentSearch.addEventListener("input", () => searchAssignments(assignmentSearch.value, assignmentCourseFilter.value));
+    assignmentCourseFilter.addEventListener("change", () => searchAssignments(assignmentSearch.value, assignmentCourseFilter.value));
+
+    // Submit assignment
+    window.submitAssignment = async (assignmentId, title) => {
+      assignmentSubmitTitle.textContent = title;
+      assignmentSubmitModal.style.display = "block";
+      assignmentSubmitForm.onsubmit = async e => {
+        e.preventDefault();
+        const file = assignmentFile.files[0];
+        if (!file) {
+          alert("Please select a file to submit.");
+          return;
+        }
+        showSpinner();
+        try {
+          const fileRef = storageRef(storage, `assignments/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
+          await uploadBytes(fileRef, file);
+          const url = await getDownloadURL(fileRef);
+          await update(ref(db, `assignments/${assignmentId}`), {
+            submissionUrl: url,
+            status: "submitted",
+            submittedAt: Date.now()
+          });
+          logAudit(`Submitted assignment ${title}`);
+          alert("Assignment submitted successfully!");
+          assignmentSubmitModal.style.display = "none";
+          assignmentSubmitForm.reset();
+        } catch (err) {
+          console.error("Error submitting assignment:", err);
+          alert("Failed to submit assignment.");
+        }
+        hideSpinner();
+      };
+    };
+
+    closeAssignmentSubmit.addEventListener("click", () => {
+      assignmentSubmitModal.style.display = "none";
+      assignmentSubmitForm.reset();
+    });
+
+    // Load forums
+    function loadForums() {
       showSpinner();
       onValue(ref(db, "forums"), snap => {
         forums = snap.val() || {};
-        renderForums(filter, courseFilter);
+        renderForums();
         hideSpinner();
       });
     }
 
     function renderForums(filter = "", courseFilter = "") {
       forumList.innerHTML = "";
-      let hasForums = false;
       for (const id in forums) {
         const f = forums[id];
-        if (!((userData.enrolled?.includes(f.courseId) && courses[f.courseId]?.providerId === userData.providerId) ||
-              Object.values(assignments).some(a => a.learnerId === currentUserId && a.courseId === f.courseId))) continue;
+        if (!courses[f.courseId]?.enrolled?.includes(auth.currentUser.uid)) continue;
         if (filter && !f.title.toLowerCase().includes(filter.toLowerCase())) continue;
         if (courseFilter && f.courseId !== courseFilter) continue;
-        hasForums = true;
-        const forumItem = document.createElement("div");
-        forumItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
-        forumItem.innerHTML = `
-          <div>
-            <p class="font-semibold">${sanitizeInput(f.title)}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")} | Posts: ${f.posts?.length || 0}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Created: ${new Date(f.createdAt).toLocaleDateString()}</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="viewForum('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" aria-label="View forum ${sanitizeInput(f.title)}" data-tooltip="View forum">View</button>
+        const threadItem = document.createElement("div");
+        threadItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        threadItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(f.title)}</p>
+              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")} | Posts: ${f.posts?.length || 0}</p>
+              <p class="text-sm text-gray-600">Created: ${new Date(f.createdAt).toLocaleDateString()}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="viewThread('${id}')" class="text-blue-600 hover:underline" aria-label="View thread ${sanitizeInput(f.title)}" data-tooltip="View thread">View</button>
+            </div>
           </div>
         `;
-        forumList.appendChild(forumItem);
+        forumList.appendChild(threadItem);
       }
-      if (!hasForums) {
-        forumList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No forums available.</p>";
+      if (!forumList.innerHTML) {
+        forumList.innerHTML = '<p class="text-gray-600 text-center">No forum threads available.</p>';
       }
     }
 
-    function loadQuizzes(filter = "", courseFilter = "") {
+    // Search forums
+    const searchForums = debounce((filter, course) => renderForums(sanitizeInput(filter), course), 300);
+    forumSearch.addEventListener("input", () => searchForums(forumSearch.value, forumCourseFilter.value));
+    forumCourseFilter.addEventListener("change", () => searchForums(forumSearch.value, forumCourseFilter.value));
+
+    // Create forum post
+    forumPostForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const courseId = forumCourse.value;
+      const title = sanitizeInput(threadTitle.value.trim());
+      const content = sanitizeInput(threadContent.value.trim());
+      if (!courseId || !title || !content) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "forums"), {
+          providerId: courses[courseId].providerId,
+          courseId,
+          title,
+          posts: [{ content, postedBy: auth.currentUser.uid, postedAt: Date.now() }],
+          createdAt: Date.now()
+        });
+        logAudit(`Created forum thread ${title}`);
+        alert("Thread created successfully!");
+        forumPostForm.reset();
+      } catch (err) {
+        console.error("Error creating thread:", err);
+        alert("Failed to create thread.");
+      }
+      hideSpinner();
+    });
+
+    // View thread
+    window.viewThread = async threadId => {
+      const f = forums[threadId];
+      const modal = document.createElement("div");
+      modal.className = "modal";
+      modal.style.display = "block";
+      modal.innerHTML = `
+        <div class="modal-content">
+          <h3 class="text-lg font-semibold mb-4">${sanitizeInput(f.title)}</h3>
+          <p class="text-sm text-gray-600 mb-2">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")}</p>
+          <div class="space-y-2 mb-4">
+            ${f.posts?.map(p => `
+              <div class="bg-gray-100 p-2 rounded">
+                <p class="text-sm">${sanitizeInput(p.content)}</p>
+                <p class="text-xs text-gray-500">Posted by ${sanitizeInput(p.postedBy === auth.currentUser.uid ? "You" : "Provider")} on ${new Date(p.postedAt).toLocaleString()}</p>
+              </div>
+            `).join("")}
+          </div>
+          <form id="post-form-${threadId}" class="mb-4">
+            <textarea id="post-content-${threadId}" placeholder="Add a post..." class="border p-2 rounded w-full mb-2" aria-label="Add post to thread" required></textarea>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Post reply">Post</button>
+          </form>
+          <button class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" onclick="this.parentElement.parentElement.remove()" data-tooltip="Close thread">Close</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document.getElementById(`post-form-${threadId}`).addEventListener("submit", async e => {
+        e.preventDefault();
+        const content = sanitizeInput(document.getElementById(`post-content-${threadId}`).value.trim());
+        if (!content) return;
+        showSpinner();
+        try {
+          await update(ref(db, `forums/${threadId}`), {
+            posts: [...f.posts, { content, postedBy: auth.currentUser.uid, postedAt: Date.now() }]
+          });
+          logAudit(`Posted to thread ${f.title}`);
+          modal.remove();
+          viewThread(threadId);
+        } catch (err) {
+          console.error("Error posting to thread:", err);
+          alert("Failed to post.");
+        }
+        hideSpinner();
+      });
+    };
+
+    // Load quizzes
+    function loadQuizzes() {
       showSpinner();
       onValue(ref(db, "quizzes"), snap => {
         quizzes = snap.val() || {};
-        renderQuizzes(filter, courseFilter);
+        renderQuizzes();
         hideSpinner();
       });
     }
 
     function renderQuizzes(filter = "", courseFilter = "") {
       quizList.innerHTML = "";
-      let hasQuizzes = false;
       for (const id in quizzes) {
         const q = quizzes[id];
-        if (!((userData.enrolled?.includes(q.courseId) && courses[q.courseId]?.providerId === userData.providerId) ||
-              Object.values(assignments).some(a => a.learnerId === currentUserId && a.courseId === q.courseId))) continue;
+        if (!courses[q.courseId]?.enrolled?.includes(auth.currentUser.uid)) continue;
         if (filter && !q.title.toLowerCase().includes(filter.toLowerCase())) continue;
         if (courseFilter && q.courseId !== courseFilter) continue;
-        hasQuizzes = true;
         const quizItem = document.createElement("div");
-        quizItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
+        quizItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
         quizItem.innerHTML = `
-          <div>
-            <p class="font-semibold">${sanitizeInput(q.title)}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[q.courseId]?.name || "Unknown")} | Questions: ${q.questions?.length || 0}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Created: ${new Date(q.createdAt).toLocaleDateString()}</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="takeQuiz('${id}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" aria-label="Take quiz ${sanitizeInput(q.title)}" data-tooltip="Take quiz">Take</button>
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(q.title)}</p>
+              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[q.courseId]?.name || "Unknown")} | Questions: ${q.questions?.length || 0}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="attemptQuiz('${id}', '${sanitizeInput(q.title)}')" class="text-blue-600 hover:underline" aria-label="Attempt quiz ${sanitizeInput(q.title)}" data-tooltip="Attempt quiz">Attempt</button>
+            </div>
           </div>
         `;
         quizList.appendChild(quizItem);
       }
-      if (!hasQuizzes) {
-        quizList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No quizzes available.</p>";
+      if (!quizList.innerHTML) {
+        quizList.innerHTML = '<p class="text-gray-600 text-center">No quizzes available.</p>';
       }
     }
 
-    function loadCertifications() {
+    // Search quizzes
+    const searchQuizzes = debounce((filter, course) => renderQuizzes(sanitizeInput(filter), course), 300);
+    quizSearch.addEventListener("input", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
+    quizCourseFilter.addEventListener("change", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
+
+    // Attempt quiz
+    window.attemptQuiz = (quizId, title) => {
+      const q = quizzes[quizId];
+      quizAttemptTitle.textContent = title;
+      quizAttemptQuestions.innerHTML = q.questions.map((ques, i) => `
+        <div class="bg-gray-50 p-2 rounded">
+          <p class="font-semibold">Question ${i + 1}: ${sanitizeInput(ques.text)}</p>
+          ${ques.options.map((opt, j) => `
+            <label class="flex items-center gap-2">
+              <input type="radio" name="question-${i}" value="${j}" required aria-label="Option ${j + 1} for question ${i + 1}" />
+              ${sanitizeInput(opt)}
+            </label>
+          `).join("")}
+        </div>
+      `).join("");
+      quizAttemptModal.style.display = "block";
+      quizAttemptForm.onsubmit = async e => {
+        e.preventDefault();
+        const answers = [];
+        q.questions.forEach((_, i) => {
+          const selected = document.querySelector(`input[name="question-${i}"]:checked`);
+          answers.push(selected ? parseInt(selected.value) : -1);
+        });
+        showSpinner();
+        try {
+          const score = answers.reduce((total, ans, i) => total + (ans === q.questions[i].correct ? 1 : 0), 0);
+          await push(ref(db, `quizzes/${quizId}/submissions`), {
+            learnerId: auth.currentUser.uid,
+            answers,
+            score: (score / q.questions.length * 100).toFixed(1),
+            submittedAt: Date.now()
+          });
+          logAudit(`Submitted quiz ${title} with score ${score}/${q.questions.length}`);
+          alert(`Quiz submitted! Score: ${score}/${q.questions.length}`);
+          quizAttemptModal.style.display = "none";
+          quizAttemptForm.reset();
+        } catch (err) {
+          console.error("Error submitting quiz:", err);
+          alert("Failed to submit quiz.");
+        }
+        hideSpinner();
+      };
+    };
+
+    closeQuizAttempt.addEventListener("click", () => {
+      quizAttemptModal.style.display = "none";
+      quizAttemptForm.reset();
+    });
+
+    // Load certificates
+    function loadCertificates() {
       showSpinner();
       onValue(ref(db, "certifications"), snap => {
-        certifications = snap.val() || {};
-        certificationList.innerHTML = "";
-        let hasCerts = false;
-        for (const id in certifications) {
-          const c = certifications[id];
-          if (c.learnerId !== currentUserId) continue;
-          hasCerts = true;
-          const certItem = document.createElement("div");
-          certItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
-          certItem.innerHTML = `
+        certificates = snap.val() || {};
+        renderCertificates();
+        hideSpinner();
+      });
+    }
+
+    function renderCertificates() {
+      certificateList.innerHTML = "";
+      for (const id in certificates) {
+        const c = certificates[id];
+        if (c.learnerId !== auth.currentUser.uid) continue;
+        const certItem = document.createElement("div");
+        certItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        certItem.innerHTML = `
+          <div class="flex justify-between items-center">
             <div>
-              <p class="font-semibold">${sanitizeInput(courses[c.courseId]?.name || "Certificate")}</p>
-              <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[c.courseId]?.name || "Unknown")} | Issued: ${new Date(c.issuedAt).toLocaleDateString()}</p>
+              <p class="font-semibold">${sanitizeInput(courses[c.courseId]?.name || "Unknown Course")}</p>
+              <p class="text-sm text-gray-600">Issued: ${new Date(c.issuedAt).toLocaleDateString()}</p>
             </div>
             <div class="flex gap-2">
-              <button onclick="downloadCertificate('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" aria-label="Download certificate" data-tooltip="Download certificate">Download</button>
+              <button onclick="downloadCertificate('${id}')" class="text-blue-600 hover:underline" aria-label="Download certificate for ${sanitizeInput(courses[c.courseId]?.name)}" data-tooltip="Download certificate">Download</button>
             </div>
-          `;
-          certificationList.appendChild(certItem);
-        }
-        if (!hasCerts) {
-          certificationList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No certificates available.</p>";
-        }
-        hideSpinner();
-      });
-    }
-
-    function loadNotices() {
-      showSpinner();
-      onValue(ref(db, "notices"), snap => {
-        notices = snap.val() || {};
-        renderNotices();
-        hideSpinner();
-      });
-    }
-
-    function renderNotices(filter = "") {
-      noticeList.innerHTML = "";
-      const filteredNotices = Object.entries(notices)
-        .filter(([_, notice]) => !filter || notice.title.toLowerCase().includes(filter.toLowerCase()))
-        .sort((a, b) => b[1].createdAt - a[1].createdAt);
-      if (filteredNotices.length === 0) {
-        noticeList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No notices found.</p>";
-        return;
-      }
-      filteredNotices.forEach(([id, n]) => {
-        const expiry = n.expiryDate ? new Date(n.expiryDate).toLocaleDateString() : "-";
-        const noticeItem = document.createElement("div");
-        noticeItem.className = "card bg-gray-50 dark:bg-gray-600";
-        noticeItem.innerHTML = `
-          <h4 class="text-md font-semibold">${sanitizeInput(n.title)}</h4>
-          <p class="text-gray-700 dark:text-gray-300">${sanitizeInput(n.content)}</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Posted on ${new Date(n.createdAt).toLocaleDateString()}${n.expiryDate ? ` | Expires on ${expiry}` : ""}</p>
+          </div>
         `;
-        noticeList.appendChild(noticeItem);
-      });
+        certificateList.appendChild(certItem);
+      }
+      if (!certificateList.innerHTML) {
+        certificateList.innerHTML = '<p class="text-gray-600 text-center">No certificates earned.</p>';
+      }
     }
 
+    // Download certificate
+    window.downloadCertificate = async certId => {
+      const cert = certificates[certId];
+      if (!cert) return;
+      showSpinner();
+      try {
+        const docDefinition = {
+          content: [
+            { text: "Certificate of Completion", style: "header" },
+            { text: `This certifies that ${sanitizeInput(user.fullName || user.email)} has successfully completed the course ${sanitizeInput(courses[cert.courseId]?.name || "Course")}.`, style: "body" },
+            { text: `Issued on: ${new Date(cert.issuedAt).toLocaleDateString()}`, style: "footer" },
+            { text: `Provider: ${sanitizeInput(courses[cert.courseId]?.providerId || "Provider")}`, style: "footer" }
+          ],
+          styles: {
+            header: { fontSize: 22, bold: true, alignment: "center", margin: [0, 0, 0, 20] },
+            body: { fontSize: 16, alignment: "center", margin: [0, 0, 0, 20] },
+            footer: { fontSize: 12, alignment: "center" }
+          }
+        };
+        pdfMake.createPdf(docDefinition).download(`certificate_${certId}.pdf`);
+        logAudit(`Downloaded certificate ${certId}`);
+      } catch (err) {
+        console.error("Error downloading certificate:", err);
+        alert("Failed to download certificate.");
+      }
+      hideSpinner();
+    };
+
+    // Load tickets
     function loadTickets() {
       showSpinner();
       onValue(ref(db, "tickets"), snap => {
@@ -987,251 +1056,49 @@
 
     function renderTickets() {
       ticketList.innerHTML = "";
-      let hasTickets = false;
       for (const id in tickets) {
         const t = tickets[id];
-        if (t.learnerId !== currentUserId) continue;
-        hasTickets = true;
+        if (t.learnerId !== auth.currentUser.uid) continue;
         const ticketItem = document.createElement("div");
-        ticketItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
+        ticketItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
         ticketItem.innerHTML = `
-          <div>
-            <p class="font-semibold">${sanitizeInput(t.title)}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Status: ${sanitizeInput(t.status)} | Priority: ${sanitizeInput(t.priority)}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">${sanitizeInput(t.description)}</p>
-            ${t.response ? `<p class="text-sm text-gray-600 dark:text-gray-300">Response: ${sanitizeInput(t.response)}</p>` : ""}
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(t.title)}</p>
+              <p class="text-sm text-gray-600">Description: ${sanitizeInput(t.description)}</p>
+              <p class="text-sm text-gray-600">Status: ${sanitizeInput(t.status)} | Created: ${new Date(t.createdAt).toLocaleDateString()}</p>
+              ${t.response ? `<p class="text-sm text-gray-600">Response: ${sanitizeInput(t.response)}</p>` : ""}
+            </div>
           </div>
         `;
         ticketList.appendChild(ticketItem);
       }
-      if (!hasTickets) {
-        ticketList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No tickets found.</p>";
+      if (!ticketList.innerHTML) {
+        ticketList.innerHTML = '<p class="text-gray-600 text-center">No tickets submitted.</p>';
       }
     }
 
-    window.viewCourse = async courseId => {
-      document.getElementById("content").classList.remove("hidden");
-      document.querySelectorAll(".section").forEach(s => { if (s.id !== "content") s.classList.add("hidden"); });
-      document.querySelectorAll(".nav-button").forEach(btn => btn.classList.remove("active"));
-      document.querySelector('.nav-button[data-section="content"]').classList.add("active");
-      contentCourseFilter.value = courseId;
-      contentSearch.value = "";
-      renderContent("", courseId);
-      logAudit(`Viewed content for course ${courses[courseId].name}`);
-    };
-
-    window.viewContent = async contentId => {
-      const c = contents[contentId];
-      contentView.innerHTML = `
-        <p class="font-semibold">${sanitizeInput(c.title)}</p>
-        <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[c.courseId]?.name || "Unknown")} | Type: ${sanitizeInput(c.type)}</p>
-        ${c.type === "video" ? `<video controls class="w-full mt-2" src="${sanitizeInput(c.url)}"></video>` : 
-         c.type === "pdf" ? `<embed src="${sanitizeInput(c.url)}" type="application/pdf" width="100%" height="400px" class="mt-2" />` :
-         `<pre class="text-sm text-gray-700 dark:text-gray-300 mt-2">${sanitizeInput(c.text)}</pre>`}
-      `;
-      contentViewModal.style.display = "flex";
-      logAudit(`Viewed content ${c.title}`);
-    };
-
-    closeContentView.addEventListener("click", () => {
-      contentViewModal.style.display = "none";
-      contentView.innerHTML = "";
-    });
-
-    window.submitAssessment = async assessmentId => {
-      assessmentTitle.textContent = sanitizeInput(assignments[assessmentId].title);
-      assessmentSubmitModal.style.display = "flex";
-      assessmentSubmitForm.onsubmit = async e => {
-        e.preventDefault();
-        const file = assessmentFile.files[0];
-        if (!file) {
-          alert("Please select a file to submit.");
-          return;
-        }
-        showSpinner();
-        try {
-          const fileRef = storageRef(storage, `submissions/${currentUserId}/${assessmentId}/${file.name}`);
-          await uploadBytes(fileRef, file);
-          const url = await getDownloadURL(fileRef);
-          await update(ref(db, `assignments/${assessmentId}/submissions/${currentUserId}`), {
-            fileUrl: url,
-            submittedAt: Date.now(),
-            status: "submitted"
-          });
-          logAudit(`Submitted assessment ${assignments[assessmentId].title}`);
-          alert("Assessment submitted successfully!");
-          assessmentSubmitModal.style.display = "none";
-          assessmentSubmitForm.reset();
-          renderAssessments();
-        } catch (err) {
-          console.error("Error submitting assessment:", err);
-          alert("Failed to submit assessment.");
-        }
-        hideSpinner();
-      };
-    };
-
-    closeAssessmentSubmit.addEventListener("click", () => {
-      assessmentSubmitModal.style.display = "none";
-      assessmentSubmitForm.reset();
-    });
-
-    window.viewAssessment = async assessmentId => {
-      const submission = assignments[assessmentId].submissions?.[currentUserId];
-      const a = assignments[assessmentId];
-      alert(`Assessment: ${sanitizeInput(a.title)}\nStatus: ${sanitizeInput(submission?.status || "Not Submitted")}\nFile: ${sanitizeInput(submission?.fileUrl || "None")}\nFeedback: ${sanitizeInput(submission?.feedback || "None")}\nGrade: ${submission?.grade || "N/A"}`);
-      logAudit(`Viewed submission for assessment ${a.title}`);
-    };
-
-    window.viewForum = async forumId => {
-      const f = forums[forumId];
-      forumTitle.textContent = sanitizeInput(f.title);
-      forumPosts.innerHTML = "";
-      f.posts?.forEach(post => {
-        const postDiv = document.createElement("div");
-        postDiv.className = "border-l-2 border-blue-600 pl-2";
-        postDiv.innerHTML = `
-          <p class="text-sm">${sanitizeInput(post.content)}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">By ${sanitizeInput(users[post.postedBy]?.fullName || "User")} on ${new Date(post.postedAt).toLocaleString()}</p>
-        `;
-        forumPosts.appendChild(postDiv);
-      });
-      forumViewModal.style.display = "flex";
-      forumPostForm.onsubmit = async e => {
-        e.preventDefault();
-        const content = sanitizeInput(newPost.value.trim());
-        if (!content) {
-          alert("Please enter post content.");
-          return;
-        }
-        showSpinner();
-        try {
-          await runTransaction(ref(db, `forums/${forumId}`), forum => {
-            forum = forum || { posts: [] };
-            forum.posts = forum.posts || [];
-            forum.posts.push({ content, postedBy: currentUserId, postedAt: Date.now() });
-            return forum;
-          });
-          logAudit(`Posted in forum ${f.title}`);
-          forumViewModal.style.display = "none";
-          newPost.value = "";
-          viewForum(forumId);
-        } catch (err) {
-          console.error("Error posting to forum:", err);
-          alert("Failed to post to forum.");
-        }
-        hideSpinner();
-      };
-    };
-
-    closeForumView.addEventListener("click", () => {
-      forumViewModal.style.display = "none";
-      forumPosts.innerHTML = "";
-    });
-
-    window.takeQuiz = async quizId => {
-      const q = quizzes[quizId];
-      quizTitle.textContent = sanitizeInput(q.title);
-      quizQuestions.innerHTML = "";
-      q.questions.forEach((question, index) => {
-        const questionDiv = document.createElement("div");
-        questionDiv.innerHTML = `
-          <p class="font-semibold">${sanitizeInput(question.text)}</p>
-          <div class="space-y-2 mt-2">
-            ${question.options.map((option, i) => `
-              <label class="flex items-center gap-2">
-                <input type="radio" name="q${index}" value="${i}" required class="text-blue-600">
-                <span>${sanitizeInput(option)}</span>
-              </label>
-            `).join("")}
-          </div>
-        `;
-        quizQuestions.appendChild(questionDiv);
-      });
-      quizTakeModal.style.display = "flex";
-      quizTakeForm.onsubmit = async e => {
-        e.preventDefault();
-        const answers = Array.from(quizTakeForm.querySelectorAll("input:checked")).map(input => parseInt(input.value));
-        if (answers.length !== q.questions.length) {
-          alert("Please answer all questions.");
-          return;
-        }
-        showSpinner();
-        try {
-          const score = answers.reduce((total, answer, i) => total + (answer === q.questions[i].correct ? 1 : 0), 0);
-          const percentage = (score / q.questions.length * 100).toFixed(1);
-          await push(ref(db, `quizResults`), {
-            learnerId: currentUserId,
-            quizId,
-            score,
-            percentage,
-            submittedAt: Date.now()
-          });
-          if (percentage >= 70) {
-            await runTransaction(ref(db, `users/${currentUserId}/progress`), progress => {
-              progress = progress || {};
-              progress[q.courseId] = Math.max(progress[q.courseId] || 0, percentage);
-              return progress;
-            });
-          }
-          logAudit(`Submitted quiz ${q.title} with score ${percentage}%`);
-          alert(`Quiz submitted! Score: ${score}/${q.questions.length} (${percentage}%)`);
-          quizTakeModal.style.display = "none";
-          quizTakeForm.reset();
-          loadOverview();
-        } catch (err) {
-          console.error("Error submitting quiz:", err);
-          alert("Failed to submit quiz.");
-        }
-        hideSpinner();
-      };
-    };
-
-    closeQuizTake.addEventListener("click", () => {
-      quizTakeModal.style.display = "none";
-      quizQuestions.innerHTML = "";
-    });
-
-    window.downloadCertificate = async certId => {
-      const cert = certifications[certId];
-      const course = courses[cert.courseId];
-      const provider = users[cert.providerId]?.fullName || users[cert.providerId]?.email || "Unknown";
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.setFontSize(20);
-      doc.text("Certificate of Completion", 20, 20);
-      doc.setFontSize(14);
-      doc.text(`Awarded to: ${sanitizeInput(userData.fullName || userData.email)}`, 20, 40);
-      doc.text(`Course: ${sanitizeInput(course.name)}`, 20, 50);
-      doc.text(`Provider: ${sanitizeInput(provider)}`, 20, 60);
-      doc.text(`Issued on: ${new Date(cert.issuedAt).toLocaleDateString()}`, 20, 70);
-      doc.save(`certificate_${userData.email}_${course.name}.pdf`);
-      logAudit(`Downloaded certificate for course ${course.name}`);
-    };
-
+    // Submit ticket
     ticketForm.addEventListener("submit", async e => {
       e.preventDefault();
-      const issue = sanitizeInput(document.getElementById("ticketIssue").value.trim());
-      const priority = document.getElementById("ticketPriority").value;
-      if (!issue) {
-        alert("Please enter an issue description.");
+      const title = sanitizeInput(ticketTitle.value.trim());
+      const description = sanitizeInput(ticketDescription.value.trim());
+      if (!title || !description) {
+        alert("Please fill in all required fields.");
         return;
       }
       showSpinner();
       try {
         await push(ref(db, "tickets"), {
-          learnerId: currentUserId,
-          providerId: userData.providerId,
-          title: issue,
-          description: issue,
-          priority,
+          learnerId: auth.currentUser.uid,
+          title,
+          description,
           status: "open",
           createdAt: Date.now()
         });
-        logAudit(`Submitted helpdesk ticket: ${issue}`);
+        logAudit(`Submitted ticket ${title}`);
         alert("Ticket submitted successfully!");
         ticketForm.reset();
-        renderTickets();
       } catch (err) {
         console.error("Error submitting ticket:", err);
         alert("Failed to submit ticket.");
@@ -1239,74 +1106,51 @@
       hideSpinner();
     });
 
-    const searchCourses = debounce(filter => renderCourses(sanitizeInput(filter)), 300);
-    courseSearch.addEventListener("input", () => searchCourses(courseSearch.value));
-    const searchContent = debounce(filter => renderContent(sanitizeInput(filter), contentCourseFilter.value), 300);
-    contentSearch.addEventListener("input", () => searchContent(contentSearch.value));
-    contentCourseFilter.addEventListener("change", () => renderContent(contentSearch.value, contentCourseFilter.value));
-    const searchAssessments = debounce(filter => renderAssessments(sanitizeInput(filter), assessmentCourseFilter.value), 300);
-    assessmentSearch.addEventListener("input", () => searchAssessments(assessmentSearch.value));
-    assessmentCourseFilter.addEventListener("change", () => renderAssessments(assessmentSearch.value, assessmentCourseFilter.value));
-    const searchForums = debounce(filter => renderForums(sanitizeInput(filter), forumCourseFilter.value), 300);
-    forumSearch.addEventListener("input", () => searchForums(forumSearch.value));
-    forumCourseFilter.addEventListener("change", () => renderForums(forumSearch.value, forumCourseFilter.value));
-    const searchQuizzes = debounce(filter => renderQuizzes(sanitizeInput(filter), quizCourseFilter.value), 300);
-    quizSearch.addEventListener("input", () => searchQuizzes(quizSearch.value));
-    quizCourseFilter.addEventListener("change", () => renderQuizzes(quizSearch.value, quizCourseFilter.value));
-    const searchNotices = debounce(filter => renderNotices(sanitizeInput(filter)), 300);
-    noticeSearch.addEventListener("input", () => searchNotices(noticeSearch.value));
+    // Log audit events
+    function logAudit(message) {
+      push(ref(db, "auditLogs"), {
+        learnerId: auth.currentUser.uid,
+        message,
+        timestamp: Date.now()
+      });
+    }
 
-    onAuthStateChanged(auth, async user => {
-      if (!user) {
-        window.location.href = "login.html";
+    // Auth state listener
+    onAuthStateChanged(auth, u => {
+      if (!u) {
+        window.location.href = "/login.html";
         return;
       }
-      currentUserId = user.uid;
-      const userSnap = await get(ref(db, `users/${user.uid}`));
-      userData = userSnap.val() || {};
-      if (userData.role !== "learner") {
-        await signOut(auth);
-        window.location.href = "login.html";
-        return;
-      }
-      initializeUI();
-      loadNotifications();
-      loadOverview();
-      loadCourses();
-      loadContent();
-      loadAssessments();
-      loadForums();
-      loadQuizzes();
-      loadCertifications();
-      loadNotices();
-      loadTickets();
+      onValue(ref(db, `users/${u.uid}`), snap => {
+        user = snap.val();
+        if (user?.role !== "learner") {
+          signOut(auth);
+          window.location.href = "/login.html";
+          return;
+        }
+        loadOverview();
+        loadCourses();
+        loadContent();
+        loadAssignments();
+        loadForums();
+        loadQuizzes();
+        loadCertificates();
+        loadTickets();
+      });
     });
 
+    // Sign out
     document.getElementById("signout-btn").addEventListener("click", async () => {
       showSpinner();
       try {
         await signOut(auth);
-        window.location.href = "login.html";
+        window.location.href = "/login.html";
       } catch (err) {
-        console.error("Sign-out failed:", err);
+        console.error("Error signing out:", err);
         alert("Failed to sign out.");
       }
       hideSpinner();
     });
-
-    async function logAudit(message) {
-      try {
-        await push(ref(db, `auditLogs/${currentUserId}`), {
-          message: sanitizeInput(message),
-          userId: currentUserId,
-          timestamp: Date.now()
-        });
-      } catch (err) {
-        console.error("Error logging audit:", err);
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", initializeUI);
   </script>
 </body>
 </html>
