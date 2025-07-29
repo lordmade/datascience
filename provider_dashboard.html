@@ -14,71 +14,81 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <style>
-    .sidebar {
-      transition: transform 0.3s ease, width 0.3s ease;
-      transform: translateX(0);
+    /* Root variables for consistent theming */
+    :root {
+      --primary: #1e40af; /* Blue for buttons and accents */
+      --secondary: #10b981; /* Green for success actions */
+      --background: #f3f4f6; /* Light gray background */
+      --card-bg: #ffffff; /* White for cards */
+      --text-primary: #1f2937; /* Dark gray for text */
+      --text-secondary: #6b7280; /* Lighter gray for secondary text */
+      --high-contrast-bg: #1a1a1a; /* Dark background for high contrast */
+      --high-contrast-text: #e5e5e5; /* Light text for high contrast */
     }
+
+    /* Base styles */
+    body {
+      background: var(--background);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(to bottom, #111827, #1f2937);
+      color: white;
+      min-height: 100vh;
+      padding: 1.5rem;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, width 0.3s ease;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 50;
+    }
+
     .sidebar-hidden {
       transform: translateX(-100%);
       width: 0;
     }
+
+    .sidebar-open {
+      transform: translateX(0);
+    }
+
+    .sidebar .nav-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      transition: background-color 0.2s ease;
+    }
+
+    .sidebar .nav-button:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar .nav-button.active {
+      background: var(--primary);
+    }
+
+    /* Main content */
     .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 2rem;
       transition: margin-left 0.3s ease;
+      min-height: 100vh;
     }
-    .high-contrast {
-      background: #000 !important;
-      color: #fff !important;
-    }
-    .high-contrast .bg-white {
-      background: #1a1a1a !important;
-    }
-    .high-contrast .text-gray-600 {
-      color: #e5e5e5 !important;
-    }
-    .tooltip {
-      position: relative;
-    }
-    .tooltip:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1f2937;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      white-space: nowrap;
-      z-index: 10;
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      topFACILITATE top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 100;
-    }
-    .modal-content {
-      background: white;
-      margin: 15% auto;
-      padding: 20px;
-      width: 90%;
-      max-width: 500px;
-      border-radius: 8px;
-    }
-    .high-contrast .modal-content {
-      background: #1a1a1a !important;
-      color: #fff !important;
-    }
+
     @media (max-width: 768px) {
       .sidebar {
-        position: fixed;
-        z-index: 50;
-        width: 256px;
+        width: 260px;
         transform: translateX(-100%);
       }
       .sidebar-open {
@@ -88,27 +98,165 @@
         margin-left: 0;
       }
     }
-    .video-feed {
-      background: black;
-      border-radius: 8px;
-      overflow: hidden;
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* High contrast mode */
+    .high-contrast {
+      background: #000 !important;
+      color: var(--high-contrast-text) !important;
+    }
+
+    .high-contrast .card {
+      background: var(--high-contrast-bg) !important;
+    }
+
+    .high-contrast .text-gray-600 {
+      color: var(--high-contrast-text) !important;
+    }
+
+    .high-contrast .bg-gray-50 {
+      background: #2d3748 !important;
+    }
+
+    /* Tooltip */
+    .tooltip {
       position: relative;
     }
+
+    .tooltip:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1f2937;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      z-index: 10;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      margin: 0 auto;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 600px;
+      border-radius: 0.5rem;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .high-contrast .modal-content {
+      background: var(--high-contrast-bg) !important;
+      color: var(--high-contrast-text) !important;
+    }
+
+    /* Video feed */
+    .video-feed {
+      background: black;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 16 / 9;
+    }
+
     .video-label {
       position: absolute;
-      top: 8px;
-      left: 8px;
+      top: 0.5rem;
+      left: 0.5rem;
       background: rgba(0, 0, 0, 0.7);
       color: white;
-      padding: 4px 8px;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+    }
+
+    /* Buttons */
+    button:not(.nav-button) {
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    button:hover:not(.nav-button) {
+      transform: translateY(-1px);
+    }
+
+    /* Form elements */
+    input, select, textarea {
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2);
+    }
+
+    /* Loading spinner */
+    #loading-spinner {
+      z-index: 200;
+    }
+
+    /* Ensure charts fit */
+    canvas {
+      max-width: 100%;
+      height: auto !important;
+    }
+
+    /* Scrollable sections */
+    .section {
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .section::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .section::-webkit-scrollbar-thumb {
+      background: var(--primary);
       border-radius: 4px;
+    }
+
+    .section::-webkit-scrollbar-track {
+      background: #e5e7eb;
     }
   </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
-  <div class="flex">
+<body>
+  <div class="flex min-h-screen">
     <!-- Sidebar -->
-    <div id="sidebar" class="sidebar bg-gradient-to-b from-gray-800 to-gray-900 text-white w-64 min-h-screen p-4 shadow-lg">
+    <div id="sidebar" class="sidebar">
       <div class="flex items-center justify-between mb-6">
         <h1 class="text-xl font-bold flex items-center gap-2">
           <i class="fas fa-graduation-cap"></i> CETA Provider
@@ -121,70 +269,70 @@
       </div>
       <nav>
         <ul class="space-y-2">
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="overview" data-tooltip="Dashboard Overview"><i class="fas fa-tachometer-alt"></i> Overview</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="learners" data-tooltip="Manage Learners"><i class="fas fa-users"></i> Manage Learners</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="courses" data-tooltip="Manage Courses"><i class="fas fa-book"></i> Manage Courses</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="progress" data-tooltip="Learner Progress"><i class="fas fa-chart-line"></i> Learner Progress</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="analytics" data-tooltip="Advanced Analytics"><i class="fas fa-chart-bar"></i> Analytics</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="helpdesk" data-tooltip="Support Tickets"><i class="fas fa-headset"></i> Helpdesk</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="video-monitoring" data-tooltip="Live Video Monitoring"><i class="fas fa-video"></i> Video Monitoring</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="content" data-tooltip="Manage Course Content"><i class="fas fa-file-alt"></i> Course Content</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="assignments" data-tooltip="Manage Assignments"><i class="fas fa-tasks"></i> Assignments</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="forums" data-tooltip="Course Forums"><i class="fas fa-comments"></i> Forums</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="quizzes" data-tooltip="Manage Quizzes"><i class="fas fa-question-circle"></i> Quizzes</button></li>
+          <li><button class="nav-button w-full text-left" data-section="overview" data-tooltip="Dashboard Overview"><i class="fas fa-tachometer-alt"></i> Overview</button></li>
+          <li><button class="nav-button w-full text-left" data-section="learners" data-tooltip="Manage Learners"><i class="fas fa-users"></i> Manage Learners</button></li>
+          <li><button class="nav-button w-full text-left" data-section="courses" data-tooltip="Manage Courses"><i class="fas fa-book"></i> Manage Courses</button></li>
+          <li><button class="nav-button w-full text-left" data-section="progress" data-tooltip="Learner Progress"><i class="fas fa-chart-line"></i> Learner Progress</button></li>
+          <li><button class="nav-button w-full text-left" data-section="analytics" data-tooltip="Advanced Analytics"><i class="fas fa-chart-bar"></i> Analytics</button></li>
+          <li><button class="nav-button w-full text-left" data-section="helpdesk" data-tooltip="Support Tickets"><i class="fas fa-headset"></i> Helpdesk</button></li>
+          <li><button class="nav-button w-full text-left" data-section="video-monitoring" data-tooltip="Live Video Monitoring"><i class="fas fa-video"></i> Video Monitoring</button></li>
+          <li><button class="nav-button w-full text-left" data-section="content" data-tooltip="Manage Course Content"><i class="fas fa-file-alt"></i> Course Content</button></li>
+          <li><button class="nav-button w-full text-left" data-section="assignments" data-tooltip="Manage Assignments"><i class="fas fa-tasks"></i> Assignments</button></li>
+          <li><button class="nav-button w-full text-left" data-section="forums" data-tooltip="Course Forums"><i class="fas fa-comments"></i> Forums</button></li>
+          <li><button class="nav-button w-full text-left" data-section="quizzes" data-tooltip="Manage Quizzes"><i class="fas fa-question-circle"></i> Quizzes</button></li>
         </ul>
       </nav>
       <div class="mt-auto">
-        <button id="toggle-contrast" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded mb-2" aria-label="Toggle high contrast mode" data-tooltip="Toggle High Contrast">Toggle High Contrast</button>
-        <button id="signout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" aria-label="Sign out of provider account" data-tooltip="Sign Out">Sign Out</button>
+        <button id="toggle-contrast" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded mb-2" aria-label="Toggle high contrast mode" data-tooltip="Toggle High Contrast">Toggle High Contrast</button>
+        <button id="signout-btn" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" aria-label="Sign out of provider account" data-tooltip="Sign Out">Sign Out</button>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="main-content flex-1 p-6 md:ml-64">
+    <div class="main-content">
       <!-- Overview Section -->
       <div id="overview" class="section">
         <h2 class="text-2xl font-semibold mb-4">Welcome, <span id="provider-name">Provider</span></h2>
-        <div class="grid gap-4 md:grid-cols-4">
-          <div class="bg-white p-4 rounded shadow hover:shadow-md transition-shadow">
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div class="card">
             <h3 class="text-lg font-semibold">Courses Offered</h3>
             <p id="courses-offered" class="text-3xl font-bold text-blue-600">0</p>
           </div>
-          <div class="bg-white p-4 rounded shadow hover:shadow-md transition-shadow">
+          <div class="card">
             <h3 class="text-lg font-semibold">Enrolled Learners</h3>
             <p id="enrolled-learners" class="text-3xl font-bold text-blue-600">0</p>
           </div>
-          <div class="bg-white p-4 rounded shadow hover:shadow-md transition-shadow">
+          <div class="card">
             <h3 class="text-lg font-semibold">Completion Rate</h3>
             <p id="completion-rate" class="text-3xl font-bold text-blue-600">0%</p>
           </div>
-          <div class="bg-white p-4 rounded shadow hover:shadow-md transition-shadow">
+          <div class="card">
             <h3 class="text-lg font-semibold">Certificates Issued</h3>
             <p id="certificates-issued" class="text-3xl font-bold text-blue-600">0</p>
           </div>
         </div>
-        <div class="mt-6 bg-white p-4 rounded shadow">
+        <div class="mt-6 card">
           <h3 class="text-lg font-semibold mb-2">Course Completion Rates</h3>
-          <canvas id="completion-chart" class="w-full h-64"></canvas>
+          <canvas id="completion-chart"></canvas>
         </div>
-        <div class="mt-6 bg-white p-4 rounded shadow">
+        <div class="mt-6 card">
           <h3 class="text-lg font-semibold mb-2">Enrollment Trends</h3>
-          <canvas id="enrollment-trend-chart" class="w-full h-64"></canvas>
+          <canvas id="enrollment-trend-chart"></canvas>
         </div>
       </div>
 
       <!-- Learners Section -->
       <div id="learners" class="section hidden">
         <h2 class="text-2xl font-semibold mb-4">Manage Learners</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="mb-4 card">
           <h3 class="text-lg font-semibold mb-2">Add New Learner</h3>
-          <button id="open-add-learner" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add new learner">Add Learner</button>
-          <button id="open-bulk-upload" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ml-2" data-tooltip="Upload learners via CSV">Bulk Upload</button>
+          <button id="open-add-learner" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Add new learner">Add Learner</button>
+          <button id="open-bulk-upload" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded ml-2" data-tooltip="Upload learners via CSV">Bulk Upload</button>
         </div>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">Learner List</h3>
           <input type="text" id="learnerSearch" placeholder="Search learners..." class="border p-2 rounded w-full mb-4" aria-label="Search learners by name, email, or tag" />
-          <select id="groupFilter" class="border p-2 rounded mb-4" aria-label="Filter by group">
+          <select id="groupFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by group">
             <option value="">All Groups</option>
           </select>
           <div id="learnerList" class="space-y-4"></div>
@@ -194,15 +342,15 @@
       <!-- Courses Section -->
       <div id="courses" class="section hidden">
         <h2 class="text-2xl font-semibold mb-4">Manage Courses</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="mb-4 card">
           <h3 class="text-lg font-semibold mb-2">Add New Course</h3>
           <form id="course-form">
             <input type="text" id="courseName" placeholder="Course Name" class="border p-2 rounded w-full mb-2" aria-label="Enter course name" required />
             <input type="text" id="courseTags" placeholder="Tags (comma-separated)" class="border p-2 rounded w-full mb-2" aria-label="Enter course tags" />
-            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add new course">Add Course</button>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Add new course">Add Course</button>
           </form>
         </div>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">Course List</h3>
           <input type="text" id="courseSearch" placeholder="Search courses..." class="border p-2 rounded w-full mb-4" aria-label="Search courses by name or tag" />
           <div id="courseList" class="space-y-4"></div>
@@ -212,7 +360,7 @@
       <!-- Course Content Section -->
       <div id="content" class="section hidden">
         <h2 class="text-2xl font-semibold mb-4">Manage Course Content</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="mb-4 card">
           <h3 class="text-lg font-semibold mb-2">Upload Content</h3>
           <form id="content-upload-form">
             <select id="contentCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
@@ -225,13 +373,13 @@
               <option value="text">Text</option>
             </select>
             <input type="file" id="contentFile" accept="video/*,application/pdf,.txt" class="border p-2 rounded w-full mb-2" aria-label="Upload content file" required />
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Upload content">Upload</button>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" data-tooltip="Upload content">Upload</button>
           </form>
         </div>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">Content List</h3>
           <input type="text" id="contentSearch" placeholder="Search content..." class="border p-2 rounded w-full mb-4" aria-label="Search content by title" />
-          <select id="contentCourseFilter" class="border p-2 rounded mb-4" aria-label="Filter by course">
+          <select id="contentCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
             <option value="">All Courses</option>
           </select>
           <div id="contentList" class="space-y-4"></div>
@@ -241,7 +389,7 @@
       <!-- Assignments Section -->
       <div id="assignments" class="section hidden">
         <h2 class="text-2xl font-semibold mb-4">Manage Assignments</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="mb-4 card">
           <h3 class="text-lg font-semibold mb-2">Create Assignment</h3>
           <form id="assignment-form">
             <select id="assignmentCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
@@ -250,13 +398,13 @@
             <input type="text" id="assignmentTitle" placeholder="Assignment Title" class="border p-2 rounded w-full mb-2" aria-label="Enter assignment title" required />
             <textarea id="assignmentDescription" placeholder="Description" class="border p-2 rounded w-full mb-2" aria-label="Enter assignment description" required></textarea>
             <input type="date" id="assignmentDueDate" class="border p-2 rounded w-full mb-2" aria-label="Select due date" required />
-            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Create assignment">Create</button>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Create assignment">Create</button>
           </form>
         </div>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">Assignment Submissions</h3>
           <input type="text" id="assignmentSearch" placeholder="Search assignments..." class="border p-2 rounded w-full mb-4" aria-label="Search assignments by title or learner" />
-          <select id="assignmentCourseFilter" class="border p-2 rounded mb-4" aria-label="Filter by course">
+          <select id="assignmentCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
             <option value="">All Courses</option>
           </select>
           <div id="assignmentList" class="space-y-4"></div>
@@ -266,7 +414,7 @@
       <!-- Forums Section -->
       <div id="forums" class="section hidden">
         <h2 class="text-2xl font-semibold mb-4">Course Forums</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="mb-4 card">
           <h3 class="text-lg font-semibold mb-2">Create Forum Thread</h3>
           <form id="forum-thread-form">
             <select id="forumCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
@@ -274,13 +422,13 @@
             </select>
             <input type="text" id="threadTitle" placeholder="Thread Title" class="border p-2 rounded w-full mb-2" aria-label="Enter thread title" required />
             <textarea id="threadContent" placeholder="Initial Post Content" class="border p-2 rounded w-full mb-2" aria-label="Enter initial post content" required></textarea>
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Create thread">Create Thread</button>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" data-tooltip="Create thread">Create Thread</button>
           </form>
         </div>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">Forum Threads</h3>
           <input type="text" id="forumSearch" placeholder="Search threads..." class="border p-2 rounded w-full mb-4" aria-label="Search threads by title" />
-          <select id="forumCourseFilter" class="border p-2 rounded mb-4" aria-label="Filter by course">
+          <select id="forumCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
             <option value="">All Courses</option>
           </select>
           <div id="forumList" class="space-y-4"></div>
@@ -290,7 +438,7 @@
       <!-- Quizzes Section -->
       <div id="quizzes" class="section hidden">
         <h2 class="text-2xl font-semibold mb-4">Manage Quizzes</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="mb-4 card">
           <h3 class="text-lg font-semibold mb-2">Create Quiz</h3>
           <form id="quiz-form">
             <select id="quizCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
@@ -298,14 +446,14 @@
             </select>
             <input type="text" id="quizTitle" placeholder="Quiz Title" class="border p-2 rounded w-full mb-2" aria-label="Enter quiz title" required />
             <div id="quizQuestions" class="space-y-2"></div>
-            <button type="button" id="add-quiz-question" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-2" data-tooltip="Add question">Add Question</button>
-            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mt-2" data-tooltip="Create quiz">Create Quiz</button>
+            <button type="button" id="add-quiz-question" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mt-2" data-tooltip="Add question">Add Question</button>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mt-2" data-tooltip="Create quiz">Create Quiz</button>
           </form>
         </div>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">Quiz List</h3>
           <input type="text" id="quizSearch" placeholder="Search quizzes..." class="border p-2 rounded w-full mb-4" aria-label="Search quizzes by title" />
-          <select id="quizCourseFilter" class="border p-2 rounded mb-4" aria-label="Filter by course">
+          <select id="quizCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
             <option value="">All Courses</option>
           </select>
           <div id="quizList" class="space-y-4"></div>
@@ -315,7 +463,7 @@
       <!-- Learner Progress Section -->
       <div id="progress" class="section hidden">
         <h2 class="text-2xl font-semibold mb-4">Learner Progress</h2>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">Learner Progress</h3>
           <input type="text" id="progressSearch" placeholder="Search learners..." class="border p-2 rounded w-full mb-4" aria-label="Search learners by name or email" />
           <div id="progressList" class="space-y-4"></div>
@@ -325,27 +473,27 @@
       <!-- Analytics Section -->
       <div id="analytics" class="section hidden">
         <h2 class="text-2xl font-semibold mb-4">Advanced Analytics</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="mb-4 card">
           <h3 class="text-lg font-semibold mb-2">Filter Analytics</h3>
           <div class="flex flex-wrap gap-4 mb-4">
-            <select id="timeRange" class="border p-2 rounded" aria-label="Select time range">
+            <select id="timeRange" class="border p-2 rounded w-full md:w-auto" aria-label="Select time range">
               <option value="30">Last 30 Days</option>
               <option value="90">Last 90 Days</option>
               <option value="365">Last Year</option>
               <option value="all">All Time</option>
             </select>
-            <select id="courseFilter" class="border p-2 rounded" aria-label="Select course"></select>
-            <select id="groupFilterAnalytics" class="border p-2 rounded" aria-label="Select learner group">
+            <select id="courseFilter" class="border p-2 rounded w-full md:w-auto" aria-label="Select course"></select>
+            <select id="groupFilterAnalytics" class="border p-2 rounded w-full md:w-auto" aria-label="Select learner group">
               <option value="">All Groups</option>
             </select>
-            <button id="export-analytics" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700" data-tooltip="Export analytics to PDF">Export to PDF</button>
+            <button id="export-analytics" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded" data-tooltip="Export analytics to PDF">Export to PDF</button>
           </div>
         </div>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">Course Performance</h3>
-          <canvas id="analytics-chart" class="w-full h-64"></canvas>
+          <canvas id="analytics-chart"></canvas>
           <h3 class="text-lg font-semibold mt-4 mb-2">Learner Activity Heatmap</h3>
-          <canvas id="heatmap-chart" class="w-full h-64"></canvas>
+          <canvas id="heatmap-chart"></canvas>
           <h3 class="text-lg font-semibold mt-4 mb-2">Statistical Metrics</h3>
           <div id="analytics-details" class="space-y-4"></div>
         </div>
@@ -354,7 +502,7 @@
       <!-- Helpdesk Section -->
       <div id="helpdesk" class="section hidden">
         <h2 class="text-2xl font-semibold mb-4">Helpdesk</h2>
-        <div class="bg-white p-6 rounded shadow">
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">Support Tickets</h3>
           <div id="ticketList" class="space-y-4"></div>
         </div>
@@ -363,10 +511,10 @@
       <!-- Video Monitoring Section -->
       <div id="video-monitoring" class="section hidden">
         <h2 class="text-2xl font-semibold mb-4">Live Video Monitoring</h2>
-        <div class="mb-4 bg-white p-6 rounded shadow">
+        <div class="card">
           <h3 class="text-lg font-semibold mb-2">Learner Video Feeds</h3>
           <input type="text" id="videoSearch" placeholder="Search learners..." class="border p-2 rounded w-full mb-4" aria-label="Search learners by name or email" />
-          <select id="videoCourseFilter" class="border p-2 rounded mb-4" aria-label="Filter by course">
+          <select id="videoCourseFilter" class="border p-2 rounded mb-4 w-full md:w-auto" aria-label="Filter by course">
             <option value="">All Courses</option>
           </select>
           <div id="videoFeedList" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
@@ -386,8 +534,8 @@
               <option value="">Select Course (optional)</option>
             </select>
             <div class="flex gap-2">
-              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Save learner">Save</button>
-              <button type="button" id="close-add-learner" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-tooltip="Cancel">Cancel</button>
+              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Save learner">Save</button>
+              <button type="button" id="close-add-learner" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" data-tooltip="Cancel">Cancel</button>
             </div>
           </form>
         </div>
@@ -401,8 +549,8 @@
             <input type="file" id="learnerCSV" accept=".csv" class="border p-2 rounded w-full mb-2" aria-label="Upload CSV file" required />
             <p class="text-sm text-gray-600 mb-2">CSV format: fullName,email,contact,tags,courseId</p>
             <div class="flex gap-2">
-              <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Upload CSV">Upload</button>
-              <button type="button" id="close-bulk-upload" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-tooltip="Cancel">Cancel</button>
+              <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" data-tooltip="Upload CSV">Upload</button>
+              <button type="button" id="close-bulk-upload" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" data-tooltip="Cancel">Cancel</button>
             </div>
           </form>
         </div>
@@ -417,19 +565,19 @@
             <input type="text" id="questionOptions" placeholder="Options (comma-separated)" class="border p-2 rounded w-full mb-2" aria-label="Enter question options" required />
             <input type="number" id="correctOption" placeholder="Correct Option Index (0-based)" class="border p-2 rounded w-full mb-2" aria-label="Enter correct option index" required />
             <div class="flex gap-2">
-              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Save question">Save</button>
-              <button type="button" id="close-quiz-question" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-tooltip="Cancel">Cancel</button>
+              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Save question">Save</button>
+              <button type="button" id="close-quiz-question" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" data-tooltip="Cancel">Cancel</button>
             </div>
           </form>
         </div>
       </div>
 
-      <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
+      <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-content-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
       </div>
 
       <noscript>
-        <p class="text-red-600 text-center">JavaScript is required to use this dashboard.</p>
+        <p class="text-red-500 text-center">JavaScript is required to use this dashboard.</p>
       </noscript>
     </div>
   </div>
