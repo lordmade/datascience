@@ -55,7 +55,7 @@
     .modal {
       display: none;
       position: fixed;
-      top: 0;
+      topFACILITATE top: 0;
       left: 0;
       width: 100%;
       height: 100%;
@@ -88,22 +88,21 @@
         margin-left: 0;
       }
     }
-    <style>
-  .video-feed {
-    background: black;
-    border-radius: 8px;
-    overflow: hidden;
-    position: relative;
-  }
-  .video-label {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-  }
+    .video-feed {
+      background: black;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+    .video-label {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
@@ -129,6 +128,10 @@
           <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="analytics" data-tooltip="Advanced Analytics"><i class="fas fa-chart-bar"></i> Analytics</button></li>
           <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="helpdesk" data-tooltip="Support Tickets"><i class="fas fa-headset"></i> Helpdesk</button></li>
           <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="video-monitoring" data-tooltip="Live Video Monitoring"><i class="fas fa-video"></i> Video Monitoring</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="content" data-tooltip="Manage Course Content"><i class="fas fa-file-alt"></i> Course Content</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="assignments" data-tooltip="Manage Assignments"><i class="fas fa-tasks"></i> Assignments</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="forums" data-tooltip="Course Forums"><i class="fas fa-comments"></i> Forums</button></li>
+          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="quizzes" data-tooltip="Manage Quizzes"><i class="fas fa-question-circle"></i> Quizzes</button></li>
         </ul>
       </nav>
       <div class="mt-auto">
@@ -139,17 +142,6 @@
 
     <!-- Main Content -->
     <div class="main-content flex-1 p-6 md:ml-64">
-      <div id="video-monitoring" class="section hidden">
-  <h2 class="text-2xl font-semibold mb-4">Live Video Monitoring</h2>
-  <div class="mb-4 bg-white p-6 rounded shadow">
-    <h3 class="text-lg font-semibold mb-2">Learner Video Feeds</h3>
-    <input type="text" id="videoSearch" placeholder="Search learners..." class="border p-2 rounded w-full mb-4" aria-label="Search learners by name or email" />
-    <select id="videoCourseFilter" class="border p-2 rounded mb-4" aria-label="Filter by course">
-      <option value="">All Courses</option>
-    </select>
-    <div id="videoFeedList" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
-  </div>
-</div>
       <!-- Overview Section -->
       <div id="overview" class="section">
         <h2 class="text-2xl font-semibold mb-4">Welcome, <span id="provider-name">Provider</span></h2>
@@ -217,6 +209,109 @@
         </div>
       </div>
 
+      <!-- Course Content Section -->
+      <div id="content" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Manage Course Content</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Upload Content</h3>
+          <form id="content-upload-form">
+            <select id="contentCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
+              <option value="">Select Course</option>
+            </select>
+            <input type="text" id="contentTitle" placeholder="Content Title" class="border p-2 rounded w-full mb-2" aria-label="Enter content title" required />
+            <select id="contentType" class="border p-2 rounded w-full mb-2" aria-label="Select content type" required>
+              <option value="video">Video</option>
+              <option value="pdf">PDF</option>
+              <option value="text">Text</option>
+            </select>
+            <input type="file" id="contentFile" accept="video/*,application/pdf,.txt" class="border p-2 rounded w-full mb-2" aria-label="Upload content file" required />
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Upload content">Upload</button>
+          </form>
+        </div>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Content List</h3>
+          <input type="text" id="contentSearch" placeholder="Search content..." class="border p-2 rounded w-full mb-4" aria-label="Search content by title" />
+          <select id="contentCourseFilter" class="border p-2 rounded mb-4" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
+          <div id="contentList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Assignments Section -->
+      <div id="assignments" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Manage Assignments</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Create Assignment</h3>
+          <form id="assignment-form">
+            <select id="assignmentCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
+              <option value="">Select Course</option>
+            </select>
+            <input type="text" id="assignmentTitle" placeholder="Assignment Title" class="border p-2 rounded w-full mb-2" aria-label="Enter assignment title" required />
+            <textarea id="assignmentDescription" placeholder="Description" class="border p-2 rounded w-full mb-2" aria-label="Enter assignment description" required></textarea>
+            <input type="date" id="assignmentDueDate" class="border p-2 rounded w-full mb-2" aria-label="Select due date" required />
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Create assignment">Create</button>
+          </form>
+        </div>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Assignment Submissions</h3>
+          <input type="text" id="assignmentSearch" placeholder="Search assignments..." class="border p-2 rounded w-full mb-4" aria-label="Search assignments by title or learner" />
+          <select id="assignmentCourseFilter" class="border p-2 rounded mb-4" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
+          <div id="assignmentList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Forums Section -->
+      <div id="forums" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Course Forums</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Create Forum Thread</h3>
+          <form id="forum-thread-form">
+            <select id="forumCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
+              <option value="">Select Course</option>
+            </select>
+            <input type="text" id="threadTitle" placeholder="Thread Title" class="border p-2 rounded w-full mb-2" aria-label="Enter thread title" required />
+            <textarea id="threadContent" placeholder="Initial Post Content" class="border p-2 rounded w-full mb-2" aria-label="Enter initial post content" required></textarea>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Create thread">Create Thread</button>
+          </form>
+        </div>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Forum Threads</h3>
+          <input type="text" id="forumSearch" placeholder="Search threads..." class="border p-2 rounded w-full mb-4" aria-label="Search threads by title" />
+          <select id="forumCourseFilter" class="border p-2 rounded mb-4" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
+          <div id="forumList" class="space-y-4"></div>
+        </div>
+      </div>
+
+      <!-- Quizzes Section -->
+      <div id="quizzes" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Manage Quizzes</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Create Quiz</h3>
+          <form id="quiz-form">
+            <select id="quizCourse" class="border p-2 rounded w-full mb-2" aria-label="Select course" required>
+              <option value="">Select Course</option>
+            </select>
+            <input type="text" id="quizTitle" placeholder="Quiz Title" class="border p-2 rounded w-full mb-2" aria-label="Enter quiz title" required />
+            <div id="quizQuestions" class="space-y-2"></div>
+            <button type="button" id="add-quiz-question" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-2" data-tooltip="Add question">Add Question</button>
+            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mt-2" data-tooltip="Create quiz">Create Quiz</button>
+          </form>
+        </div>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Quiz List</h3>
+          <input type="text" id="quizSearch" placeholder="Search quizzes..." class="border p-2 rounded w-full mb-4" aria-label="Search quizzes by title" />
+          <select id="quizCourseFilter" class="border p-2 rounded mb-4" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
+          <div id="quizList" class="space-y-4"></div>
+        </div>
+      </div>
+
       <!-- Learner Progress Section -->
       <div id="progress" class="section hidden">
         <h2 class="text-2xl font-semibold mb-4">Learner Progress</h2>
@@ -265,6 +360,19 @@
         </div>
       </div>
 
+      <!-- Video Monitoring Section -->
+      <div id="video-monitoring" class="section hidden">
+        <h2 class="text-2xl font-semibold mb-4">Live Video Monitoring</h2>
+        <div class="mb-4 bg-white p-6 rounded shadow">
+          <h3 class="text-lg font-semibold mb-2">Learner Video Feeds</h3>
+          <input type="text" id="videoSearch" placeholder="Search learners..." class="border p-2 rounded w-full mb-4" aria-label="Search learners by name or email" />
+          <select id="videoCourseFilter" class="border p-2 rounded mb-4" aria-label="Filter by course">
+            <option value="">All Courses</option>
+          </select>
+          <div id="videoFeedList" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
+        </div>
+      </div>
+
       <!-- Add Learner Modal -->
       <div id="add-learner-modal" class="modal">
         <div class="modal-content">
@@ -300,6 +408,22 @@
         </div>
       </div>
 
+      <!-- Quiz Question Modal -->
+      <div id="quiz-question-modal" class="modal">
+        <div class="modal-content">
+          <h3 class="text-lg font-semibold mb-4">Add Quiz Question</h3>
+          <form id="quiz-question-form">
+            <input type="text" id="questionText" placeholder="Question Text" class="border p-2 rounded w-full mb-2" aria-label="Enter question text" required />
+            <input type="text" id="questionOptions" placeholder="Options (comma-separated)" class="border p-2 rounded w-full mb-2" aria-label="Enter question options" required />
+            <input type="number" id="correctOption" placeholder="Correct Option Index (0-based)" class="border p-2 rounded w-full mb-2" aria-label="Enter correct option index" required />
+            <div class="flex gap-2">
+              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Save question">Save</button>
+              <button type="button" id="close-quiz-question" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-tooltip="Cancel">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <div id="loading-spinner" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
         <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
       </div>
@@ -314,8 +438,9 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
     import { getDatabase, ref, onValue, push, update, set, get, remove, runTransaction } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 
-    // Firebase configuration (move to environment variables in production)
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
@@ -329,6 +454,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const auth = getAuth(app);
+    const storage = getStorage(app);
 
     // DOM elements
     const providerName = document.getElementById("provider-name");
@@ -374,9 +500,47 @@
     const toggleContrast = document.getElementById("toggle-contrast");
     const openAddLearner = document.getElementById("open-add-learner");
     const openBulkUpload = document.getElementById("open-bulk-upload");
+    const contentUploadForm = document.getElementById("content-upload-form");
+    const contentCourse = document.getElementById("contentCourse");
+    const contentTitle = document.getElementById("contentTitle");
+    const contentType = document.getElementById("contentType");
+    const contentFile = document.getElementById("contentFile");
+    const contentList = document.getElementById("contentList");
+    const contentSearch = document.getElementById("contentSearch");
+    const contentCourseFilter = document.getElementById("contentCourseFilter");
+    const assignmentForm = document.getElementById("assignment-form");
+    const assignmentCourse = document.getElementById("assignmentCourse");
+    const assignmentTitle = document.getElementById("assignmentTitle");
+    const assignmentDescription = document.getElementById("assignmentDescription");
+    const assignmentDueDate = document.getElementById("assignmentDueDate");
+    const assignmentList = document.getElementById("assignmentList");
+    const assignmentSearch = document.getElementById("assignmentSearch");
+    const assignmentCourseFilter = document.getElementById("assignmentCourseFilter");
+    const forumThreadForm = document.getElementById("forum-thread-form");
+    const forumCourse = document.getElementById("forumCourse");
+    const threadTitle = document.getElementById("threadTitle");
+    const threadContent = document.getElementById("threadContent");
+    const forumList = document.getElementById("forumList");
+    const forumSearch = document.getElementById("forumSearch");
+    const forumCourseFilter = document.getElementById("forumCourseFilter");
+    const quizForm = document.getElementById("quiz-form");
+    const quizCourse = document.getElementById("quizCourse");
+    const quizTitle = document.getElementById("quizTitle");
+    const quizQuestions = document.getElementById("quizQuestions");
+    const addQuizQuestion = document.getElementById("add-quiz-question");
+    const quizQuestionModal = document.getElementById("quiz-question-modal");
+    const quizQuestionForm = document.getElementById("quiz-question-form");
+    const questionText = document.getElementById("questionText");
+    const questionOptions = document.getElementById("questionOptions");
+    const correctOption = document.getElementById("correctOption");
+    const closeQuizQuestion = document.getElementById("close-quiz-question");
+    const quizList = document.getElementById("quizList");
+    const quizSearch = document.getElementById("quizSearch");
+    const quizCourseFilter = document.getElementById("quizCourseFilter");
 
-    let user = null, courses = {}, learners = {}, assessments = {}, certifications = {}, tickets = {}, notifications = [];
+    let user = null, courses = {}, learners = {}, assessments = {}, certifications = {}, tickets = {}, notifications = [], contents = {}, assignments = {}, forums = {}, quizzes = {};
     let completionChartInstance = null, enrollmentTrendChartInstance = null, analyticsChartInstance = null, heatmapChartInstance = null;
+    let currentQuizQuestions = [];
 
     // Show/hide loading spinner
     function showSpinner() { loadingSpinner.classList.remove("hidden"); }
@@ -519,6 +683,10 @@
           populateGroupFilter();
           populateCourseFilter();
           populateLearnerCourseDropdown();
+          populateContentCourseDropdown();
+          populateAssignmentCourseDropdown();
+          populateForumCourseDropdown();
+          populateQuizCourseDropdown();
           hideSpinner();
         });
       });
@@ -801,6 +969,7 @@
       const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(learnerId));
       const certs = Object.values(certifications).filter(c => c.learnerId === learnerId && courses[c.courseId]?.providerId === auth.currentUser.uid);
       const activityLogs = notifications.filter(n => n.learnerId === learnerId);
+      const assignments = Object.values(assignments).filter(a => a.learnerId === learnerId);
       const modal = document.createElement("div");
       modal.className = "modal";
       modal.style.display = "block";
@@ -812,6 +981,8 @@
           <p class="text-sm text-gray-600">Tags: ${sanitizeInput(l.metadata?.tags?.join(", ") || "-")}</p>
           <p class="text-sm text-gray-600">Enrolled Courses: ${enrolledCourses.map(c => sanitizeInput(c.name)).join(", ") || "None"}</p>
           <p class="text-sm text-gray-600">Certificates: ${certs.map(c => `<a href="#" onclick="downloadCertificate('${c.id}')" class="text-blue-600 hover:underline">${sanitizeInput(courses[c.courseId].name)}</a>`).join(", ") || "None"}</p>
+          <h4 class="text-md font-semibold mt-4 mb-2">Assignments</h4>
+          <ul class="text-sm text-gray-600 space-y-1">${assignments.map(a => `<li>${sanitizeInput(a.title)}: ${a.status} (Submitted: ${a.submittedAt ? new Date(a.submittedAt).toLocaleDateString() : "Not submitted"})</li>`).join("") || "No assignments"}</ul>
           <h4 class="text-md font-semibold mt-4 mb-2">Activity Log</h4>
           <ul class="text-sm text-gray-600 space-y-1">${activityLogs.map(n => `<li>${sanitizeInput(n.message)} (${new Date(n.timestamp).toLocaleString()})</li>`).join("") || "No activity"}</ul>
           <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 mt-4" onclick="this.parentElement.parentElement.remove()" data-tooltip="Close profile">Close</button>
@@ -821,37 +992,41 @@
     };
 
     // Load courses
-   function loadCourses() {
-  showSpinner();
-  onValue(ref(db, "courses"), snap => {
-    courses = snap.val() || {};
-    renderCourses();
-    populateCourseFilter();
-    populateLearnerCourseDropdown();
-    hideSpinner();
-  });
-}
+    function loadCourses() {
+      showSpinner();
+      onValue(ref(db, "courses"), snap => {
+        courses = snap.val() || {};
+        renderCourses();
+        populateCourseFilter();
+        populateLearnerCourseDropdown();
+        populateContentCourseDropdown();
+        populateAssignmentCourseDropdown();
+        populateForumCourseDropdown();
+        populateQuizCourseDropdown();
+        hideSpinner();
+      });
+    }
 
     function renderCourses(filter = "") {
-  courseList.innerHTML = "";
-  for (const id in courses) {
-    const c = courses[id];
-    if (c.providerId !== auth.currentUser.uid || (filter && !c.name.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase())))) continue;
-    const courseItem = document.createElement("div");
-    courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow";
-    courseItem.innerHTML = `
-      <div>
-        <p class="font-semibold">${sanitizeInput(c.name)}</p>
-        <p class="text-sm text-gray-600">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Enrolled: ${c.enrolled?.length || 0}</p>
-      </div>
-      <div class="flex gap-2">
-        <button onclick="editCourse('${id}')" class="text-blue-600 hover:underline" aria-label="Edit course ${sanitizeInput(c.name)}" data-tooltip="Edit course">Edit</button>
-        <button onclick="archiveCourse('${id}')" class="text-red-600 hover:underline" aria-label="${c.archived ? "Unarchive" : "Archive"} course ${sanitizeInput(c.name)}" data-tooltip="${c.archived ? "Unarchive" : "Archive"} course">${c.archived ? "Unarchive" : "Archive"}</button>
-      </div>
-    `;
-    courseList.appendChild(courseItem);
-  }
-}
+      courseList.innerHTML = "";
+      for (const id in courses) {
+        const c = courses[id];
+        if (c.providerId !== auth.currentUser.uid || (filter && !c.name.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase())))) continue;
+        const courseItem = document.createElement("div");
+        courseItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow";
+        courseItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${sanitizeInput(c.name)}</p>
+            <p class="text-sm text-gray-600">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Enrolled: ${c.enrolled?.length || 0}</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="editCourse('${id}')" class="text-blue-600 hover:underline" aria-label="Edit course ${sanitizeInput(c.name)}" data-tooltip="Edit course">Edit</button>
+            <button onclick="archiveCourse('${id}')" class="text-red-600 hover:underline" aria-label="${c.archived ? "Unarchive" : "Archive"} course ${sanitizeInput(c.name)}" data-tooltip="${c.archived ? "Unarchive" : "Archive"} course">${c.archived ? "Unarchive" : "Archive"}</button>
+          </div>
+        `;
+        courseList.appendChild(courseItem);
+      }
+    }
 
     // Search courses
     const searchCourses = debounce(filter => renderCourses(sanitizeInput(filter)), 300);
@@ -923,494 +1098,968 @@
       hideSpinner();
     };
 
-    // Load learner progress
-    function loadLearnerProgress() {
+    // Load course content
+    function loadContent() {
       showSpinner();
-      onValue(ref(db, "users"), snap => {
-        learners = snap.val() || {};
-        onValue(ref(db, "courses"), snap => {
-          courses = snap.val() || {};
-          onValue(ref(db, "assessments"), snap => {
-            assessments = snap.val() || {};
-            onValue(ref(db, "certifications"), snap => {
-              certifications = snap.val() || {};
-              renderLearnerProgress();
-              hideSpinner();
-            });
-          });
-        });
-      });
-    }
-
-    function renderLearnerProgress(filter = "") {
-      progressList.innerHTML = "";
-      for (const id in learners) {
-        const l = learners[id];
-        if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
-        if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase())) continue;
-        const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
-        if (enrolledCourses.length === 0) continue;
-        const learnerItem = document.createElement("div");
-        learnerItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-        let courseDetails = "";
-        enrolledCourses.forEach(c => {
-          const cert = Object.values(certifications).find(cert => cert.learnerId === id && cert.courseId === c.id);
-          const completedAssessments = Object.values(assessments).filter(a => a.courseId === c.id && a.submissions?.[id]?.status === "completed").length;
-          const totalAssessments = Object.values(assessments).filter(a => a.courseId === c.id).length;
-          const progress = l.progress?.[c.id] || 0;
-          if (progress >= 50 && !notifications.some(n => n.learnerId === id && n.courseId === c.id && n.message.includes("50%"))) {
-            notifications.push({ learnerId: id, courseId: c.id, message: `${l.fullName || l.email} reached 50% progress in ${c.name}`, timestamp: Date.now() });
-          }
-          if (progress >= 100 && !notifications.some(n => n.learnerId === id && n.courseId === c.id && n.message.includes("completed"))) {
-            notifications.push({ learnerId: id, courseId: c.id, message: `${l.fullName || l.email} completed ${c.name}`, timestamp: Date.now() });
-          }
-          courseDetails += `
-            <p class="text-sm font-semibold">${sanitizeInput(c.name)}</p>
-            <p class="text-sm text-gray-600">Progress: ${progress}% | Assessments: ${completedAssessments}/${totalAssessments} | Certificate: ${cert ? `<button onclick="downloadCertificate('${cert.id}')" class="text-blue-600 hover:underline" aria-label="Download certificate for ${sanitizeInput(c.name)}" data-tooltip="Download certificate">Download</button>` : "Not Issued"}</p>
-          `;
-        });
-        learnerItem.innerHTML = `
-          <div>
-            <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p>
-            ${courseDetails}
-          </div>
-        `;
-        progressList.appendChild(learnerItem);
-      }
-    }
-
-    // Search learner progress
-    const searchProgress = debounce(filter => renderLearnerProgress(sanitizeInput(filter)), 300);
-    progressSearch.addEventListener("input", () => searchProgress(progressSearch.value));
-
-    // Download certificate
-    window.downloadCertificate = certId => {
-      const cert = certifications[certId];
-      if (!cert || !courses[cert.courseId] || !learners[cert.learnerId]) {
-        alert("Certificate, course, or learner data not found.");
-        return;
-      }
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.setFontSize(20);
-      doc.text("Certificate of Completion", 105, 30, { align: "center" });
-      doc.setFontSize(16);
-      doc.text("This certifies that", 105, 60, { align: "center" });
-      doc.setFontSize(18);
-      doc.setFont("helvetica", "bold");
-      doc.text(sanitizeInput(learners[cert.learnerId].fullName || learners[cert.learnerId].email), 105, 80, { align: "center" });
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(16);
-      doc.text("has successfully completed the course", 105, 100, { align: "center" });
-      doc.setFontSize(18);
-      doc.setFont("helvetica", "bold");
-      doc.text(sanitizeInput(courses[cert.courseId].name), 105, 120, { align: "center" });
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(14);
-      doc.text(`Issued on: ${new Date(cert.issuedAt).toLocaleDateString()}`, 105, 140, { align: "center" });
-      doc.text("CETA Provider Academy", 105, 160, { align: "center" });
-      doc.save(`certificate_${certId}.pdf`);
-      logAudit(`Downloaded certificate for ${learners[cert.learnerId].fullName || learners[cert.learnerId].email}`);
-    };
-
-    // Advanced analytics
-    function loadAnalytics() {
-      showSpinner();
-      onValue(ref(db, "courses"), snap => {
-        courses = snap.val() || {};
-        onValue(ref(db, "assessments"), snap => {
-          assessments = snap.val() || {};
-          onValue(ref(db, "certifications"), snap => {
-            certifications = snap.val() || {};
-            renderAnalytics();
-            hideSpinner();
-          });
-        });
-      });
-    }
-
-    function predictCompletionRate(courseId) {
-      const course = courses[courseId];
-      if (!course || !course.enrolled) return 0;
-      const completions = course.completions?.length || 0;
-      const enrolled = course.enrolled.length;
-      const historicalRate = enrolled > 0 ? completions / enrolled : 0;
-      const difficultyFactor = course.metadata?.tags?.includes("advanced") ? 0.8 : 1;
-      const engagementFactor = course.enrolled.length > 10 ? 1.1 : 0.9;
-      const predictedRate = historicalRate * difficultyFactor * engagementFactor * 100;
-      return Math.min(Math.max(predictedRate.toFixed(1), 0), 100);
-    }
-
-    function calculateStatisticalMetrics(courseId) {
-      const course = courses[courseId];
-      const assessmentsForCourse = Object.values(assessments).filter(a => a.courseId === courseId);
-      const completionTimes = [];
-      const scores = [];
-
-      assessmentsForCourse.forEach(a => {
-        if (a.submissions) {
-          Object.values(a.submissions).forEach(s => {
-            if (s.status === "completed" && s.completedAt && s.submittedAt) {
-              completionTimes.push((s.completedAt - s.submittedAt) / (1000 * 60 * 60));
-            }
-            if (s.score) scores.push(s.score);
-          });
-        }
-      });
-
-      const avgCompletionTime = completionTimes.length > 0 ? (completionTimes.reduce((a, b) => a + b, 0) / completionTimes.length).toFixed(1) : 0;
-      const avgScore = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : 0;
-      const stdDevScore = scores.length > 0 ? Math.sqrt(scores.reduce((a, b) => a + Math.pow(b - avgScore, 2), 0) / scores.length).toFixed(1) : 0;
-      const difficultyIndex = scores.length > 0 ? (100 - avgScore).toFixed(1) : 0;
-
-      return { avgCompletionTime, avgScore, stdDevScore, difficultyIndex };
-    }
-
-    function generateHeatmapData() {
-      const heatmapData = Array(7).fill().map(() => Array(24).fill(0));
-      for (const id in assessments) {
-        const submissions = assessments[id].submissions || {};
-        for (const subId in submissions) {
-          const submission = submissions[subId];
-          if (submission.submittedAt && courses[assessments[id].courseId]?.providerId === auth.currentUser.uid) {
-            const date = new Date(submission.submittedAt);
-            const day = date.getDay();
-            const hour = date.getHours();
-            heatmapData[day][hour]++;
-          }
-        }
-      }
-      return heatmapData;
-    }
-
-    function renderAnalytics() {
-      analyticsDetails.innerHTML = "";
-      const timeRangeValue = timeRange.value;
-      const courseFilterValue = courseFilter.value;
-      const groupFilterValue = groupFilterAnalytics.value;
-      const now = Date.now();
-      let cutoff = 0;
-      if (timeRangeValue === "30") cutoff = now - 30 * 24 * 60 * 60 * 1000;
-      else if (timeRangeValue === "90") cutoff = now - 90 * 24 * 60 * 60 * 1000;
-      else if (timeRangeValue === "365") cutoff = now - 365 * 24 * 60 * 60 * 1000;
-
-      const chartData = {
-        labels: [],
-        datasets: [
-          { label: "Completion Rate (%)", data: [], backgroundColor: "#2563eb", stack: "Stack 0" },
-          { label: "Average Assessment Score (%)", data: [], backgroundColor: "#10b981", stack: "Stack 0" },
-          { label: "Predicted Completion Rate (%)", data: [], backgroundColor: "#f59e0b", stack: "Stack 0" }
-        ]
-      };
-
-      const filteredCourses = Object.entries(courses).filter(([id, c]) => {
-        if (c.providerId !== auth.currentUser.uid || c.archived) return false;
-        if (courseFilterValue && courseFilterValue !== id) return false;
-        if (cutoff && c.createdAt < cutoff) return false;
-        return true;
-      });
-
-      const analyticsData = [];
-      filteredCourses.forEach(([id, c]) => {
-        let filteredLearners = Object.keys(learners).filter(lid => learners[lid].role === "learner" && learners[lid].providerId === auth.currentUser.uid && c.enrolled?.includes(lid));
-        if (groupFilterValue) filteredLearners = filteredLearners.filter(lid => learners[lid].metadata?.tags?.includes(groupFilterValue));
-        const completionRate = filteredLearners.length > 0 ? (c.completions?.filter(lid => filteredLearners.includes(lid)).length || 0) / filteredLearners.length * 100 : 0;
-        let totalScore = 0, scoreCount = 0;
-        const assessmentsForCourse = Object.values(assessments).filter(a => a.courseId === id && (!cutoff || a.createdAt >= cutoff));
-        assessmentsForCourse.forEach(a => {
-          for (const subId in a.submissions) {
-            if (filteredLearners.includes(subId) && (!cutoff || a.submissions[subId].submittedAt >= cutoff)) {
-              if (a.submissions[subId].score) {
-                totalScore += a.submissions[subId].score;
-                scoreCount++;
-              }
-            }
-          }
-        });
-        const avgScore = scoreCount > 0 ? (totalScore / scoreCount).toFixed(1) : 0;
-        const predictedRate = predictCompletionRate(id);
-        const stats = calculateStatisticalMetrics(id);
-
-        chartData.labels.push(c.name);
-        chartData.datasets[0].data.push(completionRate.toFixed(1));
-        chartData.datasets[1].data.push(avgScore);
-        chartData.datasets[2].data.push(predictedRate);
-
-        analyticsData.push({
-          courseId: id,
-          name: c.name,
-          completionRate: completionRate.toFixed(1),
-          avgScore,
-          predictedRate,
-          ...stats
-        });
-
-        const detailItem = document.createElement("div");
-        detailItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
-        detailItem.innerHTML = `
-          <p class="font-semibold">${sanitizeInput(c.name)}</p>
-          <p class="text-sm text-gray-600">Enrolled: ${filteredLearners.length} | Completion Rate: ${completionRate.toFixed(1)}% | Predicted Completion: ${predictedRate}%</p>
-          <p class="text-sm text-gray-600">Avg Score: ${avgScore}% | Avg Completion Time: ${stats.avgCompletionTime} hrs | Score Std Dev: ${stats.stdDevScore} | Difficulty Index: ${stats.difficultyIndex}</p>
-        `;
-        analyticsDetails.appendChild(detailItem);
-      });
-
-      if (analyticsChartInstance) analyticsChartInstance.destroy();
-      analyticsChartInstance = new Chart(analyticsChart, {
-        type: "bar",
-        data: chartData,
-        options: {
-          scales: {
-            y: { beginAtZero: true, max: 100 },
-            x: { stacked: false }
-          },
-          plugins: {
-            tooltip: { mode: "index", intersect: false },
-            datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
-          }
-        },
-        plugins: [ChartDataLabels]
-      });
-
-      const heatmapData = generateHeatmapData();
-      if (heatmapChartInstance) heatmapChartInstance.destroy();
-      heatmapChartInstance = new Chart(heatmapChart, {
-        type: "matrix",
-        data: {
-          datasets: [{
-            label: "Submission Activity",
-            data: heatmapData.flatMap((row, day) => row.map((value, hour) => ({ x: hour, y: day, v: value }))),
-            backgroundColor: c => {
-              const value = c.raw.v;
-              const alpha = Math.min(value / 10, 1);
-              return `rgba(37, 99, 235, ${alpha})`;
-            },
-            width: ({ chart }) => (chart.chartArea?.width || 0) / 24,
-            height: ({ chart }) => (chart.chartArea?.height || 0) / 7
-          }]
-        },
-        options: {
-          scales: {
-            x: { type: "category", labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), title: { display: true, text: "Hour of Day" } },
-            y: { type: "category", labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], title: { display: true, text: "Day of Week" } }
-          },
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: ctx => `Submissions: ${ctx.raw.v} at ${ctx.raw.x}:00 on ${ctx.chart.scales.y.getLabelForValue(ctx.raw.y)}`
-              }
-            }
-          }
-        }
-      });
-    }
-
-    // Export analytics to PDF
-    exportAnalytics.addEventListener("click", () => {
-      const timeRangeValue = timeRange.value;
-      const courseFilterValue = courseFilter.value;
-      const groupFilterValue = groupFilterAnalytics.value;
-      const now = Date.now();
-      let cutoff = 0;
-      if (timeRangeValue === "30") cutoff = now - 30 * 24 * 60 * 60 * 1000;
-      else if (timeRangeValue === "90") cutoff = now - 90 * 24 * 60 * 60 * 1000;
-      else if (timeRangeValue === "365") cutoff = now - 365 * 24 * 60 * 60 * 1000;
-
-      const filteredCourses = Object.entries(courses).filter(([id, c]) => {
-        if (c.providerId !== auth.currentUser.uid || c.archived) return false;
-        if (courseFilterValue && courseFilterValue !== id) return false;
-        if (cutoff && c.createdAt < cutoff) return false;
-        return true;
-      });
-
-      const docDefinition = {
-        content: [
-          { text: "CETA Provider Analytics Report", style: "header" },
-          { text: `Generated on ${new Date().toLocaleDateString()}`, style: "subheader" },
-          { text: `Time Range: ${timeRangeValue === "all" ? "All Time" : `Last ${timeRangeValue} Days`}`, style: "subheader" },
-          { text: courseFilterValue ? `Course: ${courses[courseFilterValue]?.name || "All"}` : "All Courses", style: "subheader" },
-          { text: groupFilterValue ? `Group: ${groupFilterValue}` : "All Groups", style: "subheader" },
-          {
-            table: {
-              headerRows: 1,
-              widths: ["*", "*", "*", "*", "*", "*"],
-              body: [
-                ["Course", "Enrolled", "Completion Rate (%)", "Avg Score (%)", "Predicted Completion (%)", "Difficulty Index"],
-                ...filteredCourses.map(([id, c]) => {
-                  let filteredLearners = Object.keys(learners).filter(lid => learners[lid].role === "learner" && learners[lid].providerId === auth.currentUser.uid && c.enrolled?.includes(lid));
-                  if (groupFilterValue) filteredLearners = filteredLearners.filter(lid => learners[lid].metadata?.tags?.includes(groupFilterValue));
-                  const stats = calculateStatisticalMetrics(id);
-                  const completionRate = filteredLearners.length > 0 ? (c.completions?.filter(lid => filteredLearners.includes(lid)).length || 0) / filteredLearners.length * 100 : 0;
-                  let totalScore = 0, scoreCount = 0;
-                  Object.values(assessments)
-                    .filter(a => a.courseId === id && (!cutoff || a.createdAt >= cutoff))
-                    .forEach(a => {
-                      for (const subId in a.submissions) {
-                        if (filteredLearners.includes(subId) && (!cutoff || a.submissions[subId].submittedAt >= cutoff)) {
-                          if (a.submissions[subId].score) {
-                            totalScore += a.submissions[subId].score;
-                            scoreCount++;
-                          }
-                        }
-                      }
-                    });
-                  const avgScore = scoreCount > 0 ? (totalScore / scoreCount).toFixed(1) : 0;
-                  return [
-                    sanitizeInput(c.name),
-                    filteredLearners.length,
-                    completionRate.toFixed(1),
-                    avgScore,
-                    predictCompletionRate(id),
-                    stats.difficultyIndex
-                  ];
-                })
-              ]
-            }
-          },
-          { text: "Statistical Metrics", style: "subheader", margin: [0, 20, 0, 10] },
-          {
-            ul: filteredCourses.map(([id, c]) => {
-              const stats = calculateStatisticalMetrics(id);
-              return `${sanitizeInput(c.name)}: Avg Completion Time: ${stats.avgCompletionTime} hrs, Score Std Dev: ${stats.stdDevScore}`;
-            })
-          }
-        ],
-        styles: {
-          header: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
-          subheader: { fontSize: 14, margin: [0, 0, 0, 10] }
-        }
-      };
-
-      pdfMake.createPdf(docDefinition).download(`analytics_report_${new Date().toISOString().split("T")[0]}.pdf`);
-    });
-
-    // Load tickets
-    function loadTickets() {
-      showSpinner();
-      onValue(ref(db, "helpdesk"), snap => {
-        tickets = snap.val() || {};
-        onValue(ref(db, "users"), snap => {
-          learners = snap.val() || {};
-          ticketList.innerHTML = "";
-          for (const id in tickets) {
-            const t = tickets[id];
-            if (courses[t.courseId]?.providerId !== auth.currentUser.uid) continue;
-            const ticketItem = document.createElement("div");
-            ticketItem.className = "bg-gray-50 p-4 rounded shadow flex justify-between items-center hover:shadow-md transition-shadow";
-            ticketItem.innerHTML = `
-              <div>
-                <p class="font-semibold">${sanitizeInput(t.issue)}</p>
-                <p class="text-sm text-gray-600">Learner: ${sanitizeInput(learners[t.userId]?.fullName || learners[t.userId]?.email || "Unknown")} | Status: ${t.status} | Submitted: ${new Date(t.createdAt).toLocaleDateString()}</p>
-              </div>
-              <div>
-                ${t.status === "open" ? `<button onclick="respondTicket('${id}')" class="text-blue-600 hover:underline" aria-label="Respond to ticket ${sanitizeInput(t.issue)}" data-tooltip="Respond to ticket">Respond</button>` : `<span class="text-green-600">Resolved</span>`}
-              </div>
-            `;
-            ticketList.appendChild(ticketItem);
-          }
-          hideSpinner();
-        });
-      });
-    }
-
-    // Respond to ticket
-    window.respondTicket = async ticketId => {
-      const response = prompt("Enter your response:");
-      if (response) {
-        showSpinner();
-        try {
-          await update(ref(db, `helpdesk/${ticketId}`), {
-            status: "resolved",
-            resolvedAt: Date.now(),
-            response: sanitizeInput(response)
-          });
-          logAudit(`Resolved ticket ${ticketId}`);
-          alert("Ticket resolved successfully!");
-        } catch (err) {
-          console.error("Error resolving ticket:", err);
-          alert("Failed to resolve ticket.");
-        }
+      onValue(ref(db, "contents"), snap => {
+        contents = snap.val() || {};
+        renderContent();
         hideSpinner();
-      }
-    };
+      });
+    }
 
-    // Populate course filter
-    function populateCourseFilter() {
-      courseFilter.innerHTML = '<option value="">All Courses</option>';
+    function populateContentCourseDropdown() {
+      contentCourse.innerHTML = '<option value="">Select Course</option>';
+      contentCourseFilter.innerHTML = '<option value="">All Courses</option>';
       for (const id in courses) {
         if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
           const option = document.createElement("option");
           option.value = id;
           option.textContent = sanitizeInput(courses[id].name);
-          courseFilter.appendChild(option);
+          contentCourse.appendChild(option);
+          contentCourseFilter.appendChild(option.cloneNode(true));
         }
       }
     }
 
-    // Audit logging
-    async function logAudit(action) {
+    function renderContent(filter = "", courseFilter = "") {
+      contentList.innerHTML = "";
+      for (const id in contents) {
+        const c = contents[id];
+        if (c.providerId !== auth.currentUser.uid) continue;
+        if (filter && !c.title.toLowerCase().includes(filter.toLowerCase())) continue;
+        if (courseFilter && c.courseId !== courseFilter) continue;
+        const contentItem = document.createElement("div");
+        contentItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        contentItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(c.title)}</p>
+              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[c.courseId]?.name || "Unknown")} | Type: ${sanitizeInput(c.type)}</p>
+              <p class="text-sm text-gray-600">URL: <a href="${sanitizeInput(c.url)}" target="_blank" class="text-blue-600 hover:underline">View</a></p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="deleteContent('${id}')" class="text-red-600 hover:underline" aria-label="Delete content ${sanitizeInput(c.title)}" data-tooltip="Delete content">Delete</button>
+            </div>
+          </div>
+        `;
+        contentList.appendChild(contentItem);
+      }
+    }
+
+    // Search content
+    const searchContent = debounce((filter, course) => renderContent(sanitizeInput(filter), course), 300);
+    contentSearch.addEventListener("input", () => searchContent(contentSearch.value, contentCourseFilter.value));
+    contentCourseFilter.addEventListener("change", () => searchContent(contentSearch.value, contentCourseFilter.value));
+
+    // Upload content
+    contentUploadForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const courseId = contentCourse.value;
+      const title = sanitizeInput(contentTitle.value.trim());
+      const type = contentType.value;
+      const file = contentFile.files[0];
+      if (!courseId || !title || !file) {
+        alert("Please select a course, enter a title, and upload a file.");
+        return;
+      }
+      showSpinner();
       try {
-        await push(ref(db, "audit_logs"), {
-          userId: auth.currentUser.uid,
-          action,
-          timestamp: Date.now()
+        const fileRef = storageRef(storage, `content/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
+        await uploadBytes(fileRef, file);
+        const url = await getDownloadURL(fileRef);
+        await push(ref(db, "contents"), {
+          providerId: auth.currentUser.uid,
+          courseId,
+          title,
+          type,
+          url,
+          createdAt: Date.now()
         });
+        logAudit(`Uploaded content ${title} for course ${courses[courseId].name}`);
+        alert("Content uploaded successfully!");
+        contentUploadForm.reset();
       } catch (err) {
-        console.error("Error logging audit:", err);
+        console.error("Error uploading content:", err);
+        alert("Failed to upload content.");
+      }
+      hideSpinner();
+    });
+
+    // Delete content
+    window.deleteContent = async contentId => {
+      if (!confirm("Are you sure you want to delete this content?")) return;
+      showSpinner();
+      try {
+        await remove(ref(db, `contents/${contentId}`));
+        logAudit(`Deleted content ${contents[contentId].title}`);
+        alert("Content deleted successfully!");
+      } catch (err) {
+        console.error("Error deleting content:", err);
+        alert("Failed to delete content.");
+      }
+      hideSpinner();
+    };
+
+    // Load assignments
+    function loadAssignments() {
+      showSpinner();
+      onValue(ref(db, "assignments"), snap => {
+        assignments = snap.val() || {};
+        renderAssignments();
+        hideSpinner();
+      });
+    }
+
+    function populateAssignmentCourseDropdown() {
+      assignmentCourse.innerHTML = '<option value="">Select Course</option>';
+      assignmentCourseFilter.innerHTML = '<option value="">All Courses</option>';
+      for (const id in courses) {
+        if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = sanitizeInput(courses[id].name);
+          assignmentCourse.appendChild(option);
+          assignmentCourseFilter.appendChild(option.cloneNode(true));
+        }
       }
     }
 
-    // Authentication check
-    onAuthStateChanged(auth, async authUser => {
-      if (!authUser) {
-        alert("Unauthorized. Redirecting...");
-        window.location.href = "login.html";
-      } else {
+    function renderAssignments(filter = "", courseFilter = "") {
+      assignmentList.innerHTML = "";
+      for (const id in assignments) {
+        const a = assignments[id];
+        if (a.providerId !== auth.currentUser.uid) continue;
+        if (filter && !a.title.toLowerCase().includes(filter.toLowerCase()) && !learners[a.learnerId]?.fullName?.toLowerCase().includes(filter.toLowerCase())) continue;
+        if (courseFilter && a.courseId !== courseFilter) continue;
+        const assignmentItem = document.createElement("div");
+        assignmentItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+        assignmentItem.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="font-semibold">${sanitizeInput(a.title)}</p>
+              <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[a.courseId]?.name || "Unknown")} | Learner: ${sanitizeInput(learners[a.learnerId]?.fullName || "Unknown")}</p>
+              <p class="text-sm text-gray-600">Status: ${sanitizeInput(a.status)} | Due: ${new Date(a.dueDate).toLocaleDateString()}</p>
+              <p class="text-sm text-gray-600">Submission: ${a.submissionUrl ? `<a href="${sanitizeInput(a.submissionUrl)}" target="_blank" class="text-blue-600 hover:underline">View</a>` : "Not submitted"}</p>
+            </div>
+            <div class="flex gap-2">
+              ${a.status === "submitted" ? `<button onclick="reviewAssignment('${id}')" class="text-blue-600 hover:underline" aria-label="Review assignment ${sanitizeInput(a.title)}" data-tooltip="Review assignment">Review</button>` : ""}
+              <button onclick="deleteAssignment('${id}')" class="text-red-600 hover:underline" aria-label="Delete assignment ${sanitizeInput(a.title)}" data-tooltip="Delete assignment">Delete</button>
+            </div>
+          </div>
+        `;
+        assignmentList.appendChild(assignmentItem);
+      }
+    }
+
+    // Search assignments
+    const searchAssignments = debounce((filter, course) => renderAssignments(sanitizeInput(filter), course), 300);
+    assignmentSearch.addEventListener("input", () => searchAssignments(assignmentSearch.value, assignmentCourseFilter.value));
+    assignmentCourseFilter.addEventListener("change", () => searchAssignments(assignmentSearch.value, assignmentCourseFilter.value));
+
+    // Create assignment
+    assignmentForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const courseId = assignmentCourse.value;
+      const title = sanitizeInput(assignmentTitle.value.trim());
+      const description = sanitizeInput(assignmentDescription.value.trim());
+      const dueDate = new Date(assignmentDueDate.value).getTime();
+      if (!courseId || !title || !description || !dueDate) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+      showSpinner();
+      try {
+        await push(ref(db, "assignments"), {
+          providerId: auth.currentUser.uid,
+          courseId,
+          title,
+          description,
+          dueDate,
+          status: "assigned",
+          createdAt: Date.now()
+        });
+        logAudit(`Created assignment ${title} for course ${courses[courseId].name}`);
+        alert("Assignment created successfully!");
+        assignmentForm.reset();
+      } catch (err) {
+        console.error("Error creating assignment:", err);
+        alert("Failed to create assignment.");
+      }
+      hideSpinner();
+    });
+
+    // Review assignment
+    window.reviewAssignment = async assignmentId => {
+      const feedback = prompt("Enter feedback for the assignment:");
+      const grade = prompt("Enter grade (0-100):");
+      if (feedback && grade && !isNaN(grade) && grade >= 0 && grade <= 100) {
+        showSpinner();
         try {
-          const userSnap = await get(ref(db, `users/${authUser.uid}`));
-          if (userSnap.exists()) {
-            user = userSnap.val();
-            if (user.role !== "provider") {
-              alert("Access denied. Provider role required. Redirecting...");
-              await signOut(auth);
-              window.location.href = "login.html";
-              return;
-            }
-            loadOverview();
-            loadLearners();
-            loadCourses();
-            loadLearnerProgress();
-            loadAnalytics();
-            loadTickets();
-          } else {
-            alert("User data not found. Redirecting...");
-            await signOut(auth);
-            window.location.href = "login.html";
-          }
+          await update(ref(db, `assignments/${assignmentId}`), {
+            status: "graded",
+            feedback: sanitizeInput(feedback),
+            grade: parseInt(grade),
+            reviewedAt: Date.now()
+          });
+          logAudit(`Reviewed assignment ${assignments[assignmentId].title}`);
+          alert("Assignment reviewed successfully!");
         } catch (err) {
-          console.error("Error fetching user data:", err);
-          alert("Failed to load user data. Redirecting...");
-          await signOut(auth);
-          window.location.href = "login.html";
+          console.error("Error reviewing assignment:", err);
+          alert("Failed to review assignment.");
+        }
+        hideSpinner();
+      } else {
+        alert("Invalid feedback or grade.");
+      }
+    };
+
+    // Delete assignment
+    window.deleteAssignment = async assignmentId => {
+      if (!confirm("Are you sure you want to delete this assignment?")) return;
+      showSpinner();
+      try {
+        await remove(ref(db, `assignments/${assignmentId}`));
+        logAudit(`Deleted assignment ${assignments[assignmentId].title}`);
+        alert("Assignment deleted successfully!");
+      } catch (err) {
+        console.error("Error deleting assignment:", err);
+        alert("Failed to delete assignment.");
+      }
+      hideSpinner();
+    };
+
+    // Load forums
+    function loadForums() {
+      showSpinner();
+      onValue(ref(db, "forums"), snap => {
+        forums = snap.val() || {};
+        renderForums();
+        hideSpinner();
+      });
+    }
+
+    function populateForumCourseDropdown() {
+      forumCourse.innerHTML = '<option value="">Select Course</option>';
+      forumCourseFilter.innerHTML = '<option value="">All Courses</option>';
+      for (const id in courses) {
+        if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = sanitizeInput(courses[id].name);
+          forumCourse.appendChild(option);
+          forumCourseFilter.appendChild(option.cloneNode(true));
         }
       }
-    });
+    }
 
-    // Sign out
-    document.getElementById("signout-btn").addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-        window.location.href = "login.html";
-      } catch (err) {
-        console.error("Sign-out failed:", err);
-        alert("Failed to sign out. Please try again.");
+   function renderForums(filter = "", courseFilter = "") {
+  forumList.innerHTML = "";
+  for (const id in forums) {
+    const f = forums[id];
+    if (f.providerId !== auth.currentUser.uid) continue;
+    if (filter && !f.title.toLowerCase().includes(filter.toLowerCase())) continue;
+    if (courseFilter && f.courseId !== courseFilter) continue;
+    const forumItem = document.createElement("div");
+    forumItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+    forumItem.innerHTML = `
+      <div class="flex justify-between items-center">
+        <div>
+          <p class="font-semibold">${sanitizeInput(f.title)}</p>
+          <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")} | Posts: ${f.posts?.length || 0}</p>
+          <p class="text-sm text-gray-600">Created: ${new Date(f.createdAt).toLocaleDateString()}</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="viewForum('${id}')" class="text-blue-600 hover:underline" aria-label="View forum ${sanitizeInput(f.title)}" data-tooltip="View forum">View</button>
+          <button onclick="deleteForum('${id}')" class="text-red-600 hover:underline" aria-label="Delete forum ${sanitizeInput(f.title)}" data-tooltip="Delete forum">Delete</button>
+        </div>
+      </div>
+    `;
+    forumList.appendChild(forumItem);
+  }
+}
+
+// Search forums
+const searchForums = debounce((filter, course) => renderForums(sanitizeInput(filter), course), 300);
+forumSearch.addEventListener("input", () => searchForums(forumSearch.value, forumCourseFilter.value));
+forumCourseFilter.addEventListener("change", () => searchForums(forumSearch.value, forumCourseFilter.value));
+
+// Create forum thread
+forumThreadForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  const courseId = forumCourse.value;
+  const title = sanitizeInput(threadTitle.value.trim());
+  const content = sanitizeInput(threadContent.value.trim());
+  if (!courseId || !title || !content) {
+    alert("Please fill in all required fields.");
+    return;
+  }
+  showSpinner();
+  try {
+    await push(ref(db, "forums"), {
+      providerId: auth.currentUser.uid,
+      courseId,
+      title,
+      posts: [{ content, postedBy: auth.currentUser.uid, timestamp: Date.now() }],
+      createdAt: Date.now()
+    });
+    logAudit(`Created forum thread ${title} for course ${courses[courseId].name}`);
+    alert("Forum thread created successfully!");
+    forumThreadForm.reset();
+  } catch (err) {
+    console.error("Error creating forum thread:", err);
+    alert("Failed to create forum thread.");
+  }
+  hideSpinner();
+});
+
+// View forum
+window.viewForum = async forumId => {
+  const f = forums[forumId];
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.style.display = "block";
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h3 class="text-lg font-semibold mb-4">Forum: ${sanitizeInput(f.title)}</h3>
+      <p class="text-sm text-gray-600 mb-2">Course: ${sanitizeInput(courses[f.courseId]?.name || "Unknown")}</p>
+      <div id="forumPosts" class="space-y-2 mb-4"></div>
+      <form id="post-form" class="mb-4">
+        <textarea id="newPost" placeholder="Add a new post..." class="border p-2 rounded w-full mb-2" aria-label="Enter new post content" required></textarea>
+        <div class="flex gap-2">
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Post reply">Post</button>
+          <button type="button" onclick="this.closest('.modal').remove()" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" data-tooltip="Close forum">Close</button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  const forumPosts = modal.querySelector("#forumPosts");
+  f.posts?.forEach(post => {
+    const postDiv = document.createElement("div");
+    postDiv.className = "border-l-2 border-blue-600 pl-2";
+    postDiv.innerHTML = `
+      <p class="text-sm">${sanitizeInput(post.content)}</p>
+      <p class="text-xs text-gray-500">By ${sanitizeInput(learners[post.postedBy]?.fullName || "Provider")} on ${new Date(post.timestamp).toLocaleString()}</p>
+    `;
+    forumPosts.appendChild(postDiv);
+  });
+  modal.querySelector("#post-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const content = sanitizeInput(modal.querySelector("#newPost").value.trim());
+    if (!content) {
+      alert("Please enter post content.");
+      return;
+    }
+    showSpinner();
+    try {
+      await runTransaction(ref(db, `forums/${forumId}`), forum => {
+        forum = forum || { posts: [] };
+        forum.posts = forum.posts || [];
+        forum.posts.push({ content, postedBy: auth.currentUser.uid, timestamp: Date.now() });
+        return forum;
+      });
+      logAudit(`Posted in forum ${f.title}`);
+      modal.remove();
+      viewForum(forumId); // Refresh forum view
+    } catch (err) {
+      console.error("Error posting to forum:", err);
+      alert("Failed to post to forum.");
+    }
+    hideSpinner();
+  });
+};
+
+// Delete forum
+window.deleteForum = async forumId => {
+  if (!confirm("Are you sure you want to delete this forum thread?")) return;
+  showSpinner();
+  try {
+    await remove(ref(db, `forums/${forumId}`));
+    logAudit(`Deleted forum ${forums[forumId].title}`);
+    alert("Forum thread deleted successfully!");
+  } catch (err) {
+    console.error("Error deleting forum:", err);
+    alert("Failed to delete forum thread.");
+  }
+  hideSpinner();
+};
+
+// Load quizzes
+function loadQuizzes() {
+  showSpinner();
+  onValue(ref(db, "quizzes"), snap => {
+    quizzes = snap.val() || {};
+    renderQuizzes();
+    hideSpinner();
+  });
+}
+
+function populateQuizCourseDropdown() {
+  quizCourse.innerHTML = '<option value="">Select Course</option>';
+  quizCourseFilter.innerHTML = '<option value="">All Courses</option>';
+  for (const id in courses) {
+    if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = sanitizeInput(courses[id].name);
+      quizCourse.appendChild(option);
+      quizCourseFilter.appendChild(option.cloneNode(true));
+    }
+  }
+}
+
+function renderQuizzes(filter = "", courseFilter = "") {
+  quizList.innerHTML = "";
+  for (const id in quizzes) {
+    const q = quizzes[id];
+    if (q.providerId !== auth.currentUser.uid) continue;
+    if (filter && !q.title.toLowerCase().includes(filter.toLowerCase())) continue;
+    if (courseFilter && q.courseId !== courseFilter) continue;
+    const quizItem = document.createElement("div");
+    quizItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+    quizItem.innerHTML = `
+      <div class="flex justify-between items-center">
+        <div>
+          <p class="font-semibold">${sanitizeInput(q.title)}</p>
+          <p class="text-sm text-gray-600">Course: ${sanitizeInput(courses[q.courseId]?.name || "Unknown")} | Questions: ${q.questions?.length || 0}</p>
+          <p class="text-sm text-gray-600">Created: ${new Date(q.createdAt).toLocaleDateString()}</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="viewQuiz('${id}')" class="text-blue-600 hover:underline" aria-label="View quiz ${sanitizeInput(q.title)}" data-tooltip="View quiz">View</button>
+          <button onclick="deleteQuiz('${id}')" class="text-red-600 hover:underline" aria-label="Delete quiz ${sanitizeInput(q.title)}" data-tooltip="Delete quiz">Delete</button>
+        </div>
+      </div>
+    `;
+    quizList.appendChild(quizItem);
+  }
+}
+
+// Search quizzes
+const searchQuizzes = debounce((filter, course) => renderQuizzes(sanitizeInput(filter), course), 300);
+quizSearch.addEventListener("input", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
+quizCourseFilter.addEventListener("change", () => searchQuizzes(quizSearch.value, quizCourseFilter.value));
+
+// Add quiz question
+addQuizQuestion.addEventListener("click", () => {
+  quizQuestionModal.style.display = "block";
+  questionText.focus();
+});
+
+closeQuizQuestion.addEventListener("click", () => {
+  quizQuestionModal.style.display = "none";
+  quizQuestionForm.reset();
+});
+
+quizQuestionForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const question = sanitizeInput(questionText.value.trim());
+  const options = questionOptions.value.split(",").map(o => sanitizeInput(o.trim())).filter(o => o);
+  const correct = parseInt(correctOption.value);
+  if (!question || options.length < 2 || isNaN(correct) || correct < 0 || correct >= options.length) {
+    alert("Please enter a valid question, at least two options, and a correct option index.");
+    return;
+  }
+  currentQuizQuestions.push({ question, options, correct });
+  quizQuestionModal.style.display = "none";
+  quizQuestionForm.reset();
+  renderQuizQuestions();
+});
+
+function renderQuizQuestions() {
+  quizQuestions.innerHTML = "";
+  currentQuizQuestions.forEach((q, index) => {
+    const questionDiv = document.createElement("div");
+    questionDiv.className = "border p-2 rounded";
+    questionDiv.innerHTML = `
+      <p class="font-semibold">${sanitizeInput(q.question)}</p>
+      <p class="text-sm text-gray-600">Options: ${sanitizeInput(q.options.join(", "))}</p>
+      <p class="text-sm text-gray-600">Correct: ${sanitizeInput(q.options[q.correct])}</p>
+      <button onclick="removeQuizQuestion(${index})" class="text-red-600 hover:underline text-sm" aria-label="Remove question" data-tooltip="Remove question">Remove</button>
+    `;
+    quizQuestions.appendChild(questionDiv);
+  });
+}
+
+window.removeQuizQuestion = index => {
+  currentQuizQuestions.splice(index, 1);
+  renderQuizQuestions();
+};
+
+// Create quiz
+quizForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  const courseId = quizCourse.value;
+  const title = sanitizeInput(quizTitle.value.trim());
+  if (!courseId || !title || currentQuizQuestions.length === 0) {
+    alert("Please select a course, enter a title, and add at least one question.");
+    return;
+  }
+  showSpinner();
+  try {
+    await push(ref(db, "quizzes"), {
+      providerId: auth.currentUser.uid,
+      courseId,
+      title,
+      questions: currentQuizQuestions,
+      createdAt: Date.now()
+    });
+    logAudit(`Created quiz ${title} for course ${courses[courseId].name}`);
+    alert("Quiz created successfully!");
+    quizForm.reset();
+    currentQuizQuestions = [];
+    quizQuestions.innerHTML = "";
+  } catch (err) {
+    console.error("Error creating quiz:", err);
+    alert("Failed to create quiz.");
+  }
+  hideSpinner();
+});
+
+// View quiz
+window.viewQuiz = async quizId => {
+  const q = quizzes[quizId];
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.style.display = "block";
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h3 class="text-lg font-semibold mb-4">Quiz: ${sanitizeInput(q.title)}</h3>
+      <p class="text-sm text-gray-600 mb-2">Course: ${sanitizeInput(courses[q.courseId]?.name || "Unknown")}</p>
+      <div id="quizQuestionsView" class="space-y-2 mb-4"></div>
+      <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" onclick="this.closest('.modal').remove()" data-tooltip="Close quiz">Close</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  const questionsView = modal.querySelector("#quizQuestionsView");
+  q.questions.forEach(q => {
+    const questionDiv = document.createElement("div");
+    questionDiv.className = "border p-2 rounded";
+    questionDiv.innerHTML = `
+      <p class="font-semibold">${sanitizeInput(q.question)}</p>
+      <p class="text-sm text-gray-600">Options: ${sanitizeInput(q.options.join(", "))}</p>
+      <p class="text-sm text-gray-600">Correct: ${sanitizeInput(q.options[q.correct])}</p>
+    `;
+    questionsView.appendChild(questionDiv);
+  });
+};
+
+// Delete quiz
+window.deleteQuiz = async quizId => {
+  if (!confirm("Are you sure you want to delete this quiz?")) return;
+  showSpinner();
+  try {
+    await remove(ref(db, `quizzes/${quizId}`));
+    logAudit(`Deleted quiz ${quizzes[quizId].title}`);
+    alert("Quiz deleted successfully!");
+  } catch (err) {
+    console.error("Error deleting quiz:", err);
+    alert("Failed to delete quiz.");
+  }
+  hideSpinner();
+};
+
+// Load progress
+function loadProgress() {
+  showSpinner();
+  onValue(ref(db, "users"), snap => {
+    learners = snap.val() || {};
+    renderProgress();
+    hideSpinner();
+  });
+}
+
+function renderProgress(filter = "") {
+  progressList.innerHTML = "";
+  for (const id in learners) {
+    const l = learners[id];
+    if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
+    if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase())) continue;
+    const enrolledCourses = Object.values(courses).filter(c => c.providerId === auth.currentUser.uid && c.enrolled?.includes(id));
+    const progressItem = document.createElement("div");
+    progressItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+    let progressHTML = "";
+    enrolledCourses.forEach(c => {
+      const progress = l.progress?.[c.id] || { completed: 0, total: 100, milestones: [] };
+      const percentage = (progress.completed / progress.total * 100).toFixed(1);
+      progressHTML += `
+        <div class="mt-2">
+          <p class="font-semibold">${sanitizeInput(c.name)}</p>
+          <p class="text-sm text-gray-600">Progress: ${percentage}%</p>
+          <p class="text-sm text-gray-600">Milestones: ${sanitizeInput(progress.milestones?.join(", ") || "None")}</p>
+          <button onclick="updateProgress('${id}', '${c.id}')" class="text-blue-600 hover:underline text-sm" aria-label="Update progress for ${sanitizeInput(l.fullName || l.email)} in ${sanitizeInput(c.name)}" data-tooltip="Update progress">Update</button>
+        </div>
+      `;
+    });
+    progressItem.innerHTML = `
+      <div>
+        <p class="font-semibold">${sanitizeInput(l.fullName || l.email)}</p>
+        <p class="text-sm text-gray-600">Email: ${sanitizeInput(l.email)}</p>
+        ${progressHTML}
+      </div>
+    `;
+    progressList.appendChild(progressItem);
+  }
+}
+
+// Search progress
+const searchProgress = debounce(filter => renderProgress(sanitizeInput(filter)), 300);
+progressSearch.addEventListener("input", () => searchProgress(progressSearch.value));
+
+// Update progress
+window.updateProgress = async (learnerId, courseId) => {
+  const l = learners[learnerId];
+  const c = courses[courseId];
+  const currentProgress = l.progress?.[courseId] || { completed: 0, total: 100, milestones: [] };
+  const completed = prompt("Enter completed percentage (0-100):", currentProgress.completed);
+  const milestones = prompt("Enter milestones (comma-separated, optional):", currentProgress.milestones.join(", "));
+  if (completed && !isNaN(completed) && completed >= 0 && completed <= 100) {
+    showSpinner();
+    try {
+      const updates = {};
+      updates[`users/${learnerId}/progress/${courseId}`] = {
+        completed: parseInt(completed),
+        total: 100,
+        milestones: milestones ? milestones.split(",").map(m => sanitizeInput(m.trim())).filter(m => m) : []
+      };
+      await update(ref(db, "/"), updates);
+      if (completed == 100 && !c.completions?.includes(learnerId)) {
+        await runTransaction(ref(db, `courses/${courseId}`), course => {
+          course = course || { completions: [] };
+          course.completions = course.completions || [];
+          if (!course.completions.includes(learnerId)) course.completions.push(learnerId);
+          return course;
+        });
+        if (confirm("Issue certificate for course completion?")) {
+          await push(ref(db, "certifications"), {
+            learnerId,
+            courseId,
+            issuedAt: Date.now(),
+            providerId: auth.currentUser.uid
+          });
+          logAudit(`Issued certificate to ${l.fullName || l.email} for course ${c.name}`);
+        }
       }
-    });
+      logAudit(`Updated progress for ${l.fullName || l.email} in course ${c.name}`);
+      alert("Progress updated successfully!");
+    } catch (err) {
+      console.error("Error updating progress:", err);
+      alert("Failed to update progress.");
+    }
+    hideSpinner();
+  } else {
+    alert("Invalid progress value.");
+  }
+};
 
-    // Analytics filter change
-    timeRange.addEventListener("change", loadAnalytics);
-    courseFilter.addEventListener("change", loadAnalytics);
-    groupFilterAnalytics.addEventListener("change", loadAnalytics);
+// Load analytics
+function loadAnalytics() {
+  showSpinner();
+  onValue(ref(db, "courses"), snap => {
+    courses = snap.val() || {};
+    onValue(ref(db, "users"), snap => {
+      learners = snap.val() || {};
+      renderAnalytics();
+      hideSpinner();
+    });
+  });
+}
+
+function renderAnalytics() {
+  const time = timeRange.value;
+  const courseId = courseFilter.value;
+  const group = groupFilterAnalytics.value;
+
+  const now = Date.now();
+  const days = time === "all" ? Infinity : parseInt(time);
+  const filteredCourses = Object.entries(courses).filter(([id, c]) => c.providerId === auth.currentUser.uid && !c.archived && (!courseId || id === courseId));
+
+  const analyticsData = {
+    labels: filteredCourses.map(([_, c]) => c.name),
+    datasets: [
+      {
+        label: "Enrollments",
+        data: filteredCourses.map(([_, c]) => c.enrolled?.length || 0),
+        backgroundColor: "#2563eb",
+        borderRadius: 4
+      },
+      {
+        label: "Completions",
+        data: filteredCourses.map(([_, c]) => c.completions?.length || 0),
+        backgroundColor: "#10b981",
+        borderRadius: 4
+      }
+    ]
+  };
+
+  if (analyticsChartInstance) analyticsChartInstance.destroy();
+  analyticsChartInstance = new Chart(analyticsChart, {
+    type: "bar",
+    data: analyticsData,
+    options: {
+      scales: { y: { beginAtZero: true } },
+      plugins: {
+        datalabels: { anchor: "end", align: "top", color: "#374151", font: { weight: "bold" } }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+
+  const heatmapData = Array(24).fill(0).map(() => Array(7).fill(0));
+  for (const id in learners) {
+    const l = learners[id];
+    if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
+    if (group && !l.metadata?.tags?.includes(group)) continue;
+    notifications.filter(n => n.learnerId === id && (!courseId || n.courseId === courseId) && (time === "all" || now - n.timestamp <= days * 24 * 60 * 60 * 1000))
+      .forEach(n => {
+        const date = new Date(n.timestamp);
+        const hour = date.getHours();
+        const day = date.getDay();
+        heatmapData[hour][day]++;
+      });
+  }
+
+  if (heatmapChartInstance) heatmapChartInstance.destroy();
+  heatmapChartInstance = new Chart(heatmapChart, {
+    type: "matrix",
+    data: {
+      datasets: [{
+        label: "Activity Heatmap",
+        data: heatmapData.flatMap((row, h) => row.map((val, d) => ({ x: d, y: h, v: val }))),
+        backgroundColor: c => {
+          const value = c.raw.v;
+          const alpha = Math.min(value / 10, 1);
+          return `rgba(37, 99, 235, ${alpha})`;
+        },
+        width: ({ chart }) => chart.chartArea.width / 7,
+        height: ({ chart }) => chart.chartArea.height / 24
+      }]
+    },
+    options: {
+      scales: {
+        x: { type: "category", labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] },
+        y: { type: "category", labels: Array(24).fill(0).map((_, i) => `${i}:00`) }
+      },
+      plugins: { tooltip: { callbacks: { label: ctx => `Activity: ${ctx.raw.v}` } } }
+    }
+  });
+
+  let totalEnrollments = 0, totalCompletions = 0, totalActivity = 0;
+  filteredCourses.forEach(([_, c]) => {
+    totalEnrollments += c.enrolled?.length || 0;
+    totalCompletions += c.completions?.length || 0;
+  });
+  notifications.forEach(n => {
+    if (time === "all" || now - n.timestamp <= days * 24 * 60 * 60 * 1000) {
+      if ((!courseId || n.courseId === courseId) && learners[n.learnerId]?.providerId === auth.currentUser.uid && (!group || learners[n.learnerId]?.metadata?.tags?.includes(group))) {
+        totalActivity++;
+      }
+    }
+  });
+
+  analyticsDetails.innerHTML = `
+    <p>Total Enrollments: ${totalEnrollments}</p>
+    <p>Total Completions: ${totalCompletions}</p>
+    <p>Completion Rate: ${totalEnrollments > 0 ? (totalCompletions / totalEnrollments * 100).toFixed(1) : 0}%</p>
+    <p>Total Activity Events: ${totalActivity}</p>
+  `;
+}
+
+// Export analytics to PDF
+exportAnalytics.addEventListener("click", () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text("CETA Provider Analytics", 20, 20);
+  doc.setFontSize(12);
+  doc.text(`Time Range: ${timeRange.options[timeRange.selectedIndex].text}`, 20, 30);
+  doc.text(`Course: ${courseFilter.value ? courses[courseFilter.value]?.name : "All"}`, 20, 40);
+  doc.text(`Group: ${groupFilterAnalytics.value || "All"}`, 20, 50);
+  doc.text(analyticsDetails.textContent, 20, 60);
+  doc.save("analytics_report.pdf");
+});
+
+// Load helpdesk tickets
+function loadHelpdesk() {
+  showSpinner();
+  onValue(ref(db, "tickets"), snap => {
+    tickets = snap.val() || {};
+    renderTickets();
+    hideSpinner();
+  });
+}
+
+function renderTickets() {
+  ticketList.innerHTML = "";
+  for (const id in tickets) {
+    const t = tickets[id];
+    if (t.providerId !== auth.currentUser.uid) continue;
+    const ticketItem = document.createElement("div");
+    ticketItem.className = "bg-gray-50 p-4 rounded shadow hover:shadow-md transition-shadow";
+    ticketItem.innerHTML = `
+      <div class="flex justify-between items-center">
+        <div>
+          <p class="font-semibold">${sanitizeInput(t.title)}</p>
+          <p class="text-sm text-gray-600">Learner: ${sanitizeInput(learners[t.learnerId]?.fullName || "Unknown")} | Status: ${sanitizeInput(t.status)}</p>
+          <p class="text-sm text-gray-600">${sanitizeInput(t.description)}</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="resolveTicket('${id}')" class="text-blue-600 hover:underline" aria-label="Resolve ticket ${sanitizeInput(t.title)}" data-tooltip="Resolve ticket">Resolve</button>
+          <button onclick="deleteTicket('${id}')" class="text-red-600 hover:underline" aria-label="Delete ticket ${sanitizeInput(t.title)}" data-tooltip="Delete ticket">Delete</button>
+        </div>
+      </div>
+    `;
+    ticketList.appendChild(ticketItem);
+  }
+}
+
+// Resolve ticket
+window.resolveTicket = async ticketId => {
+  const resolution = prompt("Enter resolution notes:");
+  if (resolution) {
+    showSpinner();
+    try {
+      await update(ref(db, `tickets/${ticketId}`), {
+        status: "resolved",
+        resolution: sanitizeInput(resolution),
+        resolvedAt: Date.now()
+      });
+      logAudit(`Resolved ticket ${tickets[ticketId].title}`);
+      alert("Ticket resolved successfully!");
+    } catch (err) {
+      console.error("Error resolving ticket:", err);
+      alert("Failed to resolve ticket.");
+    }
+    hideSpinner();
+  }
+};
+
+// Delete ticket
+window.deleteTicket = async ticketId => {
+  if (!confirm("Are you sure you want to delete this ticket?")) return;
+  showSpinner();
+  try {
+    await remove(ref(db, `tickets/${ticketId}`));
+    logAudit(`Deleted ticket ${tickets[ticketId].title}`);
+    alert("Ticket deleted successfully!");
+  } catch (err) {
+    console.error("Error deleting ticket:", err);
+    alert("Failed to delete ticket.");
+  }
+  hideSpinner();
+};
+
+// Load video feeds
+function loadVideoFeeds() {
+  showSpinner();
+  onValue(ref(db, "courses"), snap => {
+    courses = snap.val() || {};
+    renderVideoFeeds();
+    hideSpinner();
+  });
+}
+
+function renderVideoFeeds(filter = "", courseFilter = "") {
+  videoFeedList.innerHTML = "";
+  const peer = new Peer();
+  peer.on("open", id => {
+    for (const id in learners) {
+      const l = learners[id];
+      if (l.role !== "learner" || l.providerId !== auth.currentUser.uid) continue;
+      if (filter && !l.fullName?.toLowerCase().includes(filter.toLowerCase()) && !l.email.toLowerCase().includes(filter.toLowerCase())) continue;
+      const enrolledCourses = Object.keys(courses).filter(cId => courses[cId].enrolled?.includes(id) && (!courseFilter || cId === courseFilter));
+      if (enrolledCourses.length === 0) continue;
+      const videoItem = document.createElement("div");
+      videoItem.className = "video-feed relative";
+      videoItem.innerHTML = `
+        <div class="video-label">${sanitizeInput(l.fullName || l.email)}</div>
+        <video id="video-${id}" autoplay muted playsinline class="w-full h-48 object-cover"></video>
+      `;
+      videoFeedList.appendChild(videoItem);
+      // Simulate video feed connection (placeholder for actual WebRTC implementation)
+      console.log(`Connecting to video feed for learner ${l.email} with peer ID ${id}`);
+    }
+  });
+}
+
+// Search video feeds
+const searchVideoFeeds = debounce((filter, course) => renderVideoFeeds(sanitizeInput(filter), course), 300);
+videoSearch.addEventListener("input", () => searchVideoFeeds(videoSearch.value, videoCourseFilter.value));
+videoCourseFilter.addEventListener("change", () => searchVideoFeeds(videoSearch.value, videoCourseFilter.value));
+
+// Download certificate
+window.downloadCertificate = async certId => {
+  const cert = certifications[certId];
+  const learner = learners[cert.learnerId];
+  const course = courses[cert.courseId];
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(20);
+  doc.text("Certificate of Completion", 20, 20);
+  doc.setFontSize(14);
+  doc.text(`Awarded to: ${sanitizeInput(learner.fullName || learner.email)}`, 20, 40);
+  doc.text(`Course: ${sanitizeInput(course.name)}`, 20, 50);
+  doc.text(`Issued on: ${new Date(cert.issuedAt).toLocaleDateString()}`, 20, 60);
+  doc.save(`certificate_${learner.email}_${course.name}.pdf`);
+};
+
+// Audit logging
+function logAudit(message) {
+  push(ref(db, `auditLogs/${auth.currentUser.uid}`), {
+    message: sanitizeInput(message),
+    timestamp: Date.now(),
+    userId: auth.currentUser.uid
+  });
+}
+
+// Populate course filter
+function populateCourseFilter() {
+  courseFilter.innerHTML = '<option value="">All Courses</option>';
+  videoCourseFilter.innerHTML = '<option value="">All Courses</option>';
+  for (const id in courses) {
+    if (courses[id].providerId === auth.currentUser.uid && !courses[id].archived) {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = sanitizeInput(courses[id].name);
+      courseFilter.appendChild(option);
+      videoCourseFilter.appendChild(option.cloneNode(true));
+    }
+  }
+}
+
+// Initialize
+onAuthStateChanged(auth, u => {
+  if (u) {
+    user = u;
+    loadOverview();
+    loadLearners();
+    loadCourses();
+    loadContent();
+    loadAssignments();
+    loadForums();
+    loadQuizzes();
+    loadProgress();
+    loadAnalytics();
+    loadHelpdesk();
+    loadVideoFeeds();
+    onValue(ref(db, "notifications"), snap => {
+      notifications = Object.values(snap.val() || {}).filter(n => courses[n.courseId]?.providerId === u.uid);
+    });
+  } else {
+    window.location.href = "login.html";
+  }
+});
+
+// Sign out
+document.getElementById("signout-btn").addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+    window.location.href = "login.html";
+  } catch (err) {
+    console.error("Sign out error:", err);
+    alert("Failed to sign out.");
+  }
+});
   </script>
 </body>
 </html>
