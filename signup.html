@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CETA LMS Signup</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CETA LMS - Signup</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
@@ -14,9 +14,7 @@
       --background-dark: #0A0A0A;
       --background-gradient: linear-gradient(135deg, #0A0A0A 0%, #1C2526 100%);
       --glow: rgba(0, 163, 255, 0.3);
-      --card-bg: rgba(28, 37, 38, 0.85);
     }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       background: var(--background-gradient);
@@ -28,243 +26,116 @@
       align-items: center;
       color: var(--text-light);
     }
-
-    body.high-contrast {
-      background: #000;
-      --text-light: #FFF;
-      --card-bg: #111;
-    }
-
-    .signup-container {
-      background: var(--card-bg);
-      backdrop-filter: blur(10px);
-      padding: 2rem;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      width: 100%;
+    .container {
       max-width: 400px;
-      animation: fadeIn 0.5s ease-out;
-    }
-
-    .signup-container h1 {
-      font-size: 2.25rem;
-      font-weight: 800;
-      text-align: center;
-      color: var(--text-dark);
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      margin-bottom: 1.5rem;
-    }
-
-    .form-group {
-      margin-bottom: 1.25rem;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-light);
-      margin-bottom: 0.5rem;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 0.75rem;
+      padding: 1.5rem;
+      background: #1C2526;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 163, 255, 0.2);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-dark);
-      font-size: 1rem;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
-
-    .form-group input:focus {
-      outline: none;
-      border-color: var(--primary-blue);
-      box-shadow: 0 0 8px var(--glow);
-    }
-
-    .submit-btn {
-      width: 100%;
-      padding: 0.75rem;
+    .btn {
       background: var(--primary-blue);
       color: var(--text-dark);
+      padding: 0.5rem 1.5rem;
+      border-radius: 20px;
       font-weight: 600;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
     }
-
-    .submit-btn:hover,
-    .submit-btn:focus {
+    .btn:hover {
       background: #33B5FF;
-      transform: translateY(-2px);
-      box-shadow: 0 0 12px var(--glow);
-      outline: none;
+      transform: scale(1.05);
+      box-shadow: 0 0 10px var(--glow);
     }
-
-    .text-link {
-      color: var(--primary-blue);
-      text-decoration: none;
+    input, select {
+      background: #0A0A0A;
+      color: var(--text-light);
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    .custom-alert {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1C2526;
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 163, 255, 0.2);
+      z-index: 1000;
+      color: var(--text-light);
       font-weight: 500;
-      transition: color 0.2s ease;
+      text-align: center;
+      max-width: 90%;
+      width: 340px;
+      animation: fadeIn 0.3s ease-out forwards;
+      border: 1px solid var(--border);
     }
-
-    .text-link:hover,
-    .text-link:focus {
-      color: #33B5FF;
-      text-decoration: underline;
-      outline: none;
+    .custom-alert.active {
+      display: block;
     }
-
-    .contrast-toggle {
-      color: var(--primary-blue);
+    .custom-alert .close-btn {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 24px;
+      height: 24px;
       background: none;
       border: none;
-      font-size: 0.9rem;
-      font-weight: 500;
+      color: var(--primary-blue);
       cursor: pointer;
-      transition: color 0.2s ease;
+      transition: transform 0.2s ease, color 0.2s ease;
     }
-
-    .contrast-toggle:hover,
-    .contrast-toggle:focus {
+    .custom-alert .close-btn:hover {
+      transform: scale(1.2);
       color: #33B5FF;
-      text-decoration: underline;
-      outline: none;
     }
-
-    .error-message,
-    .success-message {
-      text-align: center;
-      font-size: 0.9rem;
-      margin-top: 1rem;
-      padding: 0.5rem;
-      border-radius: 8px;
-    }
-
-    .error-message {
-      color: #FF4D4F;
-      background: rgba(255, 77, 79, 0.1);
-    }
-
-    .success-message {
-      color: #4CAF50;
-      background: rgba(76, 175, 80, 0.1);
-    }
-
-    .loader {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    .loader-spinner {
-      width: 60px;
-      height: 60px;
-      border: 5px solid transparent;
-      border-top-color: var(--primary-blue);
-      border-radius: 50%;
-      animation: spin 1.2s linear infinite, glow 1.5s ease-in-out infinite;
-    }
-
-    .loader-spinner::before {
-      content: '';
-      position: absolute;
-      top: 5px;
-      left: 5px;
-      right: 5px;
-      bottom: 5px;
-      border-radius: 50%;
-      border: 5px solid transparent;
-      border-top-color: var(--primary-blue);
-      opacity: 0.5;
-      animation: spin 1.8s linear infinite reverse;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes glow {
-      0%, 100% { box-shadow: 0 0 10px var(--glow); }
-      50% { box-shadow: 0 0 20px var(--glow); }
-    }
-
     @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
+      0% { opacity: 0; }
+      100% { opacity: 1; }
     }
-
     @media (max-width: 640px) {
-      .signup-container {
-        padding: 1.5rem;
-        max-width: 90%;
-      }
-
-      .signup-container h1 {
-        font-size: 1.75rem;
-      }
-
-      .form-group input {
-        padding: 0.6rem;
-        font-size: 0.9rem;
-      }
-
-      .submit-btn {
-        padding: 0.6rem;
-        font-size: 0.9rem;
-      }
-
-      .loader-spinner {
-        width: 50px;
-        height: 50px;
+      .container {
+        width: 90%;
+        padding: 1rem;
       }
     }
   </style>
 </head>
 <body>
-  <div class="signup-container">
-    <h1>CETA LMS Signup</h1>
-    <form id="signup-form">
-      <div class="form-group">
-        <label for="fullName">Full Name</label>
-        <input type="text" id="fullName" aria-label="Enter your full name" required />
-      </div>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" aria-label="Enter your email" required />
-      </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" aria-label="Enter your password" required />
-      </div>
-      <button type="submit" class="submit-btn" aria-label="Sign up for a new account">Sign Up</button>
-    </form>
-    <div class="text-center mt-4">
-      <p class="text-sm">Already have an account? <a href="login.html" class="text-link">Log in</a></p>
-      <button id="toggle-contrast" class="contrast-toggle" aria-label="Toggle high contrast mode">Toggle High Contrast</button>
+  <div class="container">
+    <h1 class="text-2xl font-bold text-white mb-4">CETA LMS - Signup</h1>
+    <div id="signup-section">
+      <input id="full-name" type="text" placeholder="Full Name">
+      <input id="email" type="email" placeholder="Email">
+      <input id="password" type="password" placeholder="Password (8+ chars, mixed case, numbers)">
+      <select id="role">
+        <option value="learner">Learner</option>
+        <option value="provider">Provider</option>
+      </select>
+      <button id="signup-btn" class="btn">Sign Up</button>
+      <button id="google-signup-btn" class="btn mt-2">Sign Up with Google</button>
+      <p class="mt-2 text-center"><a href="index.html" class="text-[var(--primary-blue)] hover:text-[#33B5FF]">Already have an account? Login</a></p>
     </div>
-    <p id="error-message" class="error-message hidden"></p>
-    <p id="success-message" class="success-message hidden"></p>
-    <div id="loading-spinner" class="loader hidden">
-      <div class="loader-spinner"></div>
+    <div id="custom-alert" class="custom-alert" role="alertdialog" aria-modal="true" aria-labelledby="alert-message" tabindex="-1">
+      <button class="close-btn" aria-label="Close alert" onclick="hideAlert()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <p id="alert-message">An error occurred. Please try again later.</p>
+      <button class="retry-btn" onclick="retryAction()">Retry</button>
     </div>
-    <noscript>
-      <p class="error-message">JavaScript is required to sign up.</p>
-    </noscript>
   </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -272,75 +143,114 @@
       authDomain: "fire-b-a8878.firebaseapp.com",
       databaseURL: "https://fire-b-a8878.firebaseio.com",
       projectId: "fire-b-a8878",
-      storageBucket: "fire-b-a8878.appspot.com",
+      storageBucket: "fire-b-a8878.firebasestorage.app",
       messagingSenderId: "658673187627",
-      appId: "1:658673187627:web:6e4c29af661785f0afa36e"
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const signupForm = document.getElementById("signup-form");
-    const fullNameInput = document.getElementById("fullName");
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const errorMessage = document.getElementById("error-message");
-    const successMessage = document.getElementById("success-message");
-    const loadingSpinner = document.getElementById("loading-spinner");
-    const toggleContrast = document.getElementById("toggle-contrast");
+    function sanitizeInput(input) {
+      const div = document.createElement('div');
+      div.textContent = input;
+      return div.innerHTML;
+    }
 
-    function showSpinner() { loadingSpinner.classList.remove("hidden"); }
-    function hideSpinner() { loadingSpinner.classList.add("hidden"); }
+    function showAlert(message, autoHide = true) {
+      const customAlert = document.getElementById("custom-alert");
+      const alertMessage = document.getElementById("alert-message");
+      alertMessage.textContent = message;
+      customAlert.classList.add("active");
+      customAlert.focus();
+      if (autoHide) {
+        setTimeout(hideAlert, 5000);
+      }
+    }
 
-    toggleContrast.addEventListener("click", () => {
-      document.body.classList.toggle("high-contrast");
+    function hideAlert() {
+      const customAlert = document.getElementById("custom-alert");
+      customAlert.classList.remove("active");
+    }
+
+    let retryActionCallback = null;
+
+    function retryAction() {
+      hideAlert();
+      if (retryActionCallback) retryActionCallback();
+    }
+
+    document.getElementById('signup-btn').addEventListener('click', async () => {
+      const fullName = sanitizeInput(document.getElementById('full-name').value);
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+
+      if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+        showAlert('Password must be 8+ characters with mixed case and numbers', true);
+        return;
+      }
+
+      retryActionCallback = async () => {
+        try {
+          const cred = await createUserWithEmailAndPassword(auth, email, password);
+          await set(ref(db, `users/${cred.user.uid}`), {
+            fullName: fullName,
+            email: email,
+            role: role,
+            metadata: { contact: '', tags: [] }
+          });
+          await set(ref(db, `auditLogs/${cred.user.uid}/${Date.now()}`), {
+            message: `User signed up: ${email}`,
+            timestamp: Date.now(),
+            userId: cred.user.uid
+          });
+          window.location.replace(`${role}.html`);
+        } catch (error) {
+          showAlert(`Error: ${error.message}`, false);
+          await set(ref(db, `logs/${Date.now()}`), {
+            message: `Signup error: ${error.message}`,
+            timestamp: Date.now(),
+            userId: 'anonymous'
+          });
+        }
+      };
+      retryActionCallback();
     });
 
-    signupForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const fullName = fullNameInput.value.trim();
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
-      if (!fullName || !email || !password) {
-        errorMessage.textContent = "Please enter full name, email, and password.";
-        errorMessage.classList.remove("hidden");
-        successMessage.classList.add("hidden");
-        return;
-      }
-      if (password.length < 6) {
-        errorMessage.textContent = "Password must be at least 6 characters.";
-        errorMessage.classList.remove("hidden");
-        successMessage.classList.add("hidden");
-        return;
-      }
-      showSpinner();
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        await set(ref(db, `users/${user.uid}`), {
-          fullName,
-          email,
-          role: "learner",
-          approved: false,
-          createdAt: Date.now()
-        });
-        successMessage.textContent = "Signup successful! Please wait for admin approval and then log in.";
-        successMessage.classList.remove("hidden");
-        errorMessage.classList.add("hidden");
-        fullNameInput.value = "";
-        emailInput.value = "";
-        passwordInput.value = "";
-        setTimeout(() => {
-          window.location.href = "login.html";
-        }, 3000);
-      } catch (err) {
-        console.error("Signup failed:", err);
-        errorMessage.textContent = err.code === "auth/email-already-in-use" ? "Email already in use." : "Failed to sign up. Try again.";
-        errorMessage.classList.remove("hidden");
-        successMessage.classList.add("hidden");
-      }
-      hideSpinner();
+    document.getElementById('google-signup-btn').addEventListener('click', async () => {
+      const provider = new GoogleAuthProvider();
+      retryActionCallback = async () => {
+        try {
+          const result = await signInWithPopup(auth, provider);
+          const user = result.user;
+          const fullName = sanitizeInput(user.displayName || 'Google User');
+          const email = user.email;
+          const role = document.getElementById('role').value;
+
+          await set(ref(db, `users/${user.uid}`), {
+            fullName: fullName,
+            email: email,
+            role: role,
+            metadata: { contact: '', tags: [] }
+          });
+          await set(ref(db, `auditLogs/${user.uid}/${Date.now()}`), {
+            message: `User signed up with Google: ${email}`,
+            timestamp: Date.now(),
+            userId: user.uid
+          });
+          window.location.replace(`${role}.html`);
+        } catch (error) {
+          showAlert(`Error: ${error.message}`, false);
+          await set(ref(db, `logs/${Date.now()}`), {
+            message: `Signup error: ${error.message}`,
+            timestamp: Date.now(),
+            userId: 'anonymous'
+          });
+        }
+      };
+      retryActionCallback();
     });
   </script>
 </body>
