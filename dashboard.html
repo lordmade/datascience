@@ -10,19 +10,17 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <style>
-    /* Root variables for consistent theming */
     :root {
-      --primary: #1e40af; /* Blue for buttons and accents */
-      --secondary: #10b981; /* Green for success actions */
-      --background: #f3f4f6; /* Light gray background */
-      --card-bg: #ffffff; /* White for cards */
-      --text-primary: #1f2937; /* Dark gray for text */
-      --text-secondary: #6b7280; /* Lighter gray for secondary text */
-      --dark-mode-bg: #1a1a1a; /* Dark background for dark mode */
-      --dark-mode-text: #e5e5e5; /* Light text for dark mode */
+      --primary: #1e40af;
+      --secondary: #10b981;
+      --background: #f3f4f6;
+      --card-bg: #ffffff;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --dark-mode-bg: #1a1a1a;
+      --dark-mode-text: #e5e5e5;
     }
 
-    /* Base styles */
     body {
       background: var(--background);
       color: var(--text-primary);
@@ -33,7 +31,6 @@
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    /* Sidebar */
     .sidebar {
       width: 260px;
       background: linear-gradient(to bottom, #111827, #1f2937);
@@ -74,7 +71,6 @@
       background: var(--primary);
     }
 
-    /* Main content */
     .main-content {
       flex: 1;
       margin-left: 260px;
@@ -96,7 +92,6 @@
       }
     }
 
-    /* Cards */
     .card {
       background: var(--card-bg);
       border-radius: 0.5rem;
@@ -110,7 +105,6 @@
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }
 
-    /* Dark mode */
     .dark-mode {
       background: var(--dark-mode-bg) !important;
       color: var(--dark-mode-text) !important;
@@ -128,7 +122,6 @@
       background: #4b5563 !important;
     }
 
-    /* Tooltip */
     .tooltip {
       position: relative;
     }
@@ -148,7 +141,6 @@
       z-index: 10;
     }
 
-    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -178,16 +170,17 @@
       color: var(--dark-mode-text) !important;
     }
 
-    /* Buttons */
     button:not(.nav-button) {
+      border-radius: 9999px;
       transition: background-color 0.2s ease, transform 0.2s ease;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
     }
 
     button:hover:not(.nav-button) {
       transform: translateY(-1px);
     }
 
-    /* Form elements */
     input, select, textarea {
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
@@ -198,18 +191,15 @@
       box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.2);
     }
 
-    /* Loading spinner */
     #loading-spinner {
       z-index: 200;
     }
 
-    /* Ensure charts fit */
     canvas {
       max-width: 100%;
       height: auto !important;
     }
 
-    /* Scrollable sections */
     .section {
       max-height: calc(100vh - 4rem);
       overflow-y: auto;
@@ -229,7 +219,6 @@
       background: #e5e7eb;
     }
 
-    /* Notification banner */
     .notification-banner {
       position: sticky;
       top: 0;
@@ -265,8 +254,8 @@
         </ul>
       </nav>
       <div class="mt-auto">
-        <button id="toggle-dark-mode" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded mb-2" aria-label="Toggle dark mode" data-tooltip="Toggle Dark Mode">Toggle Dark Mode</button>
-        <button id="signout-btn" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" aria-label="Sign out" data-tooltip="Sign Out">Sign Out</button>
+        <button id="toggle-dark-mode" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-3xl mb-2" aria-label="Toggle dark mode" data-tooltip="Toggle Dark Mode">Toggle Dark Mode</button>
+        <button id="signout-btn" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-3xl" aria-label="Sign out" data-tooltip="Sign Out">Sign Out</button>
       </div>
     </div>
 
@@ -402,7 +391,7 @@
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </select>
-            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" data-tooltip="Submit ticket">Submit Ticket</button>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Submit ticket">Submit Ticket</button>
           </form>
         </div>
         <div class="card">
@@ -416,7 +405,7 @@
         <div class="modal-content">
           <h3 class="text-lg font-semibold mb-4">Course Content</h3>
           <div id="content-view" class="space-y-4"></div>
-          <button type="button" id="close-content-view" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded mt-4" data-tooltip="Close">Close</button>
+          <button type="button" id="close-content-view" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl mt-4" data-tooltip="Close">Close</button>
         </div>
       </div>
 
@@ -428,8 +417,8 @@
             <p id="assessment-title" class="font-semibold mb-2"></p>
             <input type="file" id="assessmentFile" accept="application/pdf,.txt" class="border p-2 rounded w-full mb-2" aria-label="Upload assessment file" required />
             <div class="flex gap-2">
-              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Submit assessment">Submit</button>
-              <button type="button" id="close-assessment-submit" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" data-tooltip="Cancel">Cancel</button>
+              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Submit assessment">Submit</button>
+              <button type="button" id="close-assessment-submit" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
             </div>
           </form>
         </div>
@@ -438,13 +427,13 @@
       <!-- Forum View Modal -->
       <div id="forum-view-modal" class="modal">
         <div class="modal-content">
-          <h3 class="text-lg font-semibold mb-4">Forum</h3>
+          <h3 id="forum-title" class="text-lg font-semibold mb-4">Forum</h3>
           <div id="forum-posts" class="space-y-2 mb-4"></div>
           <form id="forum-post-form">
             <textarea id="new-post" placeholder="Add a new post..." class="border p-2 rounded w-full mb-2" aria-label="Enter new post content" required></textarea>
             <div class="flex gap-2">
-              <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded" data-tooltip="Post reply">Post</button>
-              <button type="button" id="close-forum-view" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" data-tooltip="Close">Close</button>
+              <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Post reply">Post</button>
+              <button type="button" id="close-forum-view" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Close">Close</button>
             </div>
           </form>
         </div>
@@ -453,12 +442,12 @@
       <!-- Quiz Taking Modal -->
       <div id="quiz-take-modal" class="modal">
         <div class="modal-content">
-          <h3 class="text-lg font-semibold mb-4">Take Quiz</h3>
+          <h3 id="quiz-title" class="text-lg font-semibold mb-4">Take Quiz</h3>
           <form id="quiz-take-form">
             <div id="quiz-questions" class="space-y-4"></div>
             <div class="flex gap-2">
-              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-tooltip="Submit quiz">Submit</button>
-              <button type="button" id="close-quiz-take" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded" data-tooltip="Cancel">Cancel</button>
+              <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Submit quiz">Submit</button>
+              <button type="button" id="close-quiz-take" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-3xl" data-tooltip="Cancel">Cancel</button>
             </div>
           </form>
         </div>
@@ -480,7 +469,6 @@
     import { getDatabase, ref, onValue, push, get, update, runTransaction } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
     import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
@@ -496,7 +484,6 @@
     const auth = getAuth(app);
     const storage = getStorage(app);
 
-    // DOM elements
     const courseList = document.getElementById("courseList");
     const courseSearch = document.getElementById("courseSearch");
     const contentList = document.getElementById("contentList");
@@ -536,49 +523,36 @@
     const assessmentFile = document.getElementById("assessmentFile");
     const closeAssessmentSubmit = document.getElementById("close-assessment-submit");
     const forumViewModal = document.getElementById("forum-view-modal");
+    const forumTitle = document.getElementById("forum-title");
     const forumPosts = document.getElementById("forum-posts");
     const forumPostForm = document.getElementById("forum-post-form");
     const newPost = document.getElementById("new-post");
     const closeForumView = document.getElementById("close-forum-view");
     const quizTakeModal = document.getElementById("quiz-take-modal");
+    const quizTitle = document.getElementById("quiz-title");
     const quizQuestions = document.getElementById("quiz-questions");
     const quizTakeForm = document.getElementById("quiz-take-form");
     const closeQuizTake = document.getElementById("close-quiz-take");
 
-    let userData = {}, courses = {}, contents = {}, assignments = {}, forums = {}, quizzes = {}, certifications = {}, notices = {}, tickets = {};
+    let userData = {}, courses = {}, contents = {}, assignments = {}, forums = {}, quizzes = {}, certifications = {}, notices = {}, tickets = {}, users = {};
     let currentUserId = null;
+    let progressChartInstance = null;
 
-    // Sanitize input to prevent XSS
     function sanitizeInput(input) {
       const div = document.createElement("div");
       div.textContent = input;
       return div.innerHTML;
     }
 
-    // Show/hide loading spinner
     function showSpinner() { loadingSpinner.classList.remove("hidden"); }
     function hideSpinner() { loadingSpinner.classList.add("hidden"); }
 
-    // Initialize UI state
     function initializeUI() {
-      // Ensure only Overview section is visible
-      document.querySelectorAll(".section").forEach(section => {
-        section.classList.add("hidden");
-      });
+      document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
       document.getElementById("overview").classList.remove("hidden");
-
-      // Ensure all modals are hidden
-      [contentViewModal, assessmentSubmitModal, forumViewModal, quizTakeModal].forEach(modal => {
-        modal.style.display = "none";
-      });
-
-      // Set active navigation button
-      document.querySelectorAll(".nav-button").forEach(btn => {
-        btn.classList.remove("active");
-      });
+      [contentViewModal, assessmentSubmitModal, forumViewModal, quizTakeModal].forEach(modal => modal.style.display = "none");
+      document.querySelectorAll(".nav-button").forEach(btn => btn.classList.remove("active"));
       document.querySelector('.nav-button[data-section="overview"]').classList.add("active");
-
-      // Initialize sidebar state
       if (window.innerWidth < 768) {
         sidebar.classList.add("sidebar-hidden");
         sidebar.classList.remove("sidebar-open");
@@ -588,24 +562,20 @@
       }
     }
 
-    // Sidebar toggle
     toggleSidebar.addEventListener("click", () => {
       sidebar.classList.toggle("sidebar-hidden");
       sidebar.classList.toggle("sidebar-open");
     });
 
-    // Dark mode toggle
     toggleDarkMode.addEventListener("click", () => {
       document.body.classList.toggle("dark-mode");
       localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
     });
 
-    // Load dark mode preference
     if (localStorage.getItem("darkMode") === "true") {
       document.body.classList.add("dark-mode");
     }
 
-    // Section switching
     document.querySelectorAll(".nav-button").forEach(btn => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".section").forEach(section => section.classList.add("hidden"));
@@ -616,15 +586,11 @@
           sidebar.classList.remove("sidebar-open");
           sidebar.classList.add("sidebar-hidden");
         }
-        // Ensure all modals are closed when switching sections
-        [contentViewModal, assessmentSubmitModal, forumViewModal, quizTakeModal].forEach(modal => {
-          modal.style.display = "none";
-        });
+        [contentViewModal, assessmentSubmitModal, forumViewModal, quizTakeModal].forEach(modal => modal.style.display = "none");
         logAudit(`Viewed ${btn.dataset.section} section`);
       });
     });
 
-    // Debounce function for search
     function debounce(func, wait) {
       let timeout;
       return function executedFunction(...args) {
@@ -637,7 +603,6 @@
       };
     }
 
-    // Load notifications
     function loadNotifications() {
       showSpinner();
       onValue(ref(db, `auditLogs/${currentUserId}`), snap => {
@@ -649,6 +614,8 @@
           .slice(0, 5);
         if (recentLogs.length > 0) {
           notifications.classList.remove("hidden");
+        } else {
+          notifications.classList.add("hidden");
         }
         recentLogs.forEach(([_, log]) => {
           const item = document.createElement("li");
@@ -660,43 +627,43 @@
       });
     }
 
-    // Load overview
     async function loadOverview() {
       showSpinner();
       const userSnap = await get(ref(db, `users/${currentUserId}`));
       userData = userSnap.val() || {};
-      const totalProgress = userData.progress ? Object.values(userData.progress).reduce((sum, p) => sum + (p.completed / p.total * 100), 0) / Object.keys(userData.progress).length : 0;
-      learnerProgress.textContent = `${totalProgress.toFixed(1)}%`;
-
       onValue(ref(db, "courses"), snap => {
         courses = snap.val() || {};
-        const enrolled = Object.keys(courses).filter(id => userData.enrolled?.includes(id));
-        totalCourses.textContent = enrolled.length;
+        onValue(ref(db, "assignments"), snap => {
+          assignments = snap.val() || {};
+          const enrolled = Object.keys(courses).filter(id => 
+            (userData.enrolled?.includes(id) && courses[id].providerId === userData.providerId) ||
+            Object.values(assignments).some(a => a.learnerId === currentUserId && a.courseId === id)
+          );
+          totalCourses.textContent = enrolled.length;
+          const totalProgress = enrolled.reduce((sum, id) => sum + (userData.progress?.[id] || 0), 0);
+          learnerProgress.textContent = enrolled.length ? `${(totalProgress / enrolled.length).toFixed(1)}%` : "0%";
 
-        // Progress chart
-        const progressData = enrolled.map(id => ({
-          name: courses[id].name,
-          progress: userData.progress?.[id]?.completed / userData.progress?.[id]?.total * 100 || 0
-        }));
-        new Chart(progressChartCanvas, {
-          type: "bar",
-          data: {
-            labels: progressData.map(p => p.name),
-            datasets: [{
-              label: "Progress (%)",
-              data: progressData.map(p => p.progress),
-              backgroundColor: "#1e40af",
-              borderRadius: 4
-            }]
-          },
-          options: {
-            scales: { y: { beginAtZero: true, max: 100 } },
-            plugins: { 
-              legend: { display: true },
-              datalabels: { anchor: "end", align: "top", color: "#1f2937", font: { weight: "bold" } }
-            }
-          },
-          plugins: [ChartDataLabels]
+          if (progressChartInstance) progressChartInstance.destroy();
+          progressChartInstance = new Chart(progressChartCanvas, {
+            type: "bar",
+            data: {
+              labels: enrolled.map(id => courses[id].name),
+              datasets: [{
+                label: "Progress (%)",
+                data: enrolled.map(id => userData.progress?.[id] || 0),
+                backgroundColor: "#1e40af",
+                borderRadius: 4
+              }]
+            },
+            options: {
+              scales: { y: { beginAtZero: true, max: 100 } },
+              plugins: {
+                legend: { display: true },
+                datalabels: { anchor: "end", align: "top", color: "#1f2937", font: { weight: "bold" } }
+              }
+            },
+            plugins: [ChartDataLabels]
+          });
         });
       });
 
@@ -708,15 +675,15 @@
 
       onValue(ref(db, "notices"), snap => {
         recentNotices.innerHTML = "";
-        const data = snap.val();
-        if (!data) {
+        const data = snap.val() || {};
+        const recent = Object.entries(data)
+          .sort((a, b) => b[1].createdAt - a[1].createdAt)
+          .slice(0, 3);
+        if (recent.length === 0) {
           recentNotices.innerHTML = "<p class='text-gray-600 dark:text-gray-300'>No recent notices.</p>";
           hideSpinner();
           return;
         }
-        const recent = Object.entries(data)
-          .sort((a, b) => b[1].createdAt - a[1].createdAt)
-          .slice(0, 3);
         recent.forEach(([_, notice]) => {
           const noticeItem = document.createElement("div");
           noticeItem.className = "bg-gray-50 dark:bg-gray-600 p-4 rounded-lg shadow hover:shadow-md transition-shadow";
@@ -731,12 +698,14 @@
       });
     }
 
-    // Populate course filters
     function populateCourseFilters() {
       [contentCourseFilter, assessmentCourseFilter, forumCourseFilter, quizCourseFilter].forEach(filter => {
         filter.innerHTML = '<option value="">All Courses</option>';
         Object.entries(courses)
-          .filter(([id]) => userData.enrolled?.includes(id))
+          .filter(([id]) => 
+            (userData.enrolled?.includes(id) && courses[id].providerId === userData.providerId) ||
+            Object.values(assignments).some(a => a.learnerId === currentUserId && a.courseId === id)
+          )
           .forEach(([id, course]) => {
             const option = document.createElement("option");
             option.value = id;
@@ -746,35 +715,52 @@
       });
     }
 
-    // Load enrolled courses
     function loadCourses(filter = "") {
       showSpinner();
-      onValue(ref(db, "courses"), snap => {
-        courses = snap.val() || {};
-        courseList.innerHTML = "";
-        const enrolled = Object.keys(courses).filter(id => userData.enrolled?.includes(id));
-        enrolled.forEach(id => {
-          const c = courses[id];
-          if (filter && !c.name.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) return;
-          const courseItem = document.createElement("div");
-          courseItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
-          courseItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${sanitizeInput(c.name)}</p>
-              <p class="text-sm text-gray-600 dark:text-gray-300">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Progress: ${userData.progress?.[id]?.completed / userData.progress?.[id]?.total * 100 || 0}%</p>
-            </div>
-            <div class="flex gap-2">
-              <button onclick="viewCourse('${id}')" class="text-blue-600 hover:underline" aria-label="View program ${sanitizeInput(c.name)}" data-tooltip="View program">View</button>
-            </div>
-          `;
-          courseList.appendChild(courseItem);
+      onValue(ref(db, "users"), snap => {
+        users = snap.val() || {};
+        onValue(ref(db, "courses"), snap => {
+          courses = snap.val() || {};
+          onValue(ref(db, "assignments"), snap => {
+            assignments = snap.val() || {};
+            renderCourses(filter);
+            populateCourseFilters();
+            hideSpinner();
+          });
         });
-        populateCourseFilters();
-        hideSpinner();
       });
     }
 
-    // Load course content
+    function renderCourses(filter = "") {
+      courseList.innerHTML = "";
+      const enrolled = Object.keys(courses).filter(id => 
+        (userData.enrolled?.includes(id) && courses[id].providerId === userData.providerId) ||
+        Object.values(assignments).some(a => a.learnerId === currentUserId && a.courseId === id)
+      );
+      if (enrolled.length === 0) {
+        courseList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No courses assigned.</p>";
+        return;
+      }
+      enrolled.forEach(id => {
+        const c = courses[id];
+        if (filter && !c.name.toLowerCase().includes(filter.toLowerCase()) && !c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) return;
+        const courseItem = document.createElement("div");
+        courseItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
+        const provider = users[c.providerId]?.fullName || users[c.providerId]?.email || "Unknown";
+        courseItem.innerHTML = `
+          <div>
+            <p class="font-semibold">${sanitizeInput(c.name)}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Provider: ${sanitizeInput(provider)}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Tags: ${sanitizeInput(c.metadata?.tags?.join(", ") || "-")} | Progress: ${userData.progress?.[id] || 0}%</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="viewCourse('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" aria-label="View program ${sanitizeInput(c.name)}" data-tooltip="View program">View</button>
+          </div>
+        `;
+        courseList.appendChild(courseItem);
+      });
+    }
+
     function loadContent(filter = "", courseFilter = "") {
       showSpinner();
       onValue(ref(db, "contents"), snap => {
@@ -786,11 +772,14 @@
 
     function renderContent(filter = "", courseFilter = "") {
       contentList.innerHTML = "";
+      let hasContent = false;
       for (const id in contents) {
         const c = contents[id];
-        if (!userData.enrolled?.includes(c.courseId)) continue;
+        if (!((userData.enrolled?.includes(c.courseId) && courses[c.courseId]?.providerId === userData.providerId) ||
+              Object.values(assignments).some(a => a.learnerId === currentUserId && a.courseId === c.courseId))) continue;
         if (filter && !c.title.toLowerCase().includes(filter.toLowerCase())) continue;
         if (courseFilter && c.courseId !== courseFilter) continue;
+        hasContent = true;
         const contentItem = document.createElement("div");
         contentItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
         contentItem.innerHTML = `
@@ -800,14 +789,16 @@
             <p class="text-sm text-gray-600 dark:text-gray-300">Uploaded: ${new Date(c.uploadedAt).toLocaleDateString()}</p>
           </div>
           <div class="flex gap-2">
-            <button onclick="viewContent('${id}')" class="text-blue-600 hover:underline" aria-label="View content ${sanitizeInput(c.title)}" data-tooltip="View content">View</button>
+            <button onclick="viewContent('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" aria-label="View content ${sanitizeInput(c.title)}" data-tooltip="View content">View</button>
           </div>
         `;
         contentList.appendChild(contentItem);
       }
+      if (!hasContent) {
+        contentList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No content available.</p>";
+      }
     }
 
-    // Load assessments
     function loadAssessments(filter = "", courseFilter = "") {
       showSpinner();
       onValue(ref(db, "assignments"), snap => {
@@ -819,29 +810,35 @@
 
     function renderAssessments(filter = "", courseFilter = "") {
       assessmentList.innerHTML = "";
+      let hasAssessments = false;
       for (const id in assignments) {
         const a = assignments[id];
-        if (!userData.enrolled?.includes(a.courseId) || a.archived) continue;
+        if (!(a.learnerId === currentUserId || 
+              (userData.enrolled?.includes(a.courseId) && courses[a.courseId]?.providerId === userData.providerId)) ||
+            a.archived) continue;
         if (filter && !a.title.toLowerCase().includes(filter.toLowerCase())) continue;
         if (courseFilter && a.courseId !== courseFilter) continue;
+        hasAssessments = true;
         const assessmentItem = document.createElement("div");
         assessmentItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
         assessmentItem.innerHTML = `
           <div>
             <p class="font-semibold">${sanitizeInput(a.title)}</p>
             <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[a.courseId]?.name || "Unknown")}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Due: ${a.dueDate ? new Date(a.dueDate).toLocaleDateString() : "-"} | Status: ${sanitizeInput(a.submissions?.[currentUserId]?.status || "Not Submitted")}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Due: ${a.dueDate ? new Date(a.dueDate).toLocaleDateString() : "-"} | Status: ${sanitizeInput(a.submissions?.[currentUserId]?.status || "Not Submitted")}${a.submissions?.[currentUserId]?.grade ? ` | Grade: ${a.submissions[currentUserId].grade}` : ""}</p>
           </div>
           <div class="flex gap-2">
-            <button onclick="submitAssessment('${id}')" class="text-blue-600 hover:underline" aria-label="Submit assessment ${sanitizeInput(a.title)}" data-tooltip="Submit assessment">Submit</button>
-            ${a.submissions?.[currentUserId] ? `<button onclick="viewAssessment('${id}')" class="text-blue-600 hover:underline" aria-label="View assessment ${sanitizeInput(a.title)}" data-tooltip="View submission">View</button>` : ""}
+            <button onclick="submitAssessment('${id}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" aria-label="Submit assessment ${sanitizeInput(a.title)}" data-tooltip="Submit assessment">Submit</button>
+            ${a.submissions?.[currentUserId] ? `<button onclick="viewAssessment('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" aria-label="View assessment ${sanitizeInput(a.title)}" data-tooltip="View submission">View</button>` : ""}
           </div>
         `;
         assessmentList.appendChild(assessmentItem);
       }
+      if (!hasAssessments) {
+        assessmentList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No assessments available.</p>";
+      }
     }
 
-    // Load forums
     function loadForums(filter = "", courseFilter = "") {
       showSpinner();
       onValue(ref(db, "forums"), snap => {
@@ -853,11 +850,14 @@
 
     function renderForums(filter = "", courseFilter = "") {
       forumList.innerHTML = "";
+      let hasForums = false;
       for (const id in forums) {
         const f = forums[id];
-        if (!userData.enrolled?.includes(f.courseId)) continue;
+        if (!((userData.enrolled?.includes(f.courseId) && courses[f.courseId]?.providerId === userData.providerId) ||
+              Object.values(assignments).some(a => a.learnerId === currentUserId && a.courseId === f.courseId))) continue;
         if (filter && !f.title.toLowerCase().includes(filter.toLowerCase())) continue;
         if (courseFilter && f.courseId !== courseFilter) continue;
+        hasForums = true;
         const forumItem = document.createElement("div");
         forumItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
         forumItem.innerHTML = `
@@ -867,14 +867,16 @@
             <p class="text-sm text-gray-600 dark:text-gray-300">Created: ${new Date(f.createdAt).toLocaleDateString()}</p>
           </div>
           <div class="flex gap-2">
-            <button onclick="viewForum('${id}')" class="text-blue-600 hover:underline" aria-label="View forum ${sanitizeInput(f.title)}" data-tooltip="View forum">View</button>
+            <button onclick="viewForum('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" aria-label="View forum ${sanitizeInput(f.title)}" data-tooltip="View forum">View</button>
           </div>
         `;
         forumList.appendChild(forumItem);
       }
+      if (!hasForums) {
+        forumList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No forums available.</p>";
+      }
     }
 
-    // Load quizzes
     function loadQuizzes(filter = "", courseFilter = "") {
       showSpinner();
       onValue(ref(db, "quizzes"), snap => {
@@ -886,11 +888,14 @@
 
     function renderQuizzes(filter = "", courseFilter = "") {
       quizList.innerHTML = "";
+      let hasQuizzes = false;
       for (const id in quizzes) {
         const q = quizzes[id];
-        if (!userData.enrolled?.includes(q.courseId)) continue;
+        if (!((userData.enrolled?.includes(q.courseId) && courses[q.courseId]?.providerId === userData.providerId) ||
+              Object.values(assignments).some(a => a.learnerId === currentUserId && a.courseId === q.courseId))) continue;
         if (filter && !q.title.toLowerCase().includes(filter.toLowerCase())) continue;
         if (courseFilter && q.courseId !== courseFilter) continue;
+        hasQuizzes = true;
         const quizItem = document.createElement("div");
         quizItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
         quizItem.innerHTML = `
@@ -900,22 +905,26 @@
             <p class="text-sm text-gray-600 dark:text-gray-300">Created: ${new Date(q.createdAt).toLocaleDateString()}</p>
           </div>
           <div class="flex gap-2">
-            <button onclick="takeQuiz('${id}')" class="text-blue-600 hover:underline" aria-label="Take quiz ${sanitizeInput(q.title)}" data-tooltip="Take quiz">Take</button>
+            <button onclick="takeQuiz('${id}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-3xl" aria-label="Take quiz ${sanitizeInput(q.title)}" data-tooltip="Take quiz">Take</button>
           </div>
         `;
         quizList.appendChild(quizItem);
       }
+      if (!hasQuizzes) {
+        quizList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No quizzes available.</p>";
+      }
     }
 
-    // Load certifications
     function loadCertifications() {
       showSpinner();
       onValue(ref(db, "certifications"), snap => {
         certifications = snap.val() || {};
         certificationList.innerHTML = "";
+        let hasCerts = false;
         for (const id in certifications) {
           const c = certifications[id];
           if (c.learnerId !== currentUserId) continue;
+          hasCerts = true;
           const certItem = document.createElement("div");
           certItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
           certItem.innerHTML = `
@@ -924,16 +933,18 @@
               <p class="text-sm text-gray-600 dark:text-gray-300">Course: ${sanitizeInput(courses[c.courseId]?.name || "Unknown")} | Issued: ${new Date(c.issuedAt).toLocaleDateString()}</p>
             </div>
             <div class="flex gap-2">
-              <button onclick="downloadCertificate('${id}')" class="text-blue-600 hover:underline" aria-label="Download certificate" data-tooltip="Download certificate">Download</button>
+              <button onclick="downloadCertificate('${id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-3xl" aria-label="Download certificate" data-tooltip="Download certificate">Download</button>
             </div>
           `;
           certificationList.appendChild(certItem);
+        }
+        if (!hasCerts) {
+          certificationList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No certificates available.</p>";
         }
         hideSpinner();
       });
     }
 
-    // Load notices
     function loadNotices() {
       showSpinner();
       onValue(ref(db, "notices"), snap => {
@@ -949,7 +960,7 @@
         .filter(([_, notice]) => !filter || notice.title.toLowerCase().includes(filter.toLowerCase()))
         .sort((a, b) => b[1].createdAt - a[1].createdAt);
       if (filteredNotices.length === 0) {
-        noticeList.innerHTML = "<p class='text-gray-600 dark:text-gray-300'>No notices found.</p>";
+        noticeList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No notices found.</p>";
         return;
       }
       filteredNotices.forEach(([id, n]) => {
@@ -965,7 +976,6 @@
       });
     }
 
-    // Load tickets
     function loadTickets() {
       showSpinner();
       onValue(ref(db, "tickets"), snap => {
@@ -977,9 +987,11 @@
 
     function renderTickets() {
       ticketList.innerHTML = "";
+      let hasTickets = false;
       for (const id in tickets) {
         const t = tickets[id];
         if (t.learnerId !== currentUserId) continue;
+        hasTickets = true;
         const ticketItem = document.createElement("div");
         ticketItem.className = "card bg-gray-50 dark:bg-gray-600 flex justify-between items-center";
         ticketItem.innerHTML = `
@@ -987,26 +999,27 @@
             <p class="font-semibold">${sanitizeInput(t.title)}</p>
             <p class="text-sm text-gray-600 dark:text-gray-300">Status: ${sanitizeInput(t.status)} | Priority: ${sanitizeInput(t.priority)}</p>
             <p class="text-sm text-gray-600 dark:text-gray-300">${sanitizeInput(t.description)}</p>
-            ${t.resolution ? `<p class="text-sm text-gray-600 dark:text-gray-300">Resolution: ${sanitizeInput(t.resolution)}</p>` : ""}
+            ${t.response ? `<p class="text-sm text-gray-600 dark:text-gray-300">Response: ${sanitizeInput(t.response)}</p>` : ""}
           </div>
         `;
         ticketList.appendChild(ticketItem);
       }
+      if (!hasTickets) {
+        ticketList.innerHTML = "<p class='text-gray-600 dark:text-gray-300 text-center'>No tickets found.</p>";
+      }
     }
 
-    // View course content
     window.viewCourse = async courseId => {
       document.getElementById("content").classList.remove("hidden");
       document.querySelectorAll(".section").forEach(s => { if (s.id !== "content") s.classList.add("hidden"); });
       document.querySelectorAll(".nav-button").forEach(btn => btn.classList.remove("active"));
       document.querySelector('.nav-button[data-section="content"]').classList.add("active");
       contentCourseFilter.value = courseId;
-      contentSearch.value = ""; // Reset search input
+      contentSearch.value = "";
       renderContent("", courseId);
       logAudit(`Viewed content for course ${courses[courseId].name}`);
     };
 
-    // View content
     window.viewContent = async contentId => {
       const c = contents[contentId];
       contentView.innerHTML = `
@@ -1025,7 +1038,6 @@
       contentView.innerHTML = "";
     });
 
-    // Submit assessment
     window.submitAssessment = async assessmentId => {
       assessmentTitle.textContent = sanitizeInput(assignments[assessmentId].title);
       assessmentSubmitModal.style.display = "flex";
@@ -1064,23 +1076,23 @@
       assessmentSubmitForm.reset();
     });
 
-    // View assessment submission
     window.viewAssessment = async assessmentId => {
       const submission = assignments[assessmentId].submissions?.[currentUserId];
-      alert(`Assessment: ${sanitizeInput(assignments[assessmentId].title)}\nStatus: ${sanitizeInput(submission.status)}\nFile: ${sanitizeInput(submission.fileUrl)}\nFeedback: ${sanitizeInput(submission.feedback || "None")}\nGrade: ${submission.grade || "N/A"}`);
-      logAudit(`Viewed submission for assessment ${assignments[assessmentId].title}`);
+      const a = assignments[assessmentId];
+      alert(`Assessment: ${sanitizeInput(a.title)}\nStatus: ${sanitizeInput(submission?.status || "Not Submitted")}\nFile: ${sanitizeInput(submission?.fileUrl || "None")}\nFeedback: ${sanitizeInput(submission?.feedback || "None")}\nGrade: ${submission?.grade || "N/A"}`);
+      logAudit(`Viewed submission for assessment ${a.title}`);
     };
 
-    // View forum
     window.viewForum = async forumId => {
       const f = forums[forumId];
+      forumTitle.textContent = sanitizeInput(f.title);
       forumPosts.innerHTML = "";
       f.posts?.forEach(post => {
         const postDiv = document.createElement("div");
         postDiv.className = "border-l-2 border-blue-600 pl-2";
         postDiv.innerHTML = `
           <p class="text-sm">${sanitizeInput(post.content)}</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">By ${sanitizeInput(userData[post.postedBy]?.fullName || "User")} on ${new Date(post.timestamp).toLocaleString()}</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">By ${sanitizeInput(users[post.postedBy]?.fullName || "User")} on ${new Date(post.postedAt).toLocaleString()}</p>
         `;
         forumPosts.appendChild(postDiv);
       });
@@ -1097,7 +1109,7 @@
           await runTransaction(ref(db, `forums/${forumId}`), forum => {
             forum = forum || { posts: [] };
             forum.posts = forum.posts || [];
-            forum.posts.push({ content, postedBy: currentUserId, timestamp: Date.now() });
+            forum.posts.push({ content, postedBy: currentUserId, postedAt: Date.now() });
             return forum;
           });
           logAudit(`Posted in forum ${f.title}`);
@@ -1117,14 +1129,14 @@
       forumPosts.innerHTML = "";
     });
 
-    // Take quiz
     window.takeQuiz = async quizId => {
       const q = quizzes[quizId];
+      quizTitle.textContent = sanitizeInput(q.title);
       quizQuestions.innerHTML = "";
       q.questions.forEach((question, index) => {
         const questionDiv = document.createElement("div");
         questionDiv.innerHTML = `
-          <p class="font-semibold">${sanitizeInput(question.question)}</p>
+          <p class="font-semibold">${sanitizeInput(question.text)}</p>
           <div class="space-y-2 mt-2">
             ${question.options.map((option, i) => `
               <label class="flex items-center gap-2">
@@ -1155,10 +1167,18 @@
             percentage,
             submittedAt: Date.now()
           });
+          if (percentage >= 70) {
+            await runTransaction(ref(db, `users/${currentUserId}/progress`), progress => {
+              progress = progress || {};
+              progress[q.courseId] = Math.max(progress[q.courseId] || 0, percentage);
+              return progress;
+            });
+          }
           logAudit(`Submitted quiz ${q.title} with score ${percentage}%`);
           alert(`Quiz submitted! Score: ${score}/${q.questions.length} (${percentage}%)`);
           quizTakeModal.style.display = "none";
           quizTakeForm.reset();
+          loadOverview();
         } catch (err) {
           console.error("Error submitting quiz:", err);
           alert("Failed to submit quiz.");
@@ -1172,10 +1192,10 @@
       quizQuestions.innerHTML = "";
     });
 
-    // Download certificate
     window.downloadCertificate = async certId => {
       const cert = certifications[certId];
       const course = courses[cert.courseId];
+      const provider = users[cert.providerId]?.fullName || users[cert.providerId]?.email || "Unknown";
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       doc.setFontSize(20);
@@ -1183,12 +1203,12 @@
       doc.setFontSize(14);
       doc.text(`Awarded to: ${sanitizeInput(userData.fullName || userData.email)}`, 20, 40);
       doc.text(`Course: ${sanitizeInput(course.name)}`, 20, 50);
-      doc.text(`Issued on: ${new Date(cert.issuedAt).toLocaleDateString()}`, 20, 60);
+      doc.text(`Provider: ${sanitizeInput(provider)}`, 20, 60);
+      doc.text(`Issued on: ${new Date(cert.issuedAt).toLocaleDateString()}`, 20, 70);
       doc.save(`certificate_${userData.email}_${course.name}.pdf`);
       logAudit(`Downloaded certificate for course ${course.name}`);
     };
 
-    // Submit helpdesk ticket
     ticketForm.addEventListener("submit", async e => {
       e.preventDefault();
       const issue = sanitizeInput(document.getElementById("ticketIssue").value.trim());
@@ -1211,6 +1231,7 @@
         logAudit(`Submitted helpdesk ticket: ${issue}`);
         alert("Ticket submitted successfully!");
         ticketForm.reset();
+        renderTickets();
       } catch (err) {
         console.error("Error submitting ticket:", err);
         alert("Failed to submit ticket.");
@@ -1218,65 +1239,61 @@
       hideSpinner();
     });
 
-    // Search handlers
-    const searchCourses = debounce(filter => loadCourses(filter), 300);
+    const searchCourses = debounce(filter => renderCourses(sanitizeInput(filter)), 300);
     courseSearch.addEventListener("input", () => searchCourses(courseSearch.value));
-    const searchContent = debounce(filter => renderContent(filter, contentCourseFilter.value), 300);
+    const searchContent = debounce(filter => renderContent(sanitizeInput(filter), contentCourseFilter.value), 300);
     contentSearch.addEventListener("input", () => searchContent(contentSearch.value));
     contentCourseFilter.addEventListener("change", () => renderContent(contentSearch.value, contentCourseFilter.value));
-    const searchAssessments = debounce(filter => renderAssessments(filter, assessmentCourseFilter.value), 300);
+    const searchAssessments = debounce(filter => renderAssessments(sanitizeInput(filter), assessmentCourseFilter.value), 300);
     assessmentSearch.addEventListener("input", () => searchAssessments(assessmentSearch.value));
     assessmentCourseFilter.addEventListener("change", () => renderAssessments(assessmentSearch.value, assessmentCourseFilter.value));
-    const searchForums = debounce(filter => renderForums(filter, forumCourseFilter.value), 300);
+    const searchForums = debounce(filter => renderForums(sanitizeInput(filter), forumCourseFilter.value), 300);
     forumSearch.addEventListener("input", () => searchForums(forumSearch.value));
     forumCourseFilter.addEventListener("change", () => renderForums(forumSearch.value, forumCourseFilter.value));
-    const searchQuizzes = debounce(filter => renderQuizzes(filter, quizCourseFilter.value), 300);
+    const searchQuizzes = debounce(filter => renderQuizzes(sanitizeInput(filter), quizCourseFilter.value), 300);
     quizSearch.addEventListener("input", () => searchQuizzes(quizSearch.value));
     quizCourseFilter.addEventListener("change", () => renderQuizzes(quizSearch.value, quizCourseFilter.value));
-    const searchNotices = debounce(filter => renderNotices(filter), 300);
+    const searchNotices = debounce(filter => renderNotices(sanitizeInput(filter)), 300);
     noticeSearch.addEventListener("input", () => searchNotices(noticeSearch.value));
 
-    // Authentication check
     onAuthStateChanged(auth, async user => {
       if (!user) {
-        alert("Unauthorized. Redirecting...");
         window.location.href = "login.html";
-      } else {
-        currentUserId = user.uid;
-        const userSnap = await get(ref(db, `users/${user.uid}`));
-        userData = userSnap.val() || {};
-        if (userData.role !== "learner") {
-          alert("Access restricted to learners only.");
-          await signOut(auth);
-          window.location.href = "login.html";
-          return;
-        }
-        initializeUI();
-        loadNotifications();
-        loadOverview();
-        loadCourses();
-        loadContent();
-        loadAssessments();
-        loadForums();
-        loadQuizzes();
-        loadCertifications();
-        loadNotices();
-        loadTickets();
+        return;
       }
+      currentUserId = user.uid;
+      const userSnap = await get(ref(db, `users/${user.uid}`));
+      userData = userSnap.val() || {};
+      if (userData.role !== "learner") {
+        await signOut(auth);
+        window.location.href = "login.html";
+        return;
+      }
+      initializeUI();
+      loadNotifications();
+      loadOverview();
+      loadCourses();
+      loadContent();
+      loadAssessments();
+      loadForums();
+      loadQuizzes();
+      loadCertifications();
+      loadNotices();
+      loadTickets();
     });
 
-    // Sign out
     document.getElementById("signout-btn").addEventListener("click", async () => {
+      showSpinner();
       try {
         await signOut(auth);
         window.location.href = "login.html";
       } catch (err) {
         console.error("Sign-out failed:", err);
-        alert("Failed to sign out. Please try again.");
+        alert("Failed to sign out.");
       }
+      hideSpinner();
     });
 
-    // Audit logging
     async function logAudit(message) {
       try {
         await push(ref(db, `auditLogs/${currentUserId}`), {
@@ -1289,7 +1306,6 @@
       }
     }
 
-    // Run UI initialization on page load
     document.addEventListener("DOMContentLoaded", initializeUI);
   </script>
 </body>
