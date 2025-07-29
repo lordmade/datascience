@@ -2262,14 +2262,14 @@
     // Auth state listener
     onAuthStateChanged(auth, u => {
       if (!u) {
-        window.location.href = "/login.html";
+        window.location.href = "login.html";
         return;
       }
       onValue(ref(db, `users/${u.uid}`), snap => {
         user = snap.val();
         if (user?.role !== "provider") {
           signOut(auth);
-          window.location.href = "/login.html";
+          window.location.href = "login.html";
           return;
         }
         loadOverview();
@@ -2291,7 +2291,7 @@
       showSpinner();
       try {
         await signOut(auth);
-        window.location.href = "/login.html";
+        window.location.href = "login.html";
       } catch (err) {
         console.error("Error signing out:", err);
         alert("Failed to sign out.");
