@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CETA Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <style>
     .sidebar {
@@ -22,14 +19,14 @@
       transition: margin-left 0.3s ease;
     }
     .dark-mode {
-      background: #1f2937;
+      background: #111827;
       color: #f3f4f6;
     }
     .dark-mode .bg-white {
-      background: #374151;
+      background: #1f2937;
     }
     .dark-mode .bg-gray-50 {
-      background: #4b5563;
+      background: #374151;
     }
     .dark-mode .text-gray-600 {
       color: #d1d5db;
@@ -45,8 +42,8 @@
       transform: translateX(-50%);
       background: #1f2937;
       color: white;
-      padding: 4px 8px;
-      border-radius: 4px;
+      padding: 6px 12px;
+      border-radius: 6px;
       font-size: 12px;
       white-space: nowrap;
       z-index: 10;
@@ -55,7 +52,7 @@
       .sidebar {
         position: fixed;
         z-index: 50;
-        width: 256px;
+        width: 280px;
         transform: translateX(-100%);
       }
       .sidebar-open {
@@ -70,8 +67,8 @@
 <body class="bg-gray-100 text-gray-800 font-sans min-h-screen transition-colors duration-300">
   <div class="flex">
     <!-- Sidebar -->
-    <div id="sidebar" class="sidebar bg-gradient-to-b from-gray-800 to-gray-900 text-white w-64 min-h-screen p-4 shadow-lg">
-      <div class="flex items-center justify-between mb-6">
+    <div id="sidebar" class="sidebar bg-gradient-to-b from-indigo-800 to-indigo-900 text-white w-72 min-h-screen p-6 shadow-xl">
+      <div class="flex items-center justify-between mb-8">
         <h1 class="text-2xl font-bold flex items-center gap-2">
           <i class="fas fa-graduation-cap"></i> CETA Admin
         </h1>
@@ -82,327 +79,85 @@
         </button>
       </div>
       <nav>
-        <ul class="space-y-2">
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="overview" data-tooltip="Dashboard Overview"><i class="fas fa-tachometer-alt"></i> Overview</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="users" data-tooltip="Manage Users"><i class="fas fa-users"></i> User Management</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="courses" data-tooltip="Manage Programs"><i class="fas fa-book"></i> Program Management</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="assessments" data-tooltip="Manage Assessments"><i class="fas fa-tasks"></i> Assessments</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="certifications" data-tooltip="Issue Certificates"><i class="fas fa-certificate"></i> Certifications</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="accreditations" data-tooltip="Manage Accreditations"><i class="fas fa-award"></i> Accreditations</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="grants" data-tooltip="Manage Grants"><i class="fas fa-money-bill"></i> Grants</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="bursaries" data-tooltip="Manage Bursaries"><i class="fas fa-wallet"></i> Bursaries</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="projects" data-tooltip="Special Projects"><i class="fas fa-project-diagram"></i> Special Projects</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="wsp_atr" data-tooltip="WSP/ATR Management"><i class="fas fa-file-alt"></i> WSP/ATR</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="notices" data-tooltip="Notice Board"><i class="fas fa-bell"></i> Notice Board</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="analytics" data-tooltip="View Analytics"><i class="fas fa-chart-bar"></i> Analytics</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="helpdesk" data-tooltip="Helpdesk Tickets"><i class="fas fa-headset"></i> Helpdesk</button></li>
-          <li><button class="nav-button w-full text-left p-2 hover:bg-gray-700 rounded flex items-center gap-2" data-section="audit_logs" data-tooltip="Audit Logs"><i class="fas fa-history"></i> Audit Logs</button></li>
+        <ul class="space-y-3">
+          <li><button class="nav-button w-full text-left p-3 hover:bg-indigo-700 rounded-lg flex items-center gap-3" data-section="overview" data-tooltip="Dashboard Overview"><i class="fas fa-tachometer-alt"></i> Overview</button></li>
+          <li><button class="nav-button w-full text-left p-3 hover:bg-indigo-700 rounded-lg flex items-center gap-3" data-section="users" data-tooltip="Manage Users"><i class="fas fa-users"></i> User Management</button></li>
+          <li><button class="nav-button w-full text-left p-3 hover:bg-indigo-700 rounded-lg flex items-center gap-3" data-section="assignments" data-tooltip="Assign Learners"><i class="fas fa-link"></i> Learner Assignments</button></li>
         </ul>
       </nav>
       <div class="mt-auto">
-        <button id="toggle-dark-mode" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded mb-2" aria-label="Toggle dark mode">Toggle Dark Mode</button>
-        <button id="signout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" aria-label="Sign out">Sign Out</button>
+        <button id="toggle-dark-mode" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg mb-3" aria-label="Toggle dark mode">Toggle Dark Mode</button>
+        <button id="signout-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg" aria-label="Sign out">Sign Out</button>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="main-content flex-1 p-6 md:ml-64">
-      <!-- Notifications -->
-      <div id="notifications" class="mb-4 hidden">
-        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded shadow">
-          <h3 class="text-lg font-semibold">Notifications</h3>
-          <ul id="notification-list" class="space-y-2"></ul>
-        </div>
-      </div>
-
+    <div class="main-content flex-1 p-8 md:ml-72">
       <!-- Overview Section -->
       <div id="overview" class="section">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h2>
-        <div class="grid gap-6 md:grid-cols-4">
-          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+        <h2 class="text-3xl font-bold mb-8 flex items-center gap-3"><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h2>
+        <div class="grid gap-6 md:grid-cols-3">
+          <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
             <h3 class="text-lg font-semibold">Total Learners</h3>
             <p id="total-learners" class="text-4xl font-bold text-indigo-600">0</p>
           </div>
-          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-            <h3 class="text-lg font-semibold">Total Courses</h3>
-            <p id="total-courses" class="text-4xl font-bold text-indigo-600">0</p>
+          <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+            <h3 class="text-lg font-semibold">Total Providers</h3>
+            <p id="total-providers" class="text-4xl font-bold text-indigo-600">0</p>
           </div>
-          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-            <h3 class="text-lg font-semibold">Pending Grants</h3>
-            <p id="pending-grants" class="text-4xl font-bold text-indigo-600">0</p>
+          <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+            <h3 class="text-lg font-semibold">Total Assignments</h3>
+            <p id="total-assignments" class="text-4xl font-bold text-indigo-600">0</p>
           </div>
-          <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-            <h3 class="text-lg font-semibold">Open Helpdesk Tickets</h3>
-            <p id="open-tickets" class="text-4xl font-bold text-indigo-600">0</p>
-          </div>
-        </div>
-        <div class="mt-6 grid gap-6 md:grid-cols-2">
-          <div class="bg-white p-6 rounded-lg shadow-lg">
-            <h3 class="text-lg font-semibold mb-2">Learner Progress</h3>
-            <canvas id="progress-chart" class="w-full h-64"></canvas>
-          </div>
-          <div class="bg-white p-6 rounded-lg shadow-lg">
-            <h3 class="text-lg font-semibold mb-2">Grant Distribution</h3>
-            <canvas id="grant-chart" class="w-full h-64"></canvas>
-          </div>
-        </div>
-        <div class="mt-6 bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Recent Notices</h3>
-          <div id="recent-notices" class="space-y-4"></div>
         </div>
       </div>
 
       <!-- User Management Section -->
       <div id="users" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-users"></i> User Management</h2>
-        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Add/Edit User</h3>
-          <div class="flex flex-wrap gap-4 mb-4">
-            <input type="email" id="userEmail" placeholder="Email" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter user email" />
-            <input type="text" id="userName" placeholder="Full Name" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter full name" />
-            <select id="userRole" class="border p-2 rounded min-w-[150px]" aria-label="Select user role">
+        <h2 class="text-3xl font-bold mb-8 flex items-center gap-3"><i class="fas fa-users"></i> User Management</h2>
+        <div class="mb-8 bg-white p-8 rounded-xl shadow-lg">
+          <h3 class="text-xl font-semibold mb-4">Add/Edit User</h3>
+          <div class="flex flex-wrap gap-4 mb-6">
+            <input type="email" id="userEmail" placeholder="Email" class="border border-gray-300 p-3 rounded-lg flex-1 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Enter user email" />
+            <input type="text" id="userName" placeholder="Full Name" class="border border-gray-300 p-3 rounded-lg flex-1 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Enter full name" />
+            <select id="userRole" class="border border-gray-300 p-3 rounded-lg min-w-[150px] focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Select user role">
               <option value="learner">Learner</option>
-              <option value="admin">Admin</option>
               <option value="provider">Training Provider</option>
-              <option value="sdf">SDF</option>
             </select>
-            <button onclick="addUser()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add new user">Add User</button>
+            <button onclick="addUser()" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors" data-tooltip="Add new user">Add User</button>
           </div>
           <div class="flex flex-wrap gap-4">
-            <input type="file" id="userImport" accept=".csv,.xlsx" class="border p-2 rounded" aria-label="Import users from CSV/Excel" />
-            <button onclick="importUsers()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Import users">Import Users</button>
-            <button onclick="exportUsers()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Export users">Export Users</button>
+            <input type="file" id="userImport" accept=".csv,.xlsx" class="border border-gray-300 p-3 rounded-lg" aria-label="Import users from CSV/Excel" />
+            <button onclick="importUsers()" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors" data-tooltip="Import users">Import Users</button>
+            <button onclick="exportUsers()" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors" data-tooltip="Export users">Export Users</button>
           </div>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Users</h3>
-          <input type="text" id="userSearch" placeholder="Search users..." class="border p-2 rounded w-full mb-4" aria-label="Search users by name or email" />
+        <div class="bg-white p-8 rounded-xl shadow-lg">
+          <h3 class="text-xl font-semibold mb-4">Users</h3>
+          <input type="text" id="userSearch" placeholder="Search users..." class="border border-gray-300 p-3 rounded-lg w-full mb-6 focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Search users by name or email" />
           <div id="userList" class="space-y-4"></div>
         </div>
       </div>
 
-      <!-- Program Management Section -->
-      <div id="courses" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-book"></i> Program Management</h2>
-        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Add Program</h3>
-          <div class="flex flex-wrap gap-4 mb-4">
-            <input type="text" id="courseName" placeholder="Program Name" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter program name" />
-            <input type="text" id="courseTags" placeholder="Tags (comma-separated)" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter tags" />
-            <button onclick="addCourse()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add new program">Add Program</button>
-          </div>
-          <div class="mb-4">
-            <h4 class="text-md font-semibold">Add Content</h4>
-            <div class="flex flex-wrap gap-4">
-              <select id="contentType" class="border p-2 rounded min-w-[150px]" aria-label="Select content type">
-                <option value="scorm">SCORM</option>
-                <option value="video">Video</option>
-                <option value="document">Document</option>
-              </select>
-              <input type="text" id="contentUrl" placeholder="Content URL" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter content URL" />
-              <input type="text" id="contentTitle" placeholder="Content Title" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter content title" />
-              <button onclick="addContent()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Add content to program">Add Content</button>
-            </div>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Programs</h3>
-          <input type="text" id="courseSearch" placeholder="Search programs..." class="border p-2 rounded w-full mb-4" aria-label="Search programs by name or tag" />
-          <div id="courseList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Assessments Section -->
-      <div id="assessments" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-tasks"></i> Assessment Management</h2>
-        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Add Assessment</h3>
-          <div class="flex flex-wrap gap-4 mb-4">
-            <select id="assessmentCourse" class="border p-2 rounded min-w-[150px]" aria-label="Select course"></select>
-            <input type="text" id="assessmentTitle" placeholder="Assessment Title" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter assessment title" />
-            <input type="text" id="assessmentTags" placeholder="Tags" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter tags" />
-            <button onclick="addAssessment()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add new assessment">Add Assessment</button>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Assessments</h3>
-          <div id="assessmentList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Certifications Section -->
-      <div id="certifications" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-certificate"></i> Certification Management</h2>
-        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Issue Certificate</h3>
-          <div class="flex flex-wrap gap-4 mb-4">
-            <select id="certCourse" class="border p-2 rounded min-w-[150px]" aria-label="Select course"></select>
-            <select id="certLearner" class="border p-2 rounded min-w-[150px]" aria-label="Select learner"></select>
-            <input type="text" id="certTemplate" placeholder="Template Name" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter template name" />
-            <button onclick="issueCertificate()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Issue certificate">Issue Certificate</button>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Certificates</h3>
-          <div id="certificationList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Accreditations Section -->
-      <div id="accreditations" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-award"></i> Accreditation Management</h2>
-        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Add Accreditation</h3>
-          <div class="flex flex-wrap gap-4 mb-4">
-            <select id="accProvider" class="border p-2 rounded min-w-[150px]" aria-label="Select provider"></select>
-            <input type="text" id="accLetterUrl" placeholder="Letter URL" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter letter URL" />
-            <button onclick="addAccreditation()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add accreditation">Add Accreditation</button>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Accreditations</h3>
-          <div id="accreditationList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Grants Section -->
-      <div id="grants" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-money-bill"></i> Grants Management</h2>
-        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Add Grant</h3>
-          <div class="flex flex-wrap gap-4 mb-4">
-            <select id="grantType" class="border p-2 rounded min-w-[150px]" aria-label="Select grant type">
-              <option value="mandatory">Mandatory</option>
-              <option value="discretionary">Discretionary</option>
+      <!-- Learner Assignments Section -->
+      <div id="assignments" class="section hidden">
+        <h2 class="text-3xl font-bold mb-8 flex items-center gap-3"><i class="fas fa-link"></i> Learner Assignments</h2>
+        <div class="mb-8 bg-white p-8 rounded-xl shadow-lg">
+          <h3 class="text-xl font-semibold mb-4">Assign Learner to Provider</h3>
+          <div class="flex flex-wrap gap-4 mb-6">
+            <select id="assignLearner" class="border border-gray-300 p-3 rounded-lg min-w-[200px] focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Select learner">
+              <option value="">Select Learner</option>
             </select>
-            <input type="number" id="grantAmount" placeholder="Amount" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter grant amount" />
-            <select id="grantRecipient" class="border p-2 rounded min-w-[150px]" aria-label="Select recipient"></select>
-            <button onclick="addGrant()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add grant">Add Grant</button>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Grants</h3>
-          <div id="grantList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Bursaries Section -->
-      <div id="bursaries" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-wallet"></i> Bursary Management</h2>
-        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Manage Bursary</h3>
-          <div class="flex flex-wrap gap-4 mb-4">
-            <select id="bursaryApplicant" class="border p-2 rounded min-w-[150px]" aria-label="Select applicant"></select>
-            <select id="bursaryProgram" class="border p-2 rounded min-w-[150px]" aria-label="Select program"></select>
-            <input type="number" id="bursaryAmount" placeholder="Amount" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter bursary amount" />
-            <button onclick="addBursary()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add bursary">Add Bursary</button>
-          </div>
-          <div class="flex flex-wrap gap-4">
-            <input type="file" id="bursaryDoc" accept=".pdf" class="border p-2 rounded" aria-label="Upload supporting document" />
-            <button onclick="uploadBursaryDoc()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Upload document">Upload Document</button>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Bursaries</h3>
-          <div id="bursaryList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Special Projects Section -->
-      <div id="projects" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-project-diagram"></i> Special Projects</h2>
-        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Add Project</h3>
-          <div class="flex flex-wrap gap-4 mb-4">
-            <input type="text" id="projectName" placeholder="Project Name" class="border p-2 rounded flex-1 min-w-[200px]" aria-label="Enter project name" />
-            <textarea id="projectCharter" placeholder="Project Charter" class="border p-2 rounded flex-1 min-w-[200px]" rows="4" aria-label="Enter project charter"></textarea>
-            <button onclick="addProject()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" data-tooltip="Add project">Add Project</button>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Projects</h3>
-          <div id="projectList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- WSP/ATR Section -->
-      <div id="wsp_atr" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-file-alt"></i> WSP/ATR Management</h2>
-        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Manage WSP/ATR</h3>
-          <div class="flex flex-wrap gap-4 mb-4">
-            <select id="wspEmployer" class="border p-2 rounded min-w-[150px]" aria-label="Select employer"></select>
-            <select id="wspType" class="border p-2 rounded min-w-[150px]" aria-label="Select type">
-              <option value="wsp">WSP</option>
-              <option value="atr">ATR</option>
+            <select id="assignProvider" class="border border-gray-300 p-3 rounded-lg min-w-[200px] focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Select provider">
+              <option value="">Select Provider</option>
             </select>
-            <input type="file" id="wspDoc" accept=".pdf" class="border p-2 rounded" aria-label="Upload WSP/ATR document" />
-            <button onclick="uploadWspDoc()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Upload document">Upload</button>
+            <button onclick="assignLearner()" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors" data-tooltip="Assign learner">Assign</button>
           </div>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">WSP/ATR Submissions</h3>
-          <div id="wspList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Notice Board Section -->
-      <div id="notices" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-bell"></i> Notice Board</h2>
-        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Post New Notice</h3>
-          <form id="notice-form">
-            <input type="text" id="noticeTitle" placeholder="Notice Title" class="border p-2 rounded w-full mb-2" aria-label="Enter notice title" required />
-            <textarea id="noticeContent" placeholder="Notice Content" class="border p-2 rounded w-full mb-2" rows="4" aria-label="Enter notice content" required></textarea>
-            <input type="date" id="noticeExpiry" class="border p-2 rounded mb-2" aria-label="Select expiry date (optional)" />
-            <div class="flex flex-wrap gap-4">
-              <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Post notice">Post Notice</button>
-              <input type="text" id="noticeSearch" placeholder="Search notices..." class="border p-2 rounded w-full md:w-1/2" aria-label="Search notices by title" />
-            </div>
-          </form>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Notices</h3>
-          <div id="noticeList" class="space-y-4" aria-live="polite"></div>
-        </div>
-      </div>
-
-      <!-- Analytics Section -->
-      <div id="analytics" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-chart-bar"></i> Analytics & Reporting</h2>
-        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Generate Report</h3>
-          <div class="flex flex-wrap gap-4 mb-4">
-            <select id="reportType" class="border p-2 rounded min-w-[150px]" aria-label="Select report type">
-              <option value="learner_progress">Learner Progress</option>
-              <option value="grant_disbursement">Grant Disbursement</option>
-              <option value="user_activity">User Activity</option>
-            </select>
-            <button onclick="generateReport()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-tooltip="Generate report">Generate Report</button>
-            <button onclick="exportReportToPDF()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700" data-tooltip="Export as PDF">Export to PDF</button>
-          </div>
-        </div>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Reports</h3>
-          <div id="reportList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Helpdesk Section -->
-      <div id="helpdesk" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-headset"></i> Helpdesk</h2>
-        <div class="mb-6 bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">View Tickets</h3>
-          <div id="ticketList" class="space-y-4"></div>
-        </div>
-      </div>
-
-      <!-- Audit Logs Section -->
-      <div id="audit_logs" class="section hidden">
-        <h2 class="text-3xl font-bold mb-6 flex items-center gap-2"><i class="fas fa-history"></i> Audit Logs</h2>
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-          <h3 class="text-lg font-semibold mb-2">Activity Timeline</h3>
-          <div id="auditLogList" class="space-y-4"></div>
+        <div class="bg-white p-8 rounded-xl shadow-lg">
+          <h3 class="text-xl font-semibold mb-4">Assignments</h3>
+          <input type="text" id="assignmentSearch" placeholder="Search assignments..." class="border border-gray-300 p-3 rounded-lg w-full mb-6 focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Search assignments by learner or provider" />
+          <div id="assignmentList" class="space-y-4"></div>
         </div>
       </div>
 
@@ -439,39 +194,17 @@
     // DOM elements
     const userList = document.getElementById("userList");
     const userSearch = document.getElementById("userSearch");
-    const courseList = document.getElementById("courseList");
-    const courseSearch = document.getElementById("courseSearch");
-    const assessmentList = document.getElementById("assessmentList");
-    const certificationList = document.getElementById("certificationList");
-    const accreditationList = document.getElementById("accreditationList");
-    const grantList = document.getElementById("grantList");
-    const bursaryList = document.getElementById("bursaryList");
-    const projectList = document.getElementById("projectList");
-    const wspList = document.getElementById("wspList");
-    const noticeList = document.getElementById("noticeList");
-    const noticeForm = document.getElementById("notice-form");
-    const noticeTitle = document.getElementById("noticeTitle");
-    const noticeContent = document.getElementById("noticeContent");
-    const noticeExpiry = document.getElementById("noticeExpiry");
-    const noticeSearch = document.getElementById("noticeSearch");
-    const reportList = document.getElementById("reportList");
-    const ticketList = document.getElementById("ticketList");
-    const auditLogList = document.getElementById("auditLogList");
+    const assignmentList = document.getElementById("assignmentList");
+    const assignmentSearch = document.getElementById("assignmentSearch");
     const totalLearners = document.getElementById("total-learners");
-    const totalCourses = document.getElementById("total-courses");
-    const pendingGrants = document.getElementById("pending-grants");
-    const openTickets = document.getElementById("open-tickets");
-    const recentNotices = document.getElementById("recent-notices");
-    const progressChartCanvas = document.getElementById("progress-chart");
-    const grantChartCanvas = document.getElementById("grant-chart");
+    const totalProviders = document.getElementById("total-providers");
+    const totalAssignments = document.getElementById("total-assignments");
     const loadingSpinner = document.getElementById("loading-spinner");
     const sidebar = document.getElementById("sidebar");
     const toggleSidebar = document.getElementById("toggle-sidebar");
     const toggleDarkMode = document.getElementById("toggle-dark-mode");
-    const notifications = document.getElementById("notifications");
-    const notificationList = document.getElementById("notification-list");
 
-    let users = [], courses = {}, assessments = {}, certifications = {}, accreditations = {}, grants = {}, bursaries = {}, projects = {}, wspAtr = {}, notices = {}, analytics = {}, tickets = {}, auditLogs = {};
+    let users = [], assignments = {};
     let currentUserRole = null;
 
     // Show/hide loading spinner
@@ -518,126 +251,24 @@
       };
     }
 
-    // Load notifications
-    function loadNotifications() {
-      onValue(ref(db, "audit_logs"), snap => {
-        notificationList.innerHTML = "";
-        const data = snap.val() || {};
-        const recentLogs = Object.entries(data)
-          .sort((a, b) => b[1].timestamp - a[1].timestamp)
-          .slice(0, 5);
-        if (recentLogs.length > 0) {
-          notifications.classList.remove("hidden");
-        }
-        recentLogs.forEach(([_, log]) => {
-          const user = users.find(u => u.uid === log.userId) || { email: "Unknown" };
-          const item = document.createElement("li");
-          item.className = "text-sm";
-          item.innerHTML = `<i class="fas fa-bell mr-2"></i> ${log.action} by ${user.email} at ${new Date(log.timestamp).toLocaleString()}`;
-          notificationList.appendChild(item);
-        });
-      });
-    }
-
-    // Load overview metrics and charts
+    // Load overview metrics
     function loadOverview() {
       showSpinner();
       onValue(ref(db, "users"), snap => {
         const data = snap.val();
-        let learnerCount = 0;
+        let learnerCount = 0, providerCount = 0;
         users = [];
         for (const uid in data) {
           if (data[uid].role === "learner") learnerCount++;
+          if (data[uid].role === "provider") providerCount++;
           users.push({ uid, ...data[uid] });
         }
         totalLearners.textContent = learnerCount;
+        totalProviders.textContent = providerCount;
       });
 
-      onValue(ref(db, "courses"), snap => {
-        totalCourses.textContent = Object.keys(snap.val() || {}).length;
-      });
-
-      onValue(ref(db, "grants"), snap => {
-        let pendingCount = 0;
-        const data = snap.val() || {};
-        for (const grantId in data) {
-          if (data[grantId].status === "pending") pendingCount++;
-        }
-        pendingGrants.textContent = pendingCount;
-
-        // Grant chart
-        const statuses = { pending: 0, disbursed: 0 };
-        for (const id in data) {
-          statuses[data[id].status]++;
-        }
-        new Chart(grantChartCanvas, {
-          type: "pie",
-          data: {
-            labels: ["Pending", "Disbursed"],
-            datasets: [{
-              label: "Grants",
-              data: [statuses.pending, statuses.disbursed],
-              backgroundColor: ["#f87171", "#34d399"]
-            }]
-          },
-          options: { responsive: true }
-        });
-      });
-
-      onValue(ref(db, "helpdesk"), snap => {
-        let openCount = 0;
-        const data = snap.val() || {};
-        for (const ticketId in data) {
-          if (data[ticketId].status === "open") openCount++;
-        }
-        openTickets.textContent = openCount;
-      });
-
-      onValue(ref(db, "users"), snap => {
-        const data = snap.val() || {};
-        const progressData = [];
-        for (const uid in data) {
-          if (data[uid].role === "learner") progressData.push(data[uid].progress || 0);
-        }
-        new Chart(progressChartCanvas, {
-          type: "bar",
-          data: {
-            labels: progressData.map((_, i) => `Learner ${i + 1}`),
-            datasets: [{
-              label: "Progress (%)",
-              data: progressData,
-              backgroundColor: "#2563eb",
-              borderRadius: 4
-            }]
-          },
-          options: {
-            scales: { y: { beginAtZero: true, max: 100 } },
-            plugins: { legend: { display: true } }
-          }
-        });
-      });
-
-      onValue(ref(db, "notices"), snap => {
-        recentNotices.innerHTML = "";
-        const data = snap.val();
-        if (!data) {
-          recentNotices.innerHTML = "<p class='text-gray-600'>No recent notices.</p>";
-          hideSpinner();
-          return;
-        }
-        const recent = Object.entries(data)
-          .sort((a, b) => b[1].createdAt - a[1].createdAt)
-          .slice(0, 3);
-        recent.forEach(([_, notice]) => {
-          const noticeItem = document.createElement("div");
-          noticeItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow";
-          noticeItem.innerHTML = `
-            <h4 class="text-md font-semibold">${notice.title}</h4>
-            <p class="text-gray-700">${notice.content.substring(0, 100)}${notice.content.length > 100 ? "..." : ""}</p>
-            <p class="text-sm text-gray-500 mt-2">Posted on ${new Date(notice.createdAt).toLocaleDateString()}</p>
-          `;
-          recentNotices.appendChild(noticeItem);
-        });
+      onValue(ref(db, "assignments"), snap => {
+        totalAssignments.textContent = Object.keys(snap.val() || {}).length;
         hideSpinner();
       });
     }
@@ -650,18 +281,18 @@
         users = [];
         const data = snap.val();
         for (const uid in data) {
-          if (data[uid].fullName?.toLowerCase().includes(filter.toLowerCase()) || data[uid].email?.toLowerCase().includes(filter.toLowerCase())) {
+          if ((data[uid].fullName?.toLowerCase().includes(filter.toLowerCase()) || data[uid].email?.toLowerCase().includes(filter.toLowerCase())) && (data[uid].role === "learner" || data[uid].role === "provider")) {
             users.push({ uid, ...data[uid] });
             const userItem = document.createElement("div");
-            userItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
+            userItem.className = "bg-gray-50 p-6 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
             userItem.innerHTML = `
               <div>
                 <p class="font-semibold">${data[uid].fullName || "-"}</p>
                 <p class="text-sm text-gray-600">${data[uid].email} | Role: ${data[uid].role}</p>
               </div>
-              <div class="flex gap-2">
+              <div class="flex gap-3">
                 ${currentUserRole === "admin" ? `
-                  <button onclick="editUser('${uid}')" class="text-blue-600 hover:underline" aria-label="Edit user ${data[uid].email}" data-tooltip="Edit user">Edit</button>
+                  <button onclick="editUser('${uid}')" class="text-indigo-600 hover:underline" aria-label="Edit user ${data[uid].email}" data-tooltip="Edit user">Edit</button>
                   <button onclick="deleteUser('${uid}')" class="text-red-600 hover:underline" aria-label="Delete user ${data[uid].email}" data-tooltip="Delete user">Delete</button>
                 ` : ""}
               </div>
@@ -673,344 +304,33 @@
       });
     }
 
-    // Load courses
-    function loadCourses(filter = "") {
+    // Load assignments
+    function loadAssignments(filter = "") {
       showSpinner();
-      onValue(ref(db, "courses"), snap => {
-        courses = snap.val() || {};
-        courseList.innerHTML = "";
-        for (const id in courses) {
-          const c = courses[id];
-          if (c.name.toLowerCase().includes(filter.toLowerCase()) || c.metadata?.tags?.some(t => t.toLowerCase().includes(filter.toLowerCase()))) {
-            const courseItem = document.createElement("div");
-            courseItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-            courseItem.innerHTML = `
+      onValue(ref(db, "assignments"), snap => {
+        assignments = snap.val() || {};
+        assignmentList.innerHTML = "";
+        for (const id in assignments) {
+          const a = assignments[id];
+          const learner = users.find(u => u.uid === a.learnerId) || { fullName: "-", email: "-" };
+          const provider = users.find(u => u.uid === a.providerId) || { fullName: "-", email: "-" };
+          if (learner.fullName.toLowerCase().includes(filter.toLowerCase()) || provider.fullName.toLowerCase().includes(filter.toLowerCase())) {
+            const assignmentItem = document.createElement("div");
+            assignmentItem.className = "bg-gray-50 p-6 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
+            assignmentItem.innerHTML = `
               <div>
-                <p class="font-semibold">${c.name}</p>
-                <p class="text-sm text-gray-600">Tags: ${c.metadata?.tags?.join(", ") || "-"}</p>
+                <p class="font-semibold">${learner.fullName} assigned to ${provider.fullName}</p>
+                <p class="text-sm text-gray-600">Learner: ${learner.email} | Provider: ${provider.email}</p>
+                <p class="text-sm text-gray-500">Assigned on ${new Date(a.createdAt).toLocaleDateString()}</p>
               </div>
-              <div class="flex gap-2">
+              <div class="flex gap-3">
                 ${currentUserRole === "admin" ? `
-                  <button onclick="editCourse('${id}')" class="text-blue-600 hover:underline" aria-label="Edit program ${c.name}" data-tooltip="Edit program">Edit</button>
-                  <button onclick="archiveCourse('${id}')" class="text-red-600 hover:underline" aria-label="${c.archived ? "Unarchive" : "Archive"} program ${c.name}" data-tooltip="${c.archived ? "Unarchive" : "Archive"} program">${c.archived ? "Unarchive" : "Archive"}</button>
+                  <button onclick="deleteAssignment('${id}')" class="text-red-600 hover:underline" aria-label="Delete assignment" data-tooltip="Delete assignment">Delete</button>
                 ` : ""}
               </div>
             `;
-            courseList.appendChild(courseItem);
+            assignmentList.appendChild(assignmentItem);
           }
-        }
-        hideSpinner();
-      });
-    }
-
-    // Load assessments
-    function loadAssessments() {
-      showSpinner();
-      onValue(ref(db, "assessments"), snap => {
-        assessments = snap.val() || {};
-        assessmentList.innerHTML = "";
-        for (const id in assessments) {
-          const a = assessments[id];
-          const assessmentItem = document.createElement("div");
-          assessmentItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-          assessmentItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${a.title}</p>
-              <p class="text-sm text-gray-600">Course: ${courses[a.courseId]?.name || "-"}</p>
-            </div>
-            <div class="flex gap-2">
-              ${currentUserRole === "admin" ? `
-                <button onclick="editAssessment('${id}')" class="text-blue-600 hover:underline" aria-label="Edit assessment ${a.title}" data-tooltip="Edit assessment">Edit</button>
-                <button onclick="archiveAssessment('${id}')" class="text-red-600 hover:underline" aria-label="${a.archived ? "Unarchive" : "Archive"} assessment ${a.title}" data-tooltip="${a.archived ? "Unarchive" : "Archive"} assessment">${a.archived ? "Unarchive" : "Archive"}</button>
-              ` : ""}
-            </div>
-          `;
-          assessmentList.appendChild(assessmentItem);
-        }
-        hideSpinner();
-      });
-    }
-
-    // Load certifications
-    function loadCertifications() {
-      showSpinner();
-      onValue(ref(db, "certifications"), snap => {
-        certifications = snap.val() || {};
-        certificationList.innerHTML = "";
-        for (const id in certifications) {
-          const c = certifications[id];
-          const certItem = document.createElement("div");
-          certItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-          certItem.innerHTML = `
-            <div>
-              <p class="font-semibold">Certificate for ${users.find(u => u.uid === c.learnerId)?.fullName || "-"}</p>
-              <p class="text-sm text-gray-600">Course: ${courses[c.courseId]?.name || "-"} | Issued: ${new Date(c.issuedAt).toLocaleDateString()}</p>
-            </div>
-            <div>
-              <button onclick="viewCertificate('${id}')" class="text-blue-600 hover:underline" aria-label="View certificate" data-tooltip="View certificate">View</button>
-            </div>
-          `;
-          certificationList.appendChild(certItem);
-        }
-        hideSpinner();
-      });
-    }
-
-    // Load accreditations
-    function loadAccreditations() {
-      showSpinner();
-      onValue(ref(db, "accreditations"), snap => {
-        accreditations = snap.val() || {};
-        accreditationList.innerHTML = "";
-        for (const id in accreditations) {
-          const a = accreditations[id];
-          const accItem = document.createElement("div");
-          accItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-          accItem.innerHTML = `
-            <div>
-              <p class="font-semibold">Accreditation for ${users.find(u => u.uid === a.providerId)?.fullName || "-"}</p>
-              <p class="text-sm text-gray-600">Status: ${a.status}</p>
-            </div>
-            <div class="flex gap-2">
-              ${currentUserRole === "admin" ? `
-                <button onclick="editAccreditation('${id}')" class="text-blue-600 hover:underline" aria-label="Edit accreditation" data-tooltip="Edit accreditation">Edit</button>
-                <button onclick="deleteAccreditation('${id}')" class="text-red-600 hover:underline" aria-label="Delete accreditation" data-tooltip="Delete accreditation">Delete</button>
-              ` : ""}
-            </div>
-          `;
-          accreditationList.appendChild(accItem);
-        }
-        hideSpinner();
-      });
-    }
-
-    // Load grants
-    function loadGrants() {
-      showSpinner();
-      onValue(ref(db, "grants"), snap => {
-        grants = snap.val() || {};
-        grantList.innerHTML = "";
-        for (const id in grants) {
-          const g = grants[id];
-          const grantItem = document.createElement("div");
-          grantItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-          grantItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${g.type} Grant</p>
-              <p class="text-sm text-gray-600">Amount: R${g.amount} | Status: ${g.status}</p>
-            </div>
-            <div class="flex gap-2">
-              ${currentUserRole === "admin" ? `
-                <button onclick="editGrant('${id}')" class="text-blue-600 hover:underline" aria-label="Edit grant" data-tooltip="Edit grant">Edit</button>
-                <button onclick="deleteGrant('${id}')" class="text-red-600 hover:underline" aria-label="Delete grant" data-tooltip="Delete grant">Delete</button>
-              ` : ""}
-            </div>
-          `;
-          grantList.appendChild(grantItem);
-        }
-        hideSpinner();
-      });
-    }
-
-    // Load bursaries
-    function loadBursaries() {
-      showSpinner();
-      onValue(ref(db, "bursaries"), snap => {
-        bursaries = snap.val() || {};
-        bursaryList.innerHTML = "";
-        for (const id in bursaries) {
-          const b = bursaries[id];
-          const bursaryItem = document.createElement("div");
-          bursaryItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-          bursaryItem.innerHTML = `
-            <div>
-              <p class="font-semibold">Bursary for ${users.find(u => u.uid === b.applicantId)?.fullName || "-"}</p>
-              <p class="text-sm text-gray-600">Amount: R${b.amount} | Status: ${b.status}</p>
-            </div>
-            <div class="flex gap-2">
-              ${currentUserRole === "admin" ? `
-                <button onclick="editBursary('${id}')" class="text-blue-600 hover:underline" aria-label="Edit bursary" data-tooltip="Edit bursary">Edit</button>
-                <button onclick="deleteBursary('${id}')" class="text-red-600 hover:underline" aria-label="Delete bursary" data-tooltip="Delete bursary">Delete</button>
-              ` : ""}
-            </div>
-          `;
-          bursaryList.appendChild(bursaryItem);
-        }
-        hideSpinner();
-      });
-    }
-
-    // Load projects
-    function loadProjects() {
-      showSpinner();
-      onValue(ref(db, "projects"), snap => {
-        projects = snap.val() || {};
-        projectList.innerHTML = "";
-        for (const id in projects) {
-          const p = projects[id];
-          const projectItem = document.createElement("div");
-          projectItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-          projectItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${p.name}</p>
-              <p class="text-sm text-gray-600">Status: ${p.status}</p>
-            </div>
-            <div class="flex gap-2">
-              ${currentUserRole === "admin" ? `
-                <button onclick="editProject('${id}')" class="text-blue-600 hover:underline" aria-label="Edit project ${p.name}" data-tooltip="Edit project">Edit</button>
-                <button onclick="deleteProject('${id}')" class="text-red-600 hover:underline" aria-label="Delete project ${p.name}" data-tooltip="Delete project">Delete</button>
-              ` : ""}
-            </div>
-          `;
-          projectList.appendChild(projectItem);
-        }
-        hideSpinner();
-      });
-    }
-
-    // Load WSP/ATR
-    function loadWspAtr() {
-      showSpinner();
-      onValue(ref(db, "wsp_atr"), snap => {
-        wspAtr = snap.val() || {};
-        wspList.innerHTML = "";
-        for (const id in wspAtr) {
-          const w = wspAtr[id];
-          const wspItem = document.createElement("div");
-          wspItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-          wspItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${w.type.toUpperCase()} by ${users.find(u => u.uid === w.employerId)?.fullName || "-"}</p>
-              <p class="text-sm text-gray-600">Status: ${w.status}</p>
-            </div>
-            <div class="flex gap-2">
-              ${currentUserRole === "admin" ? `
-                <button onclick="reviewWsp('${id}')" class="text-blue-600 hover:underline" aria-label="Review ${w.type}" data-tooltip="Review ${w.type}">Review</button>
-                <button onclick="deleteWsp('${id}')" class="text-red-600 hover:underline" aria-label="Delete ${w.type}" data-tooltip="Delete ${w.type}">Delete</button>
-              ` : ""}
-            </div>
-          `;
-          wspList.appendChild(wspItem);
-        }
-        hideSpinner();
-      });
-    }
-
-    // Load notices
-    function loadNotices() {
-      showSpinner();
-      onValue(ref(db, "notices"), snap => {
-        notices = snap.val() || {};
-        renderNotices();
-        hideSpinner();
-      });
-    }
-
-    function renderNotices(filter = "") {
-      noticeList.innerHTML = "";
-      const filteredNotices = Object.entries(notices)
-        .filter(([_, notice]) => notice.title.toLowerCase().includes(filter.toLowerCase()))
-        .sort((a, b) => b[1].createdAt - a[1].createdAt);
-      if (filteredNotices.length === 0) {
-        noticeList.innerHTML = "<p class='text-gray-600'>No notices found.</p>";
-        return;
-      }
-      filteredNotices.forEach(([id, n]) => {
-        const creator = users.find(u => u.uid === n.createdBy) || { email: "Unknown" };
-        const expiry = n.expiryDate ? new Date(n.expiryDate).toLocaleDateString() : "-";
-        const noticeItem = document.createElement("div");
-        noticeItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-        noticeItem.innerHTML = `
-          <div>
-            <h4 class="text-md font-semibold">${n.title}</h4>
-            <p class="text-gray-700">${n.content}</p>
-            <p class="text-sm text-gray-500 mt-2">Posted by ${creator.email} on ${new Date(n.createdAt).toLocaleDateString()}
-            ${n.expiryDate ? ` | Expires on ${expiry}` : ""}</p>
-          </div>
-          <div class="flex gap-2">
-            ${currentUserRole === "admin" ? `
-              <button onclick="editNotice('${id}')" class="text-blue-600 hover:underline" aria-label="Edit notice ${n.title}" data-tooltip="Edit notice">Edit</button>
-              <button onclick="deleteNotice('${id}')" class="text-red-600 hover:underline" aria-label="Delete notice ${n.title}" data-tooltip="Delete notice">Delete</button>
-            ` : ""}
-          </div>
-        `;
-        noticeList.appendChild(noticeItem);
-      });
-    }
-
-    // Load analytics
-    function loadAnalytics() {
-      showSpinner();
-      onValue(ref(db, "analytics"), snap => {
-        analytics = snap.val() || {};
-        reportList.innerHTML = "";
-        for (const id in analytics) {
-          const a = analytics[id];
-          const reportItem = document.createElement("div");
-          reportItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-          reportItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${a.type.replace("_", " ")}</p>
-              <p class="text-sm text-gray-600">Generated: ${new Date(a.createdAt).toLocaleDateString()}</p>
-            </div>
-            <div class="flex gap-2">
-              <button onclick="viewReport('${id}')" class="text-blue-600 hover:underline" aria-label="View report" data-tooltip="View report">View</button>
-              <button onclick="exportReportToPDF('${id}')" class="text-purple-600 hover:underline" aria-label="Export report to PDF" data-tooltip="Export to PDF">Export PDF</button>
-            </div>
-          `;
-          reportList.appendChild(reportItem);
-        }
-        hideSpinner();
-      });
-    }
-
-    // Load helpdesk tickets
-    function loadTickets() {
-      showSpinner();
-      onValue(ref(db, "helpdesk"), snap => {
-        tickets = snap.val() || {};
-        ticketList.innerHTML = "";
-        for (const id in tickets) {
-          const t = tickets[id];
-          const ticketItem = document.createElement("div");
-          ticketItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex justify-between items-center";
-          ticketItem.innerHTML = `
-            <div>
-              <p class="font-semibold">${t.issue}</p>
-              <p class="text-sm text-gray-600">Status: ${t.status} | By: ${users.find(u => u.uid === t.userId)?.email || "-"}</p>
-            </div>
-            <div>
-              ${currentUserRole === "admin" ? `
-                <button onclick="resolveTicket('${id}')" class="text-blue-600 hover:underline" aria-label="Resolve ticket" data-tooltip="Resolve ticket">Resolve</button>
-              ` : ""}
-            </div>
-          `;
-          ticketList.appendChild(ticketItem);
-        }
-        hideSpinner();
-      });
-    }
-
-    // Load audit logs
-    function loadAuditLogs() {
-      showSpinner();
-      onValue(ref(db, "audit_logs"), snap => {
-        auditLogs = snap.val() || {};
-        auditLogList.innerHTML = "";
-        const sortedLogs = Object.entries(auditLogs).sort((a, b) => b[1].timestamp - a[1].timestamp);
-        for (const [id, log] of sortedLogs) {
-          const logItem = document.createElement("div");
-          logItem.className = "bg-gray-50 p-4 rounded-lg shadow hover:shadow-md transition-shadow flex items-center gap-4";
-          logItem.innerHTML = `
-            <div class="flex-shrink-0">
-              <i class="fas fa-history text-blue-600"></i>
-            </div>
-            <div>
-              <p class="font-semibold">${log.action}</p>
-              <p class="text-sm text-gray-600">By: ${users.find(u => u.uid === log.userId)?.email || "-"} | ${new Date(log.timestamp).toLocaleString()}</p>
-            </div>
-          `;
-          auditLogList.appendChild(logItem);
         }
         hideSpinner();
       });
@@ -1019,10 +339,8 @@
     // Search handlers
     const searchUsers = debounce(filter => loadUsers(filter), 300);
     userSearch.addEventListener("input", () => searchUsers(userSearch.value));
-    const searchCourses = debounce(filter => loadCourses(filter), 300);
-    courseSearch.addEventListener("input", () => searchCourses(courseSearch.value));
-    const searchNotices = debounce(filter => renderNotices(filter), 300);
-    noticeSearch.addEventListener("input", () => searchNotices(noticeSearch.value));
+    const searchAssignments = debounce(filter => loadAssignments(filter), 300);
+    assignmentSearch.addEventListener("input", () => searchAssignments(assignmentSearch.value));
 
     // Authentication check
     onAuthStateChanged(auth, async user => {
@@ -1032,21 +350,10 @@
       } else {
         const userSnap = await get(ref(db, `users/${user.uid}`));
         currentUserRole = userSnap.val()?.role || "learner";
-        loadNotifications();
         loadOverview();
         loadUsers();
-        loadCourses();
-        loadAssessments();
-        loadCertifications();
-        loadAccreditations();
-        loadGrants();
-        loadBursaries();
-        loadProjects();
-        loadWspAtr();
-        loadNotices();
-        loadAnalytics();
-        loadTickets();
-        loadAuditLogs();
+        loadAssignments();
+        populateDropdowns();
       }
     });
 
@@ -1096,8 +403,8 @@
       const user = users.find(u => u.uid === uid);
       const newEmail = prompt("Edit email:", user.email);
       const newName = prompt("Edit name:", user.fullName);
-      const newRole = prompt("Edit role:", user.role);
-      if (newEmail && newName && newRole) {
+      const newRole = prompt("Edit role (learner/provider):", user.role);
+      if (newEmail && newName && (newRole === "learner" || newRole === "provider")) {
         showSpinner();
         try {
           await update(ref(db, `users/${uid}`), { email: newEmail, fullName: newName, role: newRole });
@@ -1147,737 +454,49 @@
       logAudit("Exported users to CSV");
     };
 
-    // Course management
-    window.addCourse = async () => {
+    // Assignment management
+    window.assignLearner = async () => {
       if (currentUserRole !== "admin") {
-        alert("Only admins can add programs.");
+        alert("Only admins can assign learners.");
         return;
       }
-      const name = document.getElementById("courseName").value.trim();
-      const tags = document.getElementById("courseTags").value.split(",").map(t => t.trim());
-      if (!name) {
-        alert("Please enter a program name.");
+      const learnerId = document.getElementById("assignLearner").value;
+      const providerId = document.getElementById("assignProvider").value;
+      if (!learnerId || !providerId) {
+        alert("Please select a learner and a provider.");
         return;
       }
       showSpinner();
       try {
-        await push(ref(db, "courses"), { name, metadata: { tags, version: "1.0" }, createdAt: Date.now(), archived: false });
-        logAudit(`Added program ${name}`);
-        document.getElementById("courseName").value = "";
-        document.getElementById("courseTags").value = "";
-      } catch (err) {
-        console.error("Error adding program:", err);
-        alert("Failed to add program.");
-      }
-      hideSpinner();
-    };
-
-    window.addContent = async () => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can add content.");
-        return;
-      }
-      const type = document.getElementById("contentType").value;
-      const url = document.getElementById("contentUrl").value.trim();
-      const title = document.getElementById("contentTitle").value.trim();
-      if (!url || !title) {
-        alert("Please enter content URL and title.");
-        return;
-      }
-      showSpinner();
-      try {
-        const courseId = prompt("Enter course ID to add content to:");
-        await push(ref(db, `courses/${courseId}/content`), { type, url, title });
-        logAudit(`Added content to program ${courseId}`);
-        document.getElementById("contentUrl").value = "";
-        document.getElementById("contentTitle").value = "";
-      } catch (err) {
-        console.error("Error adding content:", err);
-        alert("Failed to add content.");
-      }
-      hideSpinner();
-    };
-
-    window.editCourse = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can edit programs.");
-        return;
-      }
-      const newName = prompt("Edit program name:", courses[id].name);
-      const newTags = prompt("Edit tags (comma-separated):", courses[id].metadata?.tags?.join(", ") || "");
-      if (newName) {
-        showSpinner();
-        try {
-          await update(ref(db, `courses/${id}`), { name: newName, metadata: { tags: newTags.split(",").map(t => t.trim()), version: "1.1" } });
-          logAudit(`Edited program ${id}`);
-        } catch (err) {
-          console.error("Error editing program:", err);
-          alert("Failed to edit program.");
-        }
-        hideSpinner();
-      }
-    };
-
-    window.archiveCourse = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can archive programs.");
-        return;
-      }
-      const action = courses[id].archived ? "unarchive" : "archive";
-      if (confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} this program?`)) {
-        showSpinner();
-        try {
-          await update(ref(db, `courses/${id}`), { archived: !courses[id].archived });
-          logAudit(`${action.charAt(0).toUpperCase() + action.slice(1)}d program ${id}`);
-        } catch (err) {
-          console.error(`Error ${action}ing program:`, err);
-          alert(`Failed to ${action} program.`);
-        }
-        hideSpinner();
-      }
-    };
-
-    // Assessment management
-    window.addAssessment = async () => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can add assessments.");
-        return;
-      }
-      const courseId = document.getElementById("assessmentCourse").value;
-      const title = document.getElementById("assessmentTitle").value.trim();
-      const tags = document.getElementById("assessmentTags").value.split(",").map(t => t.trim());
-      if (!title || !courseId) {
-        alert("Please enter assessment title and select a course.");
-        return;
-      }
-      showSpinner();
-      try {
-        await push(ref(db, "assessments"), { courseId, title, metadata: { tags, version: "1.0" }, createdAt: Date.now(), archived: false });
-        logAudit(`Added assessment ${title}`);
-        document.getElementById("assessmentTitle").value = "";
-        document.getElementById("assessmentTags").value = "";
-      } catch (err) {
-        console.error("Error adding assessment:", err);
-        alert("Failed to add assessment.");
-      }
-      hideSpinner();
-    };
-
-    window.editAssessment = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can edit assessments.");
-        return;
-      }
-      const assessment = assessments[id];
-      const newTitle = prompt("Edit assessment title:", assessment.title);
-      const newTags = prompt("Edit tags (comma-separated):", assessment.metadata?.tags?.join(", ") || "");
-      if (newTitle) {
-        showSpinner();
-        try {
-          await update(ref(db, `assessments/${id}`), { title: newTitle, metadata: { tags: newTags.split(",").map(t => t.trim()), version: "1.1" } });
-          logAudit(`Edited assessment ${id}`);
-        } catch (err) {
-          console.error("Error editing assessment:", err);
-          alert("Failed to edit assessment.");
-        }
-        hideSpinner();
-      }
-    };
-
-    window.archiveAssessment = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can archive assessments.");
-        return;
-      }
-      const action = assessments[id].archived ? "unarchive" : "archive";
-      if (confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} this assessment?`)) {
-        showSpinner();
-        try {
-          await update(ref(db, `assessments/${id}`), { archived: !assessments[id].archived });
-          logAudit(`${action.charAt(0).toUpperCase() + action.slice(1)}d assessment ${id}`);
-        } catch (err) {
-          console.error(`Error ${action}ing assessment:`, err);
-          alert(`Failed to ${action} assessment.`);
-        }
-        hideSpinner();
-      }
-    };
-
-    // Certification management
-    window.issueCertificate = async () => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can issue certificates.");
-        return;
-      }
-      const courseId = document.getElementById("certCourse").value;
-      const learnerId = document.getElementById("certLearner").value;
-      const template = document.getElementById("certTemplate").value.trim();
-      if (!courseId || !learnerId || !template) {
-        alert("Please select course, learner, and enter template name.");
-        return;
-      }
-      showSpinner();
-      try {
-        await push(ref(db, "certifications"), { courseId, learnerId, template, issuedAt: Date.now(), metadata: { tags: ["certificate"], version: "1.0" } });
-        logAudit(`Issued certificate for learner ${learnerId}`);
-      } catch (err) {
-        console.error("Error issuing certificate:", err);
-        alert("Failed to issue certificate.");
-      }
-      hideSpinner();
-    };
-
-    window.viewCertificate = id => {
-      const cert = certifications[id];
-      alert(`Certificate: ${cert.template} for ${users.find(u => u.uid === cert.learnerId)?.fullName || "-"} on course ${courses[cert.courseId]?.name || "-"}`);
-    };
-
-    // Accreditation management
-    window.addAccreditation = async () => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can add accreditations.");
-        return;
-      }
-      const providerId = document.getElementById("accProvider").value;
-      const letterUrl = document.getElementById("accLetterUrl").value.trim();
-      if (!providerId || !letterUrl) {
-        alert("Please select provider and enter letter URL.");
-        return;
-      }
-      showSpinner();
-      try {
-        await push(ref(db, "accreditations"), { providerId, status: "approved", letterUrl, metadata: { tags: ["accreditation"], version: "1.0" }, createdAt: Date.now() });
-        logAudit(`Added accreditation for provider ${providerId}`);
-        document.getElementById("accLetterUrl").value = "";
-      } catch (err) {
-        console.error("Error adding accreditation:", err);
-        alert("Failed to add accreditation.");
-      }
-      hideSpinner();
-    };
-
-    // Continuation of Accreditation Management
-    window.editAccreditation = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can edit accreditations.");
-        return;
-      }
-      const accreditation = accreditations[id];
-      const newStatus = prompt("Edit status (approved/rejected):", accreditation.status);
-      const newLetterUrl = prompt("Edit letter URL:", accreditation.letterUrl);
-      if (newStatus && newLetterUrl) {
-        showSpinner();
-        try {
-          await update(ref(db, `accreditations/${id}`), { status: newStatus, letterUrl: newLetterUrl });
-          logAudit(`Edited accreditation ${id}`);
-        } catch (err) {
-          console.error("Error editing accreditation:", err);
-          alert("Failed to edit accreditation.");
-        }
-        hideSpinner();
-      }
-    };
-
-    window.deleteAccreditation = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can delete accreditations.");
-        return;
-      }
-      if (confirm("Delete this accreditation?")) {
-        showSpinner();
-        try {
-          await remove(ref(db, `accreditations/${id}`));
-          logAudit(`Deleted accreditation ${id}`);
-        } catch (err) {
-          console.error("Error deleting accreditation:", err);
-          alert("Failed to delete accreditation.");
-        }
-        hideSpinner();
-      }
-    };
-
-    // Grant Management
-    window.addGrant = async () => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can add grants.");
-        return;
-      }
-      const type = document.getElementById("grantType").value;
-      const amount = parseFloat(document.getElementById("grantAmount").value);
-      const recipientId = document.getElementById("grantRecipient").value;
-      if (!type || isNaN(amount) || !recipientId) {
-        alert("Please select grant type, enter amount, and select recipient.");
-        return;
-      }
-      showSpinner();
-      try {
-        await push(ref(db, "grants"), {
-          type,
-          amount,
-          recipientId,
-          status: "pending",
+        await push(ref(db, "assignments"), {
+          learnerId,
+          providerId,
           createdAt: Date.now(),
-          metadata: { tags: ["grant"], version: "1.0" }
+          metadata: { tags: ["assignment"], version: "1.0" }
         });
-        logAudit(`Added ${type} grant of R${amount} for recipient ${recipientId}`);
-        document.getElementById("grantAmount").value = "";
+        logAudit(`Assigned learner ${learnerId} to provider ${providerId}`);
+        document.getElementById("assignLearner").value = "";
+        document.getElementById("assignProvider").value = "";
       } catch (err) {
-        console.error("Error adding grant:", err);
-        alert("Failed to add grant.");
+        console.error("Error assigning learner:", err);
+        alert("Failed to assign learner.");
       }
       hideSpinner();
     };
 
-    window.editGrant = async id => {
+    window.deleteAssignment = async id => {
       if (currentUserRole !== "admin") {
-        alert("Only admins can edit grants.");
+        alert("Only admins can delete assignments.");
         return;
       }
-      const grant = grants[id];
-      const newAmount = prompt("Edit grant amount:", grant.amount);
-      const newStatus = prompt("Edit status (pending/disbursed):", grant.status);
-      if (newAmount && newStatus) {
+      if (confirm("Delete this assignment?")) {
         showSpinner();
         try {
-          await update(ref(db, `grants/${id}`), { amount: parseFloat(newAmount), status: newStatus });
-          logAudit(`Edited grant ${id}`);
+          await remove(ref(db, `assignments/${id}`));
+          logAudit(`Deleted assignment ${id}`);
         } catch (err) {
-          console.error("Error editing grant:", err);
-          alert("Failed to edit grant.");
-        }
-        hideSpinner();
-      }
-    };
-
-    window.deleteGrant = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can delete grants.");
-        return;
-      }
-      if (confirm("Delete this grant?")) {
-        showSpinner();
-        try {
-          await remove(ref(db, `grants/${id}`));
-          logAudit(`Deleted grant ${id}`);
-        } catch (err) {
-          console.error("Error deleting grant:", err);
-          alert("Failed to delete grant.");
-        }
-        hideSpinner();
-      }
-    };
-
-    // Bursary Management
-    window.addBursary = async () => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can add bursaries.");
-        return;
-      }
-      const applicantId = document.getElementById("bursaryApplicant").value;
-      const programId = document.getElementById("bursaryProgram").value;
-      const amount = parseFloat(document.getElementById("bursaryAmount").value);
-      if (!applicantId || !programId || isNaN(amount)) {
-        alert("Please select applicant, program, and enter amount.");
-        return;
-      }
-      showSpinner();
-      try {
-        await push(ref(db, "bursaries"), {
-          applicantId,
-          programId,
-          amount,
-          status: "pending",
-          createdAt: Date.now(),
-          metadata: { tags: ["bursary"], version: "1.0" }
-        });
-        logAudit(`Added bursary of R${amount} for applicant ${applicantId}`);
-        document.getElementById("bursaryAmount").value = "";
-      } catch (err) {
-        console.error("Error adding bursary:", err);
-        alert("Failed to add bursary.");
-      }
-      hideSpinner();
-    };
-
-    window.uploadBursaryDoc = async () => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can upload bursary documents.");
-        return;
-      }
-      const file = document.getElementById("bursaryDoc").files[0];
-      if (!file) {
-        alert("Please select a file to upload.");
-        return;
-      }
-      showSpinner();
-      try {
-        // Placeholder for file upload (e.g., to Firebase Storage)
-        alert("File upload placeholder. Implement Firebase Storage upload.");
-        logAudit("Uploaded bursary document");
-        document.getElementById("bursaryDoc").value = "";
-      } catch (err) {
-        console.error("Error uploading bursary document:", err);
-        alert("Failed to upload document.");
-      }
-      hideSpinner();
-    };
-
-    window.editBursary = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can edit bursaries.");
-        return;
-      }
-      const bursary = bursaries[id];
-      const newAmount = prompt("Edit bursary amount:", bursary.amount);
-      const newStatus = prompt("Edit status (pending/approved/rejected):", bursary.status);
-      if (newAmount && newStatus) {
-        showSpinner();
-        try {
-          await update(ref(db, `bursaries/${id}`), { amount: parseFloat(newAmount), status: newStatus });
-          logAudit(`Edited bursary ${id}`);
-        } catch (err) {
-          console.error("Error editing bursary:", err);
-          alert("Failed to edit bursary.");
-        }
-        hideSpinner();
-      }
-    };
-
-    window.deleteBursary = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can delete bursaries.");
-        return;
-      }
-      if (confirm("Delete this bursary?")) {
-        showSpinner();
-        try {
-          await remove(ref(db, `bursaries/${id}`));
-          logAudit(`Deleted bursary ${id}`);
-        } catch (err) {
-          console.error("Error deleting bursary:", err);
-          alert("Failed to delete bursary.");
-        }
-        hideSpinner();
-      }
-    };
-
-    // Project Management
-    window.addProject = async () => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can add projects.");
-        return;
-      }
-      const name = document.getElementById("projectName").value.trim();
-      const charter = document.getElementById("projectCharter").value.trim();
-      if (!name || !charter) {
-        alert("Please enter project name and charter.");
-        return;
-      }
-      showSpinner();
-      try {
-        await push(ref(db, "projects"), {
-          name,
-          charter,
-          status: "active",
-          createdAt: Date.now(),
-          metadata: { tags: ["project"], version: "1.0" }
-        });
-        logAudit(`Added project ${name}`);
-        document.getElementById("projectName").value = "";
-        document.getElementById("projectCharter").value = "";
-      } catch (err) {
-        console.error("Error adding project:", err);
-        alert("Failed to add project.");
-      }
-      hideSpinner();
-    };
-
-    window.editProject = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can edit projects.");
-        return;
-      }
-      const project = projects[id];
-      const newName = prompt("Edit project name:", project.name);
-      const newCharter = prompt("Edit project charter:", project.charter);
-      const newStatus = prompt("Edit status (active/completed):", project.status);
-      if (newName && newCharter && newStatus) {
-        showSpinner();
-        try {
-          await update(ref(db, `projects/${id}`), { name: newName, charter: newCharter, status: newStatus });
-          logAudit(`Edited project ${id}`);
-        } catch (err) {
-          console.error("Error editing project:", err);
-          alert("Failed to edit project.");
-        }
-        hideSpinner();
-      }
-    };
-
-    window.deleteProject = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can delete projects.");
-        return;
-      }
-      if (confirm("Delete this project?")) {
-        showSpinner();
-        try {
-          await remove(ref(db, `projects/${id}`));
-          logAudit(`Deleted project ${id}`);
-        } catch (err) {
-          console.error("Error deleting project:", err);
-          alert("Failed to delete project.");
-        }
-        hideSpinner();
-      }
-    };
-
-    // WSP/ATR Management
-    window.uploadWspDoc = async () => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can upload WSP/ATR documents.");
-        return;
-      }
-      const employerId = document.getElementById("wspEmployer").value;
-      const type = document.getElementById("wspType").value;
-      const file = document.getElementById("wspDoc").files[0];
-      if (!employerId || !type || !file) {
-        alert("Please select employer, type, and file.");
-        return;
-      }
-      showSpinner();
-      try {
-        // Placeholder for file upload (e.g., to Firebase Storage)
-        await push(ref(db, "wsp_atr"), {
-          employerId,
-          type,
-          status: "pending",
-          docUrl: "placeholder_url",
-          createdAt: Date.now(),
-          metadata: { tags: [type], version: "1.0" }
-        });
-        logAudit(`Uploaded ${type} document for employer ${employerId}`);
-        document.getElementById("wspDoc").value = "";
-      } catch (err) {
-        console.error("Error uploading WSP/ATR document:", err);
-        alert("Failed to upload document.");
-      }
-      hideSpinner();
-    };
-
-    window.reviewWsp = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can review WSP/ATR submissions.");
-        return;
-      }
-      const wsp = wspAtr[id];
-      const newStatus = prompt("Update status (pending/approved/rejected):", wsp.status);
-      if (newStatus) {
-        showSpinner();
-        try {
-          await update(ref(db, `wsp_atr/${id}`), { status: newStatus });
-          logAudit(`Reviewed ${wsp.type} ${id}`);
-        } catch (err) {
-          console.error("Error reviewing WSP/ATR:", err);
-          alert("Failed to review WSP/ATR.");
-        }
-        hideSpinner();
-      }
-    };
-
-    window.deleteWsp = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can delete WSP/ATR submissions.");
-        return;
-      }
-      if (confirm("Delete this WSP/ATR submission?")) {
-        showSpinner();
-        try {
-          await remove(ref(db, `wsp_atr/${id}`));
-          logAudit(`Deleted WSP/ATR ${id}`);
-        } catch (err) {
-          console.error("Error deleting WSP/ATR:", err);
-          alert("Failed to delete WSP/ATR.");
-        }
-        hideSpinner();
-      }
-    };
-
-    // Notice Management
-    noticeForm.addEventListener("submit", async e => {
-      e.preventDefault();
-      if (currentUserRole !== "admin") {
-        alert("Only admins can post notices.");
-        return;
-      }
-      const title = noticeTitle.value.trim();
-      const content = noticeContent.value.trim();
-      const expiry = noticeExpiry.value;
-      if (!title || !content) {
-        alert("Please enter notice title and content.");
-        return;
-      }
-      showSpinner();
-      try {
-        await push(ref(db, "notices"), {
-          title,
-          content,
-          createdBy: auth.currentUser.uid,
-          createdAt: Date.now(),
-          expiryDate: expiry || null,
-          metadata: { tags: ["notice"], version: "1.0" }
-        });
-        logAudit(`Posted notice: ${title}`);
-        noticeForm.reset();
-      } catch (err) {
-        console.error("Error posting notice:", err);
-        alert("Failed to post notice.");
-      }
-      hideSpinner();
-    });
-
-    window.editNotice = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can edit notices.");
-        return;
-      }
-      const notice = notices[id];
-      const newTitle = prompt("Edit notice title:", notice.title);
-      const newContent = prompt("Edit notice content:", notice.content);
-      const newExpiry = prompt("Edit expiry date (YYYY-MM-DD):", notice.expiryDate || "");
-      if (newTitle && newContent) {
-        showSpinner();
-        try {
-          await update(ref(db, `notices/${id}`), {
-            title: newTitle,
-            content: newContent,
-            expiryDate: newExpiry || null
-          });
-          logAudit(`Edited notice ${id}`);
-        } catch (err) {
-          console.error("Error editing notice:", err);
-          alert("Failed to edit notice.");
-        }
-        hideSpinner();
-      }
-    };
-
-    window.deleteNotice = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can delete notices.");
-        return;
-      }
-      if (confirm("Delete this notice?")) {
-        showSpinner();
-        try {
-          await remove(ref(db, `notices/${id}`));
-          logAudit(`Deleted notice ${id}`);
-        } catch (err) {
-          console.error("Error deleting notice:", err);
-          alert("Failed to delete notice.");
-        }
-        hideSpinner();
-      }
-    };
-
-    // Analytics and Reporting
-    window.generateReport = async () => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can generate reports.");
-        return;
-      }
-      const reportType = document.getElementById("reportType").value;
-      showSpinner();
-      try {
-        const reportData = await generateReportData(reportType);
-        await push(ref(db, "analytics"), {
-          type: reportType,
-          data: reportData,
-          createdAt: Date.now(),
-          metadata: { tags: ["report"], version: "1.0" }
-        });
-        logAudit(`Generated ${reportType} report`);
-      } catch (err) {
-        console.error("Error generating report:", err);
-        alert("Failed to generate report.");
-      }
-      hideSpinner();
-    };
-
-    async function generateReportData(type) {
-      if (type === "learner_progress") {
-        const snap = await get(ref(db, "users"));
-        const data = snap.val() || {};
-        return Object.entries(data)
-          .filter(([_, u]) => u.role === "learner")
-          .map(([uid, u]) => ({ learner: u.fullName || u.email, progress: u.progress || 0 }));
-      } else if (type === "grant_disbursement") {
-        const snap = await get(ref(db, "grants"));
-        const data = snap.val() || {};
-        return Object.entries(data).map(([id, g]) => ({
-          id,
-          type: g.type,
-          amount: g.amount,
-          status: g.status,
-          recipient: users.find(u => u.uid === g.recipientId)?.fullName || "-"
-        }));
-      } else if (type === "user_activity") {
-        const snap = await get(ref(db, "audit_logs"));
-        const data = snap.val() || {};
-        return Object.entries(data).map(([id, log]) => ({
-          action: log.action,
-          user: users.find(u => u.uid === log.userId)?.email || "-",
-          timestamp: log.timestamp
-        }));
-      }
-      return [];
-    }
-
-    window.viewReport = id => {
-      const report = analytics[id];
-      alert(`Report: ${report.type}\nData: ${JSON.stringify(report.data, null, 2)}`);
-    };
-
-    window.exportReportToPDF = id => {
-      const report = analytics[id];
-      const docDefinition = {
-        content: [
-          { text: report.type.replace("_", " "), style: "header" },
-          { text: `Generated on ${new Date(report.createdAt).toLocaleDateString()}`, style: "subheader" },
-          {
-            table: {
-              headerRows: 1,
-              widths: ["*", "*"],
-              body: [
-                ["Field", "Value"],
-                ...report.data.map(item => Object.values(item).map(val => val.toString()))
-              ]
-            }
-          }
-        ],
-        styles: {
-          header: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
-          subheader: { fontSize: 14, margin: [0, 0, 0, 10] }
-        }
-      };
-      pdfMake.createPdf(docDefinition).download(`${report.type}_${new Date().toISOString().split("T")[0]}.pdf`);
-      logAudit(`Exported ${report.type} report to PDF`);
-    };
-
-    // Helpdesk Ticket Management
-    window.resolveTicket = async id => {
-      if (currentUserRole !== "admin") {
-        alert("Only admins can resolve tickets.");
-        return;
-      }
-      if (confirm("Resolve this ticket?")) {
-        showSpinner();
-        try {
-          await update(ref(db, `helpdesk/${id}`), { status: "resolved", resolvedAt: Date.now() });
-          logAudit(`Resolved ticket ${id}`);
-        } catch (err) {
-          console.error("Error resolving ticket:", err);
-          alert("Failed to resolve ticket.");
+          console.error("Error deleting assignment:", err);
+          alert("Failed to delete assignment.");
         }
         hideSpinner();
       }
@@ -1899,47 +518,20 @@
 
     // Populate dropdowns
     async function populateDropdowns() {
-      const assessmentCourse = document.getElementById("assessmentCourse");
-      const certCourse = document.getElementById("certCourse");
-      const certLearner = document.getElementById("certLearner");
-      const accProvider = document.getElementById("accProvider");
-      const grantRecipient = document.getElementById("grantRecipient");
-      const bursaryApplicant = document.getElementById("bursaryApplicant");
-      const bursaryProgram = document.getElementById("bursaryProgram");
-      const wspEmployer = document.getElementById("wspEmployer");
-
-      onValue(ref(db, "courses"), snap => {
-        assessmentCourse.innerHTML = '<option value="">Select Course</option>';
-        certCourse.innerHTML = '<option value="">Select Course</option>';
-        bursaryProgram.innerHTML = '<option value="">Select Program</option>';
-        const data = snap.val() || {};
-        for (const id in data) {
-          const option = document.createElement("option");
-          option.value = id;
-          option.textContent = data[id].name;
-          assessmentCourse.appendChild(option.cloneNode(true));
-          certCourse.appendChild(option.cloneNode(true));
-          bursaryProgram.appendChild(option.cloneNode(true));
-        }
-      });
+      const assignLearner = document.getElementById("assignLearner");
+      const assignProvider = document.getElementById("assignProvider");
 
       onValue(ref(db, "users"), snap => {
-        certLearner.innerHTML = '<option value="">Select Learner</option>';
-        accProvider.innerHTML = '<option value="">Select Provider</option>';
-        grantRecipient.innerHTML = '<option value="">Select Recipient</option>';
-        bursaryApplicant.innerHTML = '<option value="">Select Applicant</option>';
-        wspEmployer.innerHTML = '<option value="">Select Employer</option>';
+        assignLearner.innerHTML = '<option value="">Select Learner</option>';
+        assignProvider.innerHTML = '<option value="">Select Provider</option>';
         const data = snap.val() || {};
         for (const uid in data) {
           const user = data[uid];
           const option = document.createElement("option");
           option.value = uid;
           option.textContent = user.fullName || user.email;
-          if (user.role === "learner") certLearner.appendChild(option.cloneNode(true));
-          if (user.role === "provider") accProvider.appendChild(option.cloneNode(true));
-          grantRecipient.appendChild(option.cloneNode(true));
-          bursaryApplicant.appendChild(option.cloneNode(true));
-          if (user.role === "sdf" || user.role === "admin") wspEmployer.appendChild(option.cloneNode(true));
+          if (user.role === "learner") assignLearner.appendChild(option.cloneNode(true));
+          if (user.role === "provider") assignProvider.appendChild(option.cloneNode(true));
         }
       });
     }
