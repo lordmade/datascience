@@ -1199,10 +1199,10 @@ function populateAssignCourseDropdown() {
     hideSpinner();
   };
 
-  closeAssignCourse.addEventListener("click", () => {
-    document.getElementById("assign-course-modal").style.display = "none";
+closeAssignCourse.onclick = () => {
+    modal.style.display = "none";
     assignCourseForm.reset();
-  }, { once: true });
+  };
 };
     // Delete learner
     window.deleteLearner = async learnerId => {
