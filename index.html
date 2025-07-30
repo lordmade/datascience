@@ -269,7 +269,7 @@
           const snapshot = await get(userRef);
           if (snapshot.exists()) {
             const userData = snapshot.val();
-            const destination = `${userData.role}.html`; // Redirect to admin.html, provider.html, or learner.html
+            const destination = `${userData.role}.html`; // Redirect to program.html, provider.html, or learner.html
             document.body.classList.add("fade-out");
             setTimeout(() => {
               window.location.replace(destination);
