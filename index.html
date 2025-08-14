@@ -91,7 +91,7 @@
     }
 
     .order-card.ready {
-      border-left: 4px solid #22c55e; /* Green for ready */
+      border-left: 4px solid #22c55e;
     }
 
     .order-card h3 {
@@ -145,6 +145,16 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
+    .error-message {
+      text-align: center;
+      font-size: 1.2rem;
+      color: var(--mcd-red);
+      padding: 2rem;
+      background: var(--white);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
     @media (max-width: 768px) {
       .container {
         padding: 1rem;
@@ -189,6 +199,7 @@
     </div>
     <div class="order-grid" id="order-grid"></div>
     <div class="no-orders hidden" id="no-orders">No orders currently pending or ready for collection.</div>
+    <div class="error-message hidden" id="error-message">Error loading orders. Please try again later.</div>
   </div>
 
   <script type="module">
@@ -211,6 +222,7 @@
 
     const orderGrid = document.getElementById("order-grid");
     const noOrdersDiv = document.getElementById("no-orders");
+    const errorMessageDiv = document.getElementById("error-message");
 
     let menuItems = {};
 
@@ -220,8 +232,11 @@
       onValue(menuRef, (snapshot) => {
         menuItems = snapshot.val() || {};
         console.log("Fetched menu items:", menuItems);
+        loadOrders(); // Reload orders to update item names
       }, (error) => {
         console.error("Error loading menu items:", error);
+        errorMessageDiv.textContent = "Error loading menu data. Item names may not display correctly.";
+        errorMessageDiv.classList.remove("hidden");
       });
     }
 
@@ -243,7 +258,7 @@
               <p>Placed: ${new Date(order.timestamp).toLocaleTimeString()}</p>
               <ul>
                 ${order.items.map(item => {
-                  const itemName = menuItems[item.itemId]?.name || 'Unknown Item';
+                  const itemName = menuItems[item.itemId]?.name || 'Loading Item...';
                   return `<li>${itemName} x${item.quantity}</li>`;
                 }).join('')}
               </ul>
@@ -256,10 +271,12 @@
         });
 
         noOrdersDiv.classList.toggle('hidden', hasOrders);
+        errorMessageDiv.classList.add('hidden');
       }, (error) => {
         console.error("Error loading orders:", error);
-        noOrdersDiv.classList.remove('hidden');
-        noOrdersDiv.textContent = "Error loading orders. Please try again later.";
+        noOrdersDiv.classList.add('hidden');
+        errorMessageDiv.textContent = "Error loading orders: " + error.message;
+        errorMessageDiv.classList.remove('hidden');
       });
     }
 
@@ -273,7 +290,6 @@
     document.addEventListener("DOMContentLoaded", () => {
       applyTheme();
       loadMenuItems();
-      loadOrders();
     });
   </script>
 </body>
