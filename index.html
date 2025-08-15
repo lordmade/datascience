@@ -271,7 +271,7 @@
       onValue(menuRef, (snapshot) => {
         menuItems = snapshot.val() || {};
         console.log("Fetched menu items:", menuItems);
-        loadOrders(); // Reload orders to update item names
+        loadOrders();
       }, (error) => {
         console.error("Error loading menu items:", error);
         errorMessageDiv.textContent = "Error loading menu data. Item names may not display correctly.";
@@ -290,28 +290,29 @@
         let hasReady = false;
 
         Object.entries(orders).forEach(([orderId, order]) => {
-          const orderCard = document.createElement('div');
-          orderCard.className = `order-card ${order.status}`;
-          orderCard.innerHTML = `
-            <h3>Order #${order.orderNumber}</h3>
-            <p>Placed: ${new Date(order.timestamp).toLocaleTimeString()}</p>
-            <ul>
-              ${order.items.map(item => {
-                const itemName = menuItems[item.itemId]?.name || 'Loading Item...';
-                return `<li>${itemName} x${item.quantity}</li>`;
-              }).join('')}
-            </ul>
-            <div class="status ${order.status}">
-              ${order.status === 'pending' ? 'Preparing' : 'Ready for Collection'}
-            </div>
-          `;
-
-          if (order.status === 'pending') {
-            hasPreparing = true;
-            preparingGrid.appendChild(orderCard);
-          } else if (order.status === 'ready') {
-            hasReady = true;
-            readyGrid.appendChild(orderCard);
+          if (order.status === 'pending' || order.status === 'ready') {
+            const orderCard = document.createElement('div');
+            orderCard.className = `order-card ${order.status}`;
+            orderCard.innerHTML = `
+              <h3>Order #${order.orderNumber}</h3>
+              <p>Placed: ${new Date(order.timestamp).toLocaleTimeString()}</p>
+              <ul>
+                ${order.items.map(item => {
+                  const itemName = menuItems[item.itemId]?.name || 'Loading Item...';
+                  return `<li>${itemName} x${item.quantity}</li>`;
+                }).join('')}
+              </ul>
+              <div class="status ${order.status}">
+                ${order.status === 'pending' ? 'Preparing' : 'Ready for Collection'}
+              </div>
+            `;
+            if (order.status === 'pending') {
+              hasPreparing = true;
+              preparingGrid.appendChild(orderCard);
+            } else if (order.status === 'ready') {
+              hasReady = true;
+              readyGrid.appendChild(orderCard);
+            }
           }
         });
 
@@ -323,7 +324,7 @@
         noPreparingDiv.classList.add('hidden');
         noReadyDiv.classList.add('hidden');
         errorMessageDiv.textContent = "Error loading orders: " + error.message;
-        errorMessageDiv.classList.remove('hidden');
+        errorMessageDiv.classList.remove("hidden");
       });
     }
 
