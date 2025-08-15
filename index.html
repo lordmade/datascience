@@ -72,6 +72,28 @@
       fill: var(--mcd-red);
     }
 
+    .order-sections {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .order-section {
+      flex: 1;
+      background: var(--white);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--border);
+    }
+
+    .order-section h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-dark);
+      text-align: center;
+    }
+
     .order-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -139,10 +161,7 @@
       text-align: center;
       font-size: 1.2rem;
       color: var(--text-light);
-      padding: 2rem;
-      background: var(--white);
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
     }
 
     .error-message {
@@ -173,6 +192,14 @@
         height: 24px;
       }
 
+      .order-sections {
+        flex-direction: column;
+      }
+
+      .order-section {
+        margin-bottom: 1.5rem;
+      }
+
       .order-grid {
         grid-template-columns: 1fr;
       }
@@ -197,8 +224,18 @@
         McDonald's Order Status
       </div>
     </div>
-    <div class="order-grid" id="order-grid"></div>
-    <div class="no-orders hidden" id="no-orders">No orders currently pending or ready for collection.</div>
+    <div class="order-sections">
+      <div class="order-section" id="preparing-section">
+        <h2>Preparing Orders</h2>
+        <div class="order-grid" id="preparing-grid"></div>
+        <div class="no-orders hidden" id="no-preparing">No preparing orders.</div>
+      </div>
+      <div class="order-section" id="ready-section">
+        <h2>Ready for Collection</h2>
+        <div class="order-grid" id="ready-grid"></div>
+        <div class="no-orders hidden" id="no-ready">No ready orders.</div>
+      </div>
+    </div>
     <div class="error-message hidden" id="error-message">Error loading orders. Please try again later.</div>
   </div>
 
@@ -220,8 +257,10 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const orderGrid = document.getElementById("order-grid");
-    const noOrdersDiv = document.getElementById("no-orders");
+    const preparingGrid = document.getElementById("preparing-grid");
+    const readyGrid = document.getElementById("ready-grid");
+    const noPreparingDiv = document.getElementById("no-preparing");
+    const noReadyDiv = document.getElementById("no-ready");
     const errorMessageDiv = document.getElementById("error-message");
 
     let menuItems = {};
@@ -245,36 +284,44 @@
       const ordersRef = ref(db, 'orders');
       onValue(ordersRef, (snapshot) => {
         const orders = snapshot.val() || {};
-        orderGrid.innerHTML = '';
-        let hasOrders = false;
+        preparingGrid.innerHTML = '';
+        readyGrid.innerHTML = '';
+        let hasPreparing = false;
+        let hasReady = false;
 
         Object.entries(orders).forEach(([orderId, order]) => {
-          if (order.status === 'pending' || order.status === 'ready') {
-            hasOrders = true;
-            const orderCard = document.createElement('div');
-            orderCard.className = `order-card ${order.status}`;
-            orderCard.innerHTML = `
-              <h3>Order #${order.orderNumber}</h3>
-              <p>Placed: ${new Date(order.timestamp).toLocaleTimeString()}</p>
-              <ul>
-                ${order.items.map(item => {
-                  const itemName = menuItems[item.itemId]?.name || 'Loading Item...';
-                  return `<li>${itemName} x${item.quantity}</li>`;
-                }).join('')}
-              </ul>
-              <div class="status ${order.status}">
-                ${order.status === 'pending' ? 'Preparing' : 'Ready for Collection'}
-              </div>
-            `;
-            orderGrid.appendChild(orderCard);
+          const orderCard = document.createElement('div');
+          orderCard.className = `order-card ${order.status}`;
+          orderCard.innerHTML = `
+            <h3>Order #${order.orderNumber}</h3>
+            <p>Placed: ${new Date(order.timestamp).toLocaleTimeString()}</p>
+            <ul>
+              ${order.items.map(item => {
+                const itemName = menuItems[item.itemId]?.name || 'Loading Item...';
+                return `<li>${itemName} x${item.quantity}</li>`;
+              }).join('')}
+            </ul>
+            <div class="status ${order.status}">
+              ${order.status === 'pending' ? 'Preparing' : 'Ready for Collection'}
+            </div>
+          `;
+
+          if (order.status === 'pending') {
+            hasPreparing = true;
+            preparingGrid.appendChild(orderCard);
+          } else if (order.status === 'ready') {
+            hasReady = true;
+            readyGrid.appendChild(orderCard);
           }
         });
 
-        noOrdersDiv.classList.toggle('hidden', hasOrders);
+        noPreparingDiv.classList.toggle('hidden', hasPreparing);
+        noReadyDiv.classList.toggle('hidden', hasReady);
         errorMessageDiv.classList.add('hidden');
       }, (error) => {
         console.error("Error loading orders:", error);
-        noOrdersDiv.classList.add('hidden');
+        noPreparingDiv.classList.add('hidden');
+        noReadyDiv.classList.add('hidden');
         errorMessageDiv.textContent = "Error loading orders: " + error.message;
         errorMessageDiv.classList.remove('hidden');
       });
