@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,6 +107,12 @@
       padding: 1.5rem;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       border: 1px solid var(--border);
+      box-sizing: border-box;
+      width: 300px;
+      height: 300px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .order-card.pending {
@@ -133,6 +140,8 @@
       list-style: disc;
       padding-left: 1.5rem;
       margin-bottom: 0.5rem;
+      flex-grow: 1;
+      overflow-y: auto;
     }
 
     .order-card li {
@@ -195,7 +204,9 @@
       border: 1px solid var(--border);
       position: relative;
       overflow: hidden;
-      height: 300px; /* Match order-card height */
+      width: 300px;
+      height: 300px;
+      box-sizing: border-box;
     }
 
     .carousel-item img {
@@ -232,6 +243,16 @@
       font-size: 1.25rem;
       font-weight: 600;
       z-index: 2;
+    }
+
+    .carousel-item.fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 1rem;
+      color: var(--text-light);
+      padding: 1rem;
     }
 
     @keyframes slide {
@@ -273,6 +294,11 @@
         grid-template-columns: 1fr;
       }
 
+      .order-card {
+        width: 250px;
+        height: 250px;
+      }
+
       .order-card h3 {
         font-size: 1.25rem;
       }
@@ -287,8 +313,9 @@
 
       .carousel-item {
         flex: 0 0 250px;
-        margin-right: 1rem;
+        width: 250px;
         height: 250px;
+        margin-right: 1rem;
       }
 
       .carousel-item .price-overlay {
@@ -399,7 +426,10 @@
         });
         // If no items with images, show fallback message
         if (!track.hasChildNodes()) {
-          track.innerHTML = '<div class="carousel-item"><p>No menu items available.</p></div>';
+          const fallbackItem = document.createElement('div');
+          fallbackItem.className = 'carousel-item fallback';
+          fallbackItem.innerHTML = '<p>No menu items available.</p>';
+          track.appendChild(fallbackItem);
         }
       });
     }
@@ -472,3 +502,4 @@
   </script>
 </body>
 </html>
+```
