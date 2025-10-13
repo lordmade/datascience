@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-touch-fullscreen" content="yes">
-  <title>Vynix - Sign Up</title>
+  <title>Vynix</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
@@ -141,6 +141,38 @@
       margin-bottom: 32px;
       line-height: 1.5;
     }
+    .tabs {
+      display: flex;
+      margin-bottom: 32px;
+      background: var(--glass);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .tab-btn.active {
+      color: var(--accent);
+      background: rgba(66, 153, 225, 0.1);
+    }
+    .tab-btn:hover {
+      color: var(--accent);
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
     .input-group {
       margin-bottom: 24px;
       position: relative;
@@ -240,6 +272,7 @@
       display: block;
       padding: 12px;
       border-radius: 8px;
+      margin: 16px 0;
     }
     .switch-link:hover {
       color: var(--accent-secondary);
@@ -259,13 +292,14 @@
     .success-message {
       color: #48bb78;
       font-size: 14px;
-      margin-top: 12px;
+      margin: 12px auto;
       text-align: center;
       display: none;
       background: rgba(72, 187, 120, 0.1);
       padding: 12px;
       border-radius: 8px;
       border-left: 4px solid #48bb78;
+      max-width: 420px;
     }
     .spinner {
       display: inline-block;
@@ -372,48 +406,82 @@
       <div class="logo-icon">V</div>
     </div>
     <h1 class="auth-title">Vynix</h1>
-    <p class="auth-subtitle">Create your account to start your learning journey with us.</p>
 
-    <form id="signup-form">
-      <div class="input-group">
-        <input type="text" id="signup-username" class="input-field" placeholder="Enter your username" required>
+    <div id="auth-section">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="signup">Sign Up</button>
+        <button class="tab-btn" data-tab="login">Sign In</button>
       </div>
-      <div class="input-group">
-        <input type="email" id="signup-email" class="input-field" placeholder="Enter your email" required>
-      </div>
-      <div class="input-group">
-        <input type="password" id="signup-password" class="input-field" placeholder="Create a password" required minlength="8">
-        <div id="signup-password-strength" class="password-strength">
-          <div class="strength-bar">
-            <div id="signup-strength-fill" class="strength-fill"></div>
-          </div>
-          <span id="signup-strength-text" class="strength-text">Enter password</span>
+      <div class="tab-contents">
+        <div id="signup-tab" class="tab-content active">
+          <p class="auth-subtitle">Create your account to start your learning journey with us.</p>
+          <form id="signup-form">
+            <div class="input-group">
+              <input type="text" id="signup-username" class="input-field" placeholder="Enter your username" required>
+            </div>
+            <div class="input-group">
+              <input type="email" id="signup-email" class="input-field" placeholder="Enter your email" required>
+            </div>
+            <div class="input-group">
+              <input type="password" id="signup-password" class="input-field" placeholder="Create a password" required minlength="8">
+              <div id="signup-password-strength" class="password-strength">
+                <div class="strength-bar">
+                  <div id="signup-strength-fill" class="strength-fill"></div>
+                </div>
+                <span id="signup-strength-text" class="strength-text">Enter password</span>
+              </div>
+            </div>
+            <a href="#" class="switch-link" onclick="showTab('login'); return false;">Already have an account? Sign in</a>
+            <button type="submit" class="submit-btn" id="signup-submit">
+              <span id="signup-spinner" class="spinner" style="display: none;"></span>
+              Create Account
+            </button>
+          </form>
+          <button class="google-btn" id="google-signup">
+            <span class="material-icons" style="font-size: 20px;">g_translate</span>
+            Continue with Google
+          </button>
+          <div class="error-message" id="signup-error"></div>
+        </div>
+        <div id="login-tab" class="tab-content">
+          <p class="auth-subtitle">Welcome back! Sign in to continue your learning journey.</p>
+          <form id="login-form">
+            <div class="input-group">
+              <input type="email" id="login-email" class="input-field" placeholder="Enter your email" required>
+            </div>
+            <div class="input-group">
+              <input type="password" id="login-password" class="input-field" placeholder="Enter your password" required>
+            </div>
+            <a href="#" class="switch-link" onclick="showTab('signup'); return false;">Don't have an account? Sign up</a>
+            <button type="submit" class="submit-btn" id="login-submit">
+              <span id="login-spinner" class="spinner" style="display: none;"></span>
+              Sign In
+            </button>
+          </form>
+          <button class="google-btn" id="google-login">
+            <span class="material-icons" style="font-size: 20px;">g_translate</span>
+            Continue with Google
+          </button>
+          <div class="error-message" id="login-error"></div>
         </div>
       </div>
-      <a href="#" class="switch-link">Already have an account? Sign in</a>
-      <button type="submit" class="submit-btn" id="signup-submit">
-        <span id="signup-spinner" class="spinner" style="display: none;"></span>
-        Create Account
-      </button>
-    </form>
-    <button class="google-btn" id="google-signup">
-      <span class="material-icons" style="font-size: 20px;">g_translate</span>
-      Continue with Google
-    </button>
-    <div class="error-message" id="signup-error"></div>
-    <div class="success-message" id="signup-success"></div>
+    </div>
+
+    <div class="success-message" id="global-success"></div>
+
     <div id="verification-section" style="display: none;">
       <div class="verification-message">
         <h3>Account Created Successfully!</h3>
         <p>Please check your email to verify your account. Didn't receive the email? <button id="resend-verification" class="resend-btn">Resend Email</button></p>
       </div>
-      <a class="switch-link" href="login.html">Back to Sign In</a>
+      <a href="#" class="switch-link" onclick="showTab('login'); document.getElementById('verification-section').style.display = 'none'; document.getElementById('auth-section').style.display = 'block'; return false;">Back to Sign In</a>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-    import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendEmailVerification, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendEmailVerification, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+    import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -428,6 +496,7 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getDatabase(app);
     const googleProvider = new GoogleAuthProvider();
 
     function showError(id, message) {
@@ -455,6 +524,20 @@
         btn.disabled = false;
       }
     }
+
+    function showTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      document.getElementById(tabName + '-tab').classList.add('active');
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+        showTab(tabName);
+      });
+    });
 
     function checkPasswordStrength(password) {
       let strength = 0;
@@ -499,9 +582,14 @@
         showSpinner('signup-spinner', true);
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+        await set(ref(db, `users/${user.uid}`), {
+          username,
+          email: user.email,
+          createdAt: new Date().toISOString()
+        });
         await sendEmailVerification(user);
-        showSuccess('signup-success', 'Account created! Verification email sent.');
-        document.getElementById('signup-form').style.display = 'none';
+        showSuccess('global-success', 'Account created! Verification email sent.');
+        document.getElementById('auth-section').style.display = 'none';
         document.getElementById('verification-section').style.display = 'block';
       } catch (error) {
         showError('signup-error', error.message);
@@ -510,34 +598,52 @@
       }
     }
 
+    async function handleEmailLogin(email, password) {
+      try {
+        showSpinner('login-spinner', true);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        if (!user.emailVerified) {
+          await signOut(auth);
+          showError('login-error', 'Please verify your email before signing in.');
+          return;
+        }
+        window.location.href = 'index.html';
+      } catch (error) {
+        showError('login-error', error.message);
+      } finally {
+        showSpinner('login-spinner', false);
+      }
+    }
+
     async function resendVerificationEmail() {
       const user = auth.currentUser;
       if (user) {
         try {
           await sendEmailVerification(user);
-          showSuccess('signup-success', 'Verification email resent! Please check your email.');
+          showSuccess('global-success', 'Verification email resent! Please check your email.');
           document.getElementById('resend-verification').disabled = true;
           setTimeout(() => {
             document.getElementById('resend-verification').disabled = false;
-          }, 60000); // Re-enable after 1 minute
+          }, 60000);
         } catch (error) {
           showError('signup-error', error.message);
         }
       }
     }
 
-    async function handleGoogleSignup() {
+    async function handleGoogleSignIn() {
       try {
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
         if (!user.emailVerified) {
           await sendEmailVerification(user);
-          document.getElementById('signup-form').style.display = 'none';
+          document.getElementById('auth-section').style.display = 'none';
           document.getElementById('verification-section').style.display = 'block';
-          showSuccess('signup-success', 'Verification email sent! Please check your email.');
+          showSuccess('global-success', 'Verification email sent! Please check your email.');
           return;
         }
-        window.location.href = 'dashboard.html'; // Redirect to home
+        window.location.href = 'index.html';
       } catch (error) {
         showError('signup-error', error.message);
       }
@@ -558,16 +664,25 @@
       }
     });
 
-    document.getElementById('google-signup').addEventListener('click', handleGoogleSignup);
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      if (email && password) {
+        handleEmailLogin(email, password);
+      }
+    });
+
+    document.getElementById('google-signup').addEventListener('click', handleGoogleSignIn);
+    document.getElementById('google-login').addEventListener('click', handleGoogleSignIn);
     document.getElementById('resend-verification').addEventListener('click', resendVerificationEmail);
 
-    // Check auth state on load
     onAuthStateChanged(auth, (user) => {
       if (user && !user.emailVerified) {
-        document.getElementById('signup-form').style.display = 'none';
+        document.getElementById('auth-section').style.display = 'none';
         document.getElementById('verification-section').style.display = 'block';
       } else if (user) {
-        window.location.href = 'dashboard.html';
+        window.location.href = 'index.html';
       }
     });
   </script>
