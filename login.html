@@ -643,7 +643,7 @@
           showSuccess('global-success', 'Verification email sent! Please check your email.');
           return;
         }
-        window.location.href = 'index.html';
+        window.location.href = 'dashboard.html';
       } catch (error) {
         showError('signup-error', error.message);
       }
@@ -682,7 +682,7 @@
         document.getElementById('auth-section').style.display = 'none';
         document.getElementById('verification-section').style.display = 'block';
       } else if (user) {
-        window.location.href = 'index.html';
+        window.location.href = 'dashboard.html';
       }
     });
   </script>
