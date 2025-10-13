@@ -661,6 +661,1364 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .quiz-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .quiz-question {
+      margin-bottom: 16px;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: var(--glass);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .quiz-option:hover {
+      background: rgba(66, 153, 225, 0.1);
+    }
+    .quiz-option input[type="radio"] {
+      margin: 0;
+    }
+    .submit-quiz-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+    .submission-form {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .submission-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+    .submission-item {
+      background: var(--glass);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .main-content {
+        margin-left: 0;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+    }
+    @media (max-width: 768px) {
+      .navbar { padding: 16px 20px; }
+      .main-content { padding: 20px; margin-top: 70px; }
+      .welcome-title { font-size: 36px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .bottom-nav { display: block; }
+      .dialog { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Overlay Spinner -->
+  <div class="loader-overlay" id="loader-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <nav class="navbar" id="navbar">
+    <a class="logo" id="logo-link">
+      <div class="logo-icon">V</div>
+      Vynix
+    </a>
+    <div class="user-menu">
+      <span id="user-name">Dashboard</span>
+      <div class="user-avatar" id="user-avatar">U</div>
+      <button class="dark-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <aside class="sidebar" id="sidebar">
+    <ul>
+      <li><a href="#" class="active" data-target="dashboard">Dashboard</a></li>
+      <li><a href="#courses" data-target="courses">My Courses</a></li>
+      <li><a href="#progress" data-target="progress">Progress</a></li>
+      <li><a href="#quizzes" data-target="quizzes">Quizzes</a></li>
+      <li><a href="#submissions" data-target="submissions">Submissions</a></li>
+      <li><a href="#profile" data-target="profile">Profile</a></li>
+      <li><a href="#settings" data-target="settings">Settings</a></li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <section id="dashboard">
+      <div class="welcome-section">
+        <h1 class="welcome-title">Welcome Back, <span id="welcome-user">Learner!</span></h1>
+        <p class="welcome-subtitle">Continue your journey with personalized recommendations and track your progress effortlessly.</p>
+      </div>
+
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="total-courses">0</div>
+          <div class="stat-label">Enrolled Courses</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="hours-learned">0</div>
+          <div class="stat-label">Hours Learned</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="completion-rate">0%</div>
+          <div class="stat-label">Completion Rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="badges">0</div>
+          <div class="stat-label">Badges Earned</div>
+        </div>
+      </div>
+
+      <section class="recommendations">
+        <h2 class="section-title">Recommended for You</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 24px;">Based on your progress, try these next.</p>
+        <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));" id="rec-grid">
+        </div>
+      </section>
+    </section>
+
+    <section class="courses-section" id="courses">
+      <h2 class="section-title">Continue Learning</h2>
+      <div class="cards-grid" id="enrolled-grid">
+      </div>
+    </section>
+
+    <section id="progress" class="courses-section">
+      <h2 class="section-title">Your Progress</h2>
+      <div class="progress-section" id="progress-grid">
+        <!-- Progress items will be populated here -->
+      </div>
+    </section>
+
+    <section id="quizzes" class="courses-section">
+      <h2 class="section-title">Online Quizzes</h2>
+      <div id="quizzes-container">
+        <!-- Quizzes will be populated here -->
+      </div>
+    </section>
+
+    <section id="submissions" class="courses-section">
+      <h2 class="section-title">Assignment Submissions</h2>
+      <div class="submission-form">
+        <form id="submission-form">
+          <div class="form-group">
+            <label for="assignment-title">Assignment Title</label>
+            <input type="text" id="assignment-title" placeholder="Enter assignment title" required>
+          </div>
+          <div class="form-group">
+            <label for="pdf-file">PDF Document</label>
+            <input type="file" id="pdf-file" accept=".pdf" required>
+          </div>
+          <div class="form-group">
+            <label for="assignment-description">Description</label>
+            <textarea id="assignment-description" placeholder="Brief description..."></textarea>
+          </div>
+          <button type="submit" class="save-btn">Submit Assignment</button>
+        </form>
+      </div>
+      <h3 style="margin-top: 32px; font-size: 24px; font-weight: 700;">Previous Submissions</h3>
+      <div class="submission-list" id="submissions-list">
+        <!-- Submissions will be populated here -->
+      </div>
+    </section>
+
+    <section id="profile" class="courses-section">
+      <h2 class="section-title">Edit Profile</h2>
+      <div class="profile-card">
+        <div class="profile-avatar-large" id="profile-avatar-large">U</div>
+        <form id="profile-form">
+          <div class="form-group">
+            <label for="profile-pic">Profile Picture</label>
+            <input type="file" id="profile-pic" accept="image/*">
+          </div>
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" required>
+          </div>
+          <div class="form-group">
+            <label for="bio">Bio</label>
+            <textarea id="bio" placeholder="Tell us about yourself..."></textarea>
+          </div>
+          <button type="submit" class="save-btn">Save Changes</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="settings" class="courses-section">
+      <h2 class="section-title">Settings</h2>
+      <div class="settings-grid">
+        <div class="setting-card">
+          <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Notifications</h3>
+          <div class="setting-item">
+            <span>Email Notifications</span>
+            <div class="toggle-switch" id="email-toggle"></div>
+          </div>
+          <div class="setting-item">
+            <span>Push Notifications</span>
+            <div class="toggle-switch" id="push-toggle"></div>
+          </div>
+        </div>
+        <div class="setting-card">
+          <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Privacy</h3>
+          <div class="setting-item">
+            <span>Public Profile</span>
+            <div class="toggle-switch" id="public-toggle"></div>
+          </div>
+          <div class="setting-item">
+            <span>Share Progress</span>
+            <div class="toggle-switch" id="share-toggle"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <ul>
+      <li><a href="#" data-target="dashboard" class="active"><span class="material-icons">dashboard</span></a></li>
+      <li><a href="#courses" data-target="courses"><span class="material-icons">school</span></a></li>
+      <li><a href="#progress" data-target="progress"><span class="material-icons">assessment</span></a></li>
+      <li><a href="#quizzes" data-target="quizzes"><span class="material-icons">quiz</span></a></li>
+      <li><a href="#submissions" data-target="submissions"><span class="material-icons">assignment</span></a></li>
+      <li><a href="#profile" data-target="profile"><span class="material-icons">person</span></a></li>
+      <li><a href="#settings" data-target="settings"><span class="material-icons">settings</span></a></li>
+    </ul>
+  </nav>
+
+  <!-- Custom Dialog -->
+  <div class="dialog-backdrop" id="dialog-backdrop">
+    <div class="dialog" id="dialog">
+      <div class="dialog-title" id="dialog-title">Info</div>
+      <div class="dialog-message" id="dialog-message"></div>
+      <button class="dialog-close" onclick="closeDialog()">OK</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+    import { getDatabase, ref, onValue, set, update, push } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
+      authDomain: "fire-b-a8878.firebaseapp.com",
+      databaseURL: "https://fire-b-a8878.firebaseio.com",
+      projectId: "fire-b-a8878",
+      storageBucket: "fire-b-a8878.firebasestorage.app",
+      messagingSenderId: "658673187627",
+      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
+      measurementId: "G-V4W97VMSKL"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    // Cloudinary configuration - Replace with your actual values
+    const CLOUDINARY_CLOUD_NAME = 'your_cloud_name'; // e.g., 'demo'
+    const UPLOAD_PRESET = 'your_upload_preset'; // e.g., 'ml_default'
+
+    let userData = {};
+    let currentUser = null;
+    let isInitialLoad = true;
+
+    const loader = document.getElementById('loader-overlay');
+
+    function showLoader() {
+      loader.classList.add('show');
+    }
+
+    function hideLoader() {
+      loader.classList.remove('show');
+    }
+
+    // Custom Dialog Functions
+    function showDialog(message, type = 'info') {
+      const backdrop = document.getElementById('dialog-backdrop');
+      const title = document.getElementById('dialog-title');
+      const msg = document.getElementById('dialog-message');
+      const dialog = document.getElementById('dialog');
+
+      msg.textContent = message;
+      title.textContent = type === 'success' ? 'Success!' : type === 'error' ? 'Error!' : 'Info';
+      dialog.className = `dialog ${type}`;
+      backdrop.classList.add('show');
+    }
+
+    function closeDialog() {
+      document.getElementById('dialog-backdrop').classList.remove('show');
+    }
+
+    // Close dialog on backdrop click
+    document.getElementById('dialog-backdrop').addEventListener('click', (e) => {
+      if (e.target.id === 'dialog-backdrop') {
+        closeDialog();
+      }
+    });
+
+    // Cloudinary upload function for images and PDFs
+    async function uploadToCloudinary(file, isPdf = false) {
+      if (!file) return null;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', UPLOAD_PRESET);
+      if (isPdf) {
+        formData.append('resource_type', 'raw');
+      }
+      try {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${isPdf ? 'raw' : 'image'}/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        if (!res.ok) throw new Error('Upload failed');
+        const data = await res.json();
+        return data.secure_url;
+      } catch (e) {
+        console.error('Upload error:', e);
+        showDialog('Failed to upload file. Please try again.', 'error');
+        return null;
+      }
+    }
+
+    // Function to calculate course progress based on lessons
+    function calculateCourseProgress(course) {
+      const lessons = course.lessons || [];
+      const totalLessons = lessons.length;
+      if (totalLessons === 0) return 0;
+      const completedLessons = lessons.filter(lesson => lesson.completed).length;
+      return Math.round((completedLessons / totalLessons) * 100);
+    }
+
+    // Function to update lesson completion (for use in course.html or simulation)
+    async function completeLesson(courseId, lessonId) {
+      const courseRef = ref(db, `users/${currentUser.uid}/enrolledCourses/${courseId}/lessons/${lessonId}`);
+      await update(courseRef, { completed: true, timestamp: Date.now() });
+    }
+
+    // Populate quizzes section
+    function populateQuizzes() {
+      const quizzesContainer = document.getElementById('quizzes-container');
+      quizzesContainer.innerHTML = '';
+      const quizzes = userData.quizzes || [];
+      quizzes.forEach((quiz, index) => {
+        const quizCard = document.createElement('div');
+        quizCard.className = 'quiz-card';
+        let optionsHtml = '';
+        quiz.questions.forEach((question, qIndex) => {
+          optionsHtml += `
+            <div class="quiz-question">
+              <p style="font-weight: 600; margin-bottom: 8px;">${qIndex + 1}. ${question.text}</p>
+              <div class="quiz-options">
+                ${question.options.map((option, oIndex) => `
+                  <label class="quiz-option">
+                    <input type="radio" name="q${qIndex}" value="${oIndex}" ${question.selected === oIndex ? 'checked' : ''}>
+                    ${option}
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        });
+        quizCard.innerHTML = `
+          <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">${quiz.title}</h3>
+          <form id="quiz-form-${index}">
+            ${optionsHtml}
+            <button type="submit" class="submit-quiz-btn">Submit Quiz</button>
+          </form>
+          ${quiz.score !== undefined ? `<p style="margin-top: 16px; font-size: 18px; color: var(--accent);">Score: ${quiz.score}/${quiz.questions.length}</p>` : ''}
+        `;
+        const form = quizCard.querySelector(`#quiz-form-${index}`);
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          showLoader();
+          let correct = 0;
+          quiz.questions.forEach((question, qIndex) => {
+            const selected = form.querySelector(`input[name="q${qIndex}"]:checked`);
+            if (selected && parseInt(selected.value) === question.correct) {
+              correct++;
+            }
+            question.selected = selected ? parseInt(selected.value) : null;
+          });
+          quiz.score = correct;
+          await update(ref(db, `users/${currentUser.uid}/quizzes/${index}`), quiz);
+          hideLoader();
+          showDialog(`Quiz submitted! Your score: ${correct}/${quiz.questions.length}`, 'success');
+          populateQuizzes(); // Refresh
+        });
+        quizzesContainer.appendChild(quizCard);
+      });
+    }
+
+    // Handle submission form
+    document.getElementById('submission-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showLoader();
+      const title = document.getElementById('assignment-title').value;
+      const file = document.getElementById('pdf-file').files[0];
+      const description = document.getElementById('assignment-description').value;
+      const url = await uploadToCloudinary(file, true);
+      if (!url) {
+        hideLoader();
+        return;
+      }
+      const submission = {
+        title,
+        url,
+        description,
+        timestamp: Date.now()
+      };
+      const submissionsRef = ref(db, `users/${currentUser.uid}/submissions`);
+      await push(submissionsRef, submission);
+      hideLoader();
+      showDialog('Assignment submitted successfully!', 'success');
+      e.target.reset();
+      populateSubmissions();
+    });
+
+    // Populate submissions list
+    function populateSubmissions() {
+      const submissionsList = document.getElementById('submissions-list');
+      submissionsList.innerHTML = '';
+      const submissions = userData.submissions || [];
+      submissions.forEach((submission) => {
+        const item = document.createElement('div');
+        item.className = 'submission-item';
+        item.innerHTML = `
+          <h4 style="font-weight: 600; margin-bottom: 8px;">${submission.title}</h4>
+          <p style="color: var(--text-secondary); margin-bottom: 8px;">${submission.description || 'No description'}</p>
+          <a href="${submission.url}" target="_blank" style="color: var(--accent); text-decoration: none;">View PDF</a>
+          <p style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">Submitted: ${new Date(submission.timestamp).toLocaleDateString()}</p>
+        `;
+        submissionsList.appendChild(item);
+      });
+    }
+
+    // Tab switching function
+    function showTab(targetId) {
+      document.querySelectorAll('section').forEach(section => {
+        section.style.display = 'none';
+      });
+      const targetSection = document.getElementById(targetId);
+      if (targetSection) {
+        targetSection.style.display = 'block';
+      }
+    }
+
+    // Dark mode toggle
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      localStorage.setItem('darkMode', isDark);
+      document.querySelector('.dark-toggle').textContent = isDark ? '☀️' : '🌙';
+    }
+
+    // Load saved theme
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark');
+      document.querySelector('.dark-toggle').textContent = '☀️';
+    }
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+
+    // Sidebar toggle for mobile
+    const sidebar = document.getElementById('sidebar');
+    const logoLink = document.getElementById('logo-link');
+    logoLink.addEventListener('click', (e) => {
+      if (window.innerWidth <= 1024) {
+        e.preventDefault();
+        sidebar.classList.toggle('open');
+      }
+    });
+
+    // Navigation handling
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('a[data-target]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = this.getAttribute('data-target');
+          showTab(target);
+          // Update active classes
+          document.querySelectorAll('a[data-target]').forEach(a => a.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+      // Initialize dashboard
+      showTab('dashboard');
+    });
+
+    // Logout
+    window.logout = async () => {
+      await signOut(auth);
+      window.location.href = 'login.html';
+    };
+
+    // Update avatar
+    function updateAvatar(url) {
+      const avatar = document.getElementById('user-avatar');
+      const profileAvatar = document.getElementById('profile-avatar-large');
+      if (url) {
+        avatar.innerHTML = `<img src="${url}" alt="Profile">`;
+        profileAvatar.innerHTML = `<img src="${url}" alt="Profile">`;
+        avatar.style.background = 'none';
+        profileAvatar.style.background = 'none';
+      } else {
+        const initial = (userData.username || currentUser.email)[0].toUpperCase();
+        avatar.innerHTML = initial;
+        profileAvatar.innerHTML = initial;
+        avatar.style.background = 'var(--gradient)';
+        profileAvatar.style.background = 'var(--gradient)';
+      }
+    }
+
+    // Populate profile form
+    function populateProfile() {
+      document.getElementById('username').value = userData.username || '';
+      document.getElementById('bio').value = userData.bio || '';
+      updateAvatar(userData.profilePic);
+    }
+
+    // Handle profile save
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showLoader();
+      const fileInput = document.getElementById('profile-pic');
+      let profilePic = userData.profilePic;
+      if (fileInput.files[0]) {
+        profilePic = await uploadToCloudinary(fileInput.files[0]);
+        if (!profilePic) {
+          hideLoader();
+          return;
+        }
+      }
+      userData.username = document.getElementById('username').value;
+      userData.bio = document.getElementById('bio').value;
+      userData.profilePic = profilePic;
+      await set(ref(db, `users/${currentUser.uid}`), userData);
+      hideLoader();
+      showDialog('Profile updated successfully!', 'success');
+      updateAvatar(profilePic);
+      document.getElementById('user-name').textContent = userData.username || currentUser.email;
+      document.getElementById('welcome-user').textContent = userData.username || 'Learner!';
+    });
+
+    // Populate progress section with lesson details
+    function populateProgress() {
+      const progressGrid = document.getElementById('progress-grid');
+      progressGrid.innerHTML = '';
+      const enrolled = userData.enrolledCourses || {};
+      Object.entries(enrolled).forEach(([courseId, course]) => {
+        const progress = calculateCourseProgress(course);
+        const isCompleted = progress >= 100;
+        const item = document.createElement('div');
+        item.className = `progress-item ${isCompleted ? 'completed' : ''}`;
+        let lessonsHtml = '';
+        (course.lessons || []).forEach(lesson => {
+          const lessonStatus = lesson.completed ? 'completed' : '';
+          lessonsHtml += `<div class="lesson-item ${lessonStatus}"><span>${lesson.title}</span><span>${lesson.completed ? '✅' : '⭕'}</span></div>`;
+        });
+        item.innerHTML = `
+          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">${course.title}${isCompleted ? ' ✅' : ''}</h3>
+          <div style="height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 8px 0;">
+            <div style="height: 100%; background: ${isCompleted ? 'var(--accent-secondary)' : 'var(--accent)'}; width: ${progress}%; border-radius: 4px; transition: width 0.3s ease;"></div>
+          </div>
+          <p style="color: ${isCompleted ? 'var(--accent-secondary)' : 'var(--text-secondary)'}; font-size: 14px;">${progress}% Complete</p>
+          <div class="lesson-list">${lessonsHtml}</div>
+        `;
+        progressGrid.appendChild(item);
+      });
+    }
+
+    // Settings toggles (example - save to userData.settings)
+    function initSettings() {
+      const toggles = ['email-toggle', 'push-toggle', 'public-toggle', 'share-toggle'];
+      toggles.forEach(id => {
+        const toggle = document.getElementById(id);
+        const key = id.replace('-toggle', '');
+        const isActive = userData.settings?.[key] || false;
+        toggle.classList.toggle('active', isActive);
+        toggle.addEventListener('click', () => {
+          showLoader();
+          toggle.classList.toggle('active');
+          userData.settings = userData.settings || {};
+          userData.settings[key] = toggle.classList.contains('active');
+          set(ref(db, `users/${currentUser.uid}`), userData).then(() => {
+            hideLoader();
+          }).catch(() => {
+            hideLoader();
+            showDialog('Failed to update settings.', 'error');
+          });
+        });
+      });
+    }
+
+    // Auth state listener
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        showLoader();
+        // Fetch user data
+        const userRef = ref(db, `users/${user.uid}`);
+        onValue(userRef, (snapshot) => {
+          userData = snapshot.val() || {};
+          document.getElementById('welcome-user').textContent = userData.username || 'Learner!';
+          document.getElementById('user-name').textContent = userData.username || user.email;
+
+          // Update avatar
+          updateAvatar(userData.profilePic);
+
+          // Update stats
+          const stats = userData.stats || { totalCourses: 0, hoursLearned: 0, completionRate: 0, badges: 0 };
+          document.getElementById('total-courses').textContent = stats.totalCourses;
+          document.getElementById('hours-learned').textContent = stats.hoursLearned;
+          document.getElementById('completion-rate').textContent = stats.completionRate + '%';
+          document.getElementById('badges').textContent = stats.badges;
+
+          // Enrolled courses
+          const enrolledGrid = document.getElementById('enrolled-grid');
+          enrolledGrid.innerHTML = '';
+          const enrolled = userData.enrolledCourses || {};
+          let totalCourses = 0;
+          let totalProgress = 0;
+          let completedCount = 0;
+          Object.entries(enrolled).forEach(([courseId, course]) => {
+            const progress = calculateCourseProgress(course);
+            const isCompleted = progress >= 100;
+            totalCourses++;
+            totalProgress += progress;
+            if (isCompleted) completedCount++;
+            const status = isCompleted ? 'Completed ✅' : `${progress}% Complete`;
+            const buttonText = isCompleted ? 'Completed' : 'Continue';
+            const buttonClass = isCompleted ? 'continue-btn completed' : 'continue-btn';
+            const buttonDisabled = isCompleted ? 'disabled' : '';
+            const card = document.createElement('div');
+            card.className = `course-card ${isCompleted ? 'completed' : ''}`;
+            card.innerHTML = `
+              <div class="course-thumbnail">${course.thumbnail || '📚'}</div>
+              <div class="course-content">
+                <h3 class="course-title">${course.title}${isCompleted ? ' ✅' : ''}</h3>
+                <div class="course-progress">
+                  <div class="progress-fill" style="width: ${progress}%; background: ${isCompleted ? 'var(--accent-secondary)' : 'var(--gradient)'};"></div>
+                </div>
+                <div class="course-meta">
+                  <span>${status}</span>
+                  <button class="${buttonClass}" ${buttonDisabled}>${buttonText}</button>
+                </div>
+              </div>
+            `;
+            card.onclick = (e) => {
+              if (e.target.tagName !== 'BUTTON') {
+                if (isCompleted) {
+                  // Course is completed, perhaps show a message or review
+                  showDialog('Congratulations! This course is completed.', 'success');
+                } else {
+                  window.location.href = `course.html?id=${courseId}`;
+                }
+              }
+            };
+            const btn = card.querySelector('.continue-btn');
+            if (!isCompleted) {
+              btn.onclick = (e) => {
+                e.stopPropagation();
+                window.location.href = `course.html?id=${courseId}`;
+              };
+            }
+            enrolledGrid.appendChild(card);
+          });
+
+          // Update computed stats if not provided
+          if (stats.totalCourses === 0) {
+            document.getElementById('total-courses').textContent = totalCourses;
+          }
+          if (stats.completionRate === 0) {
+            const avg = totalCourses > 0 ? Math.round(totalProgress / totalCourses) : 0;
+            document.getElementById('completion-rate').textContent = avg + '%';
+          }
+          if (stats.badges === 0) {
+            document.getElementById('badges').textContent = completedCount;
+          }
+
+          // Recommendations
+          const recGrid = document.getElementById('rec-grid');
+          recGrid.innerHTML = '';
+          const recommendations = userData.recommendations || [];
+          recommendations.forEach((course) => {
+            const card = document.createElement('div');
+            card.className = 'course-card';
+            card.innerHTML = `
+              <div class="course-thumbnail">${course.thumbnail || '📚'}</div>
+              <div class="course-content">
+                <h3 class="course-title">${course.title}</h3>
+                <div class="course-meta">
+                  <span>${course.level || 'Beginner'} • ${course.duration || '4 weeks'}</span>
+                </div>
+              </div>
+            `;
+            card.onclick = () => {
+              // Handle enrollment or navigation
+              window.location.href = `enroll.html?id=${course.id || course.title.toLowerCase().replace(/\s+/g, '-')}`;
+            };
+            recGrid.appendChild(card);
+          });
+
+          // Populate other sections
+          populateProfile();
+          populateProgress();
+          populateQuizzes();
+          populateSubmissions();
+          initSettings();
+
+          if (isInitialLoad) {
+            isInitialLoad = false;
+            hideLoader();
+          }
+        });
+      } else {
+        hideLoader();
+        window.location.href = 'login.html';
+      }
+    });
+
+    // Expose completeLesson for use in course.html
+    window.completeLesson = completeLesson;
+  </script>
+</body>
+</html>      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+    .navbar.scrolled {
+      background: var(--card-bg);
+      box-shadow: var(--shadow-sm);
+      padding: 12px 40px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--gradient);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .user-avatar:hover {
+      transform: scale(1.05);
+    }
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .logout-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 14px;
+      transition: color 0.3s ease;
+    }
+    .logout-btn:hover {
+      color: var(--accent);
+    }
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 80px;
+      bottom: 0;
+      width: 280px;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      overflow-y: auto;
+      z-index: 900;
+      transition: transform 0.3s ease;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .sidebar li {
+      margin: 0;
+    }
+    .sidebar a {
+      display: block;
+      padding: 16px 40px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border-left: 3px solid transparent;
+    }
+    .sidebar a:hover,
+    .sidebar a.active {
+      color: var(--accent);
+      background: rgba(66, 153, 225, 0.1);
+      border-left-color: var(--accent);
+    }
+    .main-content {
+      margin-left: 280px;
+      margin-top: 80px;
+      padding: 40px;
+      min-height: calc(100vh - 80px);
+    }
+    .welcome-section {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .welcome-title {
+      font-size: 48px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+    .welcome-subtitle {
+      font-size: 20px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      text-align: center;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .stat-number {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      font-size: 16px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .courses-section {
+      margin-bottom: 48px;
+    }
+    .section-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text-primary);
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .course-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      position: relative;
+    }
+    .course-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient);
+      border-radius: 24px 24px 0 0;
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+      z-index: 1;
+    }
+    .course-card:hover::before {
+      transform: scaleX(1);
+    }
+    .course-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.1);
+    }
+    .course-card.completed {
+      border-color: var(--accent-secondary);
+    }
+    .course-thumbnail {
+      height: 160px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .course-card:hover .course-thumbnail {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+    .course-content {
+      padding: 24px;
+    }
+    .course-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    .course-progress {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--gradient);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    .course-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .continue-btn {
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.3s ease;
+    }
+    .continue-btn:hover:not(.completed) {
+      transform: translateY(-1px);
+    }
+    .continue-btn.completed {
+      background: var(--accent-secondary);
+      opacity: 0.7;
+      cursor: default;
+    }
+    .recommendations {
+      background: var(--glass);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 48px;
+    }
+    .dark-toggle {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: color 0.3s ease;
+      margin-left: auto;
+    }
+    .dark-toggle:hover {
+      color: var(--accent);
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      z-index: 1000;
+      display: none;
+    }
+    .bottom-nav ul {
+      display: flex;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
+    .bottom-nav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: color 0.3s ease;
+    }
+    .bottom-nav a:hover,
+    .bottom-nav a.active {
+      color: var(--accent);
+    }
+    .bottom-nav .material-icons {
+      font-size: 24px;
+    }
+    .profile-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-sm);
+    }
+    .profile-avatar-large {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: white;
+      background: var(--gradient);
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-avatar-large img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    .save-btn {
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    .save-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .progress-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .progress-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .progress-item.completed {
+      border-color: var(--accent-secondary);
+    }
+    .lesson-list {
+      margin-top: 12px;
+    }
+    .lesson-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .lesson-item.completed {
+      color: var(--accent-secondary);
+    }
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .setting-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 24px;
+      background: var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .toggle-switch.active {
+      background: var(--accent);
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+    .toggle-switch.active::after {
+      transform: translateX(26px);
+    }
+    section {
+      display: none;
+    }
+    #dashboard {
+      display: block;
+    }
+    /* Custom Dialog Styles */
+    .dialog-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .dialog-backdrop.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .dialog {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .dialog-backdrop.show .dialog {
+      transform: scale(1) translateY(0);
+    }
+    .dialog-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .dialog-message {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .dialog-close {
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    .dialog-close:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .dialog.success .dialog-title {
+      color: var(--accent-secondary);
+    }
+    .dialog.error .dialog-title {
+      color: #e53e3e;
+    }
+    /* Overlay Spinner */
+    .loader-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--glass);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    body.dark .loader-overlay {
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .loader-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .spinner {
+      border: 4px solid var(--border);
+      border-top: 4px solid var(--accent);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
     @media (max-width: 1024px) {
       .sidebar {
         transform: translateX(-100%);
