@@ -92,6 +92,7 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
       text-decoration: none;
+      cursor: pointer;
     }
     .logo-icon {
       width: 40px;
@@ -352,6 +353,39 @@
     .dark-toggle:hover {
       color: var(--accent);
     }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      z-index: 1000;
+      display: none;
+    }
+    .bottom-nav ul {
+      display: flex;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
+    .bottom-nav a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: color 0.3s ease;
+    }
+    .bottom-nav a:hover {
+      color: var(--accent);
+    }
+    .bottom-nav .material-icons {
+      font-size: 24px;
+    }
     @media (max-width: 1024px) {
       .sidebar {
         transform: translateX(-100%);
@@ -368,12 +402,13 @@
       .main-content { padding: 20px; margin-top: 70px; }
       .welcome-title { font-size: 36px; }
       .cards-grid { grid-template-columns: 1fr; }
+      .bottom-nav { display: block; }
     }
   </style>
 </head>
 <body>
   <nav class="navbar" id="navbar">
-    <a href="#" class="logo">
+    <a class="logo" id="logo-link">
       <div class="logo-icon">V</div>
       Vynix
     </a>
@@ -403,65 +438,26 @@
 
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-number" id="total-courses">4</div>
+        <div class="stat-number" id="total-courses">0</div>
         <div class="stat-label">Enrolled Courses</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number" id="hours-learned">12</div>
+        <div class="stat-number" id="hours-learned">0</div>
         <div class="stat-label">Hours Learned</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number" id="completion-rate">75%</div>
+        <div class="stat-number" id="completion-rate">0%</div>
         <div class="stat-label">Completion Rate</div>
       </div>
       <div class="stat-card">
-        <div class="stat-number" id="badges">3</div>
+        <div class="stat-number" id="badges">0</div>
         <div class="stat-label">Badges Earned</div>
       </div>
     </div>
 
-    <section class="courses-section">
+    <section class="courses-section" id="courses">
       <h2 class="section-title">Continue Learning</h2>
       <div class="cards-grid">
-        <div class="course-card">
-          <div class="course-thumbnail">🐍</div>
-          <div class="course-content">
-            <h3 class="course-title">Python Basics for Beginners</h3>
-            <div class="course-progress">
-              <div class="progress-fill" style="width: 60%"></div>
-            </div>
-            <div class="course-meta">
-              <span>60% Complete</span>
-              <button class="continue-btn">Continue</button>
-            </div>
-          </div>
-        </div>
-        <div class="course-card">
-          <div class="course-thumbnail">⚡</div>
-          <div class="course-content">
-            <h3 class="course-title">JavaScript Mastery</h3>
-            <div class="course-progress">
-              <div class="progress-fill" style="width: 30%"></div>
-            </div>
-            <div class="course-meta">
-              <span>30% Complete</span>
-              <button class="continue-btn">Continue</button>
-            </div>
-          </div>
-        </div>
-        <div class="course-card">
-          <div class="course-thumbnail">🎨</div>
-          <div class="course-content">
-            <h3 class="course-title">UI/UX Design Fundamentals</h3>
-            <div class="course-progress">
-              <div class="progress-fill" style="width: 85%"></div>
-            </div>
-            <div class="course-meta">
-              <span>85% Complete</span>
-              <button class="continue-btn">Continue</button>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -469,27 +465,19 @@
       <h2 class="section-title">Recommended for You</h2>
       <p style="color: var(--text-secondary); margin-bottom: 24px;">Based on your progress, try these next.</p>
       <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-        <div class="course-card">
-          <div class="course-thumbnail">📈</div>
-          <div class="course-content">
-            <h3 class="course-title">Data Science with Python</h3>
-            <div class="course-meta">
-              <span>Advanced • 8 weeks</span>
-            </div>
-          </div>
-        </div>
-        <div class="course-card">
-          <div class="course-thumbnail">🔒</div>
-          <div class="course-content">
-            <h3 class="course-title">Cybersecurity Basics</h3>
-            <div class="course-meta">
-              <span>Intermediate • 4 weeks</span>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   </main>
+
+  <nav class="bottom-nav">
+    <ul>
+      <li><a href="#"><span class="material-icons">dashboard</span></a></li>
+      <li><a href="#courses"><span class="material-icons">school</span></a></li>
+      <li><a href="#progress"><span class="material-icons">assessment</span></a></li>
+      <li><a href="#profile"><span class="material-icons">person</span></a></li>
+      <li><a href="#settings"><span class="material-icons">settings</span></a></li>
+    </ul>
+  </nav>
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
@@ -539,11 +527,30 @@
 
     // Sidebar toggle for mobile
     const sidebar = document.getElementById('sidebar');
-    document.querySelector('.logo').addEventListener('click', (e) => {
-      e.preventDefault();
+    const logoLink = document.getElementById('logo-link');
+    logoLink.addEventListener('click', (e) => {
       if (window.innerWidth <= 1024) {
+        e.preventDefault();
         sidebar.classList.toggle('open');
       }
+    });
+
+    // Smooth scroll for navigation links
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href');
+          const target = document.querySelector(targetId);
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth'
+            });
+          } else if (targetId === '#') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+      });
     });
 
     // Logout
@@ -561,21 +568,87 @@
           userData = snapshot.val() || {};
           document.getElementById('welcome-user').textContent = userData.username || 'Learner!';
           document.getElementById('user-name').textContent = userData.username || user.email;
-          document.getElementById('user-avatar').textContent = userData.username ? userData.username[0].toUpperCase() : 'U';
-          // Here you can fetch enrolled courses and update stats dynamically
-          // For demo, using mock data
+          document.getElementById('user-avatar').textContent = (userData.username || user.email)[0].toUpperCase();
+
+          // Update stats
+          const stats = userData.stats || { totalCourses: 0, hoursLearned: 0, completionRate: 0, badges: 0 };
+          document.getElementById('total-courses').textContent = stats.totalCourses;
+          document.getElementById('hours-learned').textContent = stats.hoursLearned;
+          document.getElementById('completion-rate').textContent = stats.completionRate + '%';
+          document.getElementById('badges').textContent = stats.badges;
+
+          // Enrolled courses
+          const enrolledGrid = document.querySelector('.courses-section .cards-grid');
+          enrolledGrid.innerHTML = '';
+          const enrolled = userData.enrolledCourses || {};
+          let totalCourses = 0;
+          let totalProgress = 0;
+          Object.entries(enrolled).forEach(([courseId, course]) => {
+            totalCourses++;
+            totalProgress += (course.progress || 0);
+            const card = document.createElement('div');
+            card.className = 'course-card';
+            card.innerHTML = `
+              <div class="course-thumbnail">${course.thumbnail || '📚'}</div>
+              <div class="course-content">
+                <h3 class="course-title">${course.title}</h3>
+                <div class="course-progress">
+                  <div class="progress-fill" style="width: ${course.progress || 0}%"></div>
+                </div>
+                <div class="course-meta">
+                  <span>${course.progress || 0}% Complete</span>
+                  <button class="continue-btn">Continue</button>
+                </div>
+              </div>
+            `;
+            card.onclick = (e) => {
+              if (e.target.tagName !== 'BUTTON') {
+                window.location.href = `course.html?id=${courseId}`;
+              }
+            };
+            const btn = card.querySelector('.continue-btn');
+            btn.onclick = (e) => {
+              e.stopPropagation();
+              window.location.href = `course.html?id=${courseId}`;
+            };
+            enrolledGrid.appendChild(card);
+          });
+
+          // Update computed stats if not provided
+          if (stats.totalCourses === 0) {
+            document.getElementById('total-courses').textContent = totalCourses;
+          }
+          if (stats.completionRate === 0) {
+            const avg = totalCourses > 0 ? Math.round(totalProgress / totalCourses) : 0;
+            document.getElementById('completion-rate').textContent = avg + '%';
+          }
+
+          // Recommendations
+          const recGrid = document.querySelector('.recommendations .cards-grid');
+          recGrid.innerHTML = '';
+          const recommendations = userData.recommendations || [];
+          recommendations.forEach((course) => {
+            const card = document.createElement('div');
+            card.className = 'course-card';
+            card.innerHTML = `
+              <div class="course-thumbnail">${course.thumbnail || '📚'}</div>
+              <div class="course-content">
+                <h3 class="course-title">${course.title}</h3>
+                <div class="course-meta">
+                  <span>${course.level || 'Beginner'} • ${course.duration || '4 weeks'}</span>
+                </div>
+              </div>
+            `;
+            card.onclick = () => {
+              // Handle enrollment or navigation
+              window.location.href = `enroll.html?id=${course.id || course.title.toLowerCase().replace(/\s+/g, '-')}`;
+            };
+            recGrid.appendChild(card);
+          });
         });
       } else {
         window.location.href = 'login.html';
       }
-    });
-
-    // Mock course continue functionality
-    document.querySelectorAll('.continue-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        alert('Redirecting to course...');
-        // window.location.href = 'course.html';
-      });
     });
   </script>
 </body>
