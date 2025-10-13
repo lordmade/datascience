@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-touch-fullscreen" content="yes">
-  <title>Vynix - Dashboard</title>
+  <title>Vynix - Sign Up</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
@@ -45,8 +45,19 @@
       margin: 0;
       padding: 0;
       overflow-x: hidden;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
       line-height: 1.6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       min-height: 100vh;
+      padding: 20px;
       position: relative;
     }
     body::before {
@@ -61,145 +72,30 @@
       pointer-events: none;
       z-index: -1;
     }
-    .navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      z-index: 1000;
-      padding: 16px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: all 0.3s ease;
-    }
-    .navbar.scrolled {
-      background: var(--card-bg);
-      box-shadow: var(--shadow-sm);
-      padding: 12px 40px;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 24px;
-      font-weight: 800;
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-decoration: none;
-    }
-    .logo-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--gradient);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .nav-links {
-      display: flex;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      gap: 32px;
-      align-items: center;
-    }
-    .nav-links a, .nav-links button {
-      color: var(--text-primary);
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      position: relative;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-    .nav-links a:hover, .nav-links button:hover {
-      color: var(--accent);
-    }
-    .nav-links a::after, .nav-links button::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--gradient);
-      transition: width 0.3s ease;
-    }
-    .nav-links a:hover::after, .nav-links button:hover::after {
+    .auth-container {
       width: 100%;
-    }
-    .dark-toggle {
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: var(--text-primary);
-      transition: color 0.3s ease;
-    }
-    .dark-toggle:hover {
-      color: var(--accent);
-    }
-    .main-content {
-      padding: 120px 40px 40px;
-      max-width: 1200px;
-      margin: 0 auto;
-      min-height: calc(100vh - 120px);
-    }
-    .role-choice {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 60vh;
-      text-align: center;
-    }
-    .role-title {
-      font-size: 48px;
-      font-weight: 800;
-      margin-bottom: 16px;
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .role-subtitle {
-      font-size: 20px;
-      color: var(--text-secondary);
-      margin-bottom: 64px;
-      max-width: 600px;
-    }
-    .role-buttons {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 32px;
-      max-width: 800px;
-      width: 100%;
-    }
-    .role-card {
+      max-width: 420px;
       background: var(--card-bg);
       backdrop-filter: blur(20px);
       border: 1px solid var(--border);
       border-radius: 24px;
-      padding: 40px;
-      text-align: center;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: var(--shadow-sm);
+      padding: 48px 40px;
+      box-shadow: var(--shadow-md);
       position: relative;
       overflow: hidden;
-      cursor: pointer;
+      animation: fadeInUp 0.6s ease-out;
     }
-    .role-card::before {
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .auth-container::before {
       content: '';
       position: absolute;
       top: 0;
@@ -208,377 +104,316 @@
       height: 4px;
       background: var(--gradient);
       border-radius: 24px 24px 0 0;
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
     }
-    .role-card:hover::before {
-      transform: scaleX(1);
+    .logo-container {
+      text-align: center;
+      margin-bottom: 24px;
     }
-    .role-card:hover {
-      transform: translateY(-12px);
-      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
-    }
-    .role-icon {
-      width: 80px;
-      height: 80px;
+    .logo-icon {
+      width: 64px;
+      height: 64px;
       background: var(--gradient);
-      border-radius: 20px;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 24px;
-      font-size: 32px;
+      margin: 0 auto 16px;
+      box-shadow: var(--shadow-sm);
       color: white;
-      box-shadow: var(--shadow-sm);
-    }
-    .role-title-card {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      color: var(--text-primary);
-    }
-    .role-desc {
-      color: var(--text-secondary);
-      font-size: 16px;
-      line-height: 1.6;
-    }
-    .dashboard-section {
-      display: none;
-    }
-    .dashboard-section.active {
-      display: block;
-    }
-    .learner-dashboard .welcome {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-    .welcome-title {
-      font-size: 48px;
-      font-weight: 800;
-      margin-bottom: 16px;
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .welcome-subtitle {
-      font-size: 20px;
-      color: var(--text-secondary);
-    }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 24px;
-      margin-bottom: 48px;
-    }
-    .stat-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      text-align: center;
-      box-shadow: var(--shadow-sm);
-    }
-    .stat-number {
-      font-size: 36px;
-      font-weight: 800;
-      color: var(--accent);
-      margin-bottom: 8px;
-    }
-    .stat-label {
-      color: var(--text-secondary);
-      font-size: 16px;
-    }
-    .courses-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
-    }
-    .course-item {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.3s ease;
-    }
-    .course-item:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-md);
-    }
-    .course-thumbnail {
-      height: 160px;
-      background: var(--gradient);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      color: white;
-    }
-    .course-info {
-      padding: 20px;
-    }
-    .course-name {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .course-progress {
-      background: var(--border);
-      height: 4px;
-      border-radius: 2px;
-      overflow: hidden;
-      margin-bottom: 12px;
-    }
-    .progress-fill {
-      height: 100%;
-      background: var(--accent-secondary);
-      transition: width 0.3s ease;
-    }
-    .teacher-dashboard .welcome {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-    .teacher-actions {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 24px;
-      margin-bottom: 48px;
-    }
-    .action-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px;
-      text-align: center;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-    .action-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-md);
-    }
-    .action-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .action-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .students-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 24px;
-    }
-    .student-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      box-shadow: var(--shadow-sm);
-    }
-    .student-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
+      font-size: 28px;
       font-weight: bold;
     }
-    .student-info h4 {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 4px;
+    .auth-title {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
     }
-    .student-info p {
-      font-size: 14px;
+    .auth-subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 16px;
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+    .input-group {
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .input-field {
+      width: 100%;
+      padding: 16px 20px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--glass);
+      color: var(--text-primary);
+      font-size: 16px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-sizing: border-box;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+      transform: translateY(-1px);
+    }
+    .input-field::placeholder {
       color: var(--text-secondary);
     }
-    .logout-btn {
-      background: #e53e3e;
+    .submit-btn {
+      width: 100%;
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 18px;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    .submit-btn:hover::before {
+      left: 100%;
+    }
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 25px 50px -12px rgba(66, 153, 225, 0.25);
+    }
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+    .submit-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .google-btn {
+      width: 100%;
+      background: white;
+      color: #4285f4;
+      border: 2px solid #4285f4;
+      padding: 16px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .google-btn:hover {
+      background: #4285f4;
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px -5px rgba(66, 133, 244, 0.3);
+    }
+    .switch-link {
+      text-align: center;
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: block;
+      padding: 12px;
+      border-radius: 8px;
+    }
+    .switch-link:hover {
+      color: var(--accent-secondary);
+      background: rgba(66, 153, 225, 0.1);
+    }
+    .error-message {
+      color: #e53e3e;
+      font-size: 14px;
+      margin-top: 12px;
+      text-align: center;
+      display: none;
+      background: rgba(229, 62, 62, 0.1);
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid #e53e3e;
+    }
+    .success-message {
+      color: #48bb78;
+      font-size: 14px;
+      margin-top: 12px;
+      text-align: center;
+      display: none;
+      background: rgba(72, 187, 120, 0.1);
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid #48bb78;
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .dark .google-btn {
+      background: #2d3748;
+      color: #63b3ed;
+      border-color: #63b3ed;
+    }
+    .dark .google-btn:hover {
+      background: #63b3ed;
+      color: #f7fafc;
+    }
+    .password-strength {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .strength-bar {
+      flex: 1;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    .strength-fill {
+      height: 100%;
+      transition: all 0.3s ease;
+      border-radius: 2px;
+    }
+    .strength-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      min-width: 60px;
+    }
+    .dark .strength-bar {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .verification-message {
+      background: rgba(72, 187, 120, 0.1);
+      border: 1px solid #68d391;
+      border-radius: 12px;
+      padding: 16px;
+      margin: 16px 0;
+      text-align: center;
+    }
+    .verification-message h3 {
+      color: #38a169;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .verification-message p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin: 0;
+    }
+    .resend-btn {
+      background: var(--accent);
       color: white;
       border: none;
       padding: 12px 24px;
-      border-radius: 12px;
+      border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
+      margin-top: 12px;
+      width: 100%;
     }
-    .logout-btn:hover {
-      background: #c53030;
-      transform: translateY(-2px);
+    .resend-btn:hover {
+      background: #3182ce;
+      transform: translateY(-1px);
     }
-    @media (max-width: 768px) {
-      .navbar { padding: 16px 20px; }
-      .nav-links { gap: 16px; }
-      .main-content { padding: 100px 20px 20px; }
-      .role-title { font-size: 36px; }
-      .welcome-title { font-size: 36px; }
+    .resend-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    @media (max-width: 480px) {
+      .auth-container {
+        padding: 40px 24px;
+        margin: 10px;
+      }
+      .auth-title {
+        font-size: 28px;
+      }
     }
   </style>
 </head>
 <body>
-  <nav class="navbar" id="navbar">
-    <a href="#" class="logo">
+  <div class="auth-container">
+    <div class="logo-container">
       <div class="logo-icon">V</div>
-      Vynix
-    </a>
-    <ul class="nav-links">
-      <li><a href="#dashboard">Dashboard</a></li>
-      <li><a href="index.html">Courses</a></li>
-      <li><a href="#profile">Profile</a></li>
-      <button class="dark-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
-      <button onclick="logout()" class="logout-btn">Logout</button>
-    </ul>
-  </nav>
-
-  <div class="main-content">
-    <div id="role-choice" class="role-choice">
-      <h1 class="role-title">Choose Your Role</h1>
-      <p class="role-subtitle">Select how you'd like to use Vynix. You can change this later in your profile settings.</p>
-      <div class="role-buttons">
-        <div class="role-card" onclick="selectRole('learner')">
-          <div class="role-icon">👨‍🎓</div>
-          <h3 class="role-title-card">Learner</h3>
-          <p class="role-desc">Enroll in courses, track progress, and earn certificates to advance your skills.</p>
-        </div>
-        <div class="role-card" onclick="selectRole('teacher')">
-          <div class="role-icon">👨‍🏫</div>
-          <h3 class="role-title-card">Teacher</h3>
-          <p class="role-desc">Create and manage courses, engage with students, and build your teaching portfolio.</p>
-        </div>
-      </div>
     </div>
+    <h1 class="auth-title">Vynix</h1>
+    <p class="auth-subtitle">Create your account to start your learning journey with us.</p>
 
-    <div id="learner-dashboard" class="dashboard-section learner-dashboard">
-      <div class="welcome">
-        <h1 class="welcome-title">Welcome Back, Learner!</h1>
-        <p class="welcome-subtitle">Continue your learning journey with personalized recommendations and progress tracking.</p>
+    <form id="signup-form">
+      <div class="input-group">
+        <input type="text" id="signup-username" class="input-field" placeholder="Enter your username" required>
       </div>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number">4</div>
-          <div class="stat-label">Active Courses</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">85%</div>
-          <div class="stat-label">Completion Rate</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">12</div>
-          <div class="stat-label">Certificates Earned</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">150h</div>
-          <div class="stat-label">Total Study Time</div>
+      <div class="input-group">
+        <input type="email" id="signup-email" class="input-field" placeholder="Enter your email" required>
+      </div>
+      <div class="input-group">
+        <input type="password" id="signup-password" class="input-field" placeholder="Create a password" required minlength="8">
+        <div id="signup-password-strength" class="password-strength">
+          <div class="strength-bar">
+            <div id="signup-strength-fill" class="strength-fill"></div>
+          </div>
+          <span id="signup-strength-text" class="strength-text">Enter password</span>
         </div>
       </div>
-      <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">Your Courses</h2>
-      <div class="courses-grid">
-        <div class="course-item">
-          <div class="course-thumbnail">🐍</div>
-          <div class="course-info">
-            <h3 class="course-name">Python Basics for Beginners</h3>
-            <div class="course-progress">
-              <div class="progress-fill" style="width: 60%;"></div>
-            </div>
-            <p style="color: var(--text-secondary); font-size: 14px;">60% Complete</p>
-          </div>
-        </div>
-        <div class="course-item">
-          <div class="course-thumbnail">⚡</div>
-          <div class="course-info">
-            <h3 class="course-name">JavaScript Mastery</h3>
-            <div class="course-progress">
-              <div class="progress-fill" style="width: 30%;"></div>
-            </div>
-            <p style="color: var(--text-secondary); font-size: 14px;">30% Complete</p>
-          </div>
-        </div>
-        <div class="course-item">
-          <div class="course-thumbnail">📈</div>
-          <div class="course-info">
-            <h3 class="course-name">Data Science with Python</h3>
-            <div class="course-progress">
-              <div class="progress-fill" style="width: 90%;"></div>
-            </div>
-            <p style="color: var(--text-secondary); font-size: 14px;">90% Complete</p>
-          </div>
-        </div>
+      <a href="#" class="switch-link">Already have an account? Sign in</a>
+      <button type="submit" class="submit-btn" id="signup-submit">
+        <span id="signup-spinner" class="spinner" style="display: none;"></span>
+        Create Account
+      </button>
+    </form>
+    <button class="google-btn" id="google-signup">
+      <span class="material-icons" style="font-size: 20px;">g_translate</span>
+      Continue with Google
+    </button>
+    <div class="error-message" id="signup-error"></div>
+    <div class="success-message" id="signup-success"></div>
+    <div id="verification-section" style="display: none;">
+      <div class="verification-message">
+        <h3>Account Created Successfully!</h3>
+        <p>Please check your email to verify your account. Didn't receive the email? <button id="resend-verification" class="resend-btn">Resend Email</button></p>
       </div>
-    </div>
-
-    <div id="teacher-dashboard" class="dashboard-section teacher-dashboard">
-      <div class="welcome">
-        <h1 class="welcome-title">Welcome Back, Teacher!</h1>
-        <p class="welcome-subtitle">Manage your courses, monitor students, and grow your teaching impact.</p>
-      </div>
-      <div class="teacher-actions">
-        <div class="action-card" onclick="createCourse()">
-          <div class="action-icon">➕</div>
-          <h3 class="action-title">Create New Course</h3>
-          <p style="color: var(--text-secondary);">Build engaging content for your students.</p>
-        </div>
-        <div class="action-card" onclick="viewAnalytics()">
-          <div class="action-icon">📊</div>
-          <h3 class="action-title">View Analytics</h3>
-          <p style="color: var(--text-secondary);">Track engagement and performance metrics.</p>
-        </div>
-        <div class="action-card" onclick="manageStudents()">
-          <div class="action-icon">👥</div>
-          <h3 class="action-title">Manage Students</h3>
-          <p style="color: var(--text-secondary);">Review progress and provide feedback.</p>
-        </div>
-        <div class="action-card" onclick="editProfile()">
-          <div class="action-icon">✏️</div>
-          <h3 class="action-title">Edit Profile</h3>
-          <p style="color: var(--text-secondary);">Update your bio and credentials.</p>
-        </div>
-      </div>
-      <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">Your Students</h2>
-      <div class="students-grid">
-        <div class="student-card">
-          <div class="student-avatar">AJ</div>
-          <div class="student-info">
-            <h4>Alice Johnson</h4>
-            <p>Enrolled in Python Basics</p>
-          </div>
-        </div>
-        <div class="student-card">
-          <div class="student-avatar">BM</div>
-          <div class="student-info">
-            <h4>Bob Martin</h4>
-            <p>Enrolled in JavaScript Mastery</p>
-          </div>
-        </div>
-        <div class="student-card">
-          <div class="student-avatar">CS</div>
-          <div class="student-info">
-            <h4>Carol Smith</h4>
-            <p>Enrolled in Data Science</p>
-          </div>
-        </div>
-      </div>
+      <a class="switch-link" href="login.html">Back to Sign In</a>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-    import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
+    import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendEmailVerification, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -593,95 +428,147 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getDatabase(app);
+    const googleProvider = new GoogleAuthProvider();
 
-    // Dark mode toggle
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark');
-      const isDark = document.body.classList.contains('dark');
-      localStorage.setItem('darkMode', isDark);
-      document.querySelector('.dark-toggle').textContent = isDark ? '☀️' : '🌙';
+    function showError(id, message) {
+      const errorEl = document.getElementById(id);
+      errorEl.textContent = message;
+      errorEl.style.display = 'block';
+      setTimeout(() => { errorEl.style.display = 'none'; }, 5000);
     }
 
-    if (localStorage.getItem('darkMode') === 'true') {
-      document.body.classList.add('dark');
-      document.querySelector('.dark-toggle').textContent = '☀️';
+    function showSuccess(id, message) {
+      const successEl = document.getElementById(id);
+      successEl.textContent = message;
+      successEl.style.display = 'block';
+      setTimeout(() => { successEl.style.display = 'none'; }, 5000);
     }
 
-    // Navbar scroll effect
-    window.addEventListener('scroll', () => {
-      const navbar = document.getElementById('navbar');
-      if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
+    function showSpinner(id, show) {
+      const spinner = document.getElementById(id);
+      const btn = spinner.parentElement;
+      if (show) {
+        spinner.style.display = 'inline-block';
+        btn.disabled = true;
       } else {
-        navbar.classList.remove('scrolled');
+        spinner.style.display = 'none';
+        btn.disabled = false;
       }
+    }
+
+    function checkPasswordStrength(password) {
+      let strength = 0;
+      if (password.length >= 8) strength += 1;
+      if (/[a-z]/.test(password)) strength += 1;
+      if (/[A-Z]/.test(password)) strength += 1;
+      if (/\d/.test(password)) strength += 1;
+      if (/[^a-zA-Z\d]/.test(password)) strength += 1;
+      return strength;
+    }
+
+    function updateStrength(prefix, strength) {
+      const fill = document.getElementById(prefix + '-strength-fill');
+      const text = document.getElementById(prefix + '-strength-text');
+      let color, width, label;
+      if (strength <= 1) {
+        color = '#e53e3e';
+        width = '20%';
+        label = 'Weak';
+      } else if (strength <= 3) {
+        color = '#ed8936';
+        width = '60%';
+        label = 'Medium';
+      } else {
+        color = '#48bb78';
+        width = '100%';
+        label = 'Strong';
+      }
+      fill.style.background = color;
+      fill.style.width = width;
+      text.textContent = label;
+    }
+
+    document.getElementById('signup-password').addEventListener('input', function(e) {
+      const pw = e.target.value;
+      const strength = checkPasswordStrength(pw);
+      updateStrength('signup', strength);
     });
 
-    function showRoleChoice() {
-      document.getElementById('role-choice').style.display = 'block';
-      document.getElementById('learner-dashboard').classList.remove('active');
-      document.getElementById('teacher-dashboard').classList.remove('active');
+    async function handleEmailSignup(email, password, username) {
+      try {
+        showSpinner('signup-spinner', true);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        await sendEmailVerification(user);
+        showSuccess('signup-success', 'Account created! Verification email sent.');
+        document.getElementById('signup-form').style.display = 'none';
+        document.getElementById('verification-section').style.display = 'block';
+      } catch (error) {
+        showError('signup-error', error.message);
+      } finally {
+        showSpinner('signup-spinner', false);
+      }
     }
 
-    function showLearnerDashboard() {
-      document.getElementById('role-choice').style.display = 'none';
-      document.getElementById('learner-dashboard').classList.add('active');
-      document.getElementById('teacher-dashboard').classList.remove('active');
-    }
-
-    function showTeacherDashboard() {
-      document.getElementById('role-choice').style.display = 'none';
-      document.getElementById('learner-dashboard').classList.remove('active');
-      document.getElementById('teacher-dashboard').classList.add('active');
-    }
-
-    window.selectRole = async function(role) {
+    async function resendVerificationEmail() {
       const user = auth.currentUser;
       if (user) {
         try {
-          await set(ref(db, 'users/' + user.uid + '/role'), role);
-          if (role === 'learner') {
-            showLearnerDashboard();
-          } else {
-            showTeacherDashboard();
-          }
+          await sendEmailVerification(user);
+          showSuccess('signup-success', 'Verification email resent! Please check your email.');
+          document.getElementById('resend-verification').disabled = true;
+          setTimeout(() => {
+            document.getElementById('resend-verification').disabled = false;
+          }, 60000); // Re-enable after 1 minute
         } catch (error) {
-          console.error('Error setting role:', error);
-          alert('Error setting role. Please try again.');
+          showError('signup-error', error.message);
         }
       }
-    };
+    }
 
-    window.logout = async function() {
-      await signOut(auth);
-      window.location.href = 'index.html';
-    };
+    async function handleGoogleSignup() {
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        const user = result.user;
+        if (!user.emailVerified) {
+          await sendEmailVerification(user);
+          document.getElementById('signup-form').style.display = 'none';
+          document.getElementById('verification-section').style.display = 'block';
+          showSuccess('signup-success', 'Verification email sent! Please check your email.');
+          return;
+        }
+        window.location.href = 'dashboard.html'; // Redirect to home
+      } catch (error) {
+        showError('signup-error', error.message);
+      }
+    }
 
-    // Placeholder functions for teacher actions
-    window.createCourse = function() { alert('Create course functionality coming soon!'); };
-    window.viewAnalytics = function() { alert('Analytics view coming soon!'); };
-    window.manageStudents = function() { alert('Manage students coming soon!'); };
-    window.editProfile = function() { alert('Edit profile coming soon!'); };
-
-    // Auth state listener
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = 'login.html';
+    document.getElementById('signup-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('signup-username').value;
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      const strength = checkPasswordStrength(password);
+      if (strength < 3) {
+        showError('signup-error', 'Password is too weak. Please use a stronger password.');
         return;
       }
-      // Check role in database
-      const userRef = ref(db, 'users/' + user.uid + '/role');
-      onValue(userRef, (snapshot) => {
-        const role = snapshot.val();
-        if (!role) {
-          showRoleChoice();
-        } else if (role === 'learner') {
-          showLearnerDashboard();
-        } else if (role === 'teacher') {
-          showTeacherDashboard();
-        }
-      });
+      if (username && email && password) {
+        handleEmailSignup(email, password, username);
+      }
+    });
+
+    document.getElementById('google-signup').addEventListener('click', handleGoogleSignup);
+    document.getElementById('resend-verification').addEventListener('click', resendVerificationEmail);
+
+    // Check auth state on load
+    onAuthStateChanged(auth, (user) => {
+      if (user && !user.emailVerified) {
+        document.getElementById('signup-form').style.display = 'none';
+        document.getElementById('verification-section').style.display = 'block';
+      } else if (user) {
+        window.location.href = 'dashboard.html';
+      }
     });
   </script>
 </body>
