@@ -1,377 +1,401 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CETA LMS Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-touch-fullscreen" content="yes">
+  <title>Login - Vynix</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-blue: #00A3FF;
-      --text-light: #E0E0E0;
-      --text-dark: #FFFFFF;
-      --border: #333333;
-      --background-dark: #0A0A0A;
-      --background-gradient: linear-gradient(135deg, #0A0A0A 0%, #1C2526 100%);
-      --glow: rgba(0, 163, 255, 0.3);
-      --card-bg: rgba(28, 37, 38, 0.85);
+      --bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --text-primary: #1a202c;
+      --text-secondary: #718096;
+      --border: rgba(226, 232, 240, 0.8);
+      --accent: #4299e1;
+      --accent-secondary: #48bb78;
+      --gradient: linear-gradient(135deg, #4299e1 0%, #48bb78 50%, #ed8936 100%);
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --glass: rgba(255, 255, 255, 0.25);
     }
-
+    body.dark {
+      --bg: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+      --card-bg: rgba(45, 55, 72, 0.95);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --border: rgba(255, 255, 255, 0.1);
+      --accent: #63b3ed;
+      --accent-secondary: #68d391;
+      --gradient: linear-gradient(135deg, #63b3ed 0%, #68d391 50%, #f6ad55 100%);
+      --glass: rgba(255, 255, 255, 0.1);
+    }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      background: var(--background-gradient);
-      min-height: 100vh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
       margin: 0;
       padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: var(--text-light);
+      overflow-x: hidden;
+      line-height: 1.6;
+      min-height: 100vh;
+      position: relative;
     }
-
-    body.high-contrast {
-      background: #000;
-      --text-light: #FFF;
-      --card-bg: #111;
-      --border: #FFF;
-    }
-
-    .login-container {
-      background: var(--card-bg);
-      backdrop-filter: blur(10px);
-      padding: 2rem;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      width: 100%;
-      max-width: 400px;
-      animation: fadeIn 0.5s ease-out;
-    }
-
-    .login-container h1 {
-      font-size: 2.25rem;
-      font-weight: 800;
-      text-align: center;
-      color: var(--text-dark);
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      margin-bottom: 1.5rem;
-    }
-
-    .form-group {
-      margin-bottom: 1.25rem;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-light);
-      margin-bottom: 0.5rem;
-    }
-
-    .form-group input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-dark);
-      font-size: 1rem;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    body.high-contrast .form-group input {
-      background: #FFF;
-      color: #000;
-      border-color: #FFF;
-    }
-
-    .form-group input:focus {
-      outline: none;
-      border-color: var(--primary-blue);
-      box-shadow: 0 0 8px var(--glow);
-    }
-
-    .submit-btn {
-      width: 100%;
-      padding: 0.75rem;
-      background: var(--primary-blue);
-      color: var(--text-dark);
-      font-weight: 600;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    }
-
-    body.high-contrast .submit-btn {
-      background: #FFF;
-      color: #000;
-      border: 1px solid #FFF;
-    }
-
-    .submit-btn:hover,
-    .submit-btn:focus {
-      background: #33B5FF;
-      transform: translateY(-2px);
-      box-shadow: 0 0 12px var(--glow);
-      outline: none;
-    }
-
-    body.high-contrast .submit-btn:hover,
-    body.high-contrast .submit-btn:focus {
-      background: #E0E0E0;
-    }
-
-    .text-link {
-      color: var(--primary-blue);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s ease;
-    }
-
-    .text-link:hover,
-    .text-link:focus {
-      color: #33B5FF;
-      text-decoration: underline;
-      outline: none;
-    }
-
-    .contrast-toggle {
-      color: var(--primary-blue);
-      background: none;
-      border: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: color 0.2s ease;
-    }
-
-    .contrast-toggle:hover,
-    .contrast-toggle:focus {
-      color: #33B5FF;
-      text-decoration: underline;
-      outline: none;
-    }
-
-    .error-message {
-      text-align: center;
-      font-size: 0.9rem;
-      margin-top: 1rem;
-      padding: 0.5rem;
-      border-radius: 8px;
-      color: #FF4D4F;
-      background: rgba(255, 77, 79, 0.1);
-    }
-
-    .loader {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    .loader-spinner {
-      width: 60px;
-      height: 60px;
-      border: 5px solid transparent;
-      border-top-color: var(--primary-blue);
-      border-radius: 50%;
-      animation: spin 1.2s linear infinite, glow 1.5s ease-in-out infinite;
-    }
-
-    .loader-spinner::before {
+    body::before {
       content: '';
       position: absolute;
-      top: 5px;
-      left: 5px;
-      right: 5px;
-      bottom: 5px;
-      border-radius: 50%;
-      border: 5px solid transparent;
-      border-top-color: var(--primary-blue);
-      opacity: 0.5;
-      animation: spin 1.8s linear infinite reverse;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 80%, rgba(66, 153, 225, 0.1) 0%, transparent 50%), 
+                  radial-gradient(circle at 80% 20%, rgba(72, 187, 120, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
     }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
     }
-
-    @keyframes glow {
-      0%, 100% { box-shadow: 0 0 10px var(--glow); }
-      50% { box-shadow: 0 0 20px var(--glow); }
+    .navbar.scrolled {
+      background: var(--card-bg);
+      box-shadow: var(--shadow-sm);
+      padding: 12px 40px;
     }
-
-    @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
     }
-
-    @media (max-width: 640px) {
-      .login-container {
-        padding: 1.5rem;
-        max-width: 90%;
-      }
-
-      .login-container h1 {
-        font-size: 1.75rem;
-      }
-
-      .form-group input {
-        padding: 0.6rem;
-        font-size: 0.9rem;
-      }
-
-      .submit-btn {
-        padding: 0.6rem;
-        font-size: 0.9rem;
-      }
-
-      .loader-spinner {
-        width: 50px;
-        height: 50px;
-      }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--gradient);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .nav-links {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      gap: 32px;
+      align-items: center;
+    }
+    .nav-links a {
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gradient);
+      transition: width 0.3s ease;
+    }
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+    .dark-toggle {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: color 0.3s ease;
+    }
+    .dark-toggle:hover {
+      color: var(--accent);
+    }
+    .login-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 0 40px;
+      position: relative;
+    }
+    .login-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 48px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+    }
+    .login-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    }
+    .login-title {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+    }
+    .login-subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      font-size: 16px;
+    }
+    .form-group {
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    .form-group input {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.5);
+      color: var(--text-primary);
+      font-size: 16px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    body.dark .form-group input {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+      background: white;
+    }
+    body.dark .form-group input:focus {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .form-group input::placeholder {
+      color: var(--text-secondary);
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 12px;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
+    .checkbox-group label {
+      margin: 0;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .forgot-password {
+      display: block;
+      text-align: right;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+    .forgot-password:hover {
+      color: var(--accent-secondary);
+    }
+    .login-btn {
+      width: 100%;
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    .login-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    .login-btn:hover::before {
+      left: 100%;
+    }
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .signup-link {
+      text-align: center;
+      margin-top: 24px;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    .signup-link a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .signup-link a:hover {
+      color: var(--accent-secondary);
+    }
+    @media (max-width: 768px) {
+      .navbar { padding: 16px 20px; }
+      .nav-links { gap: 16px; }
+      .login-container { padding: 0 20px; min-height: 100vh; }
+      .login-card { padding: 32px 24px; margin-top: 80px; }
+      .login-title { font-size: 28px; }
     }
   </style>
 </head>
 <body>
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">V</div>
+      Vynix
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#home">Home</a></li>
+      <li><a href="index.html#features">Features</a></li>
+      <li><a href="index.html#courses">Courses</a></li>
+      <button class="dark-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
+    </ul>
+  </nav>
+
   <div class="login-container">
-    <h1>CETA LMS Login</h1>
-    <form id="login-form" class="space-y-4">
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" placeholder="Enter your email" aria-label="Enter your email" required />
+    <div class="login-card">
+      <h1 class="login-title">Welcome Back</h1>
+      <p class="login-subtitle">Sign in to your account to continue your learning journey.</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email or Username</label>
+          <input type="text" id="email" name="email" placeholder="Enter your email or username" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="remember" name="remember">
+          <label for="remember">Remember me</label>
+        </div>
+        <a href="#forgot" class="forgot-password">Forgot Password?</a>
+        <button type="submit" class="login-btn">Sign In</button>
+      </form>
+      <div class="signup-link">
+        Don't have an account? <a href="signup.html">Sign up here</a>
       </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="Enter your password" aria-label="Enter your password" required />
-      </div>
-      <button type="submit" class="submit-btn" aria-label="Sign in to your account">Sign In</button>
-    </form>
-    <p id="error-message" class="error-message hidden"></p>
-    <div class="text-center mt-4">
-      <p class="text-sm">Don't have an account? <a href="signup.html" class="text-link">Sign Up</a></p>
-      <button id="toggle-contrast" class="contrast-toggle" aria-label="Toggle high contrast mode">Toggle High Contrast</button>
     </div>
-    <div id="loading-spinner" class="loader hidden">
-      <div class="loader-spinner"></div>
-    </div>
-    <noscript>
-      <p class="error-message">JavaScript is required to log in.</p>
-    </noscript>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+  <script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
-      authDomain: "fire-b-a8878.firebaseapp.com",
-      databaseURL: "https://fire-b-a8878.firebaseio.com",
-      projectId: "fire-b-a8878",
-      storageBucket: "fire-b-a8878.appspot.com",
-      messagingSenderId: "658673187627",
-      appId: "1:658673187627:web:6e4c29af661785f0afa36e"
-    };
+    // Smooth scrolling for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    const loginForm = document.getElementById("login-form");
-    const emailInput = document.getElementById("email");
-    const passwordInput = document.getElementById("password");
-    const errorMessage = document.getElementById("error-message");
-    const loadingSpinner = document.getElementById("loading-spinner");
-    const toggleContrast = document.getElementById("toggle-contrast");
-
-    function showSpinner() { loadingSpinner.classList.remove("hidden"); }
-    function hideSpinner() { loadingSpinner.classList.add("hidden"); }
-
-    function showError(msg) {
-      errorMessage.textContent = msg;
-      errorMessage.classList.remove("hidden");
+    // Dark mode toggle
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      localStorage.setItem('darkMode', isDark);
+      document.querySelector('.dark-toggle').textContent = isDark ? '☀️' : '🌙';
     }
 
-    toggleContrast.addEventListener("click", () => {
-      document.body.classList.toggle("high-contrast");
-    });
+    // Load saved theme
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark');
+      document.querySelector('.dark-toggle').textContent = '☀️';
+    }
 
-    loginForm.addEventListener("submit", async (e) => {
+    // Form submission
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
-
-      if (!email || !password) {
-        showError("Please enter both email and password.");
-        return;
-      }
-
-      showSpinner();
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        // Role check will happen in onAuthStateChanged
-      } catch (err) {
-        console.error("Login error:", err);
-        hideSpinner();
-        switch (err.code) {
-          case "auth/invalid-email":
-            showError("Invalid email format.");
-            break;
-          case "auth/user-not-found":
-          case "auth/wrong-password":
-            showError("Incorrect email or password.");
-            break;
-          default:
-            showError("Login failed. Please try again.");
-        }
-      }
+      // Simulate login (in real app, send to server)
+      alert('Login successful! Redirecting...');
+      // window.location.href = 'dashboard.html'; // Redirect to dashboard
     });
 
-    onAuthStateChanged(auth, async (authUser) => {
-      if (authUser) {
-        try {
-          const userSnap = await get(ref(db, `users/${authUser.uid}`));
-          hideSpinner();
-          if (userSnap.exists()) {
-            const userData = userSnap.val();
-            switch (userData.role) {
-              case "provider":
-                window.location.href = "provider.html";
-                break;
-              case "learner":
-                window.location.href = "learner.html";
-                break;
-              case "admin":
-                window.location.href = "program.html";
-                break;
-              default:
-                showError("Invalid user role. Logging out...");
-                await auth.signOut();
-                window.location.href = "login.html";
-            }
-          } else {
-            showError("User data not found. Logging out...");
-            await auth.signOut();
-            window.location.href = "login.html";
-          }
-        } catch (err) {
-          console.error("Error fetching user data:", err);
-          hideSpinner();
-          showError("Failed to load user data. Logging out...");
-          await auth.signOut();
-          window.location.href = "login.html";
-        }
-      } else {
-        hideSpinner();
-      }
+    // Animate login card on load
+    window.addEventListener('load', () => {
+      const loginCard = document.querySelector('.login-card');
+      loginCard.style.opacity = '0';
+      loginCard.style.transform = 'translateY(30px)';
+      setTimeout(() => {
+        loginCard.style.transition = 'all 0.6s ease';
+        loginCard.style.opacity = '1';
+        loginCard.style.transform = 'translateY(0)';
+      }, 200);
     });
   </script>
 </body>
