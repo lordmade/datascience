@@ -554,6 +554,78 @@
     #dashboard {
       display: block;
     }
+    /* Custom Dialog Styles */
+    .dialog-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .dialog-backdrop.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .dialog {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .dialog-backdrop.show .dialog {
+      transform: scale(1) translateY(0);
+    }
+    .dialog-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    .dialog-message {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .dialog-close {
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    .dialog-close:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .dialog.success .dialog-title {
+      color: var(--accent-secondary);
+    }
+    .dialog.error .dialog-title {
+      color: #e53e3e;
+    }
     @media (max-width: 1024px) {
       .sidebar {
         transform: translateX(-100%);
@@ -571,6 +643,7 @@
       .welcome-title { font-size: 36px; }
       .cards-grid { grid-template-columns: 1fr; }
       .bottom-nav { display: block; }
+      .dialog { padding: 24px; }
     }
   </style>
 </head>
@@ -706,6 +779,15 @@
     </ul>
   </nav>
 
+  <!-- Custom Dialog -->
+  <div class="dialog-backdrop" id="dialog-backdrop">
+    <div class="dialog" id="dialog">
+      <div class="dialog-title" id="dialog-title">Info</div>
+      <div class="dialog-message" id="dialog-message"></div>
+      <button class="dialog-close" onclick="closeDialog()">OK</button>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
@@ -733,6 +815,30 @@
     let userData = {};
     let currentUser = null;
 
+    // Custom Dialog Functions
+    function showDialog(message, type = 'info') {
+      const backdrop = document.getElementById('dialog-backdrop');
+      const title = document.getElementById('dialog-title');
+      const msg = document.getElementById('dialog-message');
+      const dialog = document.getElementById('dialog');
+
+      msg.textContent = message;
+      title.textContent = type === 'success' ? 'Success!' : type === 'error' ? 'Error!' : 'Info';
+      dialog.className = `dialog ${type}`;
+      backdrop.classList.add('show');
+    }
+
+    function closeDialog() {
+      document.getElementById('dialog-backdrop').classList.remove('show');
+    }
+
+    // Close dialog on backdrop click
+    document.getElementById('dialog-backdrop').addEventListener('click', (e) => {
+      if (e.target.id === 'dialog-backdrop') {
+        closeDialog();
+      }
+    });
+
     // Cloudinary upload function
     async function uploadToCloudinary(file) {
       if (!file) return null;
@@ -749,7 +855,7 @@
         return data.secure_url;
       } catch (e) {
         console.error('Upload error:', e);
-        alert('Failed to upload image. Please try again.');
+        showDialog('Failed to upload image. Please try again.', 'error');
         return null;
       }
     }
@@ -874,7 +980,7 @@
       userData.bio = document.getElementById('bio').value;
       userData.profilePic = profilePic;
       await set(ref(db, `users/${currentUser.uid}`), userData);
-      alert('Profile updated successfully!');
+      showDialog('Profile updated successfully!', 'success');
       updateAvatar(profilePic);
       document.getElementById('user-name').textContent = userData.username || currentUser.email;
       document.getElementById('welcome-user').textContent = userData.username || 'Learner!';
@@ -981,7 +1087,7 @@
               if (e.target.tagName !== 'BUTTON') {
                 if (isCompleted) {
                   // Course is completed, perhaps show a message or review
-                  alert('Congratulations! This course is completed.');
+                  showDialog('Congratulations! This course is completed.', 'success');
                 } else {
                   window.location.href = `course.html?id=${courseId}`;
                 }
