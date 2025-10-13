@@ -283,6 +283,9 @@
       transform: translateY(-8px) scale(1.02);
       box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.1);
     }
+    .course-card.completed {
+      border-color: var(--accent-secondary);
+    }
     .course-thumbnail {
       height: 160px;
       background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
@@ -338,8 +341,13 @@
       font-size: 12px;
       transition: all 0.3s ease;
     }
-    .continue-btn:hover {
+    .continue-btn:hover:not(.completed) {
       transform: translateY(-1px);
+    }
+    .continue-btn.completed {
+      background: var(--accent-secondary);
+      opacity: 0.7;
+      cursor: default;
     }
     .recommendations {
       background: var(--glass);
@@ -480,6 +488,23 @@
       padding: 20px;
       text-align: center;
     }
+    .progress-item.completed {
+      border-color: var(--accent-secondary);
+    }
+    .lesson-list {
+      margin-top: 12px;
+    }
+    .lesson-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .lesson-item.completed {
+      color: var(--accent-secondary);
+    }
     .settings-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -522,9 +547,6 @@
     }
     .toggle-switch.active::after {
       transform: translateX(26px);
-    }
-    section {
-      scroll-margin-top: 80px;
     }
     section {
       display: none;
@@ -687,7 +709,7 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-    import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
+    import { getDatabase, ref, onValue, set, update } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -730,6 +752,21 @@
         alert('Failed to upload image. Please try again.');
         return null;
       }
+    }
+
+    // Function to calculate course progress based on lessons
+    function calculateCourseProgress(course) {
+      const lessons = course.lessons || [];
+      const totalLessons = lessons.length;
+      if (totalLessons === 0) return 0;
+      const completedLessons = lessons.filter(lesson => lesson.completed).length;
+      return Math.round((completedLessons / totalLessons) * 100);
+    }
+
+    // Function to update lesson completion (for use in course.html or simulation)
+    async function completeLesson(courseId, lessonId) {
+      const courseRef = ref(db, `users/${currentUser.uid}/enrolledCourses/${courseId}/lessons/${lessonId}`);
+      await update(courseRef, { completed: true, timestamp: Date.now() });
     }
 
     // Tab switching function
@@ -843,20 +880,28 @@
       document.getElementById('welcome-user').textContent = userData.username || 'Learner!';
     });
 
-    // Populate progress section
+    // Populate progress section with lesson details
     function populateProgress() {
       const progressGrid = document.getElementById('progress-grid');
       progressGrid.innerHTML = '';
       const enrolled = userData.enrolledCourses || {};
       Object.entries(enrolled).forEach(([courseId, course]) => {
+        const progress = calculateCourseProgress(course);
+        const isCompleted = progress >= 100;
         const item = document.createElement('div');
-        item.className = 'progress-item';
+        item.className = `progress-item ${isCompleted ? 'completed' : ''}`;
+        let lessonsHtml = '';
+        (course.lessons || []).forEach(lesson => {
+          const lessonStatus = lesson.completed ? 'completed' : '';
+          lessonsHtml += `<div class="lesson-item ${lessonStatus}"><span>${lesson.title}</span><span>${lesson.completed ? '✅' : '⭕'}</span></div>`;
+        });
         item.innerHTML = `
-          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">${course.title}</h3>
+          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">${course.title}${isCompleted ? ' ✅' : ''}</h3>
           <div style="height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 8px 0;">
-            <div style="height: 100%; background: var(--accent); width: ${course.progress || 0}%; border-radius: 4px; transition: width 0.3s ease;"></div>
+            <div style="height: 100%; background: ${isCompleted ? 'var(--accent-secondary)' : 'var(--accent)'}; width: ${progress}%; border-radius: 4px; transition: width 0.3s ease;"></div>
           </div>
-          <p style="color: var(--text-secondary); font-size: 14px;">${course.progress || 0}% Complete</p>
+          <p style="color: ${isCompleted ? 'var(--accent-secondary)' : 'var(--text-secondary)'}; font-size: 14px;">${progress}% Complete</p>
+          <div class="lesson-list">${lessonsHtml}</div>
         `;
         progressGrid.appendChild(item);
       });
@@ -906,34 +951,49 @@
           const enrolled = userData.enrolledCourses || {};
           let totalCourses = 0;
           let totalProgress = 0;
+          let completedCount = 0;
           Object.entries(enrolled).forEach(([courseId, course]) => {
+            const progress = calculateCourseProgress(course);
+            const isCompleted = progress >= 100;
             totalCourses++;
-            totalProgress += (course.progress || 0);
+            totalProgress += progress;
+            if (isCompleted) completedCount++;
+            const status = isCompleted ? 'Completed ✅' : `${progress}% Complete`;
+            const buttonText = isCompleted ? 'Completed' : 'Continue';
+            const buttonClass = isCompleted ? 'continue-btn completed' : 'continue-btn';
+            const buttonDisabled = isCompleted ? 'disabled' : '';
             const card = document.createElement('div');
-            card.className = 'course-card';
+            card.className = `course-card ${isCompleted ? 'completed' : ''}`;
             card.innerHTML = `
               <div class="course-thumbnail">${course.thumbnail || '📚'}</div>
               <div class="course-content">
-                <h3 class="course-title">${course.title}</h3>
+                <h3 class="course-title">${course.title}${isCompleted ? ' ✅' : ''}</h3>
                 <div class="course-progress">
-                  <div class="progress-fill" style="width: ${course.progress || 0}%"></div>
+                  <div class="progress-fill" style="width: ${progress}%; background: ${isCompleted ? 'var(--accent-secondary)' : 'var(--gradient)'};"></div>
                 </div>
                 <div class="course-meta">
-                  <span>${course.progress || 0}% Complete</span>
-                  <button class="continue-btn">Continue</button>
+                  <span>${status}</span>
+                  <button class="${buttonClass}" ${buttonDisabled}>${buttonText}</button>
                 </div>
               </div>
             `;
             card.onclick = (e) => {
               if (e.target.tagName !== 'BUTTON') {
-                window.location.href = `course.html?id=${courseId}`;
+                if (isCompleted) {
+                  // Course is completed, perhaps show a message or review
+                  alert('Congratulations! This course is completed.');
+                } else {
+                  window.location.href = `course.html?id=${courseId}`;
+                }
               }
             };
             const btn = card.querySelector('.continue-btn');
-            btn.onclick = (e) => {
-              e.stopPropagation();
-              window.location.href = `course.html?id=${courseId}`;
-            };
+            if (!isCompleted) {
+              btn.onclick = (e) => {
+                e.stopPropagation();
+                window.location.href = `course.html?id=${courseId}`;
+              };
+            }
             enrolledGrid.appendChild(card);
           });
 
@@ -944,6 +1004,9 @@
           if (stats.completionRate === 0) {
             const avg = totalCourses > 0 ? Math.round(totalProgress / totalCourses) : 0;
             document.getElementById('completion-rate').textContent = avg + '%';
+          }
+          if (stats.badges === 0) {
+            document.getElementById('badges').textContent = completedCount;
           }
 
           // Recommendations
@@ -978,6 +1041,9 @@
         window.location.href = 'login.html';
       }
     });
+
+    // Expose completeLesson for use in course.html
+    window.completeLesson = completeLesson;
   </script>
 </body>
 </html>
