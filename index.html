@@ -6,11 +6,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-touch-fullscreen" content="yes">
-  <title>Vynix - School LMS Dashboard</title>
+  <title>Vynix - Empower Your Learning</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js"></script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -61,108 +58,199 @@
       pointer-events: none;
       z-index: -1;
     }
-    .dashboard-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      min-height: 100vh;
-    }
-    .header {
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 24px;
-      box-shadow: var(--shadow-md);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .header::before {
-      content: '';
-      position: absolute;
+    .navbar {
+      position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
-      background: var(--gradient);
-      border-radius: 24px 24px 0 0;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
     }
-    .logo-welcome {
+    .navbar.scrolled {
+      background: var(--card-bg);
+      box-shadow: var(--shadow-sm);
+      padding: 12px 40px;
+    }
+    .logo {
       display: flex;
       align-items: center;
       gap: 12px;
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
     }
     .logo-icon {
-      width: 48px;
-      height: 48px;
+      width: 40px;
+      height: 40px;
       background: var(--gradient);
-      border-radius: 12px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
     }
-    .welcome-text h1 {
-      font-size: 28px;
-      font-weight: 800;
+    .nav-links {
+      display: flex;
+      list-style: none;
       margin: 0;
+      padding: 0;
+      gap: 32px;
+      align-items: center;
+    }
+    .nav-links a {
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gradient);
+      transition: width 0.3s ease;
+    }
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+    .cta-btn {
+      background: var(--gradient);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 0 40px;
+      text-align: center;
+      position: relative;
+    }
+    .hero-content {
+      max-width: 800px;
+      z-index: 1;
+    }
+    .hero-title {
+      font-size: 64px;
+      font-weight: 800;
+      margin-bottom: 24px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+    .hero-subtitle {
+      font-size: 24px;
+      margin-bottom: 40px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .hero-cta {
+      display: inline-block;
+      background: var(--gradient);
+      color: white;
+      padding: 20px 40px;
+      border-radius: 16px;
+      font-size: 20px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-cta::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    .hero-cta:hover::before {
+      left: 100%;
+    }
+    .hero-cta:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 25px 50px -12px rgba(66, 153, 225, 0.25);
+    }
+    .features, .courses {
+      padding: 100px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .section-title {
+      text-align: center;
+      font-size: 48px;
+      font-weight: 800;
+      margin-bottom: 16px;
       background: var(--gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    .welcome-text p {
-      margin: 0;
+    .section-subtitle {
+      text-align: center;
+      font-size: 20px;
       color: var(--text-secondary);
-      font-size: 16px;
+      margin-bottom: 64px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
     }
-    .user-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px;
     }
-    .role-badge {
-      background: var(--glass);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 600;
-      border: 1px solid var(--border);
-    }
-    .logout-btn {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .logout-btn:hover {
-      background: #3182ce;
-      transform: translateY(-1px);
-    }
-    .content-card {
+    .feature-card {
       background: var(--card-bg);
       backdrop-filter: blur(20px);
       border: 1px solid var(--border);
       border-radius: 24px;
-      padding: 32px;
-      box-shadow: var(--shadow-md);
+      padding: 40px 32px;
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-sm);
       position: relative;
       overflow: hidden;
-      animation: fadeInUp 0.6s ease-out;
+      cursor: pointer;
+      user-select: none;
     }
-    .content-card::before {
+    .feature-card::before {
       content: '';
       position: absolute;
       top: 0;
@@ -171,91 +259,166 @@
       height: 4px;
       background: var(--gradient);
       border-radius: 24px 24px 0 0;
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
     }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+    .feature-card:hover::before {
+      transform: scaleX(1);
     }
-    .section-title {
+    .feature-card:hover {
+      transform: translateY(-12px) rotate(1deg);
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
+    }
+    .feature-card:active {
+      transform: translateY(-8px) scale(0.98);
+    }
+    .feature-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--gradient);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 32px;
+      color: white;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+      transform: rotate(0deg);
+    }
+    .feature-card:hover .feature-icon {
+      transform: rotate(360deg) scale(1.1);
+      box-shadow: 0 10px 25px rgba(66, 153, 225, 0.3);
+    }
+    .feature-title {
       font-size: 24px;
       font-weight: 700;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       color: var(--text-primary);
+      transition: color 0.3s ease;
     }
-    .input-group {
-      margin-bottom: 20px;
+    .feature-card:hover .feature-title {
+      color: var(--accent);
     }
-    .input-field {
-      width: 100%;
-      padding: 16px 20px;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: var(--glass);
-      color: var(--text-primary);
+    .feature-desc {
+      color: var(--text-secondary);
       font-size: 16px;
-      transition: all 0.3s ease;
-      box-sizing: border-box;
+      line-height: 1.6;
+      opacity: 0.9;
+      transition: opacity 0.3s ease;
     }
-    .input-field:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    .feature-card:hover .feature-desc {
+      opacity: 1;
     }
-    .btn {
-      background: var(--gradient);
-      color: white;
-      border: none;
-      padding: 16px 24px;
-      border-radius: 16px;
+    .explore-btn {
+      margin-top: 24px;
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+      padding: 12px 24px;
+      border-radius: 12px;
       font-weight: 600;
-      font-size: 16px;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: var(--shadow-sm);
+      display: inline-block;
+      text-decoration: none;
     }
-    .btn:hover {
+    .feature-card:hover .explore-btn {
+      background: var(--accent);
+      color: white;
       transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-    .btn:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-    .course-form {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-width: 400px;
-    }
-    .course-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
     }
     .course-card {
-      background: var(--glass);
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
-      transition: all 0.3s ease;
+      border-radius: 24px;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+    }
+    .course-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient);
+      border-radius: 24px 24px 0 0;
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+      z-index: 1;
+    }
+    .course-card:hover::before {
+      transform: scaleX(1);
     }
     .course-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-md);
+      transform: translateY(-12px) scale(1.02);
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
+    }
+    .course-card:active {
+      transform: translateY(-8px) scale(0.99);
+    }
+    .course-thumbnail {
+      height: 180px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .course-card:hover .course-thumbnail {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+    .course-content {
+      padding: 24px;
     }
     .course-title {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
       margin-bottom: 8px;
       color: var(--text-primary);
+      transition: color 0.3s ease;
+    }
+    .course-card:hover .course-title {
+      color: var(--accent);
     }
     .course-instructor {
       color: var(--text-secondary);
       font-size: 14px;
       margin-bottom: 12px;
     }
-    .enroll-btn, .students-btn {
+    .course-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .course-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .stars {
+      color: #fbbf24;
+      font-size: 16px;
+    }
+    .enroll-btn {
       width: 100%;
+      background: var(--gradient);
+      color: white;
+      border: none;
       padding: 12px;
       border-radius: 12px;
       font-weight: 600;
@@ -263,544 +426,478 @@
       transition: all 0.3s ease;
       margin-top: 8px;
     }
-    .enroll-btn {
-      background: var(--accent-secondary);
-      color: white;
-      border: none;
-    }
-    .enroll-btn:hover {
-      background: #38a169;
-    }
-    .enroll-btn:disabled {
-      background: var(--text-secondary);
-      cursor: not-allowed;
-    }
-    .students-btn {
-      background: var(--accent);
-      color: white;
-      border: none;
-    }
-    .students-btn:hover {
-      background: #3182ce;
-    }
-    .students-list {
-      margin-top: 12px;
-      display: none;
-    }
-    .student-item {
-      background: var(--glass);
-      padding: 8px 12px;
-      border-radius: 8px;
-      margin-bottom: 4px;
-      font-size: 14px;
-    }
-    .role-setup {
-      text-align: center;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-    .role-buttons {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      margin-top: 24px;
-    }
-    .role-btn {
-      flex: 1;
-      padding: 20px;
-      border-radius: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: 2px solid var(--border);
-    }
-    .role-btn.student {
-      background: rgba(72, 187, 120, 0.1);
-      color: var(--accent-secondary);
-    }
-    .role-btn.instructor {
-      background: rgba(66, 153, 225, 0.1);
-      color: var(--accent);
-    }
-    .role-btn.parent {
-      background: rgba(245, 101, 101, 0.1);
-      color: #f56565;
-    }
-    .role-btn:hover {
+    .course-card:hover .enroll-btn {
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
     }
-    .error-message, .success-message {
-      padding: 12px;
-      border-radius: 8px;
-      text-align: center;
-      margin: 16px 0;
+    .modal {
       display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      animation: fadeIn 0.3s ease;
     }
-    .error-message {
-      color: #e53e3e;
-      background: rgba(229, 62, 62, 0.1);
-      border-left: 4px solid #e53e3e;
-    }
-    .success-message {
-      color: #48bb78;
-      background: rgba(72, 187, 120, 0.1);
-      border-left: 4px solid #48bb78;
-    }
-    .spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 1s ease-in-out infinite;
-      margin-right: 8px;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    .parent-section {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-    }
-    .parent-card {
-      background: var(--glass);
+    .modal-content {
+      background: var(--card-bg);
+      margin: 5% auto;
+      padding: 40px;
+      border-radius: 24px;
+      width: 90%;
+      max-width: 800px;
+      max-height: 85vh;
+      overflow-y: auto;
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 20px;
-      text-align: center;
-      transition: all 0.3s ease;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      animation: slideIn 0.3s ease;
     }
-    .parent-card:hover {
-      transform: translateY(-4px);
+    .close {
+      color: var(--text-secondary);
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .close:hover {
+      color: var(--text-primary);
+    }
+    .modal-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .modal-desc {
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+    }
+    .syllabus {
+      background: var(--glass);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .syllabus h4 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+    .syllabus ul {
+      list-style: none;
+      padding: 0;
+    }
+    .syllabus li {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .syllabus li:last-child {
+      border-bottom: none;
+    }
+    .modal-cta {
+      background: var(--gradient);
+      color: white;
+      padding: 16px 32px;
+      border-radius: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+    .modal-cta:hover {
+      transform: translateY(-2px);
       box-shadow: var(--shadow-md);
     }
-    .parent-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
-    .parent-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: var(--text-primary);
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
-    .parent-value {
+    .footer {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      padding: 40px 40px 20px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .dark-toggle {
+      background: none;
+      border: none;
       font-size: 24px;
-      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: color 0.3s ease;
+    }
+    .dark-toggle:hover {
       color: var(--accent);
     }
-    .progress-bar {
-      background: var(--border);
-      height: 8px;
-      border-radius: 4px;
-      overflow: hidden;
-      margin: 8px 0;
-    }
-    .progress-fill {
-      height: 100%;
-      background: var(--gradient);
-      transition: width 0.3s ease;
-    }
-    .child-selector {
-      margin-bottom: 20px;
-    }
-    .child-select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--glass);
-      color: var(--text-primary);
-    }
     @media (max-width: 768px) {
-      .dashboard-container { padding: 16px; }
-      .header { flex-direction: column; gap: 16px; text-align: center; }
-      .course-list { grid-template-columns: 1fr; }
-      .role-buttons { flex-direction: column; }
-      .parent-section { grid-template-columns: 1fr; }
+      .navbar { padding: 16px 20px; }
+      .nav-links { gap: 16px; }
+      .hero { padding: 0 20px; min-height: 80vh; }
+      .hero-title { font-size: 48px; }
+      .hero-subtitle { font-size: 20px; }
+      .features, .courses { padding: 80px 20px; }
+      .section-title { font-size: 36px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .modal-content { width: 95%; margin: 10% auto; padding: 24px; }
+      .course-thumbnail { height: 140px; font-size: 48px; }
     }
   </style>
 </head>
 <body>
-  <div class="dashboard-container">
-    <header class="header">
-      <div class="logo-welcome">
-        <div class="logo-icon">V</div>
-        <div class="welcome-text">
-          <h1 id="welcome-title">Vynix School LMS</h1>
-          <p id="user-greeting">Welcome back!</p>
+  <nav class="navbar" id="navbar">
+    <a href="#" class="logo">
+      <div class="logo-icon">V</div>
+      Vynix
+    </a>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#courses">Courses</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="login.html">Login</a></li>
+      <li><a href="signup.html">Sign Up</a></li>
+      <button class="dark-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
+    </ul>
+  </nav>
+
+  <section id="home" class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">Empower Your Learning Journey</h1>
+      <p class="hero-subtitle">Discover interactive courses, connect with expert instructors, and track your progress in a modern LMS designed for the future of education.</p>
+      <a href="signup.html" class="hero-cta">Get Started Free</a>
+    </div>
+  </section>
+
+  <section id="features" class="features">
+    <h2 class="section-title">Why Choose Vynix?</h2>
+    <p class="section-subtitle">Our platform is built to make learning engaging, accessible, and effective for everyone—from students to professionals.</p>
+    <div class="cards-grid">
+      <div class="feature-card" data-modal="interactive">
+        <div class="feature-icon">📚</div>
+        <h3 class="feature-title">Interactive Courses</h3>
+        <p class="feature-desc">Dive into rich multimedia content, quizzes, and hands-on projects tailored to your pace and style.</p>
+        <a href="#" class="explore-btn">Explore →</a>
+      </div>
+      <div class="feature-card" data-modal="instructors">
+        <div class="feature-icon">👥</div>
+        <h3 class="feature-title">Expert Instructors</h3>
+        <p class="feature-desc">Learn from industry leaders and educators who bring real-world experience directly to your screen.</p>
+        <a href="#" class="explore-btn">Explore →</a>
+      </div>
+      <div class="feature-card" data-modal="tracking">
+        <div class="feature-icon">📊</div>
+        <h3 class="feature-title">Progress Tracking</h3>
+        <p class="feature-desc">Monitor your achievements with detailed analytics, certificates, and personalized recommendations.</p>
+        <a href="#" class="explore-btn">Explore →</a>
+      </div>
+      <div class="feature-card" data-modal="secure">
+        <div class="feature-icon">🔒</div>
+        <h3 class="feature-title">Secure & Accessible</h3>
+        <p class="feature-desc">Enjoy seamless access on any device with robust privacy and compliance features built-in.</p>
+        <a href="#" class="explore-btn">Explore →</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="courses" class="courses">
+    <h2 class="section-title">Featured Courses</h2>
+    <p class="section-subtitle">Explore our top-rated courses and start your journey today. From coding to creative skills, there's something for everyone.</p>
+    <div class="cards-grid">
+      <div class="course-card" data-modal="python">
+        <div class="course-thumbnail">🐍</div>
+        <div class="course-content">
+          <h3 class="course-title">Python Basics for Beginners</h3>
+          <p class="course-instructor">By Prof. Alice Johnson</p>
+          <div class="course-meta">
+            <span>Beginner • 4 weeks</span>
+            <div class="course-rating">
+              <span class="stars">★★★★★</span> (4.9)
+            </div>
+          </div>
+          <button class="enroll-btn" onclick="openCourseModal('python')">Preview Course</button>
         </div>
       </div>
-      <div class="user-actions">
-        <span id="role-badge" class="role-badge" style="display: none;">Parent</span>
-        <button class="logout-btn" id="logout-btn">Sign Out</button>
+      <div class="course-card" data-modal="javascript">
+        <div class="course-thumbnail">⚡</div>
+        <div class="course-content">
+          <h3 class="course-title">JavaScript Mastery</h3>
+          <p class="course-instructor">By Dev Guru Max</p>
+          <div class="course-meta">
+            <span>Intermediate • 6 weeks</span>
+            <div class="course-rating">
+              <span class="stars">★★★★☆</span> (4.7)
+            </div>
+          </div>
+          <button class="enroll-btn" onclick="openCourseModal('javascript')">Preview Course</button>
+        </div>
       </div>
-    </header>
-
-    <main>
-      <!-- Role Setup Section (shown on first login) -->
-      <section id="role-setup" class="content-card" style="display: none;">
-        <h2 class="section-title">Choose Your Role</h2>
-        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 32px;">
-          Select your role to get started with Vynix School LMS.
-        </p>
-        <div class="role-setup">
-          <div class="role-btn student" onclick="setRole('student')">
-            <div style="font-size: 48px; margin-bottom: 12px;">👨‍🎓</div>
-            <h3 style="font-size: 20px; font-weight: 700; margin: 0 0 8px;">Student</h3>
-            <p style="margin: 0; font-size: 14px; opacity: 0.8;">Access courses and track learning.</p>
-          </div>
-          <div class="role-btn instructor" onclick="setRole('instructor')">
-            <div style="font-size: 48px; margin-bottom: 12px;">👨‍🏫</div>
-            <h3 style="font-size: 20px; font-weight: 700; margin: 0 0 8px;">Teacher</h3>
-            <p style="margin: 0; font-size: 14px; opacity: 0.8;">Create courses and manage classes.</p>
-          </div>
-          <div class="role-btn parent" onclick="setRole('parent')">
-            <div style="font-size: 48px; margin-bottom: 12px;">👨‍👩‍👧</div>
-            <h3 style="font-size: 20px; font-weight: 700; margin: 0 0 8px;">Parent</h3>
-            <p style="margin: 0; font-size: 14px; opacity: 0.8;">Monitor child's progress and communicate.</p>
-          </div>
-        </div>
-        <div class="role-buttons">
-          <button class="role-btn" onclick="setRole('student')" style="background: var(--accent-secondary); color: white;">I'm a Student</button>
-          <button class="role-btn" onclick="setRole('instructor')" style="background: var(--accent); color: white;">I'm a Teacher</button>
-          <button class="role-btn" onclick="setRole('parent')" style="background: #f56565; color: white;">I'm a Parent</button>
-        </div>
-      </section>
-
-      <!-- Student Dashboard -->
-      <section id="student-dashboard" class="content-card" style="display: none;">
-        <h2 class="section-title">Available Courses</h2>
-        <p style="color: var(--text-secondary); margin-bottom: 24px;">Browse and enroll in courses aligned with your school curriculum.</p>
-        <div id="courses-list" class="course-list"></div>
-        <div id="student-message" class="success-message"></div>
-      </section>
-
-      <!-- Teacher Dashboard -->
-      <section id="instructor-dashboard" class="content-card" style="display: none;">
-        <h2 class="section-title">Your Teacher Dashboard</h2>
-        <div class="course-form">
-          <input type="text" id="course-title" class="input-field" placeholder="Enter course title (e.g., Grade 10 Mathematics)">
-          <button class="btn" id="create-course-btn">
-            <span id="create-spinner" class="spinner" style="display: none;"></span>
-            Create New Course
-          </button>
-        </div>
-        <h3 style="margin: 32px 0 16px; color: var(--text-primary);">Your Courses</h3>
-        <div id="instructor-courses" class="course-list"></div>
-        <div id="instructor-message" class="success-message"></div>
-      </section>
-
-      <!-- Parent Dashboard -->
-      <section id="parent-dashboard" class="content-card" style="display: none;">
-        <h2 class="section-title">Parent Dashboard</h2>
-        <p style="color: var(--text-secondary); margin-bottom: 24px;">Monitor your child's academic journey, view reports, and stay connected with teachers.</p>
-        <div class="child-selector">
-          <select id="child-select" class="child-select">
-            <option value="">Select Child</option>
-            <!-- Populated dynamically -->
-          </select>
-        </div>
-        <div id="parent-content" style="display: none;">
-          <div class="parent-section">
-            <div class="parent-card">
-              <div class="parent-icon">📊</div>
-              <div class="parent-title">Overall Progress</div>
-              <div class="parent-value" id="overall-progress">85%</div>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: 85%"></div>
-              </div>
-            </div>
-            <div class="parent-card">
-              <div class="parent-icon">📅</div>
-              <div class="parent-title">Attendance</div>
-              <div class="parent-value" id="attendance">95%</div>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width: 95%"></div>
-              </div>
-            </div>
-            <div class="parent-card">
-              <div class="parent-icon">📚</div>
-              <div class="parent-title">Enrolled Courses</div>
-              <div class="parent-value" id="enrolled-courses">4</div>
-            </div>
-            <div class="parent-card">
-              <div class="parent-icon">✉️</div>
-              <div class="parent-title">Unread Messages</div>
-              <div class="parent-value" id="unread-messages">2</div>
+      <div class="course-card" data-modal="design">
+        <div class="course-thumbnail">🎨</div>
+        <div class="course-content">
+          <h3 class="course-title">UI/UX Design Fundamentals</h3>
+          <p class="course-instructor">By Designer Sara Lee</p>
+          <div class="course-meta">
+            <span>Beginner • 5 weeks</span>
+            <div class="course-rating">
+              <span class="stars">★★★★★</span> (4.8)
             </div>
           </div>
-          <h3 style="margin: 32px 0 16px; color: var(--text-primary);">Child's Recent Grades</h3>
-          <div id="grades-list" class="course-list"></div>
-          <div id="parent-message" class="success-message"></div>
+          <button class="enroll-btn" onclick="openCourseModal('design')">Preview Course</button>
         </div>
-      </section>
-    </main>
+      </div>
+      <div class="course-card" data-modal="data">
+        <div class="course-thumbnail">📈</div>
+        <div class="course-content">
+          <h3 class="course-title">Data Science with Python</h3>
+          <p class="course-instructor">By Dr. Data Expert</p>
+          <div class="course-meta">
+            <span>Advanced • 8 weeks</span>
+            <div class="course-rating">
+              <span class="stars">★★★★★</span> (4.9)
+            </div>
+          </div>
+          <button class="enroll-btn" onclick="openCourseModal('data')">Preview Course</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature Modals -->
+  <div id="interactive" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('interactive')">&times;</span>
+      <h2 class="modal-title">Interactive Courses</h2>
+      <p class="modal-desc">Our courses go beyond reading—engage with videos, interactive simulations, and collaborative forums. Whether you're a beginner or advanced learner, every module adapts to your needs for maximum retention and fun.</p>
+      <a href="signup.html" class="modal-cta">Start Learning Today</a>
+    </div>
+  </div>
+  <div id="instructors" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('instructors')">&times;</span>
+      <h2 class="modal-title">Expert Instructors</h2>
+      <p class="modal-desc">Curated by top professionals from tech giants, academia, and creative industries. Get live Q&A sessions, personalized feedback, and insights that bridge theory to practice.</p>
+      <a href="signup.html" class="modal-cta">Meet the Experts</a>
+    </div>
+  </div>
+  <div id="tracking" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('tracking')">&times;</span>
+      <h2 class="modal-title">Progress Tracking</h2>
+      <p class="modal-desc">Visual dashboards show your streak, skill mastery, and growth over time. Earn badges, share certificates on LinkedIn, and get AI-powered suggestions for your next course.</p>
+      <a href="signup.html" class="modal-cta">Track Your Progress</a>
+    </div>
+  </div>
+  <div id="secure" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('secure')">&times;</span>
+      <h2 class="modal-title">Secure & Accessible</h2>
+      <p class="modal-desc">GDPR-compliant, with end-to-end encryption and offline mode. Works flawlessly on desktop, tablet, or mobile—your learning never stops.</p>
+      <a href="signup.html" class="modal-cta">Get Secure Access</a>
+    </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-    import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-    import { getDatabase, ref, onValue, set, push, update, child, get } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
+  <!-- Course Modals -->
+  <div id="python" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('python')">&times;</span>
+      <h2 class="modal-title">Python Basics for Beginners</h2>
+      <p class="modal-desc">Kickstart your programming journey with Python! This course covers fundamentals like variables, loops, functions, and more. Perfect for absolute beginners.</p>
+      <div class="syllabus">
+        <h4>Course Syllabus</h4>
+        <ul>
+          <li>Module 1: Introduction to Python</li>
+          <li>Module 2: Data Types & Variables</li>
+          <li>Module 3: Control Structures</li>
+          <li>Module 4: Functions & Modules</li>
+          <li>Module 5: Projects & Capstone</li>
+        </ul>
+      </div>
+      <a href="signup.html" class="modal-cta">Enroll Now - Free</a>
+    </div>
+  </div>
+  <div id="javascript" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('javascript')">&times;</span>
+      <h2 class="modal-title">JavaScript Mastery</h2>
+      <p class="modal-desc">Level up your web development skills with advanced JavaScript. Dive into DOM manipulation, async programming, and modern frameworks.</p>
+      <div class="syllabus">
+        <h4>Course Syllabus</h4>
+        <ul>
+          <li>Module 1: ES6+ Features</li>
+          <li>Module 2: Asynchronous JS</li>
+          <li>Module 3: DOM & Events</li>
+          <li>Module 4: APIs & Fetch</li>
+          <li>Module 5: Build a Web App</li>
+        </ul>
+      </div>
+      <a href="signup.html" class="modal-cta">Enroll Now - R49</a>
+    </div>
+  </div>
+  <div id="design" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('design')">&times;</span>
+      <h2 class="modal-title">UI/UX Design Fundamentals</h2>
+      <p class="modal-desc">Learn the principles of user-centered design. From wireframing to prototyping, create intuitive interfaces that delight users.</p>
+      <div class="syllabus">
+        <h4>Course Syllabus</h4>
+        <ul>
+          <li>Module 1: Design Thinking</li>
+          <li>Module 2: User Research</li>
+          <li>Module 3: Wireframing Tools</li>
+          <li>Module 4: Prototyping</li>
+          <li>Module 5: Portfolio Project</li>
+        </ul>
+      </div>
+      <a href="signup.html" class="modal-cta">Enroll Now - Free</a>
+    </div>
+  </div>
+  <div id="data" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('data')">&times;</span>
+      <h2 class="modal-title">Data Science with Python</h2>
+      <p class="modal-desc">Unlock the power of data! Master libraries like Pandas, NumPy, and Scikit-Learn to analyze and visualize real-world datasets.</p>
+      <div class="syllabus">
+        <h4>Course Syllabus</h4>
+        <ul>
+          <li>Module 1: Data Manipulation</li>
+          <li>Module 2: Visualization</li>
+          <li>Module 3: Machine Learning Basics</li>
+          <li>Module 4: Model Evaluation</li>
+          <li>Module 5: End-to-End Project</li>
+        </ul>
+      </div>
+      <a href="signup.html" class="modal-cta">Enroll Now - R79</a>
+    </div>
+  </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
-      authDomain: "fire-b-a8878.firebaseapp.com",
-      databaseURL: "https://fire-b-a8878.firebaseio.com",
-      projectId: "fire-b-a8878",
-      storageBucket: "fire-b-a8878.firebasestorage.app",
-      messagingSenderId: "658673187627",
-      appId: "1:658673187627:web:6e4c29af661785f0afa36e",
-      measurementId: "G-V4W97VMSKL"
-    };
+  <footer class="footer">
+    <p>&copy; 2025 Vynix LMS. All rights reserved. | <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms of Service</a></p>
+  </footer>
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    let currentUser = null;
-    let userRole = null;
-    let children = []; // For parent role
-
-    function showMessage(id, message, isError = false) {
-      const el = document.getElementById(id);
-      el.textContent = message;
-      el.className = isError ? 'error-message' : 'success-message';
-      el.style.display = 'block';
-      setTimeout(() => { el.style.display = 'none'; }, 5000);
-    }
-
-    function showSpinner(id, show) {
-      document.getElementById(id).style.display = show ? 'inline-block' : 'none';
-    }
-
-    function updateUI() {
-      if (!currentUser) {
-        window.location.href = 'login.html';
-        return;
-      }
-      document.getElementById('user-greeting').textContent = `Welcome, ${currentUser.displayName || currentUser.email}!`;
-      if (userRole) {
-        document.getElementById('role-badge').textContent = userRole.charAt(0).toUpperCase() + userRole.slice(1);
-        document.getElementById('role-badge').style.display = 'inline-block';
-        const dashboardId = userRole === 'student' ? 'student-dashboard' : userRole === 'instructor' ? 'instructor-dashboard' : 'parent-dashboard';
-        document.getElementById(dashboardId).style.display = 'block';
-        if (userRole === 'parent') {
-          loadChildren();
-        } else {
-          loadCourses();
-        }
+  <script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
       } else {
-        // Show role setup if no role set
-        document.getElementById('role-setup').style.display = 'block';
+        navbar.classList.remove('scrolled');
       }
+    });
+
+    // Smooth scrolling for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // Dark mode toggle
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      localStorage.setItem('darkMode', isDark);
+      document.querySelector('.dark-toggle').textContent = isDark ? '☀️' : '🌙';
     }
 
-    async function setUserRole(role) {
-      if (!currentUser) return;
-      try {
-        // Set user data if not exists
-        const userRef = ref(db, 'users/' + currentUser.uid);
-        await set(userRef, {
-          name: currentUser.displayName || currentUser.email.split('@')[0],
-          email: currentUser.email,
-          role: role
-        });
-        userRole = role;
-        showMessage(userRole === 'parent' ? 'parent-message' : userRole === 'instructor' ? 'instructor-message' : 'student-message', `Role set to ${role}! Dashboard loading...`);
-        updateUI();
-      } catch (error) {
-        showMessage(userRole === 'parent' ? 'parent-message' : userRole === 'instructor' ? 'instructor-message' : 'student-message', 'Error setting role: ' + error.message, true);
-      }
+    // Load saved theme
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark');
+      document.querySelector('.dark-toggle').textContent = '☀️';
     }
 
-    window.setRole = setRole; // Expose for onclick
+    // Feature card interactions
+    const featureCards = document.querySelectorAll('.feature-card');
+    featureCards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.explore-btn')) return;
+        const modalId = card.dataset.modal;
+        openModal(modalId);
+      });
+    });
 
-    // Parent-specific functions
-    async function loadChildren() {
-      const parentRef = ref(db, `users/${currentUser.uid}/children`);
-      const snapshot = await get(parentRef);
-      if (snapshot.exists()) {
-        children = Object.entries(snapshot.val()).map(([childUid, childData]) => ({ uid: childUid, ...childData }));
-        const select = document.getElementById('child-select');
-        select.innerHTML = '<option value="">Select Child</option>' + children.map(child => `<option value="${child.uid}">${child.name} (Grade ${child.grade})</option>`).join('');
-        select.addEventListener('change', (e) => {
-          if (e.target.value) {
-            loadChildData(e.target.value);
-          } else {
-            document.getElementById('parent-content').style.display = 'none';
+    // Course card interactions
+    const courseCards = document.querySelectorAll('.course-card');
+    courseCards.forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        card.style.transform = 'translateY(-12px) scale(1.02)';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'translateY(0) scale(1)';
+      });
+    });
+
+    // Modal functionality
+    function openModal(id) {
+      document.getElementById(id).style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    window.openCourseModal = openModal; // Expose for onclick
+
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+      const closeBtn = modal.querySelector('.close');
+      closeBtn.addEventListener('click', () => closeModal(modal.id));
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal(modal.id);
+      });
+    });
+
+    // Close modals on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        modals.forEach(modal => {
+          if (modal.style.display === 'block') {
+            closeModal(modal.id);
           }
         });
-      } else {
-        showMessage('parent-message', 'No children linked. Ask your child to share their code or contact support.', true);
-      }
-    }
-
-    async function loadChildData(childUid) {
-      document.getElementById('parent-content').style.display = 'block';
-      const childRef = ref(db, `users/${childUid}`);
-      onValue(childRef, (snapshot) => {
-        const childData = snapshot.val();
-        if (childData) {
-          // Mock/Real progress data - extend with Firebase paths like 'progress', 'attendance'
-          document.getElementById('overall-progress').textContent = childData.overallProgress || '85%';
-          document.getElementById('overall-progress').parentElement.querySelector('.progress-fill').style.width = (childData.overallProgress || 85) + '%';
-          document.getElementById('attendance').textContent = childData.attendance || '95%';
-          document.getElementById('attendance').parentElement.querySelector('.progress-fill').style.width = (childData.attendance || 95) + '%';
-          document.getElementById('enrolled-courses').textContent = childData.enrolledCourses || 4;
-          document.getElementById('unread-messages').textContent = childData.unreadMessages || 2;
-          loadChildGrades(childUid);
-        }
-      });
-    }
-
-    function loadChildGrades(childUid) {
-      const gradesRef = ref(db, `users/${childUid}/grades`);
-      onValue(gradesRef, (snapshot) => {
-        const grades = snapshot.val() || {};
-        const list = document.getElementById('grades-list');
-        list.innerHTML = Object.entries(grades).map(([course, grade]) => `
-          <div class="course-card">
-            <div class="course-title">${course}</div>
-            <div class="parent-value">${grade}%</div>
-          </div>
-        `).join('') || '<p style="text-align: center; color: var(--text-secondary);">No grades yet.</p>';
-      });
-    }
-
-    function loadCourses() {
-      const coursesRef = ref(db, 'courses');
-      onValue(coursesRef, (snapshot) => {
-        const courses = snapshot.val() || {};
-        const courseList = Object.entries(courses).map(([id, data]) => ({ id, ...data }));
-        
-        if (userRole === 'student') {
-          displayStudentCourses(courseList);
-        } else if (userRole === 'instructor') {
-          // Filter teacher's courses
-          const myCourses = courseList.filter(course => course.instructorUid === currentUser.uid);
-          displayInstructorCourses(myCourses);
-        }
-      });
-    }
-
-    function displayStudentCourses(courses) {
-      const container = document.getElementById('courses-list');
-      container.innerHTML = '';
-      if (courses.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No courses available yet. Check back soon!</p>';
-        return;
-      }
-      courses.forEach(course => {
-        const isEnrolled = checkEnrollment(course.id);
-        const card = document.createElement('div');
-        card.className = 'course-card';
-        card.innerHTML = `
-          <div class="course-title">${course.title}</div>
-          <div class="course-instructor">By Teacher (ID: ${course.instructorUid})</div>
-          <button class="enroll-btn" ${isEnrolled ? 'disabled' : ''} onclick="enrollInCourse('${course.id}')">
-            ${isEnrolled ? 'Enrolled' : 'Enroll Now'}
-          </button>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    async function checkEnrollment(courseId) {
-      const enrollmentRef = ref(db, `courses/${courseId}/students/${currentUser.uid}`);
-      const snapshot = await get(enrollmentRef);
-      return snapshot.exists();
-    }
-
-    async function enrollInCourse(courseId) {
-      try {
-        const updates = {};
-        updates[`courses/${courseId}/students/${currentUser.uid}`] = true;
-        updates[`users/${currentUser.uid}/enrolledCourses/${courseId}`] = true; // Track for parent view
-        await update(ref(db), updates);
-        showMessage('student-message', 'Enrolled successfully!');
-        loadCourses(); // Refresh
-      } catch (error) {
-        showMessage('student-message', 'Enrollment failed: ' + error.message, true);
-      }
-    }
-
-    window.enrollInCourse = enrollInCourse;
-
-    function displayInstructorCourses(courses) {
-      const container = document.getElementById('instructor-courses');
-      container.innerHTML = '';
-      if (courses.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-secondary);">No courses created yet. Create one above!</p>';
-        return;
-      }
-      courses.forEach(course => {
-        const card = document.createElement('div');
-        card.className = 'course-card';
-        card.innerHTML = `
-          <div class="course-title">${course.title}</div>
-          <button class="students-btn" onclick="viewStudents('${course.id}')">View Students (${course.students ? Object.keys(course.students).length : 0})</button>
-          <div id="students-${course.id}" class="students-list"></div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    window.viewStudents = async (courseId) => {
-      const list = document.getElementById(`students-${courseId}`);
-      list.style.display = list.style.display === 'block' ? 'none' : 'block';
-      if (list.style.display === 'block') {
-        const studentsRef = ref(db, `courses/${courseId}/students`);
-        onValue(studentsRef, (snapshot) => {
-          const students = snapshot.val() || {};
-          list.innerHTML = Object.keys(students).map(uid => `<div class="student-item">Student ${uid}</div>`).join('');
-        });
-      }
-    };
-
-    document.getElementById('create-course-btn').addEventListener('click', async () => {
-      const title = document.getElementById('course-title').value.trim();
-      if (!title) {
-        showMessage('instructor-message', 'Please enter a course title.', true);
-        return;
-      }
-      try {
-        showSpinner('create-spinner', true);
-        const newCourseRef = push(ref(db, 'courses'));
-        await set(newCourseRef, {
-          title: title,
-          instructorUid: currentUser.uid
-        });
-        document.getElementById('course-title').value = '';
-        showMessage('instructor-message', 'Course created successfully!');
-      } catch (error) {
-        showMessage('instructor-message', 'Creation failed: ' + error.message, true);
-      } finally {
-        showSpinner('create-spinner', false);
       }
     });
 
-    document.getElementById('logout-btn').addEventListener('click', async () => {
-      await signOut(auth);
-    });
-
-    // Auth state listener
-    onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
-      if (user) {
-        // Fetch or set user role
-        const userRef = ref(db, 'users/' + user.uid);
-        const snapshot = await get(userRef);
-        if (snapshot.exists()) {
-          userRole = snapshot.val().role;
-        }
-        updateUI();
-      } else {
-        window.location.href = 'login.html';
-      }
+    // Staggered animation on load
+    window.addEventListener('load', () => {
+      [...featureCards, ...courseCards].forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        setTimeout(() => {
+          card.style.transition = 'all 0.6s ease';
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, index * 150);
+      });
     });
   </script>
 </body>
