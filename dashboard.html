@@ -386,7 +386,8 @@
       align-items: center;
       transition: color 0.3s ease;
     }
-    .bottom-nav a:hover {
+    .bottom-nav a:hover,
+    .bottom-nav a.active {
       color: var(--accent);
     }
     .bottom-nav .material-icons {
@@ -525,6 +526,12 @@
     section {
       scroll-margin-top: 80px;
     }
+    section {
+      display: none;
+    }
+    #dashboard {
+      display: block;
+    }
     @media (max-width: 1024px) {
       .sidebar {
         transform: translateX(-100%);
@@ -570,40 +577,42 @@
   </aside>
 
   <main class="main-content">
-    <section id="dashboard" class="welcome-section">
-      <h1 class="welcome-title">Welcome Back, <span id="welcome-user">Learner!</span></h1>
-      <p class="welcome-subtitle">Continue your journey with personalized recommendations and track your progress effortlessly.</p>
-    </section>
+    <section id="dashboard">
+      <div class="welcome-section">
+        <h1 class="welcome-title">Welcome Back, <span id="welcome-user">Learner!</span></h1>
+        <p class="welcome-subtitle">Continue your journey with personalized recommendations and track your progress effortlessly.</p>
+      </div>
 
-    <div class="stats-grid" id="stats-grid">
-      <div class="stat-card">
-        <div class="stat-number" id="total-courses">0</div>
-        <div class="stat-label">Enrolled Courses</div>
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="total-courses">0</div>
+          <div class="stat-label">Enrolled Courses</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="hours-learned">0</div>
+          <div class="stat-label">Hours Learned</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="completion-rate">0%</div>
+          <div class="stat-label">Completion Rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="badges">0</div>
+          <div class="stat-label">Badges Earned</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-number" id="hours-learned">0</div>
-        <div class="stat-label">Hours Learned</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="completion-rate">0%</div>
-        <div class="stat-label">Completion Rate</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="badges">0</div>
-        <div class="stat-label">Badges Earned</div>
-      </div>
-    </div>
+
+      <section class="recommendations">
+        <h2 class="section-title">Recommended for You</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 24px;">Based on your progress, try these next.</p>
+        <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));" id="rec-grid">
+        </div>
+      </section>
+    </section>
 
     <section class="courses-section" id="courses">
       <h2 class="section-title">Continue Learning</h2>
       <div class="cards-grid" id="enrolled-grid">
-      </div>
-    </section>
-
-    <section class="recommendations" id="recommendations">
-      <h2 class="section-title">Recommended for You</h2>
-      <p style="color: var(--text-secondary); margin-bottom: 24px;">Based on your progress, try these next.</p>
-      <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));" id="rec-grid">
       </div>
     </section>
 
@@ -667,7 +676,7 @@
 
   <nav class="bottom-nav">
     <ul>
-      <li><a href="#" data-target="dashboard"><span class="material-icons">dashboard</span></a></li>
+      <li><a href="#" data-target="dashboard" class="active"><span class="material-icons">dashboard</span></a></li>
       <li><a href="#courses" data-target="courses"><span class="material-icons">school</span></a></li>
       <li><a href="#progress" data-target="progress"><span class="material-icons">assessment</span></a></li>
       <li><a href="#profile" data-target="profile"><span class="material-icons">person</span></a></li>
@@ -723,6 +732,17 @@
       }
     }
 
+    // Tab switching function
+    function showTab(targetId) {
+      document.querySelectorAll('section').forEach(section => {
+        section.style.display = 'none';
+      });
+      const targetSection = document.getElementById(targetId);
+      if (targetSection) {
+        targetSection.style.display = 'block';
+      }
+    }
+
     // Dark mode toggle
     function toggleDarkMode() {
       document.body.classList.toggle('dark');
@@ -763,20 +783,14 @@
         anchor.addEventListener('click', function (e) {
           e.preventDefault();
           const target = this.getAttribute('data-target');
-          // Set active class
-          document.querySelectorAll('.sidebar a, .bottom-nav a').forEach(a => a.classList.remove('active'));
+          showTab(target);
+          // Update active classes
+          document.querySelectorAll('a[data-target]').forEach(a => a.classList.remove('active'));
           this.classList.add('active');
-          // Smooth scroll
-          const section = document.getElementById(target) || document.querySelector(`[data-section="${target}"]`);
-          if (section) {
-            section.scrollIntoView({
-              behavior: 'smooth'
-            });
-          } else if (target === 'dashboard') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
         });
       });
+      // Initialize dashboard
+      showTab('dashboard');
     });
 
     // Logout
