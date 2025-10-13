@@ -127,6 +127,12 @@
     .user-avatar:hover {
       transform: scale(1.05);
     }
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
     .logout-btn {
       background: transparent;
       border: none;
@@ -386,6 +392,139 @@
     .bottom-nav .material-icons {
       font-size: 24px;
     }
+    .profile-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-sm);
+    }
+    .profile-avatar-large {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: white;
+      background: var(--gradient);
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-avatar-large img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    .save-btn {
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    .save-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .progress-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .progress-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .setting-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 24px;
+      background: var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .toggle-switch.active {
+      background: var(--accent);
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+    .toggle-switch.active::after {
+      transform: translateX(26px);
+    }
+    section {
+      scroll-margin-top: 80px;
+    }
     @media (max-width: 1024px) {
       .sidebar {
         transform: translateX(-100%);
@@ -422,21 +561,21 @@
 
   <aside class="sidebar" id="sidebar">
     <ul>
-      <li><a href="#" class="active">Dashboard</a></li>
-      <li><a href="#courses">My Courses</a></li>
-      <li><a href="#progress">Progress</a></li>
-      <li><a href="#profile">Profile</a></li>
-      <li><a href="#settings">Settings</a></li>
+      <li><a href="#" class="active" data-target="dashboard">Dashboard</a></li>
+      <li><a href="#courses" data-target="courses">My Courses</a></li>
+      <li><a href="#progress" data-target="progress">Progress</a></li>
+      <li><a href="#profile" data-target="profile">Profile</a></li>
+      <li><a href="#settings" data-target="settings">Settings</a></li>
     </ul>
   </aside>
 
   <main class="main-content">
-    <section class="welcome-section">
+    <section id="dashboard" class="welcome-section">
       <h1 class="welcome-title">Welcome Back, <span id="welcome-user">Learner!</span></h1>
       <p class="welcome-subtitle">Continue your journey with personalized recommendations and track your progress effortlessly.</p>
     </section>
 
-    <div class="stats-grid">
+    <div class="stats-grid" id="stats-grid">
       <div class="stat-card">
         <div class="stat-number" id="total-courses">0</div>
         <div class="stat-label">Enrolled Courses</div>
@@ -457,32 +596,89 @@
 
     <section class="courses-section" id="courses">
       <h2 class="section-title">Continue Learning</h2>
-      <div class="cards-grid">
+      <div class="cards-grid" id="enrolled-grid">
       </div>
     </section>
 
-    <section class="recommendations">
+    <section class="recommendations" id="recommendations">
       <h2 class="section-title">Recommended for You</h2>
       <p style="color: var(--text-secondary); margin-bottom: 24px;">Based on your progress, try these next.</p>
-      <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+      <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));" id="rec-grid">
+      </div>
+    </section>
+
+    <section id="progress" class="courses-section">
+      <h2 class="section-title">Your Progress</h2>
+      <div class="progress-section" id="progress-grid">
+        <!-- Progress items will be populated here -->
+      </div>
+    </section>
+
+    <section id="profile" class="courses-section">
+      <h2 class="section-title">Edit Profile</h2>
+      <div class="profile-card">
+        <div class="profile-avatar-large" id="profile-avatar-large">U</div>
+        <form id="profile-form">
+          <div class="form-group">
+            <label for="profile-pic">Profile Picture</label>
+            <input type="file" id="profile-pic" accept="image/*">
+          </div>
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" required>
+          </div>
+          <div class="form-group">
+            <label for="bio">Bio</label>
+            <textarea id="bio" placeholder="Tell us about yourself..."></textarea>
+          </div>
+          <button type="submit" class="save-btn">Save Changes</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="settings" class="courses-section">
+      <h2 class="section-title">Settings</h2>
+      <div class="settings-grid">
+        <div class="setting-card">
+          <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Notifications</h3>
+          <div class="setting-item">
+            <span>Email Notifications</span>
+            <div class="toggle-switch" id="email-toggle"></div>
+          </div>
+          <div class="setting-item">
+            <span>Push Notifications</span>
+            <div class="toggle-switch" id="push-toggle"></div>
+          </div>
+        </div>
+        <div class="setting-card">
+          <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Privacy</h3>
+          <div class="setting-item">
+            <span>Public Profile</span>
+            <div class="toggle-switch" id="public-toggle"></div>
+          </div>
+          <div class="setting-item">
+            <span>Share Progress</span>
+            <div class="toggle-switch" id="share-toggle"></div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 
   <nav class="bottom-nav">
     <ul>
-      <li><a href="#"><span class="material-icons">dashboard</span></a></li>
-      <li><a href="#courses"><span class="material-icons">school</span></a></li>
-      <li><a href="#progress"><span class="material-icons">assessment</span></a></li>
-      <li><a href="#profile"><span class="material-icons">person</span></a></li>
-      <li><a href="#settings"><span class="material-icons">settings</span></a></li>
+      <li><a href="#" data-target="dashboard"><span class="material-icons">dashboard</span></a></li>
+      <li><a href="#courses" data-target="courses"><span class="material-icons">school</span></a></li>
+      <li><a href="#progress" data-target="progress"><span class="material-icons">assessment</span></a></li>
+      <li><a href="#profile" data-target="profile"><span class="material-icons">person</span></a></li>
+      <li><a href="#settings" data-target="settings"><span class="material-icons">settings</span></a></li>
     </ul>
   </nav>
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
+    import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -499,7 +695,33 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
+    // Cloudinary configuration - Replace with your actual values
+    const CLOUDINARY_CLOUD_NAME = 'your_cloud_name'; // e.g., 'demo'
+    const UPLOAD_PRESET = 'your_upload_preset'; // e.g., 'ml_default'
+
     let userData = {};
+    let currentUser = null;
+
+    // Cloudinary upload function
+    async function uploadToCloudinary(file) {
+      if (!file) return null;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', UPLOAD_PRESET);
+      try {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        if (!res.ok) throw new Error('Upload failed');
+        const data = await res.json();
+        return data.secure_url;
+      } catch (e) {
+        console.error('Upload error:', e);
+        alert('Failed to upload image. Please try again.');
+        return null;
+      }
+    }
 
     // Dark mode toggle
     function toggleDarkMode() {
@@ -535,18 +757,22 @@
       }
     });
 
-    // Smooth scroll for navigation links
+    // Navigation handling
     document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      document.querySelectorAll('a[data-target]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
           e.preventDefault();
-          const targetId = this.getAttribute('href');
-          const target = document.querySelector(targetId);
-          if (target) {
-            target.scrollIntoView({
+          const target = this.getAttribute('data-target');
+          // Set active class
+          document.querySelectorAll('.sidebar a, .bottom-nav a').forEach(a => a.classList.remove('active'));
+          this.classList.add('active');
+          // Smooth scroll
+          const section = document.getElementById(target) || document.querySelector(`[data-section="${target}"]`);
+          if (section) {
+            section.scrollIntoView({
               behavior: 'smooth'
             });
-          } else if (targetId === '#') {
+          } else if (target === 'dashboard') {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }
         });
@@ -559,16 +785,99 @@
       window.location.href = 'login.html';
     };
 
+    // Update avatar
+    function updateAvatar(url) {
+      const avatar = document.getElementById('user-avatar');
+      const profileAvatar = document.getElementById('profile-avatar-large');
+      if (url) {
+        avatar.innerHTML = `<img src="${url}" alt="Profile">`;
+        profileAvatar.innerHTML = `<img src="${url}" alt="Profile">`;
+        avatar.style.background = 'none';
+        profileAvatar.style.background = 'none';
+      } else {
+        const initial = (userData.username || currentUser.email)[0].toUpperCase();
+        avatar.innerHTML = initial;
+        profileAvatar.innerHTML = initial;
+        avatar.style.background = 'var(--gradient)';
+        profileAvatar.style.background = 'var(--gradient)';
+      }
+    }
+
+    // Populate profile form
+    function populateProfile() {
+      document.getElementById('username').value = userData.username || '';
+      document.getElementById('bio').value = userData.bio || '';
+      updateAvatar(userData.profilePic);
+    }
+
+    // Handle profile save
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById('profile-pic');
+      let profilePic = userData.profilePic;
+      if (fileInput.files[0]) {
+        profilePic = await uploadToCloudinary(fileInput.files[0]);
+        if (!profilePic) return;
+      }
+      userData.username = document.getElementById('username').value;
+      userData.bio = document.getElementById('bio').value;
+      userData.profilePic = profilePic;
+      await set(ref(db, `users/${currentUser.uid}`), userData);
+      alert('Profile updated successfully!');
+      updateAvatar(profilePic);
+      document.getElementById('user-name').textContent = userData.username || currentUser.email;
+      document.getElementById('welcome-user').textContent = userData.username || 'Learner!';
+    });
+
+    // Populate progress section
+    function populateProgress() {
+      const progressGrid = document.getElementById('progress-grid');
+      progressGrid.innerHTML = '';
+      const enrolled = userData.enrolledCourses || {};
+      Object.entries(enrolled).forEach(([courseId, course]) => {
+        const item = document.createElement('div');
+        item.className = 'progress-item';
+        item.innerHTML = `
+          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">${course.title}</h3>
+          <div style="height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 8px 0;">
+            <div style="height: 100%; background: var(--accent); width: ${course.progress || 0}%; border-radius: 4px; transition: width 0.3s ease;"></div>
+          </div>
+          <p style="color: var(--text-secondary); font-size: 14px;">${course.progress || 0}% Complete</p>
+        `;
+        progressGrid.appendChild(item);
+      });
+    }
+
+    // Settings toggles (example - save to userData.settings)
+    function initSettings() {
+      const toggles = ['email-toggle', 'push-toggle', 'public-toggle', 'share-toggle'];
+      toggles.forEach(id => {
+        const toggle = document.getElementById(id);
+        const key = id.replace('-toggle', '');
+        const isActive = userData.settings?.[key] || false;
+        toggle.classList.toggle('active', isActive);
+        toggle.addEventListener('click', () => {
+          toggle.classList.toggle('active');
+          userData.settings = userData.settings || {};
+          userData.settings[key] = toggle.classList.contains('active');
+          set(ref(db, `users/${currentUser.uid}`), userData);
+        });
+      });
+    }
+
     // Auth state listener
     onAuthStateChanged(auth, (user) => {
       if (user) {
+        currentUser = user;
         // Fetch user data
         const userRef = ref(db, `users/${user.uid}`);
         onValue(userRef, (snapshot) => {
           userData = snapshot.val() || {};
           document.getElementById('welcome-user').textContent = userData.username || 'Learner!';
           document.getElementById('user-name').textContent = userData.username || user.email;
-          document.getElementById('user-avatar').textContent = (userData.username || user.email)[0].toUpperCase();
+
+          // Update avatar
+          updateAvatar(userData.profilePic);
 
           // Update stats
           const stats = userData.stats || { totalCourses: 0, hoursLearned: 0, completionRate: 0, badges: 0 };
@@ -578,7 +887,7 @@
           document.getElementById('badges').textContent = stats.badges;
 
           // Enrolled courses
-          const enrolledGrid = document.querySelector('.courses-section .cards-grid');
+          const enrolledGrid = document.getElementById('enrolled-grid');
           enrolledGrid.innerHTML = '';
           const enrolled = userData.enrolledCourses || {};
           let totalCourses = 0;
@@ -624,7 +933,7 @@
           }
 
           // Recommendations
-          const recGrid = document.querySelector('.recommendations .cards-grid');
+          const recGrid = document.getElementById('rec-grid');
           recGrid.innerHTML = '';
           const recommendations = userData.recommendations || [];
           recommendations.forEach((course) => {
@@ -645,6 +954,11 @@
             };
             recGrid.appendChild(card);
           });
+
+          // Populate other sections
+          populateProfile();
+          populateProgress();
+          initSettings();
         });
       } else {
         window.location.href = 'login.html';
