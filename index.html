@@ -2,349 +2,438 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>McDonald's Order Status</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-touch-fullscreen" content="yes">
+  <title>Vynix - LMS Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --mcd-yellow: #FFB81C;
-      --mcd-red: #C8102E;
-      --text-dark: #0F1419;
-      --text-light: #536471;
-      --border: #D8D9DB;
-      --white: #FFFFFF;
-      --background: #FFFFFF;
-      --background-dark: #15202B;
-      --text-dark-dark: #FFFFFF;
-      --text-light-dark: #8899A6;
-      --border-dark: #2F3336;
-      --white-dark: #1C2526;
-      --gradient-bg: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+      --bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --text-primary: #1a202c;
+      --text-secondary: #718096;
+      --border: rgba(226, 232, 240, 0.8);
+      --accent: #4299e1;
+      --accent-secondary: #48bb78;
+      --gradient: linear-gradient(135deg, #4299e1 0%, #48bb78 50%, #ed8936 100%);
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --glass: rgba(255, 255, 255, 0.25);
     }
-
-    [data-theme="dark"] {
-      --background: var(--background-dark);
-      --text-dark: var(--text-dark-dark);
-      --text-light: var(--text-light-dark);
-      --border: var(--border-dark);
-      --white: var(--white-dark);
-      --gradient-bg: linear-gradient(135deg, #1c2526 0%, #15202b 100%);
+    body.dark {
+      --bg: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+      --card-bg: rgba(45, 55, 72, 0.95);
+      --text-primary: #f7fafc;
+      --text-secondary: #a0aec0;
+      --border: rgba(255, 255, 255, 0.1);
+      --accent: #63b3ed;
+      --accent-secondary: #68d391;
+      --gradient: linear-gradient(135deg, #63b3ed 0%, #68d391 50%, #f6ad55 100%);
+      --glass: rgba(255, 255, 255, 0.1);
     }
-
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      background: var(--gradient-bg);
-      min-height: 100vh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
       margin: 0;
       padding: 0;
-      color: var(--text-dark);
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
+      overflow-x: hidden;
+      line-height: 1.6;
+      min-height: 100vh;
       position: relative;
     }
-
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 80%, rgba(66, 153, 225, 0.1) 0%, transparent 50%), 
+                  radial-gradient(circle at 80% 20%, rgba(72, 187, 120, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      min-height: 100vh;
+    }
     .header {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient);
+      border-radius: 24px 24px 0 0;
+    }
+    .logo-welcome {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--gradient);
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1.5rem;
-      background: var(--white);
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      margin-bottom: 2rem;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
     }
-
-    .logo {
-      font-size: 2rem;
+    .welcome-text h1 {
+      font-size: 28px;
       font-weight: 800;
-      color: var(--mcd-yellow);
+      margin: 0;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .welcome-text p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+    .user-actions {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 12px;
     }
-
-    .logo svg {
-      width: 32px;
-      height: 32px;
-      fill: var(--mcd-red);
-    }
-
-    .order-sections {
-      display: flex;
-      gap: 1.5rem;
-    }
-
-    .order-section {
-      flex: 1;
-      background: var(--white);
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    .role-badge {
+      background: var(--glass);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
       border: 1px solid var(--border);
     }
-
-    .order-section h2 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      color: var(--text-dark);
-      text-align: center;
+    .logout-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
-
-    .order-grid {
+    .logout-btn:hover {
+      background: #3182ce;
+      transform: translateY(-1px);
+    }
+    .content-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    .content-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient);
+      border-radius: 24px 24px 0 0;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .section-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text-primary);
+    }
+    .input-group {
+      margin-bottom: 20px;
+    }
+    .input-field {
+      width: 100%;
+      padding: 16px 20px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--glass);
+      color: var(--text-primary);
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+    .btn {
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 16px 24px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .course-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 400px;
+    }
+    .course-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.5rem;
+      gap: 20px;
     }
-
-    .order-card {
-      background: var(--white);
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    .course-card {
+      background: var(--glass);
       border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      transition: all 0.3s ease;
     }
-
-    .order-card.pending {
-      border-left: 4px solid var(--mcd-yellow);
+    .course-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
     }
-
-    .order-card.ready {
-      border-left: 4px solid #22c55e;
-    }
-
-    .order-card h3 {
-      font-size: 1.5rem;
+    .course-title {
+      font-size: 18px;
       font-weight: 700;
-      margin-bottom: 0.5rem;
-      color: var(--text-dark);
+      margin-bottom: 8px;
+      color: var(--text-primary);
     }
-
-    .order-card p {
-      font-size: 1rem;
-      color: var(--text-light);
-      margin-bottom: 0.5rem;
+    .course-instructor {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 12px;
     }
-
-    .order-card ul {
-      list-style: disc;
-      padding-left: 1.5rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .order-card li {
-      font-size: 0.95rem;
-      color: var(--text-dark);
-    }
-
-    .status {
-      font-weight: 600;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      display: inline-block;
-    }
-
-    .status.pending {
-      background: var(--mcd-yellow);
-      color: var(--text-dark);
-    }
-
-    .status.ready {
-      background: #22c55e;
-      color: var(--white);
-    }
-
-    .no-orders {
-      text-align: center;
-      font-size: 1.2rem;
-      color: var(--text-light);
-      padding: 1rem;
-    }
-
-    .error-message {
-      text-align: center;
-      font-size: 1.2rem;
-      color: var(--mcd-red);
-      padding: 2rem;
-      background: var(--white);
+    .enroll-btn, .students-btn {
+      width: 100%;
+      padding: 12px;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .ad-popup {
-      position: absolute;
-      width: 300px;
-      background: var(--white);
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      border: 1px solid var(--border);
-      z-index: 1000;
-      transition: opacity 0.3s ease, transform 0.3s ease;
-      opacity: 0;
-      transform: translateY(20px);
-      pointer-events: none;
-    }
-
-    .ad-popup.visible {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-
-    .ad-popup.left {
-      left: 2rem;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    .ad-popup.right {
-      right: 2rem;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    .ad-popup h3 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--mcd-red);
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-
-    .ad-popup .ad-item {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
-      padding: 0.5rem;
-      background: var(--gradient-bg);
-      border-radius: 8px;
-    }
-
-    .ad-popup .ad-item img {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-
-    .ad-popup .ad-item p {
-      font-size: 1rem;
       font-weight: 600;
-      color: var(--text-dark);
-    }
-
-    .ad-popup .close-btn {
-      position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      background: var(--mcd-red);
-      color: var(--white);
-      border: none;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       cursor: pointer;
-      font-size: 1rem;
+      transition: all 0.3s ease;
+      margin-top: 8px;
     }
-
+    .enroll-btn {
+      background: var(--accent-secondary);
+      color: white;
+      border: none;
+    }
+    .enroll-btn:hover {
+      background: #38a169;
+    }
+    .enroll-btn:disabled {
+      background: var(--text-secondary);
+      cursor: not-allowed;
+    }
+    .students-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+    }
+    .students-btn:hover {
+      background: #3182ce;
+    }
+    .students-list {
+      margin-top: 12px;
+      display: none;
+    }
+    .student-item {
+      background: var(--glass);
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+    .role-setup {
+      text-align: center;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .role-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+    .role-btn {
+      flex: 1;
+      padding: 20px;
+      border-radius: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid var(--border);
+    }
+    .role-btn.student {
+      background: rgba(72, 187, 120, 0.1);
+      color: var(--accent-secondary);
+    }
+    .role-btn.instructor {
+      background: rgba(66, 153, 225, 0.1);
+      color: var(--accent);
+    }
+    .role-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .error-message, .success-message {
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      margin: 16px 0;
+      display: none;
+    }
+    .error-message {
+      color: #e53e3e;
+      background: rgba(229, 62, 62, 0.1);
+      border-left: 4px solid #e53e3e;
+    }
+    .success-message {
+      color: #48bb78;
+      background: rgba(72, 187, 120, 0.1);
+      border-left: 4px solid #48bb78;
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
     @media (max-width: 768px) {
-      .container {
-        padding: 1rem;
-      }
-
-      .header {
-        padding: 1rem;
-      }
-
-      .logo {
-        font-size: 1.5rem;
-      }
-
-      .logo svg {
-        width: 24px;
-        height: 24px;
-      }
-
-      .order-sections {
-        flex-direction: column;
-      }
-
-      .order-section {
-        margin-bottom: 1.5rem;
-      }
-
-      .order-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .order-card h3 {
-        font-size: 1.25rem;
-      }
-
-      .order-card p, .order-card li {
-        font-size: 0.9rem;
-      }
-
-      .ad-popup {
-        width: 90%;
-        left: 50%;
-        transform: translateX(-50%);
-        top: auto;
-        bottom: 1rem;
-      }
-
-      .ad-popup.left, .ad-popup.right {
-        left: 50%;
-        right: auto;
-        top: auto;
-        bottom: 1rem;
-        transform: translateX(-50%);
-      }
+      .dashboard-container { padding: 16px; }
+      .header { flex-direction: column; gap: 16px; text-align: center; }
+      .course-list { grid-template-columns: 1fr; }
+      .role-buttons { flex-direction: column; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="logo">
-        <svg viewBox="0 0 24 24">
-          <path d="M19.5 3C17.65 3 16.5 4.79 16.5 6.38v5.44c0 1.59 1.15 2.88 2.5 2.88V6.38c0-.52.39-1.13 1-1.13s1 .61 1 1.13v8.32c1.35 0 2.5-1.29 2.5-2.88V6.38C24.5 4.79 23.35 3 21.5 3h-2zM2.5 3C.65 3-.5 4.79-.5 6.38v5.44c0 1.59 1.15 2.88 2.5 2.88V6.38c0-.52.39-1.13 1-1.13s1 .61 1 1.13v8.32c1.35 0 2.5-1.29 2.5-2.88V6.38C8.5 4.79 7.35 3 5.5 3h-3z"></path>
-        </svg>
-        McDonald's Order Status
+  <div class="dashboard-container">
+    <header class="header">
+      <div class="logo-welcome">
+        <div class="logo-icon">V</div>
+        <div class="welcome-text">
+          <h1 id="welcome-title">Vynix LMS</h1>
+          <p id="user-greeting">Welcome back!</p>
+        </div>
       </div>
-    </div>
-    <div class="order-sections">
-      <div class="order-section" id="preparing-section">
-        <h2>Preparing Orders</h2>
-        <div class="order-grid" id="preparing-grid"></div>
-        <div class="no-orders hidden" id="no-preparing">No preparing orders.</div>
+      <div class="user-actions">
+        <span id="role-badge" class="role-badge" style="display: none;">Student</span>
+        <button class="logout-btn" id="logout-btn">Sign Out</button>
       </div>
-      <div class="order-section" id="ready-section">
-        <h2>Ready for Collection</h2>
-        <div class="order-grid" id="ready-grid"></div>
-        <div class="no-orders hidden" id="no-ready">No ready orders.</div>
-      </div>
-    </div>
-    <div class="error-message hidden" id="error-message">Error loading orders. Please try again later.</div>
-    <div class="ad-popup hidden" id="ad-popup">
-      <button class="close-btn" onclick="document.getElementById('ad-popup').classList.add('hidden')">✕</button>
-      <h3>Try These Favorites!</h3>
-      <div id="ad-content"></div>
-    </div>
+    </header>
+
+    <main>
+      <!-- Role Setup Section (shown on first login) -->
+      <section id="role-setup" class="content-card" style="display: none;">
+        <h2 class="section-title">Choose Your Role</h2>
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 32px;">
+          Select your role to get started with Vynix LMS.
+        </p>
+        <div class="role-setup">
+          <div class="role-btn student" onclick="setRole('student')">
+            <div style="font-size: 48px; margin-bottom: 12px;">👨‍🎓</div>
+            <h3 style="font-size: 20px; font-weight: 700; margin: 0 0 8px;">Student</h3>
+            <p style="margin: 0; font-size: 14px; opacity: 0.8;">Enroll in courses and learn.</p>
+          </div>
+          <div class="role-btn instructor" onclick="setRole('instructor')">
+            <div style="font-size: 48px; margin-bottom: 12px;">👨‍🏫</div>
+            <h3 style="font-size: 20px; font-weight: 700; margin: 0 0 8px;">Instructor</h3>
+            <p style="margin: 0; font-size: 14px; opacity: 0.8;">Create courses and teach.</p>
+          </div>
+        </div>
+        <div class="role-buttons">
+          <button class="role-btn" onclick="setRole('student')" style="background: var(--accent-secondary); color: white;">I'm a Student</button>
+          <button class="role-btn" onclick="setRole('instructor')" style="background: var(--accent); color: white;">I'm an Instructor</button>
+        </div>
+      </section>
+
+      <!-- Student Dashboard -->
+      <section id="student-dashboard" class="content-card" style="display: none;">
+        <h2 class="section-title">Available Courses</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 24px;">Browse and enroll in courses taught by instructors.</p>
+        <div id="courses-list" class="course-list"></div>
+        <div id="student-message" class="success-message"></div>
+      </section>
+
+      <!-- Instructor Dashboard -->
+      <section id="instructor-dashboard" class="content-card" style="display: none;">
+        <h2 class="section-title">Your Instructor Dashboard</h2>
+        <div class="course-form">
+          <input type="text" id="course-title" class="input-field" placeholder="Enter course title (e.g., Python Basics)">
+          <button class="btn" id="create-course-btn">
+            <span id="create-spinner" class="spinner" style="display: none;"></span>
+            Create New Course
+          </button>
+        </div>
+        <h3 style="margin: 32px 0 16px; color: var(--text-primary);">Your Courses</h3>
+        <div id="instructor-courses" class="course-list"></div>
+        <div id="instructor-message" class="success-message"></div>
+      </section>
+    </main>
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+    import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+    import { getDatabase, ref, onValue, set, push, update, child, get } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -358,131 +447,190 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getDatabase(app);
 
-    const preparingGrid = document.getElementById("preparing-grid");
-    const readyGrid = document.getElementById("ready-grid");
-    const noPreparingDiv = document.getElementById("no-preparing");
-    const noReadyDiv = document.getElementById("no-ready");
-    const errorMessageDiv = document.getElementById("error-message");
-    const adPopup = document.getElementById("ad-popup");
-    const adContent = document.getElementById("ad-content");
+    let currentUser = null;
+    let userRole = null;
 
-    let menuItems = {};
-
-    // Load menu items to map itemId to name and for ads
-    function loadMenuItems() {
-      const menuRef = ref(db, 'menu');
-      onValue(menuRef, (snapshot) => {
-        menuItems = snapshot.val() || {};
-        console.log("Fetched menu items:", menuItems);
-        loadOrders();
-      }, (error) => {
-        console.error("Error loading menu items:", error);
-        errorMessageDiv.textContent = "Error loading menu data. Item names may not display correctly.";
-        errorMessageDiv.classList.remove("hidden");
-      });
+    function showMessage(id, message, isError = false) {
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.className = isError ? 'error-message' : 'success-message';
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 5000);
     }
 
-    // Display ads in the popup
-    function displayAds(hasPreparing, hasReady) {
-      adPopup.classList.remove("visible");
-      adPopup.classList.add("hidden");
-      adContent.innerHTML = '';
+    function showSpinner(id, show) {
+      document.getElementById(id).style.display = show ? 'inline-block' : 'none';
+    }
 
-      if (!hasPreparing || !hasReady) {
-        const menuArray = Object.entries(menuItems);
-        if (menuArray.length === 0) return;
-
-        // Select up to 3 random menu items
-        const shuffled = menuArray.sort(() => 0.5 - Math.random());
-        const selectedItems = shuffled.slice(0, Math.min(3, menuArray.length));
-
-        selectedItems.forEach(([itemId, item]) => {
-          const adItem = document.createElement("div");
-          adItem.className = "ad-item";
-          adItem.innerHTML = `
-            <img src="${item.image || 'https://via.placeholder.com/60'}" alt="${item.name}">
-            <p>${item.name}</p>
-          `;
-          adContent.appendChild(adItem);
-        });
-
-        // Position popup based on empty section
-        adPopup.classList.remove("left", "right");
-        if (!hasPreparing) {
-          adPopup.classList.add("left");
-        } else if (!hasReady) {
-          adPopup.classList.add("right");
-        }
-        adPopup.classList.remove("hidden");
-        adPopup.classList.add("visible");
+    function updateUI() {
+      if (!currentUser) {
+        window.location.href = 'login.html';
+        return;
+      }
+      document.getElementById('user-greeting').textContent = `Welcome, ${currentUser.displayName || currentUser.email}!`;
+      if (userRole) {
+        document.getElementById('role-badge').textContent = userRole.charAt(0).toUpperCase() + userRole.slice(1);
+        document.getElementById('role-badge').style.display = 'inline-block';
+        document.getElementById(userRole === 'student' ? 'student-dashboard' : 'instructor-dashboard').style.display = 'block';
+        loadCourses();
+      } else {
+        // Show role setup if no role set
+        document.getElementById('role-setup').style.display = 'block';
       }
     }
 
-    // Load and display orders
-    function loadOrders() {
-      const ordersRef = ref(db, 'orders');
-      onValue(ordersRef, (snapshot) => {
-        const orders = snapshot.val() || {};
-        preparingGrid.innerHTML = '';
-        readyGrid.innerHTML = '';
-        let hasPreparing = false;
-        let hasReady = false;
-
-        Object.entries(orders).forEach(([orderId, order]) => {
-          if (order.status === 'pending' || order.status === 'ready') {
-            const orderCard = document.createElement('div');
-            orderCard.className = `order-card ${order.status}`;
-            orderCard.innerHTML = `
-              <h3>Order #${order.orderNumber}</h3>
-              <p>Placed: ${new Date(order.timestamp).toLocaleTimeString()}</p>
-              <ul>
-                ${order.items.map(item => {
-                  const itemName = menuItems[item.itemId]?.name || 'Loading Item...';
-                  return `<li>${itemName} x${item.quantity}</li>`;
-                }).join('')}
-              </ul>
-              <div class="status ${order.status}">
-                ${order.status === 'pending' ? 'Preparing' : 'Ready for Collection'}
-              </div>
-            `;
-            if (order.status === 'pending') {
-              hasPreparing = true;
-              preparingGrid.appendChild(orderCard);
-            } else if (order.status === 'ready') {
-              hasReady = true;
-              readyGrid.appendChild(orderCard);
-            }
-          }
+    async function setUserRole(role) {
+      if (!currentUser) return;
+      try {
+        // Set user data if not exists
+        const userRef = ref(db, 'users/' + currentUser.uid);
+        await set(userRef, {
+          name: currentUser.displayName || currentUser.email.split('@')[0],
+          email: currentUser.email,
+          role: role
         });
+        userRole = role;
+        showMessage('instructor-message', `Role set to ${role}! Dashboard loading...`);
+        updateUI();
+      } catch (error) {
+        showMessage('instructor-message', 'Error setting role: ' + error.message, true);
+      }
+    }
 
-        noPreparingDiv.classList.toggle('hidden', hasPreparing);
-        noReadyDiv.classList.toggle('hidden', hasReady);
-        errorMessageDiv.classList.add('hidden');
+    window.setRole = setRole; // Expose for onclick
 
-        // Display ads based on empty sections
-        displayAds(hasPreparing, hasReady);
-      }, (error) => {
-        console.error("Error loading orders:", error);
-        noPreparingDiv.classList.add('hidden');
-        noReadyDiv.classList.add('hidden');
-        errorMessageDiv.textContent = "Error loading orders: " + error.message;
-        errorMessageDiv.classList.remove("hidden");
-        adPopup.classList.add("hidden");
+    function loadCourses() {
+      const coursesRef = ref(db, 'courses');
+      onValue(coursesRef, (snapshot) => {
+        const courses = snapshot.val() || {};
+        const courseList = Object.entries(courses).map(([id, data]) => ({ id, ...data }));
+        
+        if (userRole === 'student') {
+          displayStudentCourses(courseList);
+        } else {
+          // Filter instructor's courses
+          const myCourses = courseList.filter(course => course.instructorUid === currentUser.uid);
+          displayInstructorCourses(myCourses);
+        }
       });
     }
 
-    // Apply theme from localStorage
-    function applyTheme() {
-      const theme = localStorage.getItem("theme") || "light";
-      document.documentElement.setAttribute("data-theme", theme);
+    function displayStudentCourses(courses) {
+      const container = document.getElementById('courses-list');
+      container.innerHTML = '';
+      if (courses.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No courses available yet. Check back soon!</p>';
+        return;
+      }
+      courses.forEach(course => {
+        const isEnrolled = checkEnrollment(course.id); // We'll implement this
+        const card = document.createElement('div');
+        card.className = 'course-card';
+        card.innerHTML = `
+          <div class="course-title">${course.title}</div>
+          <div class="course-instructor">By Instructor (ID: ${course.instructorUid})</div>
+          <button class="enroll-btn" ${isEnrolled ? 'disabled' : ''} onclick="enrollInCourse('${course.id}')">
+            ${isEnrolled ? 'Enrolled' : 'Enroll Now'}
+          </button>
+        `;
+        container.appendChild(card);
+      });
     }
 
-    // Initialize on page load
-    document.addEventListener("DOMContentLoaded", () => {
-      applyTheme();
-      loadMenuItems();
+    async function checkEnrollment(courseId) {
+      const enrollmentRef = ref(db, `courses/${courseId}/students/${currentUser.uid}`);
+      const snapshot = await get(enrollmentRef);
+      return snapshot.exists();
+    }
+
+    async function enrollInCourse(courseId) {
+      try {
+        const updates = {};
+        updates[`courses/${courseId}/students/${currentUser.uid}`] = true;
+        await update(ref(db), updates);
+        showMessage('student-message', 'Enrolled successfully!');
+        loadCourses(); // Refresh
+      } catch (error) {
+        showMessage('student-message', 'Enrollment failed: ' + error.message, true);
+      }
+    }
+
+    window.enrollInCourse = enrollInCourse;
+
+    function displayInstructorCourses(courses) {
+      const container = document.getElementById('instructor-courses');
+      container.innerHTML = '';
+      if (courses.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-secondary);">No courses created yet. Create one above!</p>';
+        return;
+      }
+      courses.forEach(course => {
+        const card = document.createElement('div');
+        card.className = 'course-card';
+        card.innerHTML = `
+          <div class="course-title">${course.title}</div>
+          <button class="students-btn" onclick="viewStudents('${course.id}')">View Students (${course.students ? Object.keys(course.students).length : 0})</button>
+          <div id="students-${course.id}" class="students-list"></div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    window.viewStudents = async (courseId) => {
+      const list = document.getElementById(`students-${courseId}`);
+      list.style.display = list.style.display === 'block' ? 'none' : 'block';
+      if (list.style.display === 'block') {
+        const studentsRef = ref(db, `courses/${courseId}/students`);
+        onValue(studentsRef, (snapshot) => {
+          const students = snapshot.val() || {};
+          list.innerHTML = Object.keys(students).map(uid => `<div class="student-item">Student ${uid}</div>`).join('');
+        });
+      }
+    };
+
+    document.getElementById('create-course-btn').addEventListener('click', async () => {
+      const title = document.getElementById('course-title').value.trim();
+      if (!title) {
+        showMessage('instructor-message', 'Please enter a course title.', true);
+        return;
+      }
+      try {
+        showSpinner('create-spinner', true);
+        const newCourseRef = push(ref(db, 'courses'));
+        await set(newCourseRef, {
+          title: title,
+          instructorUid: currentUser.uid
+        });
+        document.getElementById('course-title').value = '';
+        showMessage('instructor-message', 'Course created successfully!');
+      } catch (error) {
+        showMessage('instructor-message', 'Creation failed: ' + error.message, true);
+      } finally {
+        showSpinner('create-spinner', false);
+      }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await signOut(auth);
+    });
+
+    // Auth state listener
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      if (user) {
+        // Fetch or set user role
+        const userRef = ref(db, 'users/' + user.uid);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+          userRole = snapshot.val().role;
+        }
+        updateUI();
+      } else {
+        window.location.href = 'login.html';
+      }
     });
   </script>
 </body>
