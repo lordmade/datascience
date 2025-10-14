@@ -8,6 +8,9 @@
   <meta name="apple-touch-fullscreen" content="yes">
   <title>Vynix - Teacher Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js"></script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -502,14 +505,14 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/v12.4.0/firebase-app.js';
-    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/v12.4.0/firebase-auth.js';
-    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/v12.4.0/firebase-database.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+    import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
       authDomain: "fire-b-a8878.firebaseapp.com",
-      databaseURL: "https://fire-b-a8878-default-rtdb.firebaseio.com",
+      databaseURL: "https://fire-b-a8878.firebaseio.com",
       projectId: "fire-b-a8878",
       storageBucket: "fire-b-a8878.firebasestorage.app",
       messagingSenderId: "658673187627",
@@ -554,7 +557,7 @@
 
     // Close dialog on backdrop click
     document.getElementById('dialog-backdrop').addEventListener('click', (e) => {
-      if (e.target === document.getElementById('dialog-backdrop')) {
+      if (e.target.id === 'dialog-backdrop') {
         closeDialog();
       }
     });
@@ -601,12 +604,9 @@
       if (url) {
         avatar.innerHTML = `<img src="${url}" alt="Profile">`;
         avatar.style.background = 'none';
-      } else if (currentUser && currentUser.email) {
-        const initial = currentUser.email[0].toUpperCase();
-        avatar.innerHTML = initial;
-        avatar.style.background = 'var(--gradient)';
       } else {
-        avatar.innerHTML = 'T';
+        const initial = (currentUser.email)[0].toUpperCase();
+        avatar.innerHTML = initial;
         avatar.style.background = 'var(--gradient)';
       }
     }
@@ -614,14 +614,9 @@
     // Update stats
     function updateStats() {
       const assignedLearners = Object.values(allUsers).filter(user => user.teacherId === currentUser.uid).length;
-      const now = Date.now();
-      const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
-      const activeLearnersCount = Object.values(allUsers).filter(user => {
-        if (user.teacherId !== currentUser.uid) return false;
-        return user.lastActivity && user.lastActivity > weekAgo;
-      }).length;
+      const activeLearners = Math.floor(assignedLearners * 0.7); // Placeholder for active count; in production, query last activity
       document.getElementById('assigned-learners-count').textContent = assignedLearners;
-      document.getElementById('active-learners').textContent = activeLearnersCount;
+      document.getElementById('active-learners').textContent = activeLearners;
     }
 
     // Populate assigned learners
@@ -636,12 +631,11 @@
       assignedLearners.forEach(([uid, user]) => {
         const card = document.createElement('div');
         card.className = 'user-card';
-        const displayName = user.username || user.email || 'Unknown';
-        const initial = displayName[0].toUpperCase();
+        const initial = (user.username || user.email)[0].toUpperCase();
         card.innerHTML = `
           <div class="user-avatar-small">${initial}</div>
-          <div class="user-name">${displayName}</div>
-          <div class="user-meta">Email: ${user.email || 'N/A'} ${user.enrolledCourses ? `• Enrolled Courses: ${Object.keys(user.enrolledCourses).length}` : ''}</div>
+          <div class="user-name">${user.username || user.email}</div>
+          <div class="user-meta">Email: ${user.email} ${user.enrolledCourses ? `• Enrolled Courses: ${Object.keys(user.enrolledCourses).length}` : ''}</div>
         `;
         grid.appendChild(card);
       });
@@ -657,7 +651,7 @@
         currentUser = user;
         showLoader();
         updateAvatar(null);  // Use email initial for teacher
-        document.getElementById('user-name').textContent = user.email || 'Teacher';
+        document.getElementById('user-name').textContent = user.email;
 
         // Fetch all users to find assigned ones
         const usersRef = ref(db, 'users');
