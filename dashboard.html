@@ -441,7 +441,8 @@
       color: var(--text-primary);
     }
     .form-group input,
-    .form-group textarea {
+    .form-group textarea,
+    .form-group select {
       width: 100%;
       padding: 12px 16px;
       border: 1px solid var(--border);
@@ -452,7 +453,8 @@
       transition: border-color 0.3s ease;
     }
     .form-group input:focus,
-    .form-group textarea:focus {
+    .form-group textarea:focus,
+    .form-group select:focus {
       outline: none;
       border-color: var(--accent);
     }
@@ -721,6 +723,96 @@
       padding: 16px;
       text-align: center;
     }
+    /* Chat Styles */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 500px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    #messages-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      max-height: 400px;
+    }
+    .message {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 18px;
+      max-width: 70%;
+    }
+    .message.sent {
+      background: var(--accent);
+      color: white;
+      margin-left: auto;
+      text-align: right;
+    }
+    .message.received {
+      background: var(--glass);
+      margin-right: auto;
+    }
+    #message-form {
+      display: flex;
+      padding: 10px;
+      gap: 10px;
+    }
+    #message-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+    #message-form button {
+      padding: 10px 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    .assignment-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+    .assigned-teacher {
+      background: var(--accent-secondary);
+      color: white;
+      padding: 12px;
+      border-radius: 12px;
+      margin: 20px 0;
+      font-weight: 600;
+    }
+    .assign-btn {
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      margin-top: 16px;
+    }
+    .assign-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .assign-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     @media (max-width: 1024px) {
       .sidebar {
         transform: translateX(-100%);
@@ -739,6 +831,7 @@
       .cards-grid { grid-template-columns: 1fr; }
       .bottom-nav { display: block; }
       .dialog { padding: 24px; }
+      .chat-container { height: 400px; }
     }
   </style>
 </head>
@@ -768,6 +861,8 @@
       <li><a href="#progress" data-target="progress">Progress</a></li>
       <li><a href="#quizzes" data-target="quizzes">Quizzes</a></li>
       <li><a href="#submissions" data-target="submissions">Submissions</a></li>
+      <li><a href="#" data-target="assign-teacher">Assign Teacher</a></li>
+      <li><a href="#" data-target="chat">Chat</a></li>
       <li><a href="#profile" data-target="profile">Profile</a></li>
       <li><a href="#settings" data-target="settings">Settings</a></li>
     </ul>
@@ -852,6 +947,44 @@
       </div>
     </section>
 
+    <section id="assign-teacher" class="courses-section">
+      <h2 class="section-title">Assign Teacher</h2>
+      <div class="assignment-card">
+        <div id="assigned-teacher-info" style="display: none;">
+          <div class="assigned-teacher">
+            Assigned Teacher: <span id="current-teacher-name"></span>
+          </div>
+          <button class="assign-btn" onclick="changeTeacher()">Change Teacher</button>
+        </div>
+        <form id="teacher-assign-form" style="display: block;">
+          <div class="form-group">
+            <label for="teacher-id">Teacher ID (UID or Email)</label>
+            <input type="text" id="teacher-id" placeholder="Enter teacher UID or email" required>
+          </div>
+          <div class="form-group">
+            <label for="teacher-name">Teacher Name (Optional)</label>
+            <input type="text" id="teacher-name" placeholder="Enter teacher name">
+          </div>
+          <button type="submit" class="assign-btn">Assign Teacher</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="chat" class="courses-section">
+      <h2 class="section-title">Chat with Teacher</h2>
+      <div id="no-teacher" style="text-align: center; color: var(--text-secondary); display: none; padding: 40px;">No teacher assigned yet.</div>
+      <div class="chat-container" id="chat-container" style="display: none;">
+        <div id="teacher-header" style="padding: 10px; background: var(--glass); border-radius: 10px; margin-bottom: 10px; text-align: center;">
+          Chatting with <span id="chat-teacher-name">Teacher</span>
+        </div>
+        <div id="messages-list"></div>
+        <form id="message-form">
+          <input type="text" id="message-input" placeholder="Type a message...">
+          <button type="submit">Send</button>
+        </form>
+      </div>
+    </section>
+
     <section id="profile" class="courses-section">
       <h2 class="section-title">Edit Profile</h2>
       <div class="profile-card">
@@ -910,6 +1043,8 @@
       <li><a href="#progress" data-target="progress"><span class="material-icons">assessment</span></a></li>
       <li><a href="#quizzes" data-target="quizzes"><span class="material-icons">quiz</span></a></li>
       <li><a href="#submissions" data-target="submissions"><span class="material-icons">assignment</span></a></li>
+      <li><a href="#" data-target="assign-teacher"><span class="material-icons">person_add</span></a></li>
+      <li><a href="#" data-target="chat"><span class="material-icons">chat_bubble</span></a></li>
       <li><a href="#profile" data-target="profile"><span class="material-icons">person</span></a></li>
       <li><a href="#settings" data-target="settings"><span class="material-icons">settings</span></a></li>
     </ul>
@@ -951,6 +1086,7 @@
     let userData = {};
     let currentUser = null;
     let isInitialLoad = true;
+    let messages = [];
 
     const loader = document.getElementById('loader-overlay');
 
@@ -1024,6 +1160,69 @@
       const courseRef = ref(db, `users/${currentUser.uid}/enrolledCourses/${courseId}/lessons/${lessonId}`);
       await update(courseRef, { completed: true, timestamp: Date.now() });
     }
+
+    // Populate messages
+    function populateMessages() {
+      const list = document.getElementById('messages-list');
+      if (!list) return;
+      list.innerHTML = '';
+      messages.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = `message ${msg.senderId === currentUser.uid ? 'sent' : 'received'}`;
+        div.innerHTML = `
+          <p>${msg.text}</p>
+          <small style="opacity: 0.7; font-size: 12px;">${new Date(msg.timestamp).toLocaleTimeString()}</small>
+        `;
+        list.appendChild(div);
+      });
+      list.scrollTop = list.scrollHeight;
+    }
+
+    // Handle teacher assignment form
+    document.getElementById('teacher-assign-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showLoader();
+      const teacherId = document.getElementById('teacher-id').value.trim();
+      const teacherName = document.getElementById('teacher-name').value.trim();
+      if (!teacherId) {
+        hideLoader();
+        showDialog('Please enter a teacher ID.', 'error');
+        return;
+      }
+      // For simplicity, assume teacherId is UID. In production, validate if teacher exists.
+      userData.teacherId = teacherId;
+      if (teacherName) {
+        userData.teacherName = teacherName;
+      }
+      await set(ref(db, `users/${currentUser.uid}`), userData);
+      hideLoader();
+      showDialog('Teacher assigned successfully!', 'success');
+      populateTeacherAssignment();
+    });
+
+    // Function to populate teacher assignment UI
+    function populateTeacherAssignment() {
+      const assignedInfo = document.getElementById('assigned-teacher-info');
+      const assignForm = document.getElementById('teacher-assign-form');
+      if (userData.teacherId) {
+        assignedInfo.style.display = 'block';
+        assignForm.style.display = 'none';
+        document.getElementById('current-teacher-name').textContent = userData.teacherName || userData.teacherId;
+      } else {
+        assignedInfo.style.display = 'none';
+        assignForm.style.display = 'block';
+      }
+    }
+
+    // Change teacher function
+    window.changeTeacher = () => {
+      userData.teacherId = null;
+      userData.teacherName = null;
+      set(ref(db, `users/${currentUser.uid}`), userData).then(() => {
+        showDialog('Teacher assignment cleared.', 'info');
+        populateTeacherAssignment();
+      });
+    };
 
     // Populate quizzes section
     function populateQuizzes() {
@@ -1182,6 +1381,24 @@
       });
       // Initialize dashboard
       showTab('dashboard');
+
+      // Message form handler
+      const messageForm = document.getElementById('message-form');
+      messageForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = document.getElementById('message-input');
+        const text = input.value.trim();
+        if (!text || !userData.teacherId) return;
+        const chatId = `${currentUser.uid}_${userData.teacherId}`;
+        const messagesRef = ref(db, `chats/${chatId}/messages`);
+        const msg = {
+          text,
+          senderId: currentUser.uid,
+          timestamp: Date.now()
+        };
+        await push(messagesRef, msg);
+        input.value = '';
+      });
     });
 
     // Logout
@@ -1398,6 +1615,46 @@
             recGrid.appendChild(card);
           });
 
+          // Chat setup
+          const noTeacher = document.getElementById('no-teacher');
+          const chatContainer = document.getElementById('chat-container');
+          const chatTeacherName = document.getElementById('chat-teacher-name');
+          if (userData.teacherId) {
+            noTeacher.style.display = 'none';
+            chatContainer.style.display = 'flex';
+            // Fetch teacher name if not stored
+            if (!userData.teacherName) {
+              const teacherRef = ref(db, `users/${userData.teacherId}/username`);
+              onValue(teacherRef, (snap) => {
+                const name = snap.val() || userData.teacherId;
+                userData.teacherName = name;
+                set(ref(db, `users/${currentUser.uid}`), userData);
+                chatTeacherName.textContent = name;
+              });
+            } else {
+              chatTeacherName.textContent = userData.teacherName;
+            }
+            // Messages listener
+            const chatId = `${currentUser.uid}_${userData.teacherId}`;
+            const messagesRef = ref(db, `chats/${chatId}/messages`);
+            onValue(messagesRef, (snapshot) => {
+              const data = snapshot.val();
+              if (data) {
+                messages = Object.entries(data).map(([key, value]) => ({ ...value, id: key }));
+                messages.sort((a, b) => a.timestamp - b.timestamp);
+              } else {
+                messages = [];
+              }
+              populateMessages();
+            });
+          } else {
+            noTeacher.style.display = 'block';
+            chatContainer.style.display = 'none';
+          }
+
+          // Populate teacher assignment UI
+          populateTeacherAssignment();
+
           // Populate other sections
           populateProfile();
           populateProgress();
@@ -1420,4 +1677,4 @@
     window.completeLesson = completeLesson;
   </script>
 </body>
-</html> 
+</html>
