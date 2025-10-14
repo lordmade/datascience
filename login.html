@@ -141,38 +141,6 @@
       margin-bottom: 32px;
       line-height: 1.5;
     }
-    .tabs {
-      display: flex;
-      margin-bottom: 32px;
-      background: var(--glass);
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 16px;
-      background: transparent;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .tab-btn.active {
-      color: var(--accent);
-      background: rgba(66, 153, 225, 0.1);
-    }
-    .tab-btn:hover {
-      color: var(--accent);
-    }
-    .tab-content {
-      display: none;
-    }
-    .tab-content.active {
-      display: block;
-    }
     .input-group {
       margin-bottom: 24px;
       position: relative;
@@ -262,22 +230,6 @@
       transform: translateY(-1px);
       box-shadow: 0 10px 25px -5px rgba(66, 133, 244, 0.3);
     }
-    .switch-link {
-      text-align: center;
-      color: var(--accent);
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      display: block;
-      padding: 12px;
-      border-radius: 8px;
-      margin: 16px 0;
-    }
-    .switch-link:hover {
-      color: var(--accent-secondary);
-      background: rgba(66, 153, 225, 0.1);
-    }
     .error-message {
       color: #e53e3e;
       font-size: 14px;
@@ -321,45 +273,6 @@
     .dark .google-btn:hover {
       background: #63b3ed;
       color: #f7fafc;
-    }
-    .verification-message {
-      background: rgba(72, 187, 120, 0.1);
-      border: 1px solid #68d391;
-      border-radius: 12px;
-      padding: 16px;
-      margin: 16px 0;
-      text-align: center;
-    }
-    .verification-message h3 {
-      color: #38a169;
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    .verification-message p {
-      color: var(--text-secondary);
-      font-size: 14px;
-      margin: 0;
-    }
-    .resend-btn {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-top: 12px;
-      width: 100%;
-    }
-    .resend-btn:hover {
-      background: #3182ce;
-      transform: translateY(-1px);
-    }
-    .resend-btn:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
     }
     .logged-in-section {
       text-align: center;
@@ -466,14 +379,6 @@
 
     <div class="success-message" id="global-success"></div>
 
-    <div id="verification-section" style="display: none;">
-      <div class="verification-message">
-        <h3>Email Verification Required</h3>
-        <p>Please check your email to verify your account. Didn't receive the email? <button id="resend-verification" class="resend-btn">Resend Email</button></p>
-      </div>
-      <a href="#" class="switch-link" onclick="document.getElementById('verification-section').style.display = 'none'; document.getElementById('auth-section').style.display = 'block'; return false;">Back to Sign In</a>
-    </div>
-
     <div id="logged-in-section" class="logged-in-section">
       <h2 class="auth-subtitle" style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">Welcome back!</h2>
       <div id="role-badge" class="role-badge"></div>
@@ -488,7 +393,7 @@
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendEmailVerification, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+    import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
     import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 
     const firebaseConfig = {
@@ -535,7 +440,6 @@
 
     function showLoggedInState(user, role) {
       document.getElementById('auth-section').style.display = 'none';
-      document.getElementById('verification-section').style.display = 'none';
       const loggedInSection = document.getElementById('logged-in-section');
       loggedInSection.classList.add('active');
       document.getElementById('role-text').textContent = role;
@@ -565,11 +469,6 @@
         showSpinner('login-spinner', true);
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
-        if (!user.emailVerified) {
-          await signOut(auth);
-          showError('login-error', 'Please verify your email before signing in.');
-          return;
-        }
         const role = await getUserRole(user.uid);
         showLoggedInState(user, role);
       } catch (error) {
@@ -583,13 +482,6 @@
       try {
         const result = await signInWithPopup(auth, googleProvider);
         const user = result.user;
-        if (!user.emailVerified) {
-          await sendEmailVerification(user);
-          document.getElementById('auth-section').style.display = 'none';
-          document.getElementById('verification-section').style.display = 'block';
-          showSuccess('global-success', 'Verification email sent! Please check your email.');
-          return;
-        }
         const role = await getUserRole(user.uid);
         showLoggedInState(user, role);
       } catch (error) {
@@ -624,17 +516,11 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        if (!user.emailVerified) {
-          document.getElementById('auth-section').style.display = 'none';
-          document.getElementById('verification-section').style.display = 'block';
-        } else {
-          const role = await getUserRole(user.uid);
-          showLoggedInState(user, role);
-        }
+        const role = await getUserRole(user.uid);
+        showLoggedInState(user, role);
       } else {
         document.getElementById('logged-in-section').classList.remove('active');
         document.getElementById('auth-section').style.display = 'block';
-        document.getElementById('verification-section').style.display = 'none';
       }
     });
   </script>
