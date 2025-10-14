@@ -11,6 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js"></script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -575,7 +576,8 @@
       color: var(--text-primary);
     }
     .form-group input,
-    .form-group textarea {
+    .form-group textarea,
+    .form-group select {
       width: 100%;
       padding: 12px 16px;
       border: 1px solid var(--border);
@@ -586,7 +588,8 @@
       transition: border-color 0.3s ease;
     }
     .form-group input:focus,
-    .form-group textarea:focus {
+    .form-group textarea:focus,
+    .form-group select:focus {
       outline: none;
       border-color: var(--accent);
     }
@@ -883,6 +886,50 @@
 
     <section id="courses" class="courses-section">
       <h2 class="section-title">Manage Courses</h2>
+      <div class="submission-form">
+        <form id="course-form">
+          <div class="form-group">
+            <label for="course-title">Course Title</label>
+            <input type="text" id="course-title" placeholder="Enter course title" required>
+          </div>
+          <div class="form-group">
+            <label for="course-description">Description</label>
+            <textarea id="course-description" placeholder="Brief description..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="course-level">Level</label>
+            <select id="course-level" required>
+              <option value="">Select level</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="course-duration">Duration</label>
+            <input type="text" id="course-duration" placeholder="e.g., 4 weeks">
+          </div>
+          <button type="submit" class="save-btn">Create Course</button>
+        </form>
+      </div>
+      <div class="submission-form" style="margin-top: 24px;">
+        <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">Add Content to Course</h3>
+        <div class="form-group">
+          <label for="content-course">Course</label>
+          <select id="content-course" required>
+            <option value="">Select a course</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="lesson-title">Lesson Title</label>
+          <input type="text" id="lesson-title" placeholder="Enter lesson title" required>
+        </div>
+        <div class="form-group">
+          <label for="lesson-file">Upload Content (Video, PDF, Audio)</label>
+          <input type="file" id="lesson-file" accept="video/*,application/pdf,audio/*" required>
+        </div>
+        <button id="add-lesson-btn" class="save-btn">Add Lesson</button>
+      </div>
       <div class="cards-grid" id="courses-grid">
         <!-- Courses will be populated here -->
       </div>
@@ -1041,6 +1088,7 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
     import { getDatabase, ref, onValue, set, push, query, orderByChild, equalTo } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -1056,10 +1104,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
-
-    // Cloudinary configuration - Replace with your actual values
-    const CLOUDINARY_CLOUD_NAME = 'your_cloud_name'; // e.g., 'demo'
-    const UPLOAD_PRESET = 'your_upload_preset'; // e.g., 'ml_default'
+    const storage = getStorage(app);
 
     let currentUser = null;
     let allUsers = {};
@@ -1099,27 +1144,6 @@
         closeDialog();
       }
     });
-
-    // Cloudinary upload function
-    async function uploadToCloudinary(file) {
-      if (!file) return null;
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', UPLOAD_PRESET);
-      try {
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-          method: 'POST',
-          body: formData
-        });
-        if (!res.ok) throw new Error('Upload failed');
-        const data = await res.json();
-        return data.secure_url;
-      } catch (e) {
-        console.error('Upload error:', e);
-        showDialog('Failed to upload file. Please try again.', 'error');
-        return null;
-      }
-    }
 
     // Filter learners based on search query
     window.filterLearners = () => {
@@ -1300,6 +1324,20 @@
       showDialog(`Learner: ${learner.username || learner.email}\nEmail: ${learner.email}\nCourses: ${Object.keys(learner.enrolledCourses || {}).length}`, 'info');
     };
 
+    // Populate content course select
+    function populateContentCourseSelect() {
+      const select = document.getElementById('content-course');
+      if (!select) return;
+      select.innerHTML = '<option value="">Select a course</option>';
+      const courses = teacherData.courses || {};
+      Object.entries(courses).forEach(([courseId, course]) => {
+        const option = document.createElement('option');
+        option.value = courseId;
+        option.textContent = course.title;
+        select.appendChild(option);
+      });
+    }
+
     // Populate courses
     function populateCourses() {
       const grid = document.getElementById('courses-grid');
@@ -1308,12 +1346,13 @@
       Object.entries(courses).forEach(([courseId, course]) => {
         const card = document.createElement('div');
         card.className = 'course-card';
+        const lessonsCount = Object.keys(course.lessons || {}).length;
         card.innerHTML = `
           <div class="course-thumbnail">${course.thumbnail || '📚'}</div>
           <div class="course-content">
             <h3 class="course-title">${course.title}</h3>
             <div class="course-meta">
-              <span>${course.level || 'Beginner'} • ${course.duration || '4 weeks'}</span>
+              <span>${course.level || 'Beginner'} • ${course.duration || '4 weeks'} • Lessons: ${lessonsCount}</span>
               <button class="edit-btn" onclick="editCourse('${courseId}')">Edit</button>
             </div>
           </div>
@@ -1326,21 +1365,104 @@
       // Populate course dropdowns for assignments and quizzes
       const assignmentCourse = document.getElementById('assignment-course');
       const quizCourse = document.getElementById('quiz-course');
-      assignmentCourse.innerHTML = '<option value="">Select a course</option>';
-      quizCourse.innerHTML = '<option value="">Select a course</option>';
-      Object.entries(courses).forEach(([courseId, course]) => {
-        const option = document.createElement('option');
-        option.value = courseId;
-        option.textContent = course.title;
-        assignmentCourse.appendChild(option.cloneNode(true));
-        quizCourse.appendChild(option);
-      });
+      if (assignmentCourse) {
+        assignmentCourse.innerHTML = '<option value="">Select a course</option>';
+        Object.entries(courses).forEach(([courseId, course]) => {
+          const option = document.createElement('option');
+          option.value = courseId;
+          option.textContent = course.title;
+          assignmentCourse.appendChild(option.cloneNode(true));
+        });
+      }
+      if (quizCourse) {
+        quizCourse.innerHTML = '<option value="">Select a course</option>';
+        Object.entries(courses).forEach(([courseId, course]) => {
+          const option = document.createElement('option');
+          option.value = courseId;
+          option.textContent = course.title;
+          quizCourse.appendChild(option);
+        });
+      }
+      populateContentCourseSelect();
     }
 
     // Edit course (placeholder)
     window.editCourse = (courseId) => {
       showDialog(`Edit course: ${teacherData.courses[courseId].title}`, 'info');
     };
+
+    // Handle course form
+    document.getElementById('course-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      showLoader();
+      const title = document.getElementById('course-title').value;
+      const description = document.getElementById('course-description').value;
+      const level = document.getElementById('course-level').value;
+      const duration = document.getElementById('course-duration').value;
+      const course = {
+        title,
+        description,
+        level,
+        duration,
+        timestamp: Date.now()
+      };
+      try {
+        const coursesRef = ref(db, `teachers/${currentUser.uid}/courses`);
+        await push(coursesRef, course);
+        hideLoader();
+        showDialog('Course created successfully!', 'success');
+        e.target.reset();
+        populateCourses();
+      } catch (error) {
+        hideLoader();
+        showDialog(`Failed to create course: ${error.message}`, 'error');
+      }
+    });
+
+    // Handle add lesson button
+    document.getElementById('add-lesson-btn').addEventListener('click', async () => {
+      const courseId = document.getElementById('content-course').value;
+      const lessonTitle = document.getElementById('lesson-title').value;
+      const fileInput = document.getElementById('lesson-file');
+      if (!courseId || !lessonTitle || !fileInput.files[0]) {
+        showDialog('Please fill all fields and select a file.', 'error');
+        return;
+      }
+      showLoader();
+      const file = fileInput.files[0];
+      const fileExt = file.name.split('.').pop().toLowerCase();
+      let type = '';
+      if (file.type.startsWith('video/')) type = 'video';
+      else if (file.type === 'application/pdf') type = 'pdf';
+      else if (file.type.startsWith('audio/')) type = 'audio';
+      else {
+        showDialog('Unsupported file type. Please upload video, PDF, or audio.', 'error');
+        hideLoader();
+        return;
+      }
+      const storagePath = `courses/${currentUser.uid}/${courseId}/lessons/${Date.now()}_${file.name}`;
+      const storageReference = storageRef(storage, storagePath);
+      try {
+        const snapshot = await uploadBytes(storageReference, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        const lessonsRef = ref(db, `teachers/${currentUser.uid}/courses/${courseId}/lessons`);
+        const lesson = {
+          title: lessonTitle,
+          url: downloadURL,
+          type: type,
+          timestamp: Date.now()
+        };
+        await push(lessonsRef, lesson);
+        hideLoader();
+        showDialog('Lesson added successfully! It will appear to assigned learners.', 'success');
+        document.getElementById('lesson-title').value = '';
+        fileInput.value = '';
+        populateCourses();
+      } catch (error) {
+        hideLoader();
+        showDialog(`Failed to add lesson: ${error.message}`, 'error');
+      }
+    });
 
     // Handle assignment form
     document.getElementById('assignment-form').addEventListener('submit', async (e) => {
@@ -1547,9 +1669,15 @@
       const fileInput = document.getElementById('profile-pic');
       let profilePic = teacherData.profilePic;
       if (fileInput.files[0]) {
-        profilePic = await uploadToCloudinary(fileInput.files[0]);
-        if (!profilePic) {
+        // Use Firebase Storage for profile pic
+        const storagePath = `profiles/${currentUser.uid}/profile.jpg`;
+        const storageReference = storageRef(storage, storagePath);
+        try {
+          const snapshot = await uploadBytes(storageReference, fileInput.files[0]);
+          profilePic = await getDownloadURL(snapshot.ref);
+        } catch (uploadError) {
           hideLoader();
+          showDialog('Failed to upload profile picture.', 'error');
           return;
         }
       }
@@ -1607,6 +1735,8 @@
           initSettings();
           updateAvatar(teacherData.profilePic);
           document.getElementById('user-name').textContent = teacherData.username || user.email;
+          populateCourses();
+          populateContentCourseSelect();
         });
 
         // Fetch all users to find assigned ones
@@ -1617,7 +1747,6 @@
           updateStats();
           populateAssignedLearners();
           populateManageLearners();
-          populateCourses();
           populateSubmissions();
           populateQuizzes();
           populateMessages();
