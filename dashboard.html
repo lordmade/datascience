@@ -441,8 +441,7 @@
       color: var(--text-primary);
     }
     .form-group input,
-    .form-group textarea,
-    .form-group select {
+    .form-group textarea {
       width: 100%;
       padding: 12px 16px;
       border: 1px solid var(--border);
@@ -453,8 +452,7 @@
       transition: border-color 0.3s ease;
     }
     .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
+    .form-group textarea:focus {
       outline: none;
       border-color: var(--accent);
     }
@@ -774,45 +772,6 @@
       border-radius: 20px;
       cursor: pointer;
     }
-    .assignment-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 40px;
-      max-width: 600px;
-      margin: 0 auto;
-      box-shadow: var(--shadow-sm);
-      text-align: center;
-    }
-    .assigned-teacher {
-      background: var(--accent-secondary);
-      color: white;
-      padding: 12px;
-      border-radius: 12px;
-      margin: 20px 0;
-      font-weight: 600;
-    }
-    .assign-btn {
-      background: var(--gradient);
-      color: white;
-      border: none;
-      padding: 12px 32px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      margin-top: 16px;
-    }
-    .assign-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-    .assign-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
     @media (max-width: 1024px) {
       .sidebar {
         transform: translateX(-100%);
@@ -861,7 +820,6 @@
       <li><a href="#progress" data-target="progress">Progress</a></li>
       <li><a href="#quizzes" data-target="quizzes">Quizzes</a></li>
       <li><a href="#submissions" data-target="submissions">Submissions</a></li>
-      <li><a href="#" data-target="assign-teacher">Assign Teacher</a></li>
       <li><a href="#" data-target="chat">Chat</a></li>
       <li><a href="#profile" data-target="profile">Profile</a></li>
       <li><a href="#settings" data-target="settings">Settings</a></li>
@@ -947,29 +905,6 @@
       </div>
     </section>
 
-    <section id="assign-teacher" class="courses-section">
-      <h2 class="section-title">Assign Teacher</h2>
-      <div class="assignment-card">
-        <div id="assigned-teacher-info" style="display: none;">
-          <div class="assigned-teacher">
-            Assigned Teacher: <span id="current-teacher-name"></span>
-          </div>
-          <button class="assign-btn" onclick="changeTeacher()">Change Teacher</button>
-        </div>
-        <form id="teacher-assign-form" style="display: block;">
-          <div class="form-group">
-            <label for="teacher-id">Teacher ID (UID or Email)</label>
-            <input type="text" id="teacher-id" placeholder="Enter teacher UID or email" required>
-          </div>
-          <div class="form-group">
-            <label for="teacher-name">Teacher Name (Optional)</label>
-            <input type="text" id="teacher-name" placeholder="Enter teacher name">
-          </div>
-          <button type="submit" class="assign-btn">Assign Teacher</button>
-        </form>
-      </div>
-    </section>
-
     <section id="chat" class="courses-section">
       <h2 class="section-title">Chat with Teacher</h2>
       <div id="no-teacher" style="text-align: center; color: var(--text-secondary); display: none; padding: 40px;">No teacher assigned yet.</div>
@@ -1043,7 +978,6 @@
       <li><a href="#progress" data-target="progress"><span class="material-icons">assessment</span></a></li>
       <li><a href="#quizzes" data-target="quizzes"><span class="material-icons">quiz</span></a></li>
       <li><a href="#submissions" data-target="submissions"><span class="material-icons">assignment</span></a></li>
-      <li><a href="#" data-target="assign-teacher"><span class="material-icons">person_add</span></a></li>
       <li><a href="#" data-target="chat"><span class="material-icons">chat_bubble</span></a></li>
       <li><a href="#profile" data-target="profile"><span class="material-icons">person</span></a></li>
       <li><a href="#settings" data-target="settings"><span class="material-icons">settings</span></a></li>
@@ -1177,52 +1111,6 @@
       });
       list.scrollTop = list.scrollHeight;
     }
-
-    // Handle teacher assignment form
-    document.getElementById('teacher-assign-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      showLoader();
-      const teacherId = document.getElementById('teacher-id').value.trim();
-      const teacherName = document.getElementById('teacher-name').value.trim();
-      if (!teacherId) {
-        hideLoader();
-        showDialog('Please enter a teacher ID.', 'error');
-        return;
-      }
-      // For simplicity, assume teacherId is UID. In production, validate if teacher exists.
-      userData.teacherId = teacherId;
-      if (teacherName) {
-        userData.teacherName = teacherName;
-      }
-      await set(ref(db, `users/${currentUser.uid}`), userData);
-      hideLoader();
-      showDialog('Teacher assigned successfully!', 'success');
-      populateTeacherAssignment();
-    });
-
-    // Function to populate teacher assignment UI
-    function populateTeacherAssignment() {
-      const assignedInfo = document.getElementById('assigned-teacher-info');
-      const assignForm = document.getElementById('teacher-assign-form');
-      if (userData.teacherId) {
-        assignedInfo.style.display = 'block';
-        assignForm.style.display = 'none';
-        document.getElementById('current-teacher-name').textContent = userData.teacherName || userData.teacherId;
-      } else {
-        assignedInfo.style.display = 'none';
-        assignForm.style.display = 'block';
-      }
-    }
-
-    // Change teacher function
-    window.changeTeacher = () => {
-      userData.teacherId = null;
-      userData.teacherName = null;
-      set(ref(db, `users/${currentUser.uid}`), userData).then(() => {
-        showDialog('Teacher assignment cleared.', 'info');
-        populateTeacherAssignment();
-      });
-    };
 
     // Populate quizzes section
     function populateQuizzes() {
@@ -1651,9 +1539,6 @@
             noTeacher.style.display = 'block';
             chatContainer.style.display = 'none';
           }
-
-          // Populate teacher assignment UI
-          populateTeacherAssignment();
 
           // Populate other sections
           populateProfile();
