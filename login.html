@@ -322,34 +322,6 @@
       background: #63b3ed;
       color: #f7fafc;
     }
-    .password-strength {
-      margin-top: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .strength-bar {
-      flex: 1;
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      transition: all 0.3s ease;
-      overflow: hidden;
-    }
-    .strength-fill {
-      height: 100%;
-      transition: all 0.3s ease;
-      border-radius: 2px;
-    }
-    .strength-text {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 500;
-      min-width: 60px;
-    }
-    .dark .strength-bar {
-      background: rgba(255, 255, 255, 0.2);
-    }
     .verification-message {
       background: rgba(72, 187, 120, 0.1);
       border: 1px solid #68d391;
@@ -466,41 +438,10 @@
 
     <div id="auth-section">
       <div class="tabs">
-        <button class="tab-btn active" data-tab="signup">Sign Up</button>
-        <button class="tab-btn" data-tab="login">Sign In</button>
+        <button class="tab-btn active" data-tab="login">Sign In</button>
       </div>
       <div class="tab-contents">
-        <div id="signup-tab" class="tab-content active">
-          <p class="auth-subtitle">Create your account to start your learning journey with us.</p>
-          <form id="signup-form">
-            <div class="input-group">
-              <input type="text" id="signup-username" class="input-field" placeholder="Enter your username" required>
-            </div>
-            <div class="input-group">
-              <input type="email" id="signup-email" class="input-field" placeholder="Enter your email" required>
-            </div>
-            <div class="input-group">
-              <input type="password" id="signup-password" class="input-field" placeholder="Create a password" required minlength="8">
-              <div id="signup-password-strength" class="password-strength">
-                <div class="strength-bar">
-                  <div id="signup-strength-fill" class="strength-fill"></div>
-                </div>
-                <span id="signup-strength-text" class="strength-text">Enter password</span>
-              </div>
-            </div>
-            <a href="#" class="switch-link" onclick="showTab('login'); return false;">Already have an account? Sign in</a>
-            <button type="submit" class="submit-btn" id="signup-submit">
-              <span id="signup-spinner" class="spinner" style="display: none;"></span>
-              Create Account
-            </button>
-          </form>
-          <button class="google-btn" id="google-signup">
-            <span class="material-icons" style="font-size: 20px;">g_translate</span>
-            Continue with Google
-          </button>
-          <div class="error-message" id="signup-error"></div>
-        </div>
-        <div id="login-tab" class="tab-content">
+        <div id="login-tab" class="tab-content active">
           <p class="auth-subtitle">Welcome back! Sign in to continue your learning journey.</p>
           <form id="login-form">
             <div class="input-group">
@@ -509,7 +450,6 @@
             <div class="input-group">
               <input type="password" id="login-password" class="input-field" placeholder="Enter your password" required>
             </div>
-            <a href="#" class="switch-link" onclick="showTab('signup'); return false;">Don't have an account? Sign up</a>
             <button type="submit" class="submit-btn" id="login-submit">
               <span id="login-spinner" class="spinner" style="display: none;"></span>
               Sign In
@@ -528,10 +468,10 @@
 
     <div id="verification-section" style="display: none;">
       <div class="verification-message">
-        <h3>Account Created Successfully!</h3>
+        <h3>Email Verification Required</h3>
         <p>Please check your email to verify your account. Didn't receive the email? <button id="resend-verification" class="resend-btn">Resend Email</button></p>
       </div>
-      <a href="#" class="switch-link" onclick="showTab('login'); document.getElementById('verification-section').style.display = 'none'; document.getElementById('auth-section').style.display = 'block'; return false;">Back to Sign In</a>
+      <a href="#" class="switch-link" onclick="document.getElementById('verification-section').style.display = 'none'; document.getElementById('auth-section').style.display = 'block'; return false;">Back to Sign In</a>
     </div>
 
     <div id="logged-in-section" class="logged-in-section">
@@ -548,8 +488,8 @@
 
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendEmailVerification, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-    import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
+    import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendEmailVerification, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+    import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOyZ3As4GTuNvjemvPF_SpsC6m6vqtNhc",
@@ -593,57 +533,20 @@
       }
     }
 
-    function showTab(tabName) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-      document.getElementById(tabName + '-tab').classList.add('active');
+    function showLoggedInState(user, role) {
+      document.getElementById('auth-section').style.display = 'none';
+      document.getElementById('verification-section').style.display = 'none';
+      const loggedInSection = document.getElementById('logged-in-section');
+      loggedInSection.classList.add('active');
+      document.getElementById('role-text').textContent = role;
+      document.getElementById('role-badge').textContent = role.charAt(0).toUpperCase() + role.slice(1);
+      document.getElementById('logged-in-message').textContent = `You are now logged in as a ${role}.`;
+      showSuccess('global-success', `Welcome, ${user.displayName || user.email}!`);
+
+      // Show role-specific dashboard button
+      document.getElementById('learner-dashboard-btn').style.display = role === 'learner' ? 'inline-block' : 'none';
+      document.getElementById('teacher-dashboard-btn').style.display = role === 'teacher' ? 'inline-block' : 'none';
     }
-
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tabName = btn.dataset.tab;
-        showTab(tabName);
-      });
-    });
-
-    function checkPasswordStrength(password) {
-      let strength = 0;
-      if (password.length >= 8) strength += 1;
-      if (/[a-z]/.test(password)) strength += 1;
-      if (/[A-Z]/.test(password)) strength += 1;
-      if (/\d/.test(password)) strength += 1;
-      if (/[^a-zA-Z\d]/.test(password)) strength += 1;
-      return strength;
-    }
-
-    function updateStrength(prefix, strength) {
-      const fill = document.getElementById(prefix + '-strength-fill');
-      const text = document.getElementById(prefix + '-strength-text');
-      let color, width, label;
-      if (strength <= 1) {
-        color = '#e53e3e';
-        width = '20%';
-        label = 'Weak';
-      } else if (strength <= 3) {
-        color = '#ed8936';
-        width = '60%';
-        label = 'Medium';
-      } else {
-        color = '#48bb78';
-        width = '100%';
-        label = 'Strong';
-      }
-      fill.style.background = color;
-      fill.style.width = width;
-      text.textContent = label;
-    }
-
-    document.getElementById('signup-password').addEventListener('input', function(e) {
-      const pw = e.target.value;
-      const strength = checkPasswordStrength(pw);
-      updateStrength('signup', strength);
-    });
 
     async function getUserRole(userUid) {
       try {
@@ -654,28 +557,6 @@
       } catch (error) {
         console.error('Error fetching user role:', error);
         return 'learner';
-      }
-    }
-
-    async function handleEmailSignup(email, password, username) {
-      try {
-        showSpinner('signup-spinner', true);
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        await set(ref(db, `users/${user.uid}`), {
-          username,
-          email: user.email,
-          role: 'learner',
-          createdAt: new Date().toISOString()
-        });
-        await sendEmailVerification(user);
-        showSuccess('global-success', 'Account created! Verification email sent.');
-        document.getElementById('auth-section').style.display = 'none';
-        document.getElementById('verification-section').style.display = 'block';
-      } catch (error) {
-        showError('signup-error', error.message);
-      } finally {
-        showSpinner('signup-spinner', false);
       }
     }
 
@@ -698,37 +579,6 @@
       }
     }
 
-    function showLoggedInState(user, role) {
-      document.getElementById('auth-section').style.display = 'none';
-      document.getElementById('verification-section').style.display = 'none';
-      const loggedInSection = document.getElementById('logged-in-section');
-      loggedInSection.classList.add('active');
-      document.getElementById('role-text').textContent = role;
-      document.getElementById('role-badge').textContent = role.charAt(0).toUpperCase() + role.slice(1);
-      document.getElementById('logged-in-message').textContent = `You are now logged in as a ${role}.`;
-      showSuccess('global-success', `Welcome, ${user.displayName || user.email}!`);
-
-      // Show role-specific dashboard button
-      document.getElementById('learner-dashboard-btn').style.display = role === 'learner' ? 'inline-block' : 'none';
-      document.getElementById('teacher-dashboard-btn').style.display = role === 'teacher' ? 'inline-block' : 'none';
-    }
-
-    async function resendVerificationEmail() {
-      const user = auth.currentUser;
-      if (user) {
-        try {
-          await sendEmailVerification(user);
-          showSuccess('global-success', 'Verification email resent! Please check your email.');
-          document.getElementById('resend-verification').disabled = true;
-          setTimeout(() => {
-            document.getElementById('resend-verification').disabled = false;
-          }, 60000);
-        } catch (error) {
-          showError('signup-error', error.message);
-        }
-      }
-    }
-
     async function handleGoogleSignIn() {
       try {
         const result = await signInWithPopup(auth, googleProvider);
@@ -743,24 +593,9 @@
         const role = await getUserRole(user.uid);
         showLoggedInState(user, role);
       } catch (error) {
-        showError('signup-error', error.message);
+        showError('login-error', error.message);
       }
     }
-
-    document.getElementById('signup-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const username = document.getElementById('signup-username').value;
-      const email = document.getElementById('signup-email').value;
-      const password = document.getElementById('signup-password').value;
-      const strength = checkPasswordStrength(password);
-      if (strength < 3) {
-        showError('signup-error', 'Password is too weak. Please use a stronger password.');
-        return;
-      }
-      if (username && email && password) {
-        handleEmailSignup(email, password, username);
-      }
-    });
 
     document.getElementById('login-form').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -771,9 +606,7 @@
       }
     });
 
-    document.getElementById('google-signup').addEventListener('click', handleGoogleSignIn);
     document.getElementById('google-login').addEventListener('click', handleGoogleSignIn);
-    document.getElementById('resend-verification').addEventListener('click', resendVerificationEmail);
 
     document.getElementById('learner-dashboard-btn').addEventListener('click', () => {
       window.location.href = 'dashboard.html';
@@ -787,7 +620,6 @@
       await signOut(auth);
       document.getElementById('logged-in-section').classList.remove('active');
       document.getElementById('auth-section').style.display = 'block';
-      showTab('login');
     });
 
     onAuthStateChanged(auth, async (user) => {
