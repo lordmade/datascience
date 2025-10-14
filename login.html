@@ -389,6 +389,59 @@
       opacity: 0.7;
       cursor: not-allowed;
     }
+    .logged-in-section {
+      text-align: center;
+      display: none;
+    }
+    .logged-in-section.active {
+      display: block;
+    }
+    .role-badge {
+      background: var(--gradient);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      margin: 16px 0;
+      display: inline-block;
+    }
+    .dashboard-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 8px;
+      width: calc(50% - 8px);
+      display: inline-block;
+    }
+    .dashboard-btn:hover {
+      background: #3182ce;
+      transform: translateY(-1px);
+    }
+    .teacher-btn {
+      background: var(--accent-secondary);
+    }
+    .teacher-btn:hover {
+      background: #38a169;
+    }
+    .logout-btn {
+      background: #e53e3e;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 16px;
+    }
+    .logout-btn:hover {
+      background: #c53030;
+    }
     @media (max-width: 480px) {
       .auth-container {
         padding: 40px 24px;
@@ -396,6 +449,10 @@
       }
       .auth-title {
         font-size: 28px;
+      }
+      .dashboard-btn {
+        width: 100%;
+        margin: 4px 0;
       }
     }
   </style>
@@ -475,6 +532,17 @@
         <p>Please check your email to verify your account. Didn't receive the email? <button id="resend-verification" class="resend-btn">Resend Email</button></p>
       </div>
       <a href="#" class="switch-link" onclick="showTab('login'); document.getElementById('verification-section').style.display = 'none'; document.getElementById('auth-section').style.display = 'block'; return false;">Back to Sign In</a>
+    </div>
+
+    <div id="logged-in-section" class="logged-in-section">
+      <h2 class="auth-subtitle" style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">Welcome back!</h2>
+      <div id="role-badge" class="role-badge"></div>
+      <p id="logged-in-message" style="color: var(--text-secondary); margin-bottom: 24px;">You are now logged in as a <span id="role-text"></span>.</p>
+      <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 16px;">
+        <button id="learner-dashboard-btn" class="dashboard-btn" style="display: none;">Learner Dashboard</button>
+        <button id="teacher-dashboard-btn" class="dashboard-btn teacher-btn" style="display: none;">Teacher Dashboard</button>
+      </div>
+      <button id="logout-btn" class="logout-btn">Logout</button>
     </div>
   </div>
 
@@ -577,18 +645,15 @@
       updateStrength('signup', strength);
     });
 
-    async function redirectBasedOnRole(userUid) {
+    async function getUserRole(userUid) {
       try {
         const userRef = ref(db, `users/${userUid}`);
         const snapshot = await get(userRef);
         const data = snapshot.val();
-        const role = data?.role || 'learner';
-        const redirectUrl = role === 'teacher' ? 'teacherdash.html' : 'dashboard.html';
-        window.location.href = redirectUrl;
+        return data?.role || 'learner';
       } catch (error) {
         console.error('Error fetching user role:', error);
-        // Default to learner dashboard
-        window.location.href = 'dashboard.html';
+        return 'learner';
       }
     }
 
@@ -624,12 +689,28 @@
           showError('login-error', 'Please verify your email before signing in.');
           return;
         }
-        await redirectBasedOnRole(user.uid);
+        const role = await getUserRole(user.uid);
+        showLoggedInState(user, role);
       } catch (error) {
         showError('login-error', error.message);
       } finally {
         showSpinner('login-spinner', false);
       }
+    }
+
+    function showLoggedInState(user, role) {
+      document.getElementById('auth-section').style.display = 'none';
+      document.getElementById('verification-section').style.display = 'none';
+      const loggedInSection = document.getElementById('logged-in-section');
+      loggedInSection.classList.add('active');
+      document.getElementById('role-text').textContent = role;
+      document.getElementById('role-badge').textContent = role.charAt(0).toUpperCase() + role.slice(1);
+      document.getElementById('logged-in-message').textContent = `You are now logged in as a ${role}.`;
+      showSuccess('global-success', `Welcome, ${user.displayName || user.email}!`);
+
+      // Show role-specific dashboard button
+      document.getElementById('learner-dashboard-btn').style.display = role === 'learner' ? 'inline-block' : 'none';
+      document.getElementById('teacher-dashboard-btn').style.display = role === 'teacher' ? 'inline-block' : 'none';
     }
 
     async function resendVerificationEmail() {
@@ -659,7 +740,8 @@
           showSuccess('global-success', 'Verification email sent! Please check your email.');
           return;
         }
-        await redirectBasedOnRole(user.uid);
+        const role = await getUserRole(user.uid);
+        showLoggedInState(user, role);
       } catch (error) {
         showError('signup-error', error.message);
       }
@@ -693,14 +775,34 @@
     document.getElementById('google-login').addEventListener('click', handleGoogleSignIn);
     document.getElementById('resend-verification').addEventListener('click', resendVerificationEmail);
 
+    document.getElementById('learner-dashboard-btn').addEventListener('click', () => {
+      window.location.href = 'dashboard.html';
+    });
+
+    document.getElementById('teacher-dashboard-btn').addEventListener('click', () => {
+      window.location.href = 'teacherdash.html';
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await signOut(auth);
+      document.getElementById('logged-in-section').classList.remove('active');
+      document.getElementById('auth-section').style.display = 'block';
+      showTab('login');
+    });
+
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         if (!user.emailVerified) {
           document.getElementById('auth-section').style.display = 'none';
           document.getElementById('verification-section').style.display = 'block';
         } else {
-          await redirectBasedOnRole(user.uid);
+          const role = await getUserRole(user.uid);
+          showLoggedInState(user, role);
         }
+      } else {
+        document.getElementById('logged-in-section').classList.remove('active');
+        document.getElementById('auth-section').style.display = 'block';
+        document.getElementById('verification-section').style.display = 'none';
       }
     });
   </script>
