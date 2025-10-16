@@ -839,6 +839,19 @@
     .lesson-link:hover {
       text-decoration: underline;
     }
+    .complete-btn {
+      background: var(--accent-secondary);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .complete-btn.completed {
+      background: var(--text-secondary);
+      cursor: default;
+    }
     .forum-section {
       margin-top: 24px;
     }
@@ -869,6 +882,78 @@
       background: var(--gradient);
       border: none;
       border-radius: 6px;
+    }
+    .course-details-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2001;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    .course-details-backdrop.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .course-details {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      max-width: 800px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-md);
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .course-details-backdrop.show .course-details {
+      transform: scale(1) translateY(0);
+    }
+    .course-details-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text-primary);
+    }
+    .course-description {
+      margin-bottom: 24px;
+      color: var(--text-secondary);
+    }
+    .lessons-section {
+      margin-bottom: 24px;
+    }
+    .lessons-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .announcements-section, .forums-section {
+      margin-top: 32px;
+    }
+    .announcement-item, .forum-thread {
+      margin-bottom: 16px;
+    }
+    .close-details {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--text-secondary);
     }
     @media (max-width: 1024px) {
       .sidebar {
@@ -1091,6 +1176,27 @@
     </div>
   </div>
 
+  <!-- Course Details Modal -->
+  <div class="course-details-backdrop" id="course-details-backdrop">
+    <div class="course-details" id="course-details">
+      <button class="close-details" onclick="closeCourseDetails()">✕</button>
+      <div class="course-details-title" id="course-details-title"></div>
+      <div class="course-description" id="course-description"></div>
+      <div class="lessons-section">
+        <h3 class="lessons-title">Lessons</h3>
+        <div id="lessons-list"></div>
+      </div>
+      <div class="announcements-section">
+        <h3 class="lessons-title">Announcements</h3>
+        <div id="announcements-list"></div>
+      </div>
+      <div class="forums-section">
+        <h3 class="lessons-title">Forum Threads</h3>
+        <div id="forums-list"></div>
+      </div>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
@@ -1176,6 +1282,95 @@
         closeDialog();
       }
     });
+
+    // Course Details Modal Functions
+    function showCourseDetails(courseId) {
+      const backdrop = document.getElementById('course-details-backdrop');
+      const title = document.getElementById('course-details-title');
+      const description = document.getElementById('course-description');
+      const lessonsList = document.getElementById('lessons-list');
+      const announcementsList = document.getElementById('announcements-list');
+      const forumsList = document.getElementById('forums-list');
+
+      const course = teacherCourses[courseId];
+      if (!course) return;
+
+      title.textContent = course.title;
+      description.textContent = course.description || 'No description available.';
+
+      // Populate lessons with completion tracking
+      lessonsList.innerHTML = '';
+      Object.entries(course.lessons || {}).forEach(([lessonId, lesson]) => {
+        const lessonKey = `${courseId}_${lessonId}`;
+        const isCompleted = learnerData.completedLessons?.[lessonKey] || false;
+        const item = document.createElement('div');
+        item.className = 'lesson-item';
+        item.innerHTML = `
+          <div>
+            <strong>${lesson.title}</strong> (${lesson.type})
+            <a href="${lesson.url}" target="_blank" class="lesson-link" style="display: block; margin-top: 4px;">Open Content</a>
+          </div>
+          <button class="complete-btn ${isCompleted ? 'completed' : ''}" onclick="markLessonComplete('${courseId}', '${lessonId}', this)" ${isCompleted ? 'disabled' : ''}>
+            ${isCompleted ? 'Completed' : 'Mark Complete'}
+          </button>
+        `;
+        lessonsList.appendChild(item);
+      });
+
+      // Populate announcements
+      announcementsList.innerHTML = '';
+      const announcementsRef = ref(db, `courses/${courseId}/announcements`);
+      onValue(announcementsRef, (snap) => {
+        const anns = snap.val() || {};
+        Object.values(anns).forEach(ann => {
+          const div = document.createElement('div');
+          div.className = 'announcement-item';
+          div.innerHTML = `<strong>${ann.title}</strong><p>${ann.message}</p><small>${new Date(ann.timestamp).toLocaleDateString()}</small>`;
+          announcementsList.appendChild(div);
+        });
+      }, { onlyOnce: true });
+
+      // Populate forums
+      forumsList.innerHTML = '';
+      const forumsRef = ref(db, `courses/${courseId}/forums/threads`);
+      onValue(forumsRef, (snap) => {
+        const threads = snap.val() || {};
+        Object.values(threads).forEach(thread => {
+          const div = document.createElement('div');
+          div.className = 'forum-thread';
+          div.innerHTML = `<strong>${thread.title}</strong><p>${thread.message}</p><small>${new Date(thread.timestamp).toLocaleDateString()}</small>`;
+          forumsList.appendChild(div);
+        });
+      }, { onlyOnce: true });
+
+      backdrop.classList.add('show');
+    }
+
+    function closeCourseDetails() {
+      document.getElementById('course-details-backdrop').classList.remove('show');
+    }
+
+    // Mark lesson complete
+    window.markLessonComplete = async (courseId, lessonId, btn) => {
+      const lessonKey = `${courseId}_${lessonId}`;
+      showLoader();
+      try {
+        learnerData.completedLessons = learnerData.completedLessons || {};
+        learnerData.completedLessons[lessonKey] = true;
+        await set(ref(db, `users/${currentUser.uid}/completedLessons/${lessonKey}`), true);
+        hideLoader();
+        showDialog('Lesson marked as complete!', 'success');
+        btn.classList.add('completed');
+        btn.textContent = 'Completed';
+        btn.disabled = true;
+        // Update stats and progress
+        updateStats();
+        populateEnrolledCourses();
+      } catch (error) {
+        hideLoader();
+        showDialog(`Failed to mark complete: ${error.message}`, 'error');
+      }
+    };
 
     // Filter courses based on search query
     window.filterCourses = (inputId) => {
@@ -1304,18 +1499,18 @@
     function updateStats() {
       const enrolledCourses = Object.keys(learnerData.enrolledCourses || {}).length;
       const totalLessons = Object.values(teacherCourses).reduce((sum, course) => sum + Object.keys(course.lessons || {}).length, 0);
-      const completedLessons = Object.keys(learnerData.completedLessons || {}).length;
+      const completedLessonsCount = Object.keys(learnerData.completedLessons || {}).length;
       const grades = Object.values(learnerData.submissions || {}).filter(s => s.grade).map(s => s.grade);
       const averageGrade = grades.length > 0 ? (grades.reduce((a, b) => a + b, 0) / grades.length).toFixed(1) : 0;
       const pendingAssignments = Object.values(teacherAssignments).filter(a => !learnerData.submissions || !learnerData.submissions[a.id]).length;
       document.getElementById('enrolled-courses-count').textContent = enrolledCourses;
-      document.getElementById('completed-lessons').textContent = completedLessons;
+      document.getElementById('completed-lessons').textContent = completedLessonsCount;
       document.getElementById('average-grade').textContent = averageGrade + '%';
       document.getElementById('pending-assignments').textContent = pendingAssignments;
 
       // Update progress chart
       const labels = ['Courses', 'Lessons', 'Grades'];
-      const data = [enrolledCourses, (completedLessons / totalLessons * 100) || 0, averageGrade];
+      const data = [enrolledCourses, (completedLessonsCount / totalLessons * 100) || 0, averageGrade];
       if (progressChart) {
         progressChart.data.labels = labels;
         progressChart.data.datasets[0].data = data;
@@ -1376,14 +1571,15 @@
         const card = document.createElement('div');
         card.className = 'course-card';
         const lessonsCount = Object.keys(course.lessons || {}).length;
-        const progress = learnerData.completedLessons ? Object.keys(learnerData.completedLessons).filter(l => l.startsWith(courseId)).length / lessonsCount * 100 : 0;
+        const completedForCourse = Object.keys(learnerData.completedLessons || {}).filter(l => l.startsWith(courseId)).length;
+        const progress = lessonsCount > 0 ? (completedForCourse / lessonsCount * 100) : 0;
         card.innerHTML = `
           <div class="course-thumbnail">${course.thumbnail || '📚'}</div>
           <div class="course-content">
             <h3 class="course-title">${course.title}</h3>
             <div class="course-meta">
               <span>${course.level || 'Beginner'} • ${course.duration || '4 weeks'} • Progress: ${progress.toFixed(0)}%</span>
-              <button class="view-btn" onclick="viewCourse('${courseId}')">View</button>
+              <button class="view-btn" onclick="showCourseDetails('${courseId}')">View</button>
             </div>
           </div>
         `;
@@ -1395,33 +1591,9 @@
       }
     }
 
-    // View course details (shows lessons, announcements, forums)
+    // View course details - now opens modal
     window.viewCourse = (courseId) => {
-      const course = teacherCourses[courseId];
-      let content = `Course: ${course.title}\nDescription: ${course.description || 'N/A'}\n\nLessons:\n`;
-      Object.entries(course.lessons || {}).forEach(([lessonId, lesson]) => {
-        content += `- ${lesson.title} (${lesson.type}): <a href="${lesson.url}" target="_blank">${lesson.url}</a>\n`;
-      });
-      // Fetch announcements
-      const announcementsRef = ref(db, `courses/${courseId}/announcements`);
-      onValue(announcementsRef, (snap) => {
-        const anns = snap.val() || {};
-        content += `\nAnnouncements:\n`;
-        Object.values(anns).forEach(ann => {
-          content += `- ${ann.title}: ${ann.message}\n`;
-        });
-        showDialog(content, 'info');
-      });
-      // Similar for forums
-      const forumsRef = ref(db, `courses/${courseId}/forums/threads`);
-      onValue(forumsRef, (snap) => {
-        const threads = snap.val() || {};
-        content += `\nForum Threads:\n`;
-        Object.values(threads).forEach(thread => {
-          content += `- ${thread.title}: ${thread.message}\n`;
-        });
-        showDialog(content, 'info');
-      });
+      showCourseDetails(courseId);
     };
 
     // Populate courses (alias for enrolled)
@@ -1553,11 +1725,11 @@
       e.preventDefault();
       const formData = new FormData(e.target);
       const answers = {};
-      quiz.questions.forEach((_, qIndex) => {
+      teacherQuizzes[quizId].questions.forEach((_, qIndex) => {
         answers[qIndex] = parseInt(formData.get(`q${qIndex}`)) || -1;
       });
-      const score = quiz.questions.reduce((score, q, i) => score + (answers[i] === q.correct ? 1 : 0), 0);
-      const percentage = (score / quiz.questions.length * 100).toFixed(0);
+      const score = teacherQuizzes[quizId].questions.reduce((score, q, i) => score + (answers[i] === q.correct ? 1 : 0), 0);
+      const percentage = (score / teacherQuizzes[quizId].questions.length * 100).toFixed(0);
       try {
         await set(ref(db, `users/${currentUser.uid}/quizResults/${quizId}`), { score: percentage, answers, timestamp: Date.now() });
         showDialog(`Quiz submitted! Score: ${percentage}%`, 'success');
@@ -1718,6 +1890,13 @@
       });
     }
 
+    // Close course details on backdrop click
+    document.getElementById('course-details-backdrop').addEventListener('click', (e) => {
+      if (e.target.id === 'course-details-backdrop') {
+        closeCourseDetails();
+      }
+    });
+
     // Loading flags for spinner
     let learnerLoaded = false;
     let dataLoaded = false;
@@ -1753,43 +1932,44 @@
         });
 
         // Fetch teacher's courses
-        const learnerRefOnce = await fetch(ref(db, `users/${user.uid}`));
-        const learnerSnap = await learnerRefOnce;
-        const teacherId = learnerSnap.val()?.teacherId;
-        if (teacherId) {
-          const teacherCoursesRef = ref(db, `teachers/${teacherId}/courses`);
-          onValue(teacherCoursesRef, (snapshot) => {
-            teacherCourses = snapshot.val() || {};
-            if (document.getElementById('dashboard').style.display === 'block' || document.getElementById('courses').style.display === 'block') {
-              populateEnrolledCourses();
-            }
-          });
+        const learnerRefOnce = ref(db, `users/${user.uid}`);
+        onValue(learnerRefOnce, (snap) => {
+          const teacherId = snap.val()?.teacherId;
+          if (teacherId) {
+            const teacherCoursesRef = ref(db, `teachers/${teacherId}/courses`);
+            onValue(teacherCoursesRef, (snapshot) => {
+              teacherCourses = snapshot.val() || {};
+              if (document.getElementById('dashboard').style.display === 'block' || document.getElementById('courses').style.display === 'block') {
+                populateEnrolledCourses();
+              }
+            });
 
-          // Fetch teacher's assignments
-          const assignmentsRef = ref(db, 'assignments');
-          const assignmentsQuery = query(assignmentsRef, orderByChild('teacherId'), equalTo(teacherId));
-          onValue(assignmentsQuery, (snapshot) => {
-            teacherAssignments = snapshot.val() || {};
-            if (document.getElementById('assignments').style.display === 'block') {
-              populateAssignments();
-            }
-          });
+            // Fetch teacher's assignments
+            const assignmentsRef = ref(db, 'assignments');
+            const assignmentsQuery = query(assignmentsRef, orderByChild('teacherId'), equalTo(teacherId));
+            onValue(assignmentsQuery, (snapshot) => {
+              teacherAssignments = snapshot.val() || {};
+              if (document.getElementById('assignments').style.display === 'block') {
+                populateAssignments();
+              }
+            });
 
-          // Fetch teacher's quizzes
-          const quizzesRef = ref(db, 'quizzes');
-          const quizzesQuery = query(quizzesRef, orderByChild('teacherId'), equalTo(teacherId));
-          onValue(quizzesQuery, (snapshot) => {
-            teacherQuizzes = snapshot.val() || {};
-            if (document.getElementById('quizzes').style.display === 'block') {
-              populateQuizzes();
-            }
-          });
+            // Fetch teacher's quizzes
+            const quizzesRef = ref(db, 'quizzes');
+            const quizzesQuery = query(quizzesRef, orderByChild('teacherId'), equalTo(teacherId));
+            onValue(quizzesQuery, (snapshot) => {
+              teacherQuizzes = snapshot.val() || {};
+              if (document.getElementById('quizzes').style.display === 'block') {
+                populateQuizzes();
+              }
+            });
 
-          if (!dataLoaded) {
-            dataLoaded = true;
-            checkAllLoaded();
+            if (!dataLoaded) {
+              dataLoaded = true;
+              checkAllLoaded();
+            }
           }
-        }
+        });
 
         // Fetch messages
         const messagesRef = ref(db, `users/${user.uid}/messages`);
@@ -1798,6 +1978,13 @@
           if (document.getElementById('messages').style.display === 'block') {
             populateMessages();
           }
+        });
+
+        // Fetch completed lessons
+        const completedRef = ref(db, `users/${user.uid}/completedLessons`);
+        onValue(completedRef, (snapshot) => {
+          learnerData.completedLessons = snapshot.val() || {};
+          updateStats();
         });
       } else {
         hideLoader();
