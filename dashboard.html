@@ -155,12 +155,15 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 16px 40px;
+      padding: 12px 24px;
+      margin: 4px 16px;
       color: var(--text-secondary);
       text-decoration: none;
       font-weight: 600;
       transition: all 0.3s ease;
       border-left: 3px solid transparent;
+      border-radius: 50px;
+      min-height: 48px;
     }
     .sidebar a:hover,
     .sidebar a.active {
@@ -170,6 +173,7 @@
     }
     .sidebar .material-icons {
       font-size: 24px;
+      min-width: 24px;
     }
     .main-content {
       margin-left: 280px;
@@ -314,6 +318,8 @@
       border-top: 1px solid var(--border);
       z-index: 1000;
       display: none;
+      overflow-x: auto;
+      white-space: nowrap;
     }
     .bottom-nav ul {
       display: flex;
@@ -322,6 +328,7 @@
       margin: 0;
       justify-content: space-around;
       padding: 10px 0;
+      min-width: max-content;
     }
     .bottom-nav a {
       color: var(--text-secondary);
@@ -330,6 +337,8 @@
       flex-direction: column;
       align-items: center;
       transition: color 0.3s ease;
+      min-width: 50px;
+      padding: 0 8px;
     }
     .bottom-nav a:hover,
     .bottom-nav a.active {
@@ -493,6 +502,9 @@
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
     }
+    .course-card:active {
+      transform: scale(0.98);
+    }
     .course-thumbnail {
       height: 160px;
       background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
@@ -533,9 +545,17 @@
       cursor: pointer;
       font-size: 12px;
       transition: all 0.3s ease;
+      min-height: 36px;
+      min-width: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .view-btn:hover {
       transform: translateY(-1px);
+    }
+    .view-btn:active {
+      transform: scale(0.98);
     }
     .submission-form {
       background: var(--card-bg);
@@ -588,10 +608,14 @@
       font-size: 16px;
       transition: all 0.3s ease;
       width: 100%;
+      min-height: 48px;
     }
     .save-btn:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
+    }
+    .save-btn:active {
+      transform: scale(0.98);
     }
     .submission-list {
       display: grid;
@@ -600,8 +624,8 @@
     }
     .submission-item {
       background: var(--glass);
-      border-radius: 8px;
       padding: 16px;
+      border-radius: 8px;
       text-align: center;
     }
     .quiz-card {
@@ -624,17 +648,20 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 8px;
+      padding: 12px;
       background: var(--glass);
       border-radius: 8px;
       cursor: pointer;
       transition: background 0.3s ease;
+      min-height: 44px;
     }
     .quiz-option:hover {
       background: rgba(66, 153, 225, 0.05);
     }
     .quiz-option input[type="radio"] {
       margin-right: 8px;
+      width: 20px;
+      height: 20px;
     }
     .chat-container {
       display: flex;
@@ -686,6 +713,7 @@
       border: none;
       border-radius: 20px;
       cursor: pointer;
+      min-width: 60px;
     }
     .profile-card {
       background: var(--card-bg);
@@ -793,6 +821,7 @@
       border-radius: 6px;
       cursor: pointer;
       font-size: 12px;
+      min-height: 32px;
     }
     .complete-btn.completed {
       background: var(--text-secondary);
@@ -900,6 +929,30 @@
       cursor: pointer;
       color: var(--text-secondary);
     }
+    .fab {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 60px;
+      height: 60px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+      z-index: 1001;
+      transition: all 0.3s ease;
+    }
+    .fab:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-md), 0 0 20px rgba(66, 153, 225, 0.3);
+    }
+    .fab .material-icons {
+      font-size: 30px;
+    }
     @media (max-width: 1024px) {
       .sidebar {
         transform: translateX(-100%);
@@ -909,6 +962,12 @@
       }
       .sidebar.open {
         transform: translateX(0);
+      }
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
     @media (max-width: 768px) {
@@ -922,14 +981,64 @@
       .welcome-title { 
         font-size: 36px; 
       }
+      .welcome-subtitle {
+        font-size: 16px;
+      }
+      .section-title {
+        font-size: 24px;
+      }
       .users-grid { 
         grid-template-columns: 1fr; 
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
       }
       .bottom-nav { 
         display: block; 
       }
       .chat-container { 
         height: 400px; 
+      }
+      .fab {
+        display: flex;
+      }
+      .sidebar {
+        top: 0;
+        height: 100vh;
+        width: 80%;
+        max-width: 300px;
+      }
+      .course-card {
+        min-height: 200px;
+      }
+      .quiz-option {
+        padding: 16px;
+        min-height: 48px;
+      }
+      .search-bar input {
+        font-size: 18px;
+        padding: 16px;
+      }
+    }
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 16px;
+      }
+      .stat-card {
+        padding: 24px 16px;
+      }
+      .course-content {
+        padding: 16px;
+      }
+      .bottom-nav ul {
+        padding: 8px 0;
+      }
+      .bottom-nav a {
+        min-width: 40px;
+      }
+      .bottom-nav .material-icons {
+        font-size: 20px;
       }
     }
   </style>
@@ -955,14 +1064,14 @@
   <aside class="sidebar" id="sidebar">
     <ul>
       <li><a href="#" class="active" data-target="dashboard"><span class="material-icons">dashboard</span>Dashboard</a></li>
-      <li><a href="#courses" data-target="courses"><span class="material-icons">school</span>Courses</a></li>
-      <li><a href="#assignments" data-target="assignments"><span class="material-icons">assignment</span>Assignments</a></li>
-      <li><a href="#quizzes" data-target="quizzes"><span class="material-icons">quiz</span>Quizzes</a></li>
-      <li><a href="#grades" data-target="grades"><span class="material-icons">grade</span>Grades</a></li>
-      <li><a href="#attendance" data-target="attendance"><span class="material-icons">event_busy</span>Attendance</a></li>
-      <li><a href="#messages" data-target="messages"><span class="material-icons">chat_bubble</span>Messages</a></li>
-      <li><a href="#profile" data-target="profile"><span class="material-icons">person</span>Profile</a></li>
-      <li><a href="#settings" data-target="settings"><span class="material-icons">settings</span>Settings</a></li>
+      <li><a href="start-courses.html"><span class="material-icons">school</span>Courses</a></li>
+      <li><a href="#" data-target="assignments"><span class="material-icons">assignment</span>Assignments</a></li>
+      <li><a href="#" data-target="quizzes"><span class="material-icons">quiz</span>Quizzes</a></li>
+      <li><a href="#" data-target="grades"><span class="material-icons">grade</span>Grades</a></li>
+      <li><a href="#" data-target="attendance"><span class="material-icons">event_busy</span>Attendance</a></li>
+      <li><a href="#" data-target="messages"><span class="material-icons">chat_bubble</span>Messages</a></li>
+      <li><a href="#" data-target="profile"><span class="material-icons">person</span>Profile</a></li>
+      <li><a href="#" data-target="settings"><span class="material-icons">settings</span>Settings</a></li>
     </ul>
   </aside>
 
@@ -1112,16 +1221,21 @@
   <nav class="bottom-nav">
     <ul>
       <li><a href="#" class="active" data-target="dashboard"><span class="material-icons">dashboard</span></a></li>
-      <li><a href="#courses" data-target="courses"><span class="material-icons">school</span></a></li>
-      <li><a href="#assignments" data-target="assignments"><span class="material-icons">assignment</span></a></li>
-      <li><a href="#quizzes" data-target="quizzes"><span class="material-icons">quiz</span></a></li>
-      <li><a href="#grades" data-target="grades"><span class="material-icons">grade</span></a></li>
-      <li><a href="#attendance" data-target="attendance"><span class="material-icons">event_busy</span></a></li>
-      <li><a href="#messages" data-target="messages"><span class="material-icons">chat_bubble</span></a></li>
-      <li><a href="#profile" data-target="profile"><span class="material-icons">person</span></a></li>
-      <li><a href="#settings" data-target="settings"><span class="material-icons">settings</span></a></li>
+      <li><a href="start-courses.html"><span class="material-icons">school</span></a></li>
+      <li><a href="#" data-target="assignments"><span class="material-icons">assignment</span></a></li>
+      <li><a href="#" data-target="quizzes"><span class="material-icons">quiz</span></a></li>
+      <li><a href="#" data-target="grades"><span class="material-icons">grade</span></a></li>
+      <li><a href="#" data-target="attendance"><span class="material-icons">event_busy</span></a></li>
+      <li><a href="#" data-target="messages"><span class="material-icons">chat_bubble</span></a></li>
+      <li><a href="#" data-target="profile"><span class="material-icons">person</span></a></li>
+      <li><a href="#" data-target="settings"><span class="material-icons">settings</span></a></li>
     </ul>
   </nav>
+
+  <!-- Floating Action Button for Sidebar -->
+  <div class="fab" onclick="toggleSidebar()">
+    <span class="material-icons">menu</span>
+  </div>
 
   <!-- Custom Dialog -->
   <div class="dialog-backdrop" id="dialog-backdrop">
@@ -1187,6 +1301,7 @@
     let progressChart;
 
     const loader = document.getElementById('loader-overlay');
+    const sidebar = document.getElementById('sidebar');
 
     function showLoader() {
       loader.classList.add('show');
@@ -1195,6 +1310,11 @@
     function hideLoader() {
       loader.classList.remove('show');
     }
+
+    // Toggle sidebar
+    window.toggleSidebar = () => {
+      sidebar.classList.toggle('open');
+    };
 
     // Upload file to Cloudinary
     async function uploadToCloudinary(file) {
@@ -1351,13 +1471,12 @@
       }
     });
 
-    // Sidebar toggle for mobile
-    const sidebar = document.getElementById('sidebar');
+    // Sidebar toggle for mobile via logo (fallback)
     const logoLink = document.getElementById('logo-link');
     logoLink.addEventListener('click', (e) => {
       if (window.innerWidth <= 1024) {
         e.preventDefault();
-        sidebar.classList.toggle('open');
+        toggleSidebar();
       }
     });
 
@@ -1520,6 +1639,7 @@
       filtered.forEach(([courseId, course]) => {
         const card = document.createElement('div');
         card.className = 'course-card';
+        card.onclick = () => { window.location.href = `start-course.html?id=${courseId}`; };
         const lessonsCount = Object.keys(course.lessons || {}).length;
         const completedForCourse = Object.keys(learnerData.completedLessons || {}).filter(l => l.startsWith(courseId)).length;
         const progress = lessonsCount > 0 ? (completedForCourse / lessonsCount * 100) : 0;
@@ -1529,7 +1649,7 @@
             <h3 class="course-title">${course.title}</h3>
             <div class="course-meta">
               <span>${course.level || 'Beginner'} • ${course.duration || '4 weeks'} • Progress: ${progress.toFixed(0)}%</span>
-              <button class="view-btn" onclick="showCourseDetails('${courseId}')">View</button>
+              <button class="view-btn" onclick="event.stopPropagation(); showCourseDetails('${courseId}')">View</button>
             </div>
           </div>
         `;
