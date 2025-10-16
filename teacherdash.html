@@ -13,6 +13,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js"></script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
       --bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -243,6 +245,13 @@
       color: var(--text-secondary);
       font-weight: 600;
     }
+    .analytics-chart {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
     .section-title {
       font-size: 32px;
       font-weight: 700;
@@ -288,6 +297,34 @@
       font-size: 14px;
       color: var(--text-secondary);
       margin-bottom: 16px;
+    }
+    .gradebook-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .gradebook-table th, .gradebook-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .gradebook-table th {
+      background: rgba(66, 153, 225, 0.1);
+      font-weight: 600;
+    }
+    .attendance-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .attendance-item {
+      background: var(--glass);
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
     }
     .dark-toggle {
       background: none;
@@ -782,6 +819,37 @@
     .toggle-switch.active::after {
       transform: translateX(26px);
     }
+    .announcement-form {
+      margin-bottom: 24px;
+    }
+    .forum-section {
+      margin-top: 24px;
+    }
+    .forum-thread {
+      background: var(--glass);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .calendar-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    #calendar {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .fc {
+      font-family: 'Inter', sans-serif;
+    }
+    .fc-event {
+      background: var(--gradient);
+      border: none;
+      border-radius: 6px;
+    }
     @media (max-width: 1024px) {
       .sidebar {
         transform: translateX(-100%);
@@ -861,9 +929,14 @@
         </div>
       </div>
 
+      <div class="analytics-chart">
+        <h3 class="section-title">Learner Activity Chart</h3>
+        <canvas id="activity-chart" width="400" height="200"></canvas>
+      </div>
+
       <div class="search-bar">
         <span class="material-icons">search</span>
-        <input type="text" id="learner-search" placeholder="Search assigned learners..." oninput="filterLearners()" aria-label="Search assigned learners">
+        <input type="text" id="learner-search" placeholder="Search assigned learners..." oninput="filterLearners('learner-search')" aria-label="Search assigned learners">
       </div>
 
       <h2 class="section-title">Assigned Learners</h2>
@@ -876,10 +949,18 @@
       <h2 class="section-title">Manage Learners</h2>
       <div class="search-bar">
         <span class="material-icons">search</span>
-        <input type="text" id="learner-manage-search" placeholder="Search learners..." oninput="filterLearners()" aria-label="Search learners">
+        <input type="text" id="learner-manage-search" placeholder="Search learners..." oninput="filterLearners('learner-manage-search')" aria-label="Search learners">
       </div>
       <div class="users-grid" id="manage-learners-grid">
         <!-- Learners will be populated here -->
+      </div>
+      <h3 class="section-title" style="font-size: 24px;">Gradebook</h3>
+      <table class="gradebook-table" id="gradebook-table">
+        <!-- Gradebook populated here -->
+      </table>
+      <h3 class="section-title" style="font-size: 24px; margin-top: 32px;">Attendance</h3>
+      <div class="attendance-grid" id="attendance-grid">
+        <!-- Attendance populated here -->
       </div>
     </section>
 
@@ -928,6 +1009,49 @@
           <input type="file" id="lesson-file" accept="video/*,application/pdf,audio/*" required>
         </div>
         <button id="add-lesson-btn" class="save-btn">Add Lesson</button>
+      </div>
+      <div class="announcement-form submission-form" style="margin-top: 24px;">
+        <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">Create Announcement</h3>
+        <div class="form-group">
+          <label for="announcement-course">Course</label>
+          <select id="announcement-course" required>
+            <option value="">Select a course</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="announcement-title">Title</label>
+          <input type="text" id="announcement-title" placeholder="Announcement title" required>
+        </div>
+        <div class="form-group">
+          <label for="announcement-message">Message</label>
+          <textarea id="announcement-message" placeholder="Announcement message..." required></textarea>
+        </div>
+        <button id="create-announcement-btn" class="save-btn">Create Announcement</button>
+      </div>
+      <div class="forum-section">
+        <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary);">Course Forums</h3>
+        <div class="form-group">
+          <label for="forum-course">Course</label>
+          <select id="forum-course">
+            <option value="">Select a course</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="forum-thread-title">Thread Title</label>
+          <input type="text" id="forum-thread-title" placeholder="Thread title">
+        </div>
+        <div class="form-group">
+          <label for="forum-thread-message">Message</label>
+          <textarea id="forum-thread-message" placeholder="Start a discussion..."></textarea>
+        </div>
+        <button id="create-thread-btn" class="save-btn">Create Thread</button>
+        <div id="forum-threads" class="cards-grid">
+          <!-- Threads populated here -->
+        </div>
+      </div>
+      <div class="calendar-container">
+        <h3 class="section-title">Course Calendar</h3>
+        <div id="calendar"></div>
       </div>
       <div class="cards-grid" id="courses-grid">
         <!-- Courses will be populated here -->
@@ -1118,6 +1242,7 @@
     let allUsers = {};
     let teacherData = {};
     let searchQuery = '';
+    let activityChart;
 
     const loader = document.getElementById('loader-overlay');
 
@@ -1173,12 +1298,14 @@
       }
     });
 
-    // Filter learners based on search query
-    window.filterLearners = () => {
-      searchQuery = document.getElementById('learner-search').value.toLowerCase();
-      populateAssignedLearners();
-      // Also update manage learners section if active
-      if (document.getElementById('learners').style.display === 'block') {
+    // Filter learners based on search query - Fixed for multiple inputs
+    window.filterLearners = (inputId) => {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      searchQuery = input.value.toLowerCase();
+      if (document.getElementById('dashboard').style.display === 'block') {
+        populateAssignedLearners();
+      } else if (document.getElementById('learners').style.display === 'block') {
         populateManageLearners();
       }
     };
@@ -1234,8 +1361,19 @@
         sidebar.classList.remove('open');
       }
       // Populate section-specific data
-      if (targetId === 'courses') {
+      if (targetId === 'dashboard') {
+        updateStats();
+        populateAssignedLearners();
+      } else if (targetId === 'learners') {
+        populateManageLearners();
+        populateGradebook();
+        populateAttendance();
+      } else if (targetId === 'courses') {
         populateCourses();
+        populateContentCourseSelect();
+        populateAnnouncementCourseSelect();
+        populateForumCourseSelect();
+        initCalendar();
       } else if (targetId === 'assignments') {
         populateAssignments();
         populateSubmissions();
@@ -1296,12 +1434,56 @@
       ).length;
       const totalCourses = Object.keys(teacherData.courses || {}).length;
       const pendingSubmissions = Object.values(allUsers).reduce((count, user) => 
-        user.teacherId === currentUser.uid ? count + (Object.keys(user.submissions || {}).length) : count, 0
+        user.teacherId === currentUser.uid ? count + Object.keys(user.submissions || {}).filter(s => !s.grade).length : count, 0
       );
       document.getElementById('assigned-learners-count').textContent = assignedLearners;
       document.getElementById('active-learners').textContent = activeLearners;
       document.getElementById('total-courses').textContent = totalCourses;
       document.getElementById('pending-submissions').textContent = pendingSubmissions;
+
+      // Update activity chart with real data
+      const weeks = [];
+      const counts = [];
+      for (let i = 3; i >= 0; i--) {
+        const weekStart = Date.now() - (i + 1) * 7 * 24 * 60 * 60 * 1000;
+        const weekEnd = weekStart + 7 * 24 * 60 * 60 * 1000;
+        const weekActive = Object.values(allUsers).filter(user => 
+          user.teacherId === currentUser.uid && user.lastActive >= weekStart && user.lastActive < weekEnd
+        ).length;
+        weeks.unshift(`Week ${4 - i}`);
+        counts.unshift(weekActive);
+      }
+      if (activityChart) {
+        activityChart.data.labels = weeks;
+        activityChart.data.datasets[0].data = counts;
+        activityChart.update();
+      } else {
+        const ctx = document.getElementById('activity-chart').getContext('2d');
+        activityChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: weeks,
+            datasets: [{
+              label: 'Active Learners',
+              data: counts,
+              borderColor: '#4299e1',
+              backgroundColor: 'rgba(66, 153, 225, 0.1)',
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'top' },
+              title: { display: true, text: 'Learner Activity Over Time' }
+            },
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+      }
     }
 
     // Populate assigned learners (Dashboard)
@@ -1363,6 +1545,79 @@
       showDialog(`Learner: ${learner.username || learner.email}\nEmail: ${learner.email}\nCourses: ${Object.keys(learner.enrolledCourses || {}).length}`, 'info');
     };
 
+    // Populate gradebook
+    function populateGradebook() {
+      const table = document.getElementById('gradebook-table');
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th>Learner</th>
+            <th>Course</th>
+            <th>Assignment</th>
+            <th>Grade</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      `;
+      const tbody = table.querySelector('tbody');
+      Object.entries(allUsers).forEach(([uid, user]) => {
+        if (user.teacherId === currentUser.uid && user.submissions) {
+          Object.entries(user.submissions).forEach(([subId, sub]) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${user.username || user.email}</td>
+              <td>${sub.courseTitle || 'N/A'}</td>
+              <td>${sub.title}</td>
+              <td><input type="number" value="${sub.grade || ''}" min="0" max="100" onchange="updateGrade('${uid}', '${subId}', this.value)"></td>
+              <td><button class="edit-btn" onclick="gradeSubmission('${uid}', '${subId}')">Save</button></td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
+      });
+    }
+
+    // Update grade
+    window.updateGrade = async (userId, subId, grade) => {
+      try {
+        await set(ref(db, `users/${userId}/submissions/${subId}/grade`), parseInt(grade));
+        showDialog('Grade updated!', 'success');
+      } catch (error) {
+        showDialog(`Failed to update grade: ${error.message}`, 'error');
+      }
+    };
+
+    // Populate attendance
+    function populateAttendance() {
+      const grid = document.getElementById('attendance-grid');
+      grid.innerHTML = '';
+      const today = new Date().toISOString().split('T')[0];
+      Object.entries(allUsers).forEach(([uid, user]) => {
+        if (user.teacherId === currentUser.uid) {
+          const item = document.createElement('div');
+          item.className = 'attendance-item';
+          const attended = user.attendance && user.attendance[today] ? 'Present' : 'Absent';
+          item.innerHTML = `
+            <div class="user-name">${user.username || user.email}</div>
+            <label>Today: <input type="checkbox" ${attended === 'Present' ? 'checked' : ''} onchange="updateAttendance('${uid}', '${today}', this.checked)"></label>
+          `;
+          grid.appendChild(item);
+        }
+      });
+    }
+
+    // Update attendance
+    window.updateAttendance = async (uid, date, present) => {
+      try {
+        await set(ref(db, `users/${uid}/attendance/${date}`), present);
+        showDialog('Attendance updated!', 'success');
+      } catch (error) {
+        showDialog(`Failed to update attendance: ${error.message}`, 'error');
+      }
+    };
+
     // Populate content course select
     function populateContentCourseSelect() {
       const select = document.getElementById('content-course');
@@ -1375,6 +1630,68 @@
         option.textContent = course.title;
         select.appendChild(option);
       });
+    }
+
+    // Populate announcement course select
+    function populateAnnouncementCourseSelect() {
+      const select = document.getElementById('announcement-course');
+      if (!select) return;
+      select.innerHTML = '<option value="">Select a course</option>';
+      const courses = teacherData.courses || {};
+      Object.entries(courses).forEach(([courseId, course]) => {
+        const option = document.createElement('option');
+        option.value = courseId;
+        option.textContent = course.title;
+        select.appendChild(option);
+      });
+    }
+
+    // Populate forum course select
+    function populateForumCourseSelect() {
+      const select = document.getElementById('forum-course');
+      if (!select) return;
+      select.innerHTML = '<option value="">Select a course</option>';
+      const courses = teacherData.courses || {};
+      Object.entries(courses).forEach(([courseId, course]) => {
+        const option = document.createElement('option');
+        option.value = courseId;
+        option.textContent = course.title;
+        select.appendChild(option);
+      });
+    }
+
+    // Init calendar
+    function initCalendar() {
+      const calendarEl = document.getElementById('calendar');
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: [], // Will populate from DB
+        eventClick: function(info) {
+          showDialog(`Event: ${info.event.title}\nDate: ${info.event.start.toLocaleDateString()}`, 'info');
+        }
+      });
+      calendar.render();
+
+      // Fetch and add events from DB
+      const eventsRef = ref(db, `teachers/${currentUser.uid}/schedule`);
+      onValue(eventsRef, (snapshot) => {
+        const events = snapshot.val() || {};
+        const fcEvents = Object.entries(events).map(([id, event]) => ({
+          id,
+          title: event.title,
+          start: new Date(event.date),
+          description: event.description
+        }));
+        calendar.getEventSources().forEach(source => source.remove());
+        calendar.addEventSource(fcEvents);
+      });
+    }
+
+    // Add event to calendar (placeholder - call from form)
+    async function addCalendarEvent(title, date, description) {
+      const eventsRef = ref(db, `teachers/${currentUser.uid}/schedule`);
+      const event = { title, date: date.toISOString(), description, timestamp: Date.now() };
+      await push(eventsRef, event);
     }
 
     // Populate courses
@@ -1422,7 +1739,6 @@
           quizCourse.appendChild(option);
         });
       }
-      populateContentCourseSelect();
     }
 
     // Edit course (placeholder)
@@ -1498,6 +1814,85 @@
         showDialog(`Failed to add lesson: ${error.message}`, 'error');
       }
     });
+
+    // Handle announcement creation
+    document.getElementById('create-announcement-btn').addEventListener('click', async () => {
+      const courseId = document.getElementById('announcement-course').value;
+      const title = document.getElementById('announcement-title').value;
+      const message = document.getElementById('announcement-message').value;
+      if (!courseId || !title || !message) {
+        showDialog('Please fill all fields.', 'error');
+        return;
+      }
+      showLoader();
+      const announcementsRef = ref(db, `courses/${courseId}/announcements`);
+      const announcement = {
+        title,
+        message,
+        teacherId: currentUser.uid,
+        timestamp: Date.now()
+      };
+      try {
+        await push(announcementsRef, announcement);
+        hideLoader();
+        showDialog('Announcement created!', 'success');
+        document.getElementById('announcement-title').value = '';
+        document.getElementById('announcement-message').value = '';
+      } catch (error) {
+        hideLoader();
+        showDialog(`Failed to create announcement: ${error.message}`, 'error');
+      }
+    });
+
+    // Handle forum thread creation
+    document.getElementById('create-thread-btn').addEventListener('click', async () => {
+      const courseId = document.getElementById('forum-course').value;
+      const title = document.getElementById('forum-thread-title').value;
+      const message = document.getElementById('forum-thread-message').value;
+      if (!courseId || !title || !message) {
+        showDialog('Please fill all fields.', 'error');
+        return;
+      }
+      showLoader();
+      const threadsRef = ref(db, `courses/${courseId}/forums/threads`);
+      const thread = {
+        title,
+        message,
+        authorId: currentUser.uid,
+        timestamp: Date.now()
+      };
+      try {
+        await push(threadsRef, thread);
+        hideLoader();
+        showDialog('Thread created!', 'success');
+        document.getElementById('forum-thread-title').value = '';
+        document.getElementById('forum-thread-message').value = '';
+        populateForumThreads(courseId);
+      } catch (error) {
+        hideLoader();
+        showDialog(`Failed to create thread: ${error.message}`, 'error');
+      }
+    });
+
+    // Populate forum threads
+    function populateForumThreads(courseId) {
+      const container = document.getElementById('forum-threads');
+      container.innerHTML = '';
+      const threadsRef = ref(db, `courses/${courseId}/forums/threads`);
+      onValue(threadsRef, (snapshot) => {
+        const threads = snapshot.val() || {};
+        Object.entries(threads).forEach(([threadId, thread]) => {
+          const div = document.createElement('div');
+          div.className = 'forum-thread';
+          div.innerHTML = `
+            <h4>${thread.title}</h4>
+            <p>${thread.message}</p>
+            <small>By Teacher - ${new Date(thread.timestamp).toLocaleDateString()}</small>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
 
     // Populate assignments
     function populateAssignments() {
@@ -1589,8 +1984,8 @@
           <h4 style="font-weight: 600; margin-bottom: 8px;">${sub.title}</h4>
           <p style="color: var(--text-secondary); margin-bottom: 8px;">${sub.description || 'No description'}</p>
           <a href="${sub.url}" target="_blank" style="color: var(--accent); text-decoration: none;">View PDF</a>
-          <p style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">Submitted: ${new Date(sub.timestamp).toLocaleDateString()}</p>
-          <button class="edit-btn" onclick="gradeSubmission('${sub.userId}', '${sub.submissionId}')">Grade</button>
+          <p style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">Submitted: ${new Date(sub.timestamp).toLocaleDateString()} ${sub.grade ? `• Grade: ${sub.grade}%` : '• Ungraded'}</p>
+          ${!sub.grade ? `<button class="edit-btn" onclick="gradeSubmission('${sub.userId}', '${sub.submissionId}')">Grade</button>` : ''}
         `;
         submissionsList.appendChild(item);
       });
@@ -1599,9 +1994,18 @@
       }
     }
 
-    // Grade submission (placeholder)
-    window.gradeSubmission = (userId, submissionId) => {
-      showDialog(`Grade submission for user ${userId}, submission ${submissionId}`, 'info');
+    // Grade submission (placeholder - now saves)
+    window.gradeSubmission = async (userId, submissionId) => {
+      const grade = prompt('Enter grade (0-100):');
+      if (grade && !isNaN(grade)) {
+        try {
+          await set(ref(db, `users/${userId}/submissions/${submissionId}/grade`), parseInt(grade));
+          showDialog('Grade saved!', 'success');
+          populateSubmissions();
+        } catch (error) {
+          showDialog(`Failed to save grade: ${error.message}`, 'error');
+        }
+      }
     };
 
     // Add quiz question
