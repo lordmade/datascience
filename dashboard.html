@@ -1500,7 +1500,14 @@
       const enrolledCourses = Object.keys(learnerData.enrolledCourses || {}).length;
       const totalLessons = Object.values(teacherCourses).reduce((sum, course) => sum + Object.keys(course.lessons || {}).length, 0);
       const completedLessonsCount = Object.keys(learnerData.completedLessons || {}).length;
-      const grades = Object.values(learnerData.submissions || {}).filter(s => s.grade).map(s => s.grade);
+      const grades = [];
+      // Assignment grades
+      Object.values(learnerData.submissions || {}).filter(s => s.grade).forEach(s => grades.push(s.grade));
+      // Quiz grades
+      Object.values(learnerData.quizSubmissions || {}).forEach(q => {
+        if (q.grade) grades.push(q.grade);
+        else if (q.autoScore) grades.push(q.autoScore);
+      });
       const averageGrade = grades.length > 0 ? (grades.reduce((a, b) => a + b, 0) / grades.length).toFixed(1) : 0;
       const pendingAssignments = Object.values(teacherAssignments).filter(a => !learnerData.submissions || !learnerData.submissions[a.id]).length;
       document.getElementById('enrolled-courses-count').textContent = enrolledCourses;
@@ -1690,35 +1697,61 @@
       Object.entries(teacherQuizzes).forEach(([quizId, quiz]) => {
         const quizCard = document.createElement('div');
         quizCard.className = 'quiz-card';
-        let optionsHtml = '';
-        quiz.questions.forEach((question, qIndex) => {
-          optionsHtml += `
-            <div class="quiz-question">
-              <p style="font-weight: 600; margin-bottom: 8px;">${qIndex + 1}. ${question.text}</p>
-              <div class="quiz-options">
-                ${question.options.map((option, oIndex) => `
-                  <label class="quiz-option">
-                    <input type="radio" name="q${qIndex}" value="${oIndex}">
-                    ${option}
-                  </label>
-                `).join('')}
-              </div>
-            </div>
+        const submission = learnerData.quizSubmissions?.[quizId];
+        if (submission) {
+          const score = submission.grade || submission.autoScore;
+          quizCard.innerHTML = `
+            <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">${quiz.title}</h3>
+            <p style="font-size: 18px; font-weight: 600; color: ${score >= 70 ? 'var(--accent-secondary)' : '#e53e3e'};">Score: ${score}%</p>
+            <small>Submitted: ${new Date(submission.timestamp).toLocaleDateString()}</small>
+            <button class="view-btn" onclick="viewQuizDetails('${quizId}')" style="margin-top: 12px;">View Details</button>
           `;
-        });
-        quizCard.innerHTML = `
-          <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">${quiz.title}</h3>
-          <form onsubmit="submitQuiz(event, '${quizId}')">
-            ${optionsHtml}
-            <button type="submit" class="save-btn" style="margin-top: 16px;">Submit Quiz</button>
-          </form>
-        `;
+        } else {
+          let optionsHtml = '';
+          quiz.questions.forEach((question, qIndex) => {
+            optionsHtml += `
+              <div class="quiz-question">
+                <p style="font-weight: 600; margin-bottom: 8px;">${qIndex + 1}. ${question.text}</p>
+                <div class="quiz-options">
+                  ${question.options.map((option, oIndex) => `
+                    <label class="quiz-option">
+                      <input type="radio" name="q${qIndex}" value="${oIndex}">
+                      ${option}
+                    </label>
+                  `).join('')}
+                </div>
+              </div>
+            `;
+          });
+          quizCard.innerHTML = `
+            <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">${quiz.title}</h3>
+            <form onsubmit="submitQuiz(event, '${quizId}')">
+              ${optionsHtml}
+              <button type="submit" class="save-btn" style="margin-top: 16px;">Submit Quiz</button>
+            </form>
+          `;
+        }
         quizzesContainer.appendChild(quizCard);
       });
       if (Object.keys(teacherQuizzes).length === 0) {
         quizzesContainer.innerHTML = '<p class="text-center" style="color: var(--text-secondary);">No quizzes yet.</p>';
       }
     }
+
+    // View quiz details
+    window.viewQuizDetails = (quizId) => {
+      const quiz = teacherQuizzes[quizId];
+      const submission = learnerData.quizSubmissions[quizId];
+      if (!quiz || !submission) return;
+      let details = `Quiz: ${quiz.title}\nYour Score: ${submission.grade || submission.autoScore}%\n\nYour Answers:\n`;
+      quiz.questions.forEach((q, i) => {
+        const yourAnswer = submission.answers[i] !== undefined ? submission.answers[i] : 'Not answered';
+        const correct = q.correct;
+        const status = yourAnswer === correct ? 'Correct' : 'Incorrect';
+        details += `${i+1}. ${q.text}\n   Your: ${q.options[yourAnswer]}\n   Correct: ${q.options[correct]}\n   Status: ${status}\n\n`;
+      });
+      showDialog(details, 'info');
+    };
 
     // Submit quiz
     window.submitQuiz = async (e, quizId) => {
@@ -1731,7 +1764,7 @@
       const score = teacherQuizzes[quizId].questions.reduce((score, q, i) => score + (answers[i] === q.correct ? 1 : 0), 0);
       const percentage = (score / teacherQuizzes[quizId].questions.length * 100).toFixed(0);
       try {
-        await set(ref(db, `users/${currentUser.uid}/quizResults/${quizId}`), { score: percentage, answers, timestamp: Date.now() });
+        await set(ref(db, `users/${currentUser.uid}/quizSubmissions/${quizId}`), { autoScore: parseInt(percentage), answers, timestamp: Date.now() });
         showDialog(`Quiz submitted! Score: ${percentage}%`, 'success');
         populateQuizzes();
       } catch (error) {
@@ -1746,7 +1779,7 @@
         <thead>
           <tr>
             <th>Course</th>
-            <th>Assignment</th>
+            <th>Item</th>
             <th>Grade</th>
             <th>Date</th>
           </tr>
@@ -1755,18 +1788,39 @@
         </tbody>
       `;
       const tbody = table.querySelector('tbody');
+      // Assignments
       Object.entries(learnerData.submissions || {}).forEach(([subId, sub]) => {
         if (sub.grade !== undefined) {
           const row = document.createElement('tr');
           row.innerHTML = `
             <td>${sub.courseTitle || 'N/A'}</td>
-            <td>${sub.title}</td>
+            <td>${sub.title} (Assignment)</td>
             <td>${sub.grade}%</td>
             <td>${new Date(sub.timestamp).toLocaleDateString()}</td>
           `;
           tbody.appendChild(row);
         }
       });
+      // Quizzes
+      Object.entries(learnerData.quizSubmissions || {}).forEach(([quizId, result]) => {
+        const quiz = teacherQuizzes[quizId];
+        if (quiz) {
+          const score = result.grade || result.autoScore;
+          if (score !== undefined) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${teacherCourses[quiz.courseId]?.title || 'N/A'}</td>
+              <td>${quiz.title} (Quiz)</td>
+              <td>${score}%</td>
+              <td>${new Date(result.timestamp).toLocaleDateString()}</td>
+            `;
+            tbody.appendChild(row);
+          }
+        }
+      });
+      if (tbody.children.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">No grades yet.</td></tr>';
+      }
     }
 
     // Populate attendance
@@ -1961,6 +2015,19 @@
               teacherQuizzes = snapshot.val() || {};
               if (document.getElementById('quizzes').style.display === 'block') {
                 populateQuizzes();
+              }
+            });
+
+            // Fetch quiz submissions
+            const quizSubsRef = ref(db, `users/${user.uid}/quizSubmissions`);
+            onValue(quizSubsRef, (snapshot) => {
+              learnerData.quizSubmissions = snapshot.val() || {};
+              updateStats();
+              if (document.getElementById('quizzes').style.display === 'block') {
+                populateQuizzes();
+              }
+              if (document.getElementById('grades').style.display === 'block') {
+                populateGrades();
               }
             });
 
