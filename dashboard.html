@@ -6,13 +6,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-touch-fullscreen" content="yes">
-  <title>Vynix - Student Dashboard</title>
+  <title>Vynix - Learner Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js"></script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
@@ -257,199 +258,45 @@
       margin-bottom: 24px;
       color: var(--text-primary);
     }
-    .cards-grid {
+    .users-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 24px;
     }
-    .course-card {
+    .user-card {
       background: var(--card-bg);
       backdrop-filter: blur(20px);
       border: 1px solid var(--border);
       border-radius: 24px;
-      overflow: hidden;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 24px;
       box-shadow: var(--shadow-sm);
-      cursor: pointer;
-      position: relative;
+      transition: all 0.3s ease;
     }
-    .course-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
+    .user-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+    .user-avatar-small {
+      width: 50px;
+      height: 50px;
       background: var(--gradient);
-      border-radius: 24px 24px 0 0;
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
-      z-index: 1;
-    }
-    .course-card:hover::before {
-      transform: scaleX(1);
-    }
-    .course-card:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.1);
-    }
-    .course-thumbnail {
-      height: 160px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 48px;
       color: white;
-      position: relative;
-      overflow: hidden;
+      font-weight: 600;
+      margin-bottom: 12px;
     }
-    .course-card:hover .course-thumbnail {
-      transform: scale(1.05);
-      filter: brightness(1.1);
-    }
-    .course-content {
-      padding: 24px;
-    }
-    .course-title {
-      font-size: 20px;
+    .user-name {
+      font-size: 18px;
       font-weight: 700;
       margin-bottom: 8px;
-      color: var(--text-primary);
     }
-    .course-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .user-meta {
       font-size: 14px;
       color: var(--text-secondary);
-    }
-    .edit-btn {
-      background: var(--gradient);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.3s ease;
-    }
-    .edit-btn:hover {
-      transform: translateY(-1px);
-    }
-    .search-bar {
-      position: relative;
-      max-width: 400px;
-      margin-bottom: 24px;
-    }
-    .search-bar input {
-      width: 100%;
-      padding: 12px 16px 12px 40px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--card-bg);
-      color: var(--text-primary);
-      font-size: 16px;
-      transition: border-color 0.3s ease;
-    }
-    .search-bar input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    .search-bar .material-icons {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-secondary);
-      font-size: 20px;
-    }
-    .submission-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 16px;
-    }
-    .submission-item {
-      background: var(--glass);
-      border-radius: 8px;
-      padding: 16px;
-      text-align: center;
-    }
-    .save-btn {
-      background: var(--gradient);
-      color: white;
-      border: none;
-      padding: 12px 32px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      width: 100%;
-    }
-    .save-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .form-group label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--text-primary);
-    }
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--card-bg);
-      color: var(--text-primary);
-      font-size: 16px;
-      transition: border-color 0.3s ease;
-    }
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    .form-group textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-    .quiz-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
       margin-bottom: 16px;
-    }
-    .quiz-question {
-      margin-bottom: 16px;
-    }
-    .quiz-options {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .quiz-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px;
-      background: var(--glass);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    .quiz-option:hover {
-      background: rgba(66, 153, 225, 0.1);
     }
     .gradebook-table {
       width: 100%;
@@ -468,128 +315,16 @@
       background: rgba(66, 153, 225, 0.1);
       font-weight: 600;
     }
-    .chat-container {
-      display: flex;
-      flex-direction: column;
-      height: 500px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    #student-messages-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-      max-height: 400px;
-    }
-    .message {
-      margin: 10px 0;
-      padding: 10px;
-      border-radius: 18px;
-      max-width: 70%;
-    }
-    .message.sent {
-      background: var(--accent);
-      color: white;
-      margin-left: auto;
-      text-align: right;
-    }
-    .message.received {
-      background: var(--glass);
-      margin-right: auto;
-    }
-    #student-message-form {
-      display: flex;
-      padding: 10px;
-      gap: 10px;
-    }
-    #student-message-input {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-    }
-    #student-message-form button {
-      padding: 10px 20px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-    }
-    .profile-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 40px;
-      max-width: 600px;
-      margin: 0 auto;
-      box-shadow: var(--shadow-sm);
-    }
-    .profile-avatar-large {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      margin: 0 auto 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      color: white;
-      background: var(--gradient);
-      position: relative;
-      overflow: hidden;
-    }
-    .profile-avatar-large img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .settings-grid {
+    .attendance-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
     }
-    .setting-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 24px;
-    }
-    .setting-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    .toggle-switch {
-      position: relative;
-      width: 50px;
-      height: 24px;
-      background: var(--border);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    .toggle-switch.active {
-      background: var(--accent);
-    }
-    .toggle-switch::after {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 20px;
-      height: 20px;
-      background: white;
-      border-radius: 50%;
-      transition: transform 0.3s ease;
-    }
-    .toggle-switch.active::after {
-      transform: translateX(26px);
+    .attendance-item {
+      background: var(--glass);
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
     }
     .dark-toggle {
       background: none;
@@ -748,6 +483,393 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .search-bar {
+      position: relative;
+      max-width: 400px;
+      margin-bottom: 24px;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 12px 16px 12px 40px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+    .search-bar input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .search-bar .material-icons {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      font-size: 20px;
+    }
+    .courses-section {
+      margin-bottom: 48px;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .course-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      position: relative;
+    }
+    .course-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient);
+      border-radius: 24px 24px 0 0;
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+      z-index: 1;
+    }
+    .course-card:hover::before {
+      transform: scaleX(1);
+    }
+    .course-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.1);
+    }
+    .course-thumbnail {
+      height: 160px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .course-card:hover .course-thumbnail {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+    .course-content {
+      padding: 24px;
+    }
+    .course-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    .course-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .view-btn {
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.3s ease;
+    }
+    .view-btn:hover {
+      transform: translateY(-1px);
+    }
+    .submission-form {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    .save-btn {
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    .save-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .submission-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+    .submission-item {
+      background: var(--glass);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .quiz-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .quiz-question {
+      margin-bottom: 16px;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: var(--glass);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .quiz-option:hover {
+      background: rgba(66, 153, 225, 0.1);
+    }
+    .quiz-option input[type="radio"] {
+      margin-right: 8px;
+    }
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 500px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    #messages-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      max-height: 400px;
+    }
+    .message {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 18px;
+      max-width: 70%;
+    }
+    .message.sent {
+      background: var(--accent);
+      color: white;
+      margin-left: auto;
+      text-align: right;
+    }
+    .message.received {
+      background: var(--glass);
+      margin-right: auto;
+    }
+    #message-form {
+      display: flex;
+      padding: 10px;
+      gap: 10px;
+    }
+    #message-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+    #message-form button {
+      padding: 10px 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    .profile-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-sm);
+    }
+    .profile-avatar-large {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: white;
+      background: var(--gradient);
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-avatar-large img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .setting-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 24px;
+      background: var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .toggle-switch.active {
+      background: var(--accent);
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+    .toggle-switch.active::after {
+      transform: translateX(26px);
+    }
+    .announcement-list {
+      margin-top: 16px;
+    }
+    .announcement-item {
+      background: var(--glass);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .lesson-item {
+      background: var(--glass);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .lesson-link {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .lesson-link:hover {
+      text-decoration: underline;
+    }
+    .forum-section {
+      margin-top: 24px;
+    }
+    .forum-thread {
+      background: var(--glass);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .forum-reply-form {
+      margin-top: 16px;
+    }
+    .calendar-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    #calendar {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .fc {
+      font-family: 'Inter', sans-serif;
+    }
+    .fc-event {
+      background: var(--gradient);
+      border: none;
+      border-radius: 6px;
+    }
     @media (max-width: 1024px) {
       .sidebar {
         transform: translateX(-100%);
@@ -763,6 +885,7 @@
       .navbar { padding: 16px 20px; }
       .main-content { padding: 20px; margin-top: 70px; }
       .welcome-title { font-size: 36px; }
+      .users-grid { grid-template-columns: 1fr; }
       .bottom-nav { display: block; }
       .chat-container { height: 400px; }
     }
@@ -777,11 +900,11 @@
   <nav class="navbar" id="navbar">
     <a class="logo" id="logo-link">
       <div class="logo-icon">V</div>
-      Vynix Student
+      Vynix Learner
     </a>
     <div class="user-menu">
-      <span id="user-name">Student</span>
-      <div class="user-avatar" id="user-avatar">S</div>
+      <span id="user-name">Learner</span>
+      <div class="user-avatar" id="user-avatar">L</div>
       <button class="dark-toggle" onclick="toggleDarkMode()" aria-label="Toggle Dark Mode">🌙</button>
       <button class="logout-btn" onclick="logout()" aria-label="Log out">Logout</button>
     </div>
@@ -794,6 +917,7 @@
       <li><a href="#assignments" data-target="assignments"><span class="material-icons">assignment</span>Assignments</a></li>
       <li><a href="#quizzes" data-target="quizzes"><span class="material-icons">quiz</span>Quizzes</a></li>
       <li><a href="#grades" data-target="grades"><span class="material-icons">grade</span>Grades</a></li>
+      <li><a href="#attendance" data-target="attendance"><span class="material-icons">event_busy</span>Attendance</a></li>
       <li><a href="#messages" data-target="messages"><span class="material-icons">chat_bubble</span>Messages</a></li>
       <li><a href="#profile" data-target="profile"><span class="material-icons">person</span>Profile</a></li>
       <li><a href="#settings" data-target="settings"><span class="material-icons">settings</span>Settings</a></li>
@@ -803,8 +927,8 @@
   <main class="main-content">
     <section id="dashboard">
       <div class="welcome-section">
-        <h1 class="welcome-title">Student Dashboard</h1>
-        <p class="welcome-subtitle">View your courses and track your progress.</p>
+        <h1 class="welcome-title">Learner Dashboard</h1>
+        <p class="welcome-subtitle">Track your progress and engage with your courses.</p>
       </div>
 
       <div class="stats-grid">
@@ -813,68 +937,84 @@
           <div class="stat-label">Enrolled Courses</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number" id="avg-grade">0</div>
+          <div class="stat-number" id="completed-lessons">0</div>
+          <div class="stat-label">Lessons Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="average-grade">0</div>
           <div class="stat-label">Average Grade</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number" id="pending-tasks">0</div>
-          <div class="stat-label">Pending Tasks</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="active-week">0</div>
-          <div class="stat-label">Sessions This Week</div>
+          <div class="stat-number" id="pending-assignments">0</div>
+          <div class="stat-label">Pending Assignments</div>
         </div>
       </div>
 
       <div class="analytics-chart">
-        <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">Progress Chart</h3>
+        <h3 class="section-title">Progress Chart</h3>
         <canvas id="progress-chart" width="400" height="200"></canvas>
       </div>
 
-      <h2 class="section-title">Quick Links</h2>
-      <div class="cards-grid" id="quick-links-grid">
-        <!-- Quick links to courses -->
+      <div class="search-bar">
+        <span class="material-icons">search</span>
+        <input type="text" id="course-search" placeholder="Search enrolled courses..." oninput="filterCourses('course-search')" aria-label="Search enrolled courses">
+      </div>
+
+      <h2 class="section-title">Enrolled Courses</h2>
+      <div class="cards-grid" id="enrolled-courses-grid">
+        <!-- Enrolled courses will be populated here -->
       </div>
     </section>
 
-    <section id="courses">
+    <section id="courses" class="courses-section">
       <h2 class="section-title">My Courses</h2>
       <div class="search-bar">
         <span class="material-icons">search</span>
-        <input type="text" id="course-search" placeholder="Search courses..." oninput="filterCourses()" aria-label="Search courses">
+        <input type="text" id="courses-search" placeholder="Search courses..." oninput="filterCourses('courses-search')" aria-label="Search courses">
       </div>
-      <div class="cards-grid" id="enrolled-courses-grid">
-        <!-- Enrolled courses populated here -->
+      <div class="cards-grid" id="courses-grid">
+        <!-- Courses will be populated here -->
       </div>
     </section>
 
-    <section id="assignments">
+    <section id="assignments" class="courses-section">
       <h2 class="section-title">Assignments</h2>
-      <div class="submission-list" id="student-assignments-list">
-        <!-- Assignments and submissions -->
+      <div class="cards-grid" id="assignments-grid">
+        <!-- Assignments will be populated here -->
+      </div>
+      <h3 style="margin-top: 32px; font-size: 24px; font-weight: 700;">My Submissions</h3>
+      <div class="submission-list" id="submissions-list">
+        <!-- Submissions will be populated here -->
       </div>
     </section>
 
-    <section id="quizzes">
+    <section id="quizzes" class="courses-section">
       <h2 class="section-title">Quizzes</h2>
-      <div id="student-quizzes-container">
-        <!-- Quizzes to take -->
+      <div id="quizzes-container">
+        <!-- Quizzes will be populated here -->
       </div>
     </section>
 
-    <section id="grades">
-      <h2 class="section-title">My Grades</h2>
-      <table class="gradebook-table" id="student-grades-table">
-        <!-- Grades table -->
+    <section id="grades" class="courses-section">
+      <h2 class="section-title">Grades</h2>
+      <table class="gradebook-table" id="grades-table">
+        <!-- Grades populated here -->
       </table>
     </section>
 
-    <section id="messages">
+    <section id="attendance" class="courses-section">
+      <h2 class="section-title">Attendance</h2>
+      <div class="attendance-grid" id="attendance-grid">
+        <!-- Attendance populated here -->
+      </div>
+    </section>
+
+    <section id="messages" class="courses-section">
       <h2 class="section-title">Messages</h2>
-      <div class="chat-container" id="student-chat-container">
-        <div id="student-messages-list"></div>
-        <form id="student-message-form">
-          <input type="text" id="student-message-input" placeholder="Type a message..." aria-label="Type a message">
+      <div class="chat-container" id="chat-container">
+        <div id="messages-list"></div>
+        <form id="message-form">
+          <input type="text" id="message-input" placeholder="Type a message..." aria-label="Type a message">
           <button type="submit">Send</button>
         </form>
       </div>
@@ -883,19 +1023,19 @@
     <section id="profile" class="courses-section">
       <h2 class="section-title">Edit Profile</h2>
       <div class="profile-card">
-        <div class="profile-avatar-large" id="student-profile-avatar-large">S</div>
-        <form id="student-profile-form">
+        <div class="profile-avatar-large" id="profile-avatar-large">L</div>
+        <form id="profile-form">
           <div class="form-group">
-            <label for="student-profile-pic">Profile Picture</label>
-            <input type="file" id="student-profile-pic" accept="image/*">
+            <label for="profile-pic">Profile Picture</label>
+            <input type="file" id="profile-pic" accept="image/*">
           </div>
           <div class="form-group">
-            <label for="student-username">Username</label>
-            <input type="text" id="student-username" required>
+            <label for="username">Username</label>
+            <input type="text" id="username" required>
           </div>
           <div class="form-group">
-            <label for="student-bio">Bio</label>
-            <textarea id="student-bio" placeholder="Tell us about yourself..."></textarea>
+            <label for="bio">Bio</label>
+            <textarea id="bio" placeholder="Tell us about yourself..."></textarea>
           </div>
           <button type="submit" class="save-btn">Save Changes</button>
         </form>
@@ -909,18 +1049,18 @@
           <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Notifications</h3>
           <div class="setting-item">
             <span>Email Notifications</span>
-            <div class="toggle-switch" id="student-email-toggle"></div>
+            <div class="toggle-switch" id="email-toggle"></div>
           </div>
           <div class="setting-item">
             <span>Push Notifications</span>
-            <div class="toggle-switch" id="student-push-toggle"></div>
+            <div class="toggle-switch" id="push-toggle"></div>
           </div>
         </div>
         <div class="setting-card">
           <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Privacy</h3>
           <div class="setting-item">
             <span>Public Profile</span>
-            <div class="toggle-switch" id="student-public-toggle"></div>
+            <div class="toggle-switch" id="public-toggle"></div>
           </div>
         </div>
       </div>
@@ -934,6 +1074,7 @@
       <li><a href="#assignments" data-target="assignments"><span class="material-icons">assignment</span></a></li>
       <li><a href="#quizzes" data-target="quizzes"><span class="material-icons">quiz</span></a></li>
       <li><a href="#grades" data-target="grades"><span class="material-icons">grade</span></a></li>
+      <li><a href="#attendance" data-target="attendance"><span class="material-icons">event_busy</span></a></li>
       <li><a href="#messages" data-target="messages"><span class="material-icons">chat_bubble</span></a></li>
       <li><a href="#profile" data-target="profile"><span class="material-icons">person</span></a></li>
       <li><a href="#settings" data-target="settings"><span class="material-icons">settings</span></a></li>
@@ -970,17 +1111,17 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // Cloudinary configuration
-    const CLOUDINARY_CLOUD_NAME = 'dqkujefxj';
-    const UPLOAD_PRESET = 'banter_box';
+    // Cloudinary configuration - Replace with your actual values
+    const CLOUDINARY_CLOUD_NAME = 'dqkujefxj'; // Replace with your Cloudinary cloud name
+    const UPLOAD_PRESET = 'banter_box'; // Replace with your unsigned upload preset
 
     let currentUser = null;
-    let studentData = {};
-    let allAssignments = {};
-    let allQuizzes = {};
-    let enrolledCourses = {};
-    let progressChart;
+    let learnerData = {};
+    let teacherCourses = {};
+    let teacherAssignments = {};
+    let teacherQuizzes = {};
     let searchQuery = '';
+    let progressChart;
 
     const loader = document.getElementById('loader-overlay');
 
@@ -1036,6 +1177,18 @@
       }
     });
 
+    // Filter courses based on search query
+    window.filterCourses = (inputId) => {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      searchQuery = input.value.toLowerCase();
+      if (document.getElementById('dashboard').style.display === 'block') {
+        populateEnrolledCourses();
+      } else if (document.getElementById('courses').style.display === 'block') {
+        populateCourses();
+      }
+    };
+
     // Dark mode toggle
     function toggleDarkMode() {
       document.body.classList.toggle('dark');
@@ -1082,28 +1235,27 @@
       // Update active classes
       document.querySelectorAll('a[data-target]').forEach(a => a.classList.remove('active'));
       document.querySelectorAll(`a[data-target="${targetId}"]`).forEach(a => a.classList.add('active'));
-      // Close sidebar on mobile
+      // Close sidebar on mobile after selection
       if (window.innerWidth <= 1024) {
         sidebar.classList.remove('open');
       }
-      // Populate data
+      // Populate section-specific data
       if (targetId === 'dashboard') {
-        updateStudentStats();
-        populateQuickLinks();
-      } else if (targetId === 'courses') {
+        updateStats();
         populateEnrolledCourses();
+      } else if (targetId === 'courses') {
+        populateCourses();
       } else if (targetId === 'assignments') {
-        populateStudentAssignments();
+        populateAssignments();
+        populateSubmissions();
       } else if (targetId === 'quizzes') {
-        populateStudentQuizzes();
+        populateQuizzes();
       } else if (targetId === 'grades') {
-        populateStudentGrades();
+        populateGrades();
+      } else if (targetId === 'attendance') {
+        populateAttendance();
       } else if (targetId === 'messages') {
-        populateStudentMessages();
-      } else if (targetId === 'profile') {
-        populateStudentProfile();
-      } else if (targetId === 'settings') {
-        initStudentSettings();
+        populateMessages();
       }
     }
 
@@ -1116,6 +1268,7 @@
           showTab(target);
         });
       });
+      // Initialize dashboard
       showTab('dashboard');
     });
 
@@ -1129,222 +1282,269 @@
       }
     };
 
-    // Update student stats
-    function updateStudentStats() {
-      const enrolledCount = Object.keys(enrolledCourses).length;
-      const grades = Object.values(studentData.submissions || {}).map(s => s.grade || 0).filter(g => g > 0);
-      const avgGrade = grades.length > 0 ? (grades.reduce((a, b) => a + b, 0) / grades.length).toFixed(1) : 0;
-      const pending = Object.values(allAssignments).filter(a => !studentData.submissions?.[a.id]).length;
-      const sessions = studentData.sessionsThisWeek || 0;
-      document.getElementById('enrolled-courses-count').textContent = enrolledCount;
-      document.getElementById('avg-grade').textContent = avgGrade;
-      document.getElementById('pending-tasks').textContent = pending;
-      document.getElementById('active-week').textContent = sessions;
+    // Update avatar
+    function updateAvatar(url) {
+      const avatar = document.getElementById('user-avatar');
+      const profileAvatar = document.getElementById('profile-avatar-large');
+      if (url) {
+        avatar.innerHTML = `<img src="${url}" alt="Profile">`;
+        profileAvatar.innerHTML = `<img src="${url}" alt="Profile">`;
+        avatar.style.background = 'none';
+        profileAvatar.style.background = 'none';
+      } else {
+        const initial = (learnerData.username || currentUser.email)[0].toUpperCase();
+        avatar.innerHTML = initial;
+        profileAvatar.innerHTML = initial;
+        avatar.style.background = 'var(--gradient)';
+        profileAvatar.style.background = 'var(--gradient)';
+      }
+    }
 
-      // Sample data for chart; replace with real grades over time
-      const months = ['Jan', 'Feb', 'Mar', 'Apr'];
-      const gradeData = [75, 82, 88, 92];
+    // Update stats
+    function updateStats() {
+      const enrolledCourses = Object.keys(learnerData.enrolledCourses || {}).length;
+      const totalLessons = Object.values(teacherCourses).reduce((sum, course) => sum + Object.keys(course.lessons || {}).length, 0);
+      const completedLessons = Object.keys(learnerData.completedLessons || {}).length;
+      const grades = Object.values(learnerData.submissions || {}).filter(s => s.grade).map(s => s.grade);
+      const averageGrade = grades.length > 0 ? (grades.reduce((a, b) => a + b, 0) / grades.length).toFixed(1) : 0;
+      const pendingAssignments = Object.values(teacherAssignments).filter(a => !learnerData.submissions || !learnerData.submissions[a.id]).length;
+      document.getElementById('enrolled-courses-count').textContent = enrolledCourses;
+      document.getElementById('completed-lessons').textContent = completedLessons;
+      document.getElementById('average-grade').textContent = averageGrade + '%';
+      document.getElementById('pending-assignments').textContent = pendingAssignments;
+
+      // Update progress chart
+      const labels = ['Courses', 'Lessons', 'Grades'];
+      const data = [enrolledCourses, (completedLessons / totalLessons * 100) || 0, averageGrade];
       if (progressChart) {
-        progressChart.data.labels = months;
-        progressChart.data.datasets[0].data = gradeData;
+        progressChart.data.labels = labels;
+        progressChart.data.datasets[0].data = data;
         progressChart.update();
       } else {
         const ctx = document.getElementById('progress-chart').getContext('2d');
         progressChart = new Chart(ctx, {
-          type: 'line',
+          type: 'doughnut',
           data: {
-            labels: months,
+            labels: labels,
             datasets: [{
-              label: 'Grades',
-              data: gradeData,
-              borderColor: '#48bb78',
-              backgroundColor: 'rgba(72, 187, 120, 0.1)',
-              fill: true,
-              tension: 0.4
+              data: data,
+              backgroundColor: ['#4299e1', '#48bb78', '#ed8936']
             }]
           },
           options: {
             responsive: true,
             plugins: {
               legend: { position: 'top' },
-              title: { display: true, text: 'Grade Progress Over Time' }
-            },
-            scales: {
-              y: { beginAtZero: true }
+              title: { display: true, text: 'Progress Overview' }
             }
           }
         });
       }
     }
 
-    // Populate quick links
-    function populateQuickLinks() {
-      const grid = document.getElementById('quick-links-grid');
-      grid.innerHTML = '';
-      Object.entries(enrolledCourses).slice(0, 4).forEach(([courseId, course]) => {
-        const card = document.createElement('div');
-        card.className = 'course-card';
-        card.onclick = () => showTab('courses');
-        card.innerHTML = `
-          <div class="course-thumbnail">📚</div>
-          <div class="course-content">
-            <h3 class="course-title">${course.title}</h3>
-            <div class="course-meta">
-              <span>Quick Access</span>
-            </div>
-          </div>
-        `;
-        grid.appendChild(card);
+    // Auto-enroll learner when course is created (listen to teacher's courses and update enrolledCourses)
+    function autoEnrollInCourses(teacherId) {
+      const teacherCoursesRef = ref(db, `teachers/${teacherId}/courses`);
+      onValue(teacherCoursesRef, async (snapshot) => {
+        const newCourses = snapshot.val() || {};
+        const enrolledCourses = learnerData.enrolledCourses || {};
+        let updated = false;
+        Object.entries(newCourses).forEach(([courseId]) => {
+          if (!enrolledCourses[courseId]) {
+            enrolledCourses[courseId] = true;
+            updated = true;
+          }
+        });
+        if (updated) {
+          learnerData.enrolledCourses = enrolledCourses;
+          await set(ref(db, `users/${currentUser.uid}`), learnerData);
+        }
       });
     }
 
-    // Filter courses
-    window.filterCourses = () => {
-      searchQuery = document.getElementById('course-search').value.toLowerCase();
-      populateEnrolledCourses();
-    };
-
-    // Populate enrolled courses
+    // Populate enrolled courses (Dashboard and Courses section)
     function populateEnrolledCourses() {
-      const grid = document.getElementById('enrolled-courses-grid');
+      const grid = document.getElementById('enrolled-courses-grid') || document.getElementById('courses-grid');
+      if (!grid) return;
       grid.innerHTML = '';
-      let courses = Object.entries(enrolledCourses).filter(([id, course]) => 
-        (course.title || '').toLowerCase().includes(searchQuery)
-      );
-      courses.forEach(([courseId, course]) => {
+      const enrolled = Object.entries(teacherCourses).filter(([courseId]) => learnerData.enrolledCourses?.[courseId]);
+      let filtered = enrolled.filter(([_, course]) => {
+        const searchTerm = (course.title || '').toLowerCase();
+        return searchTerm.includes(searchQuery);
+      });
+      filtered.forEach(([courseId, course]) => {
         const card = document.createElement('div');
         card.className = 'course-card';
-        card.onclick = () => viewCourse(courseId);
         const lessonsCount = Object.keys(course.lessons || {}).length;
+        const progress = learnerData.completedLessons ? Object.keys(learnerData.completedLessons).filter(l => l.startsWith(courseId)).length / lessonsCount * 100 : 0;
         card.innerHTML = `
           <div class="course-thumbnail">${course.thumbnail || '📚'}</div>
           <div class="course-content">
             <h3 class="course-title">${course.title}</h3>
             <div class="course-meta">
-              <span>${course.level || 'Beginner'} • ${course.duration || '4 weeks'} • Lessons: ${lessonsCount}</span>
-              <button class="edit-btn">View</button>
+              <span>${course.level || 'Beginner'} • ${course.duration || '4 weeks'} • Progress: ${progress.toFixed(0)}%</span>
+              <button class="view-btn" onclick="viewCourse('${courseId}')">View</button>
             </div>
           </div>
         `;
         grid.appendChild(card);
       });
-      if (courses.length === 0) {
-        grid.innerHTML = '<p class="text-center" style="color: var(--text-secondary);">No courses match your search.</p>';
+      if (filtered.length === 0) {
+        const message = searchQuery ? `<p class="text-center" style="color: var(--text-secondary);">No courses match "${searchQuery}".</p>` : '<p class="text-center" style="color: var(--text-secondary);">No courses enrolled yet.</p>';
+        grid.innerHTML = message;
       }
     }
 
-    // View course
+    // View course details (shows lessons, announcements, forums)
     window.viewCourse = (courseId) => {
-      const course = enrolledCourses[courseId];
-      showDialog(`Course: ${course.title}\nDescription: ${course.description || 'N/A'}\nLessons: ${Object.keys(course.lessons || {}).length}`, 'info');
-      // In full impl, open modal with lessons list
+      const course = teacherCourses[courseId];
+      let content = `Course: ${course.title}\nDescription: ${course.description || 'N/A'}\n\nLessons:\n`;
+      Object.entries(course.lessons || {}).forEach(([lessonId, lesson]) => {
+        content += `- ${lesson.title} (${lesson.type}): <a href="${lesson.url}" target="_blank">${lesson.url}</a>\n`;
+      });
+      // Fetch announcements
+      const announcementsRef = ref(db, `courses/${courseId}/announcements`);
+      onValue(announcementsRef, (snap) => {
+        const anns = snap.val() || {};
+        content += `\nAnnouncements:\n`;
+        Object.values(anns).forEach(ann => {
+          content += `- ${ann.title}: ${ann.message}\n`;
+        });
+        showDialog(content, 'info');
+      });
+      // Similar for forums
+      const forumsRef = ref(db, `courses/${courseId}/forums/threads`);
+      onValue(forumsRef, (snap) => {
+        const threads = snap.val() || {};
+        content += `\nForum Threads:\n`;
+        Object.values(threads).forEach(thread => {
+          content += `- ${thread.title}: ${thread.message}\n`;
+        });
+        showDialog(content, 'info');
+      });
     };
 
-    // Populate student assignments
-    function populateStudentAssignments() {
-      const list = document.getElementById('student-assignments-list');
-      list.innerHTML = '';
-      Object.entries(allAssignments).forEach(([assignId, assign]) => {
-        if (enrolledCourses[assign.courseId]) {
-          const submitted = studentData.submissions && studentData.submissions[assignId];
-          const item = document.createElement('div');
-          item.className = 'submission-item';
-          item.innerHTML = `
-            <h4 style="font-weight: 600; margin-bottom: 8px;">${assign.title}</h4>
-            <p style="color: var(--text-secondary); margin-bottom: 8px;">${assign.description || 'No description'}</p>
-            ${assign.attachmentUrl ? `<a href="${assign.attachmentUrl}" target="_blank" style="color: var(--accent); text-decoration: none; margin-bottom: 8px; display: block;">View Attachment</a>` : ''}
-            ${submitted ? `
-              <p style="font-size: 12px; color: var(--text-secondary);">Submitted: ${new Date(submitted.timestamp).toLocaleDateString()}${submitted.grade ? ` • Grade: ${submitted.grade}%` : ''}</p>
-            ` : `
-              <form style="margin-top: 8px;" onsubmit="submitAssignment(event, '${assignId}')">
-                <div class="form-group">
-                  <input type="file" accept="application/pdf" required>
-                </div>
-                <button type="submit" class="save-btn">Submit Assignment</button>
-              </form>
-            `}
-          `;
-          list.appendChild(item);
-        }
+    // Populate courses (alias for enrolled)
+    function populateCourses() {
+      populateEnrolledCourses();
+    }
+
+    // Populate assignments
+    function populateAssignments() {
+      const grid = document.getElementById('assignments-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      Object.entries(teacherAssignments).forEach(([assignId, assign]) => {
+        const card = document.createElement('div');
+        card.className = 'course-card';
+        const isSubmitted = learnerData.submissions?.[assignId];
+        card.innerHTML = `
+          <div class="course-thumbnail">📄</div>
+          <div class="course-content">
+            <h3 class="course-title">${assign.title}</h3>
+            <div class="course-meta">
+              <span>Due: ${new Date(assign.timestamp).toLocaleDateString()} ${isSubmitted ? '• Submitted' : '• Pending'}</span>
+              ${assign.attachmentUrl ? `<a href="${assign.attachmentUrl}" target="_blank" class="view-btn" style="margin-left: 8px;">View</a>` : ''}
+              ${!isSubmitted ? `<button class="view-btn" onclick="submitAssignment('${assignId}')">Submit</button>` : ''}
+            </div>
+            <p style="margin-top: 8px; color: var(--text-secondary);">${assign.description || ''}</p>
+          </div>
+        `;
+        grid.appendChild(card);
       });
-      if (list.children.length === 0) {
-        list.innerHTML = '<p class="text-center" style="color: var(--text-secondary);">No assignments available.</p>';
+      if (Object.keys(teacherAssignments).length === 0) {
+        grid.innerHTML = '<p class="text-center" style="color: var(--text-secondary);">No assignments yet.</p>';
       }
     }
 
     // Submit assignment
-    window.submitAssignment = async (e, assignId) => {
-      e.preventDefault();
-      const fileInput = e.target.querySelector('input[type="file"]');
-      const file = fileInput.files[0];
-      if (!file) return;
-      showLoader();
-      try {
-        const url = await uploadToCloudinary(file);
-        const assignment = allAssignments[assignId];
-        const sub = {
-          title: assignment.title,
-          description: assignment.description,
-          url,
-          timestamp: Date.now(),
-          courseId: assignment.courseId
-        };
-        const submissionsRef = ref(db, `users/${currentUser.uid}/submissions/${assignId}`);
-        await set(submissionsRef, sub);
-        hideLoader();
-        showDialog('Assignment submitted successfully!', 'success');
-        populateStudentAssignments();
-      } catch (error) {
-        hideLoader();
-        showDialog(`Submission failed: ${error.message}`, 'error');
-      }
+    window.submitAssignment = async (assignId) => {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'application/pdf';
+      fileInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        showLoader();
+        try {
+          const downloadURL = await uploadToCloudinary(file);
+          const submission = {
+            title: teacherAssignments[assignId].title,
+            description: 'Submitted PDF',
+            url: downloadURL,
+            courseTitle: teacherCourses[teacherAssignments[assignId].courseId]?.title || 'N/A',
+            timestamp: Date.now(),
+            assignmentId: assignId
+          };
+          const submissionsRef = ref(db, `users/${currentUser.uid}/submissions/${assignId}`);
+          await set(submissionsRef, submission);
+          hideLoader();
+          showDialog('Assignment submitted successfully!', 'success');
+          populateAssignments();
+          populateSubmissions();
+        } catch (error) {
+          hideLoader();
+          showDialog(`Failed to submit: ${error.message}`, 'error');
+        }
+      };
+      fileInput.click();
     };
 
-    // Populate student quizzes
-    function populateStudentQuizzes() {
-      const container = document.getElementById('student-quizzes-container');
-      container.innerHTML = '';
-      Object.entries(allQuizzes).forEach(([quizId, quiz]) => {
-        if (enrolledCourses[quiz.courseId]) {
-          const taken = studentData.quizResults && studentData.quizResults[quizId];
-          const card = document.createElement('div');
-          card.className = 'quiz-card';
-          if (!taken) {
-            let questionsHtml = '';
-            quiz.questions.forEach((q, i) => {
-              questionsHtml += `
-                <div class="quiz-question">
-                  <p style="font-weight: 600;">${i + 1}. ${q.text}</p>
-                  <div class="quiz-options">
-                    ${q.options.map((opt, j) => `
-                      <label class="quiz-option">
-                        <input type="radio" name="q${i}" value="${j}" required>
-                        ${opt}
-                      </label>
-                    `).join('')}
-                  </div>
-                </div>
-              `;
-            });
-            card.innerHTML = `
-              <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">${quiz.title}</h3>
-              <form onsubmit="submitQuiz(event, '${quizId}')">
-                ${questionsHtml}
-                <button type="submit" class="save-btn">Submit Quiz</button>
-              </form>
-            `;
-          } else {
-            card.innerHTML = `
-              <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">${quiz.title}</h3>
-              <p>Score: ${taken.score}/${quiz.questions.length} (${(taken.score / quiz.questions.length * 100).toFixed(0)}%)</p>
-              <p>Completed: ${new Date(taken.timestamp).toLocaleDateString()}</p>
-            `;
-          }
-          container.appendChild(card);
-        }
+    // Populate submissions
+    function populateSubmissions() {
+      const submissionsList = document.getElementById('submissions-list');
+      submissionsList.innerHTML = '';
+      const submissions = learnerData.submissions || {};
+      Object.entries(submissions).forEach(([subId, sub]) => {
+        const item = document.createElement('div');
+        item.className = 'submission-item';
+        item.innerHTML = `
+          <h4 style="font-weight: 600; margin-bottom: 8px;">${sub.title}</h4>
+          <p style="color: var(--text-secondary); margin-bottom: 8px;">${sub.description || 'No description'}</p>
+          <a href="${sub.url}" target="_blank" style="color: var(--accent); text-decoration: none;">View PDF</a>
+          <p style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">Submitted: ${new Date(sub.timestamp).toLocaleDateString()} ${sub.grade ? `• Grade: ${sub.grade}%` : '• Ungraded'}</p>
+        `;
+        submissionsList.appendChild(item);
       });
-      if (container.children.length === 0) {
-        container.innerHTML = '<p class="text-center" style="color: var(--text-secondary);">No quizzes available.</p>';
+      if (Object.keys(submissions).length === 0) {
+        submissionsList.innerHTML = '<p class="text-center" style="color: var(--text-secondary);">No submissions yet.</p>';
+      }
+    }
+
+    // Populate quizzes
+    function populateQuizzes() {
+      const quizzesContainer = document.getElementById('quizzes-container');
+      quizzesContainer.innerHTML = '';
+      Object.entries(teacherQuizzes).forEach(([quizId, quiz]) => {
+        const quizCard = document.createElement('div');
+        quizCard.className = 'quiz-card';
+        let optionsHtml = '';
+        quiz.questions.forEach((question, qIndex) => {
+          optionsHtml += `
+            <div class="quiz-question">
+              <p style="font-weight: 600; margin-bottom: 8px;">${qIndex + 1}. ${question.text}</p>
+              <div class="quiz-options">
+                ${question.options.map((option, oIndex) => `
+                  <label class="quiz-option">
+                    <input type="radio" name="q${qIndex}" value="${oIndex}">
+                    ${option}
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        });
+        quizCard.innerHTML = `
+          <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">${quiz.title}</h3>
+          <form onsubmit="submitQuiz(event, '${quizId}')">
+            ${optionsHtml}
+            <button type="submit" class="save-btn" style="margin-top: 16px;">Submit Quiz</button>
+          </form>
+        `;
+        quizzesContainer.appendChild(quizCard);
+      });
+      if (Object.keys(teacherQuizzes).length === 0) {
+        quizzesContainer.innerHTML = '<p class="text-center" style="color: var(--text-secondary);">No quizzes yet.</p>';
       }
     }
 
@@ -1353,32 +1553,28 @@
       e.preventDefault();
       const formData = new FormData(e.target);
       const answers = {};
-      quiz.questions.forEach((q, i) => {
-        answers[i] = parseInt(formData.get(`q${i}`));
+      quiz.questions.forEach((_, qIndex) => {
+        answers[qIndex] = parseInt(formData.get(`q${qIndex}`)) || -1;
       });
-      let score = 0;
-      quiz.questions.forEach((q, i) => {
-        if (answers[i] === q.correct) score++;
-      });
-      const result = { answers, score, timestamp: Date.now() };
+      const score = quiz.questions.reduce((score, q, i) => score + (answers[i] === q.correct ? 1 : 0), 0);
+      const percentage = (score / quiz.questions.length * 100).toFixed(0);
       try {
-        const resultsRef = ref(db, `users/${currentUser.uid}/quizResults/${quizId}`);
-        await set(resultsRef, result);
-        showDialog(`Quiz submitted! Score: ${score}/${quiz.questions.length}`, 'success');
-        populateStudentQuizzes();
+        await set(ref(db, `users/${currentUser.uid}/quizResults/${quizId}`), { score: percentage, answers, timestamp: Date.now() });
+        showDialog(`Quiz submitted! Score: ${percentage}%`, 'success');
+        populateQuizzes();
       } catch (error) {
         showDialog(`Failed to submit quiz: ${error.message}`, 'error');
       }
     };
 
-    // Populate student grades
-    function populateStudentGrades() {
-      const table = document.getElementById('student-grades-table');
+    // Populate grades
+    function populateGrades() {
+      const table = document.getElementById('grades-table');
       table.innerHTML = `
         <thead>
           <tr>
-            <th>Item</th>
             <th>Course</th>
+            <th>Assignment</th>
             <th>Grade</th>
             <th>Date</th>
           </tr>
@@ -1387,36 +1583,49 @@
         </tbody>
       `;
       const tbody = table.querySelector('tbody');
-      // Grades from submissions
-      Object.entries(studentData.submissions || {}).forEach(([id, sub]) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${sub.title}</td>
-          <td>${enrolledCourses[sub.courseId]?.title || 'N/A'}</td>
-          <td>${sub.grade || 'Pending'}</td>
-          <td>${new Date(sub.timestamp).toLocaleDateString()}</td>
-        `;
-        tbody.appendChild(row);
-      });
-      // Grades from quizzes
-      Object.entries(studentData.quizResults || {}).forEach(([id, res]) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${allQuizzes[id]?.title || 'Quiz'}</td>
-          <td>${enrolledCourses[allQuizzes[id]?.courseId]?.title || 'N/A'}</td>
-          <td>${(res.score / allQuizzes[id].questions.length * 100).toFixed(0)}%</td>
-          <td>${new Date(res.timestamp).toLocaleDateString()}</td>
-        `;
-        tbody.appendChild(row);
+      Object.entries(learnerData.submissions || {}).forEach(([subId, sub]) => {
+        if (sub.grade !== undefined) {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${sub.courseTitle || 'N/A'}</td>
+            <td>${sub.title}</td>
+            <td>${sub.grade}%</td>
+            <td>${new Date(sub.timestamp).toLocaleDateString()}</td>
+          `;
+          tbody.appendChild(row);
+        }
       });
     }
 
-    // Populate student messages
-    function populateStudentMessages() {
-      const list = document.getElementById('student-messages-list');
+    // Populate attendance
+    function populateAttendance() {
+      const grid = document.getElementById('attendance-grid');
+      grid.innerHTML = '';
+      const attendance = learnerData.attendance || {};
+      const dates = Object.keys(attendance).sort().slice(-7); // Last 7 days
+      dates.forEach(date => {
+        const item = document.createElement('div');
+        item.className = 'attendance-item';
+        const status = attendance[date] ? 'Present' : 'Absent';
+        item.innerHTML = `
+          <div>${new Date(date).toLocaleDateString()}</div>
+          <span style="color: ${status === 'Present' ? 'var(--accent-secondary)' : '#e53e3e'};">${status}</span>
+        `;
+        grid.appendChild(item);
+      });
+      if (dates.length === 0) {
+        grid.innerHTML = '<p class="text-center" style="color: var(--text-secondary);">No attendance records yet.</p>';
+      }
+    }
+
+    // Populate messages
+    function populateMessages() {
+      const list = document.getElementById('messages-list');
+      if (!list) return;
       list.innerHTML = '';
-      const messages = studentData.messages || {};
-      Object.values(messages).forEach(msg => {
+      const messagesObj = learnerData.messages || {};
+      const messages = Object.values(messagesObj);
+      messages.forEach(msg => {
         const div = document.createElement('div');
         div.className = `message ${msg.senderId === currentUser.uid ? 'sent' : 'received'}`;
         div.innerHTML = `
@@ -1428,10 +1637,10 @@
       list.scrollTop = list.scrollHeight;
     }
 
-    // Handle student message form
-    document.getElementById('student-message-form').addEventListener('submit', async (e) => {
+    // Handle message form
+    document.getElementById('message-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const input = document.getElementById('student-message-input');
+      const input = document.getElementById('message-input');
       const text = input.value.trim();
       if (!text) return;
       const messagesRef = ref(db, `users/${currentUser.uid}/messages`);
@@ -1448,37 +1657,19 @@
       }
     });
 
-    // Populate student profile
-    function populateStudentProfile() {
-      document.getElementById('student-username').value = studentData.username || '';
-      document.getElementById('student-bio').value = studentData.bio || '';
-      updateStudentAvatar(studentData.profilePic);
+    // Populate profile form
+    function populateProfile() {
+      document.getElementById('username').value = learnerData.username || '';
+      document.getElementById('bio').value = learnerData.bio || '';
+      updateAvatar(learnerData.profilePic);
     }
 
-    // Update student avatar
-    function updateStudentAvatar(url) {
-      const avatar = document.getElementById('user-avatar');
-      const profileAvatar = document.getElementById('student-profile-avatar-large');
-      if (url) {
-        avatar.innerHTML = `<img src="${url}" alt="Profile">`;
-        profileAvatar.innerHTML = `<img src="${url}" alt="Profile">`;
-        avatar.style.background = 'none';
-        profileAvatar.style.background = 'none';
-      } else {
-        const initial = (studentData.username || currentUser.email)[0].toUpperCase();
-        avatar.innerHTML = initial;
-        profileAvatar.innerHTML = initial;
-        avatar.style.background = 'var(--gradient)';
-        profileAvatar.style.background = 'var(--gradient)';
-      }
-    }
-
-    // Handle student profile save
-    document.getElementById('student-profile-form').addEventListener('submit', async (e) => {
+    // Handle profile save
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       showLoader();
-      const fileInput = document.getElementById('student-profile-pic');
-      let profilePic = studentData.profilePic;
+      const fileInput = document.getElementById('profile-pic');
+      let profilePic = learnerData.profilePic;
       if (fileInput.files[0]) {
         try {
           profilePic = await uploadToCloudinary(fileInput.files[0]);
@@ -1488,44 +1679,36 @@
           return;
         }
       }
-      const newData = {
-        ...studentData,
-        username: document.getElementById('student-username').value,
-        bio: document.getElementById('student-bio').value,
-        profilePic
-      };
+      learnerData.username = document.getElementById('username').value;
+      learnerData.bio = document.getElementById('bio').value;
+      learnerData.profilePic = profilePic;
       try {
-        await set(ref(db, `users/${currentUser.uid}`), newData);
+        await set(ref(db, `users/${currentUser.uid}`), learnerData);
         hideLoader();
         showDialog('Profile updated successfully!', 'success');
-        updateStudentAvatar(profilePic);
-        document.getElementById('user-name').textContent = newData.username || currentUser.email;
+        updateAvatar(profilePic);
+        document.getElementById('user-name').textContent = learnerData.username || currentUser.email;
       } catch (error) {
         hideLoader();
         showDialog(`Failed to update profile: ${error.message}`, 'error');
       }
     });
 
-    // Init student settings
-    function initStudentSettings() {
-      const toggles = ['student-email-toggle', 'student-push-toggle', 'student-public-toggle'];
+    // Settings toggles
+    function initSettings() {
+      const toggles = ['email-toggle', 'push-toggle', 'public-toggle'];
       toggles.forEach(id => {
         const toggle = document.getElementById(id);
         const key = id.replace('-toggle', '');
-        const isActive = studentData.settings?.[key] || false;
+        const isActive = learnerData.settings?.[key] || false;
         toggle.classList.toggle('active', isActive);
         toggle.addEventListener('click', async () => {
           showLoader();
           toggle.classList.toggle('active');
-          const newData = {
-            ...studentData,
-            settings: {
-              ...studentData.settings,
-              [key]: toggle.classList.contains('active')
-            }
-          };
+          learnerData.settings = learnerData.settings || {};
+          learnerData.settings[key] = toggle.classList.contains('active');
           try {
-            await set(ref(db, `users/${currentUser.uid}`), newData);
+            await set(ref(db, `users/${currentUser.uid}`), learnerData);
             hideLoader();
           } catch (error) {
             hideLoader();
@@ -1535,49 +1718,86 @@
       });
     }
 
-    // Auth state listener for student
+    // Loading flags for spinner
+    let learnerLoaded = false;
+    let dataLoaded = false;
+    function checkAllLoaded() {
+      if (learnerLoaded && dataLoaded) {
+        hideLoader();
+      }
+    }
+
+    // Auth state listener
     onAuthStateChanged(auth, (user) => {
       if (user) {
         currentUser = user;
         showLoader();
         document.getElementById('user-name').textContent = user.email;
 
-        // Fetch student data from /users/{uid}
-        const userRef = ref(db, `users/${user.uid}`);
-        onValue(userRef, (snapshot) => {
-          studentData = snapshot.val() || {};
-          updateStudentAvatar(studentData.profilePic);
-          document.getElementById('user-name').textContent = studentData.username || user.email;
-          populateStudentProfile();
-          initStudentSettings();
-          // Fetch enrolled courses (assume stored in user.enrolledCourses)
-          enrolledCourses = studentData.enrolledCourses || {};
-          // Fetch global assignments
+        // Fetch learner data
+        const learnerRef = ref(db, `users/${user.uid}`);
+        onValue(learnerRef, (snapshot) => {
+          if (!learnerLoaded) {
+            learnerLoaded = true;
+            checkAllLoaded();
+          }
+          learnerData = snapshot.val() || {};
+          const teacherId = learnerData.teacherId;
+          if (teacherId) {
+            autoEnrollInCourses(teacherId);
+          }
+          populateProfile();
+          initSettings();
+          updateAvatar(learnerData.profilePic);
+          document.getElementById('user-name').textContent = learnerData.username || user.email;
+        });
+
+        // Fetch teacher's courses
+        const learnerRefOnce = await fetch(ref(db, `users/${user.uid}`));
+        const learnerSnap = await learnerRefOnce;
+        const teacherId = learnerSnap.val()?.teacherId;
+        if (teacherId) {
+          const teacherCoursesRef = ref(db, `teachers/${teacherId}/courses`);
+          onValue(teacherCoursesRef, (snapshot) => {
+            teacherCourses = snapshot.val() || {};
+            if (document.getElementById('dashboard').style.display === 'block' || document.getElementById('courses').style.display === 'block') {
+              populateEnrolledCourses();
+            }
+          });
+
+          // Fetch teacher's assignments
           const assignmentsRef = ref(db, 'assignments');
-          onValue(assignmentsRef, (snap) => {
-            allAssignments = snap.val() || {};
+          const assignmentsQuery = query(assignmentsRef, orderByChild('teacherId'), equalTo(teacherId));
+          onValue(assignmentsQuery, (snapshot) => {
+            teacherAssignments = snapshot.val() || {};
             if (document.getElementById('assignments').style.display === 'block') {
-              populateStudentAssignments();
+              populateAssignments();
             }
           });
-          // Fetch global quizzes
+
+          // Fetch teacher's quizzes
           const quizzesRef = ref(db, 'quizzes');
-          onValue(quizzesRef, (snap) => {
-            allQuizzes = snap.val() || {};
+          const quizzesQuery = query(quizzesRef, orderByChild('teacherId'), equalTo(teacherId));
+          onValue(quizzesQuery, (snapshot) => {
+            teacherQuizzes = snapshot.val() || {};
             if (document.getElementById('quizzes').style.display === 'block') {
-              populateStudentQuizzes();
+              populateQuizzes();
             }
           });
-          // Fetch messages
-          const messagesRef = ref(db, `users/${user.uid}/messages`);
-          onValue(messagesRef, (snap) => {
-            studentData.messages = snap.val() || {};
-            if (document.getElementById('messages').style.display === 'block') {
-              populateStudentMessages();
-            }
-          });
-          hideLoader();
-          updateStudentStats();
+
+          if (!dataLoaded) {
+            dataLoaded = true;
+            checkAllLoaded();
+          }
+        }
+
+        // Fetch messages
+        const messagesRef = ref(db, `users/${user.uid}/messages`);
+        onValue(messagesRef, (snapshot) => {
+          learnerData.messages = snapshot.val() || {};
+          if (document.getElementById('messages').style.display === 'block') {
+            populateMessages();
+          }
         });
       } else {
         hideLoader();
