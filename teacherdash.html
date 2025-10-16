@@ -1127,6 +1127,23 @@
           <button type="submit" class="save-btn">Create Quiz</button>
         </form>
       </div>
+      <h3 style="margin-top: 32px; font-size: 24px; font-weight: 700;">Quiz Results</h3>
+      <div class="analytics-chart">
+        <table class="gradebook-table" id="quiz-submissions-table">
+          <thead>
+            <tr>
+              <th>Quiz</th>
+              <th>Learner</th>
+              <th>Auto Score</th>
+              <th>Final Grade</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="quiz-submissions-tbody">
+            <!-- Quiz submissions will be populated here -->
+          </tbody>
+        </table>
+      </div>
       <h3 style="margin-top: 32px; font-size: 24px; font-weight: 700;">Existing Quizzes</h3>
       <div id="quizzes-container">
         <!-- Quizzes will be populated here -->
@@ -1379,6 +1396,7 @@
         populateSubmissions();
       } else if (targetId === 'quizzes') {
         populateQuizzes();
+        populateQuizSubmissions();
       } else if (targetId === 'messages') {
         populateMessages();
       }
@@ -2005,6 +2023,61 @@
         } catch (error) {
           showDialog(`Failed to save grade: ${error.message}`, 'error');
         }
+      }
+    };
+
+    // Calculate quiz score
+    function calculateScore(questions, answers) {
+      let score = 0;
+      questions.forEach((q, i) => {
+        if (answers && answers[i] === q.correct) score++;
+      });
+      return Math.round((score / questions.length) * 100);
+    }
+
+    // Populate quiz submissions
+    function populateQuizSubmissions() {
+      const tbody = document.getElementById('quiz-submissions-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      Object.entries(teacherData.quizzes || {}).forEach(([quizId, quiz]) => {
+        Object.entries(allUsers).forEach(([userId, user]) => {
+          if (user.teacherId !== currentUser.uid) return;
+          const submission = user.quizSubmissions?.[quizId];
+          if (submission) {
+            const autoScore = submission.autoScore || calculateScore(quiz.questions, submission.answers);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${quiz.title}</td>
+              <td>${user.username || user.email}</td>
+              <td>${autoScore}%</td>
+              <td><input type="number" value="${submission.grade || autoScore}" min="0" max="100"></td>
+              <td><button class="edit-btn" onclick="saveQuizGrade('${userId}', '${quizId}', this)">Save Grade</button></td>
+            `;
+            tbody.appendChild(row);
+          }
+        });
+      });
+      if (tbody.children.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No quiz submissions yet.</td></tr>';
+      }
+    }
+
+    // Save quiz grade
+    window.saveQuizGrade = async (userId, quizId, button) => {
+      const row = button.closest('tr');
+      const input = row.querySelector('input[type="number"]');
+      const grade = parseInt(input.value);
+      if (isNaN(grade) || grade < 0 || grade > 100) {
+        showDialog('Please enter a valid grade (0-100).', 'error');
+        return;
+      }
+      try {
+        await set(ref(db, `users/${userId}/quizSubmissions/${quizId}/grade`), grade);
+        showDialog('Grade saved!', 'success');
+        populateQuizSubmissions();
+      } catch (error) {
+        showDialog(`Failed to save grade: ${error.message}`, 'error');
       }
     };
 
