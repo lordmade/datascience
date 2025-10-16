@@ -691,52 +691,97 @@
     .chat-container {
       display: flex;
       flex-direction: column;
-      height: 500px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+      height: calc(100vh - 120px);
+      width: 100%;
+      background: var(--bg);
+      position: fixed;
+      top: 80px;
+      left: 280px;
+      right: 0;
+      z-index: 1;
       overflow: hidden;
     }
     #messages-list {
       flex: 1;
       overflow-y: auto;
-      padding: 10px;
-      max-height: 400px;
+      padding: 20px;
+      max-height: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
     .message {
-      margin: 10px 0;
-      padding: 10px;
+      margin: 0;
+      padding: 12px 16px;
       border-radius: 18px;
-      max-width: 70%;
+      max-width: 60%;
+      word-wrap: break-word;
+      animation: fadeIn 0.3s ease;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .message.sent {
-      background: var(--accent);
+      background: linear-gradient(135deg, var(--accent), #3182ce);
       color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
       margin-left: auto;
-      text-align: right;
     }
     .message.received {
-      background: var(--glass);
-      margin-right: auto;
+      background: var(--card-bg);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    .message-header {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .message-time {
+      font-size: 11px;
+      opacity: 0.6;
+      margin-top: 4px;
+      text-align: right;
     }
     #message-form {
       display: flex;
-      padding: 10px;
-      gap: 10px;
+      padding: 20px;
+      gap: 12px;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
     }
     #message-input {
       flex: 1;
-      padding: 10px;
+      padding: 12px 16px;
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: 24px;
+      background: var(--glass);
+      color: var(--text-primary);
+      font-size: 16px;
+    }
+    #message-input:focus {
+      outline: none;
+      border-color: var(--accent);
     }
     #message-form button {
-      padding: 10px 20px;
+      padding: 12px 20px;
       background: var(--accent);
       color: white;
       border: none;
-      border-radius: 20px;
+      border-radius: 24px;
       cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+    #message-form button:hover {
+      background: #3182ce;
     }
     .profile-card {
       background: var(--card-bg);
@@ -852,6 +897,9 @@
       .sidebar.open {
         transform: translateX(0);
       }
+      .chat-container {
+        left: 0;
+      }
     }
     @media (max-width: 768px) {
       .navbar { padding: 16px 20px; }
@@ -859,7 +907,8 @@
       .welcome-title { font-size: 36px; }
       .users-grid { grid-template-columns: 1fr; }
       .bottom-nav { display: block; }
-      .chat-container { height: 400px; }
+      .chat-container { height: calc(100vh - 110px); top: 70px; }
+      #message-form { padding: 16px; }
     }
   </style>
 </head>
@@ -889,7 +938,7 @@
       <li><a href="#courses" data-target="courses"><span class="material-icons">school</span>Courses</a></li>
       <li><a href="#assignments" data-target="assignments"><span class="material-icons">assignment</span>Assignments</a></li>
       <li><a href="#quizzes" data-target="quizzes"><span class="material-icons">quiz</span>Quizzes</a></li>
-      <li><a href="#messages" data-target="messages"><span class="material-icons">chat_bubble</span>Messages</a></li>
+      <li><a href="#chats" data-target="chats"><span class="material-icons">chat_bubble</span>Chats</a></li>
       <li><a href="#profile" data-target="profile"><span class="material-icons">person</span>Profile</a></li>
       <li><a href="#settings" data-target="settings"><span class="material-icons">settings</span>Settings</a></li>
     </ul>
@@ -1154,12 +1203,12 @@
       </div>
     </section>
 
-    <section id="messages" class="courses-section">
-      <h2 class="section-title">Messages</h2>
+    <section id="chats" class="courses-section">
+      <h2 class="section-title">Group Chat with Assigned Learners</h2>
       <div class="chat-container" id="chat-container">
         <div id="messages-list"></div>
         <form id="message-form">
-          <input type="text" id="message-input" placeholder="Type a message..." aria-label="Type a message">
+          <input type="text" id="message-input" placeholder="Type a message to all learners..." aria-label="Type a message">
           <button type="submit">Send</button>
         </form>
       </div>
@@ -1219,7 +1268,7 @@
       <li><a href="#courses" data-target="courses"><span class="material-icons">school</span></a></li>
       <li><a href="#assignments" data-target="assignments"><span class="material-icons">assignment</span></a></li>
       <li><a href="#quizzes" data-target="quizzes"><span class="material-icons">quiz</span></a></li>
-      <li><a href="#messages" data-target="messages"><span class="material-icons">chat_bubble</span></a></li>
+      <li><a href="#chats" data-target="chats"><span class="material-icons">chat_bubble</span></a></li>
       <li><a href="#profile" data-target="profile"><span class="material-icons">person</span></a></li>
       <li><a href="#settings" data-target="settings"><span class="material-icons">settings</span></a></li>
     </ul>
@@ -1264,6 +1313,7 @@
     let teacherData = {};
     let searchQuery = '';
     let activityChart;
+    let chatUnsubscribe = null;
 
     const loader = document.getElementById('loader-overlay');
 
@@ -1401,8 +1451,8 @@
       } else if (targetId === 'quizzes') {
         populateQuizzes();
         populateQuizSubmissions();
-      } else if (targetId === 'messages') {
-        populateMessages();
+      } else if (targetId === 'chats') {
+        populateGroupChat();
       }
     }
 
@@ -2195,39 +2245,52 @@
       showDialog(`Edit quiz: ${teacherData.quizzes[quizId].title}`, 'info');
     };
 
-    // Populate messages
-    function populateMessages() {
+    // Populate group chat with real-time listener
+    function populateGroupChat() {
       const list = document.getElementById('messages-list');
       if (!list) return;
+
+      // Unsubscribe from previous listener if exists
+      if (chatUnsubscribe) {
+        chatUnsubscribe();
+      }
+
       list.innerHTML = '';
-      const messagesObj = teacherData.messages || {};
-      const messages = Object.values(messagesObj);
-      messages.forEach(msg => {
-        const div = document.createElement('div');
-        div.className = `message ${msg.senderId === currentUser.uid ? 'sent' : 'received'}`;
-        div.innerHTML = `
-          <p>${msg.text}</p>
-          <small style="opacity: 0.7; font-size: 12px;">${new Date(msg.timestamp).toLocaleTimeString()}</small>
-        `;
-        list.appendChild(div);
+      const groupChatRef = ref(db, `groupChats/${currentUser.uid}`);
+      chatUnsubscribe = onValue(groupChatRef, (snapshot) => {
+        const messagesObj = snapshot.val() || {};
+        const messages = Object.entries(messagesObj).sort((a, b) => a[1].timestamp - b[1].timestamp).map(([msgId, msg]) => ({ ...msg, id: msgId }));
+        list.innerHTML = ''; // Clear and repopulate for real-time updates
+        messages.forEach(msg => {
+          const div = document.createElement('div');
+          div.className = `message ${msg.senderId === currentUser.uid ? 'sent' : 'received'}`;
+          const senderName = msg.senderId === currentUser.uid ? 'You' : (allUsers[msg.senderId]?.username || allUsers[msg.senderId]?.email || 'Learner');
+          div.innerHTML = `
+            <div class="message-header">${senderName}</div>
+            <p>${msg.text}</p>
+            <div class="message-time">${new Date(msg.timestamp).toLocaleTimeString()}</div>
+          `;
+          list.appendChild(div);
+        });
+        // Auto-scroll to bottom
+        list.scrollTop = list.scrollHeight;
       });
-      list.scrollTop = list.scrollHeight;
     }
 
-    // Handle message form
+    // Handle group message form
     document.getElementById('message-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const input = document.getElementById('message-input');
       const text = input.value.trim();
       if (!text) return;
-      const messagesRef = ref(db, `teachers/${currentUser.uid}/messages`);
+      const groupChatRef = ref(db, `groupChats/${currentUser.uid}`);
       const msg = {
         text,
         senderId: currentUser.uid,
         timestamp: Date.now()
       };
       try {
-        await push(messagesRef, msg);
+        await push(groupChatRef, msg);
         input.value = '';
       } catch (error) {
         showDialog(`Failed to send message: ${error.message}`, 'error');
@@ -2325,35 +2388,6 @@
           document.getElementById('user-name').textContent = teacherData.username || user.email;
           populateCourses();
           populateContentCourseSelect();
-        });
-
-        // Fetch messages
-        const messagesRef = ref(db, `teachers/${user.uid}/messages`);
-        onValue(messagesRef, (snapshot) => {
-          teacherData.messages = snapshot.val() || {};
-          if (document.getElementById('messages').style.display === 'block') {
-            populateMessages();
-          }
-        });
-
-        // Fetch assignments
-        const assignmentsRef = ref(db, 'assignments');
-        const assignmentsQuery = query(assignmentsRef, orderByChild('teacherId'), equalTo(user.uid));
-        onValue(assignmentsQuery, (snapshot) => {
-          teacherData.assignments = snapshot.val() || {};
-          if (document.getElementById('assignments').style.display === 'block') {
-            populateAssignments();
-          }
-        });
-
-        // Fetch quizzes
-        const quizzesRef = ref(db, 'quizzes');
-        const quizzesQuery = query(quizzesRef, orderByChild('teacherId'), equalTo(user.uid));
-        onValue(quizzesQuery, (snapshot) => {
-          teacherData.quizzes = snapshot.val() || {};
-          if (document.getElementById('quizzes').style.display === 'block') {
-            populateQuizzes();
-          }
         });
 
         // Fetch all users to find assigned ones
