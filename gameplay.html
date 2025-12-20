@@ -11,8 +11,6 @@
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
             user-select: none;
             touch-action: none; 
         }
@@ -22,7 +20,7 @@
             overflow: hidden;
             background: #000;
             font-family: 'Share Tech Mono', monospace;
-            cursor: none; /* Hide real cursor to use scope */
+            cursor: none;
         }
 
         canvas { display: block; }
@@ -42,6 +40,33 @@
             letter-spacing: 2px;
             font-size: 12px;
         }
+
+        #health-container {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 10px;
+            border: 1px solid #4ade80;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        #health-bar {
+            width: 100%;
+            height: 100%;
+            background: #4ade80;
+            transition: width 0.2s;
+        }
+
+        #vitals-label {
+            position: absolute;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #4ade80;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -50,6 +75,11 @@
         <div class="thermal-tag">MODE: THERMAL_SIGHT_ON</div>
         <div>THREATS NEUTRALIZED: <span id="score">0</span></div>
         <div id="wind-readout">WIND: 2.1 m/s</div>
+    </div>
+
+    <div id="vitals-label">VITALS: STABLE</div>
+    <div id="health-container">
+        <div id="health-bar"></div>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -61,8 +91,9 @@
 
         let cw, ch, score = 0, enemy = null, grassBlades = [];
         let mouse = { x: 0, y: 0 };
-        let shake = 0, breathing = 0;
+        let shake = 0, breathing = 0, health = 100;
         let isDead = false;
+        let damageFlash = 0;
 
         function resize() {
             cw = canvas.width = window.innerWidth;
@@ -88,19 +119,20 @@
         function spawnEnemy() {
             enemy = {
                 x: Math.random() * (cw - 200) + 100,
-                y: Math.random() * (ch - 300) + 100,
+                y: Math.random() * (ch - 300) + 200,
                 timer: 0,
-                isShooting: false
+                lastShot: 0,
+                isVisible: true
             };
         }
 
-        function playGunshot() {
+        function playGunshot(vol = 0.3, pitch = 200) {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(pitch, audioCtx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.start(); osc.stop(audioCtx.currentTime + 0.4);
@@ -111,42 +143,51 @@
             mouse.y = e.clientY;
         });
 
-        window.addEventListener('touchstart', e => {
-            mouse.x = e.touches[0].clientX;
-            mouse.y = e.touches[0].clientY;
-        });
-
-        function drawEnemyBody(x, y, thermal) {
+        function drawSoldier(x, y) {
             ctx.save();
             ctx.translate(x, y);
             
-            // Draw a silhouette "body" hiding
-            const color = thermal ? "rgba(255, 69, 0, 0.8)" : "rgba(10, 30, 10, 1)";
-            ctx.fillStyle = color;
-            if (thermal) ctx.shadowBlur = 15, ctx.shadowColor = "#ff4500";
+            // Heat Glow
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "#ff4500";
+            ctx.fillStyle = "rgba(255, 100, 0, 0.9)";
+
+            // Helmet/Head
+            ctx.beginPath();
+            ctx.ellipse(0, -45, 12, 10, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Torso (Plate carrier look)
+            ctx.fillRect(-15, -35, 30, 45);
             
-            // Head
-            ctx.beginPath(); ctx.arc(0, -20, 10, 0, Math.PI*2); ctx.fill();
-            // Torso
-            ctx.fillRect(-15, -10, 30, 40);
-            // Rifle barrel
-            ctx.fillStyle = thermal ? "#ffa500" : "#051005";
-            ctx.fillRect(10, -5, 40, 4);
+            // Shoulders/Arms
+            ctx.fillRect(-22, -32, 10, 25); // Left arm
+            ctx.fillRect(12, -32, 10, 25);  // Right arm
+
+            // Rifle (M4 Silhouette)
+            ctx.fillStyle = "#ffcc00";
+            ctx.fillRect(5, -15, 45, 6); // Barrel
+            ctx.fillRect(8, -10, 15, 10); // Mag/Body
             
+            // Enemy Muzzle Flash (if shooting)
+            if (Date.now() % 1000 < 100 && enemy.timer > 2) {
+                ctx.fillStyle = "#fff";
+                ctx.beginPath();
+                ctx.arc(50, -12, 8, 0, Math.PI*2);
+                ctx.fill();
+            }
+
             ctx.restore();
         }
 
         function loop() {
             if (isDead) return;
 
-            // 1. Draw Background (Dark Cold World)
+            // 1. Background
             ctx.fillStyle = '#000500';
             ctx.fillRect(0, 0, cw, ch);
 
-            // 2. Setup the Circular Scope Mask
-            ctx.save();
-            
-            // Apply breathing sway to the scope view
+            // 2. Scope Calculations
             breathing += 0.02;
             let sx = mouse.x + Math.sin(breathing) * 10;
             let sy = mouse.y + Math.cos(breathing * 0.5) * 8;
@@ -157,21 +198,21 @@
                 shake *= 0.8;
             }
 
-            // Create circular clipping path for the lens
+            // 3. Thermal Render
+            ctx.save();
             ctx.beginPath();
             ctx.arc(sx, sy, 180, 0, Math.PI * 2);
             ctx.clip();
 
-            // 3. Draw Thermal World Inside the Lens
-            ctx.fillStyle = '#000033'; // Deep blue thermal background
+            ctx.fillStyle = '#000033'; 
             ctx.fillRect(0, 0, cw, ch);
 
-            // Draw Enemy Heat Signature
-            drawEnemyBody(enemy.x, enemy.y, true);
+            // Draw Soldier
+            drawSoldier(enemy.x, enemy.y);
 
-            // Draw Thermal Grass (Neon blue/cyan)
+            // Thermal Grass
             ctx.strokeStyle = '#00ffff';
-            ctx.globalAlpha = 0.4;
+            ctx.globalAlpha = 0.3;
             grassBlades.forEach(g => {
                 let sway = Math.sin(Date.now()*0.002 + g.offset) * 15;
                 ctx.beginPath();
@@ -181,27 +222,43 @@
             });
             ctx.globalAlpha = 1.0;
 
-            // Reticle Overlay
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-            ctx.lineWidth = 1;
+            // Crosshair
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
             ctx.beginPath();
             ctx.moveTo(sx - 180, sy); ctx.lineTo(sx + 180, sy);
             ctx.moveTo(sx, sy - 180); ctx.lineTo(sx, sy + 180);
             ctx.stroke();
-
             ctx.restore();
 
-            // 4. Scope Border
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 10;
+            // 4. Scope Ring
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 15;
             ctx.beginPath(); ctx.arc(sx, sy, 185, 0, Math.PI*2); ctx.stroke();
 
-            // 5. Enemy Logic
+            // 5. Enemy Combat AI
             enemy.timer += 0.016;
-            if (enemy.timer > 4.5) {
+            if (enemy.timer > 2) { // Enemy starts firing after 2 seconds
+                if (Date.now() - enemy.lastShot > 600) {
+                    health -= 15;
+                    damageFlash = 0.5;
+                    playGunshot(0.1, 100);
+                    enemy.lastShot = Date.now();
+                    document.getElementById('health-bar').style.width = health + "%";
+                    document.getElementById('vitals-label').innerText = "VITALS: CRITICAL - UNDER FIRE";
+                    document.getElementById('vitals-label').style.color = "#ff4500";
+                }
+            }
+
+            // Damage Flash Effect
+            if (damageFlash > 0) {
+                ctx.fillStyle = `rgba(255, 0, 0, ${damageFlash})`;
+                ctx.fillRect(0, 0, cw, ch);
+                damageFlash -= 0.02;
+            }
+
+            if (health <= 0) {
                 isDead = true;
-                playGunshot();
-                alert("MISSION COMPROMISED: ELIMINATED BY ENEMY SNIPER.");
+                alert("OPERATOR K.I.A. - MISSION FAILED");
                 location.reload();
             }
 
@@ -210,17 +267,18 @@
 
         window.addEventListener('mousedown', () => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            playGunshot();
-            shake = 30;
+            playGunshot(0.4, 250);
+            shake = 40;
 
-            // Recalculate hit with sway
             let sx = mouse.x + Math.sin(breathing) * 10;
             let sy = mouse.y + Math.cos(breathing * 0.5) * 8;
 
-            let d = Math.hypot(enemy.x - sx, enemy.y - sy);
-            if (d < 45) {
+            let d = Math.hypot(enemy.x - sx, (enemy.y - 20) - sy);
+            if (d < 40) {
                 score++;
                 document.getElementById('score').innerText = score;
+                health = Math.min(100, health + 10); // Reward health for kill
+                document.getElementById('health-bar').style.width = health + "%";
                 spawnEnemy();
             }
         });
