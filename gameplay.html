@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vine Shot: Counter-Sniper</title>
+    <title>Vine Shot: Thermal Recon</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@900&display=swap" rel="stylesheet">
 
@@ -20,53 +20,36 @@
         body {
             margin: 0;
             overflow: hidden;
-            background: #010a01;
+            background: #000;
             font-family: 'Share Tech Mono', monospace;
+            cursor: none; /* Hide real cursor to use scope */
         }
 
         canvas { display: block; }
 
-        #scope-overlay {
+        #ui-layer {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 25%, rgba(0,0,0,0.85) 60%, #000 100%);
-            pointer-events: none;
-            z-index: 20;
-        }
-
-        .reticle-v { position: absolute; top: 0; left: 50%; width: 1px; height: 100%; background: rgba(74, 222, 128, 0.3); z-index: 21; pointer-events: none; }
-        .reticle-h { position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(74, 222, 128, 0.3); z-index: 21; pointer-events: none; }
-
-        #ui-container {
-            position: absolute;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 30;
+            top: 20px; left: 20px;
             color: #4ade80;
-            padding: 40px;
+            pointer-events: none;
+            z-index: 100;
+            text-shadow: 0 0 5px #000;
         }
 
-        .status-msg {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -150%);
-            font-size: 12px; letter-spacing: 4px;
-            color: #ef4444; display: none;
+        .thermal-tag {
+            color: #ff4500;
+            font-weight: bold;
+            letter-spacing: 2px;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
 
-    <div id="scope-overlay"></div>
-    <div class="reticle-v"></div>
-    <div class="reticle-h"></div>
-    
-    <div id="ui-container">
-        <div style="display:flex; justify-content: space-between;">
-            <div>SIGHT: THERMAL_V3<br>THREATS: <span id="score">0</span></div>
-            <div style="text-align: right;">WIND: <span id="wind">2.4</span> m/s<br>HUMIDITY: 88%</div>
-        </div>
-        <div id="target-lock" class="status-msg">TARGET ACQUIRED</div>
+    <div id="ui-layer">
+        <div class="thermal-tag">MODE: THERMAL_SIGHT_ON</div>
+        <div>THREATS NEUTRALIZED: <span id="score">0</span></div>
+        <div id="wind-readout">WIND: 2.1 m/s</div>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -77,20 +60,28 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         let cw, ch, score = 0, enemy = null, grassBlades = [];
-        let windTime = 0, shake = 0, breathing = 0;
+        let mouse = { x: 0, y: 0 };
+        let shake = 0, breathing = 0;
         let isDead = false;
 
         function resize() {
             cw = canvas.width = window.innerWidth;
             ch = canvas.height = window.innerHeight;
+            mouse.x = cw/2; mouse.y = ch/2;
             initGrass();
             spawnEnemy();
         }
 
         function initGrass() {
             grassBlades = [];
-            for(let i = 0; i < 100; i++) {
-                grassBlades.push({ x: Math.random() * cw, baseY: ch, len: Math.random() * 200 + 150, offset: Math.random() * 10, thickness: Math.random() * 5 + 2 });
+            for(let i = 0; i < 150; i++) {
+                grassBlades.push({ 
+                    x: Math.random() * cw, 
+                    baseY: ch, 
+                    len: Math.random() * 250 + 100, 
+                    offset: Math.random() * 10, 
+                    thickness: Math.random() * 3 + 1 
+                });
             }
         }
 
@@ -98,108 +89,139 @@
             enemy = {
                 x: Math.random() * (cw - 200) + 100,
                 y: Math.random() * (ch - 300) + 100,
-                glintTimer: 0,
-                isVisible: false,
-                shootTimer: 0,
-                threatLevel: 0
+                timer: 0,
+                isShooting: false
             };
         }
 
-        // --- SOUND ENGINE ---
         function playGunshot() {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.5);
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+        }
+
+        window.addEventListener('mousemove', e => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        window.addEventListener('touchstart', e => {
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+        });
+
+        function drawEnemyBody(x, y, thermal) {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            // Draw a silhouette "body" hiding
+            const color = thermal ? "rgba(255, 69, 0, 0.8)" : "rgba(10, 30, 10, 1)";
+            ctx.fillStyle = color;
+            if (thermal) ctx.shadowBlur = 15, ctx.shadowColor = "#ff4500";
+            
+            // Head
+            ctx.beginPath(); ctx.arc(0, -20, 10, 0, Math.PI*2); ctx.fill();
+            // Torso
+            ctx.fillRect(-15, -10, 30, 40);
+            // Rifle barrel
+            ctx.fillStyle = thermal ? "#ffa500" : "#051005";
+            ctx.fillRect(10, -5, 40, 4);
+            
+            ctx.restore();
         }
 
         function loop() {
             if (isDead) return;
 
+            // 1. Draw Background (Dark Cold World)
+            ctx.fillStyle = '#000500';
+            ctx.fillRect(0, 0, cw, ch);
+
+            // 2. Setup the Circular Scope Mask
             ctx.save();
             
-            // Breathing Sway
+            // Apply breathing sway to the scope view
             breathing += 0.02;
-            let swayX = Math.sin(breathing) * 15;
-            let swayY = Math.cos(breathing * 0.5) * 10;
+            let sx = mouse.x + Math.sin(breathing) * 10;
+            let sy = mouse.y + Math.cos(breathing * 0.5) * 8;
             
-            // Recoil
             if (shake > 0) {
-                ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake);
-                shake *= 0.85;
-            }
-            ctx.translate(swayX, swayY);
-
-            // Background
-            ctx.fillStyle = '#010801';
-            ctx.fillRect(-100, -100, cw + 200, ch + 200);
-
-            // Enemy Logic
-            if (enemy) {
-                enemy.glintTimer += 0.016;
-                enemy.shootTimer += 0.016;
-
-                // Enemy "Glint" flashes every 2 seconds
-                if (Math.sin(enemy.glintTimer * 3) > 0.95) {
-                    ctx.shadowBlur = 30;
-                    ctx.shadowColor = '#fff';
-                    ctx.fillStyle = '#fff';
-                    ctx.beginPath();
-                    ctx.arc(enemy.x, enemy.y, 4, 0, Math.PI*2);
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
-                }
-
-                // If you take too long (5 seconds), they shoot you
-                if (enemy.shootTimer > 5.0) {
-                    isDead = true;
-                    playGunshot();
-                    alert("SNIPER DOWN. FINAL KILLS: " + score);
-                    location.reload();
-                }
+                sx += (Math.random()-0.5)*shake;
+                sy += (Math.random()-0.5)*shake;
+                shake *= 0.8;
             }
 
-            // Draw Wind-blown Grass (Foreground)
-            windTime += 0.03;
-            ctx.strokeStyle = '#0a320a';
-            ctx.lineCap = 'round';
+            // Create circular clipping path for the lens
+            ctx.beginPath();
+            ctx.arc(sx, sy, 180, 0, Math.PI * 2);
+            ctx.clip();
+
+            // 3. Draw Thermal World Inside the Lens
+            ctx.fillStyle = '#000033'; // Deep blue thermal background
+            ctx.fillRect(0, 0, cw, ch);
+
+            // Draw Enemy Heat Signature
+            drawEnemyBody(enemy.x, enemy.y, true);
+
+            // Draw Thermal Grass (Neon blue/cyan)
+            ctx.strokeStyle = '#00ffff';
+            ctx.globalAlpha = 0.4;
             grassBlades.forEach(g => {
-                let sway = Math.sin(windTime + g.offset) * 20;
+                let sway = Math.sin(Date.now()*0.002 + g.offset) * 15;
                 ctx.beginPath();
-                ctx.lineWidth = g.thickness;
                 ctx.moveTo(g.x, g.baseY);
                 ctx.quadraticCurveTo(g.x + sway, g.baseY - g.len/2, g.x + sway*2, g.baseY - g.len);
                 ctx.stroke();
             });
+            ctx.globalAlpha = 1.0;
+
+            // Reticle Overlay
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(sx - 180, sy); ctx.lineTo(sx + 180, sy);
+            ctx.moveTo(sx, sy - 180); ctx.lineTo(sx, sy + 180);
+            ctx.stroke();
 
             ctx.restore();
+
+            // 4. Scope Border
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 10;
+            ctx.beginPath(); ctx.arc(sx, sy, 185, 0, Math.PI*2); ctx.stroke();
+
+            // 5. Enemy Logic
+            enemy.timer += 0.016;
+            if (enemy.timer > 4.5) {
+                isDead = true;
+                playGunshot();
+                alert("MISSION COMPROMISED: ELIMINATED BY ENEMY SNIPER.");
+                location.reload();
+            }
+
             requestAnimationFrame(loop);
         }
 
-        window.addEventListener('mousedown', (e) => {
+        window.addEventListener('mousedown', () => {
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            
             playGunshot();
-            shake = 40; // Recoil intensity
+            shake = 30;
 
-            // Adjust click coordinates for scope sway
-            let swayX = Math.sin(breathing) * 15;
-            let swayY = Math.cos(breathing * 0.5) * 10;
-            let hitX = e.clientX - swayX;
-            let hitY = e.clientY - swayY;
+            // Recalculate hit with sway
+            let sx = mouse.x + Math.sin(breathing) * 10;
+            let sy = mouse.y + Math.cos(breathing * 0.5) * 8;
 
-            let dist = Math.hypot(enemy.x - hitX, enemy.y - hitY);
-            if (dist < 40) {
+            let d = Math.hypot(enemy.x - sx, enemy.y - sy);
+            if (d < 45) {
                 score++;
                 document.getElementById('score').innerText = score;
-                spawnEnemy(); // Move to next target
+                spawnEnemy();
             }
         });
 
