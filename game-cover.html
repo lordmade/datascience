@@ -4,25 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <title>Vynix: Main Menu</title>
+    <title>Vynix: Cyber Drift</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
+
     <style>
         :root {
             --neon-purple: #d946ef;
             --neon-green: #10b981;
             --neon-blue: #3b82f6;
             --bg-dark: #050505;
-            --military-green: #4b5320;
-            --military-dark: #1e1e1e;
         }
-        /* PREVENT HIGHLIGHT & SELECTION */
+
+        /* LOCKDOWN UI */
         * {
+            box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
-            user-select: none;
             -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
         }
+
         body {
             margin: 0;
             padding: 0;
@@ -30,183 +34,184 @@
             width: 100vw;
             overflow: hidden;
             background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at center, #111 0%, #000 70%),
-                url('https://images6.alphacoders.com/106/1065482.jpg');
+            /* YOUR CUSTOM IMAGE AS BACKGROUND */
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.9) 100%), 
+                        url('https://i.postimg.cc/52jDKtn9/Gemini-Generated-Image-ldq2u9ldq2u9ldq2.png');
             background-size: cover;
             background-position: center;
-            background-blend-mode: overlay;
             font-family: 'Orbitron', sans-serif;
             color: white;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
         }
-        .overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.8) 100%);
-            pointer-events: none;
-            z-index: 1;
-        }
-        /* HUD & Hero Styles */
+
+        /* Top HUD */
         .hud-top {
-            position: relative;
-            z-index: 2;
             display: flex;
             justify-content: space-between;
             padding: 20px;
             font-size: 14px;
-            color: #888;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            z-index: 10;
         }
-        .currency { color: var(--neon-green); display: flex; align-items: center; gap: 5px; }
+
+        /* Center Content */
         .hero-section {
-            position: relative;
-            z-index: 2;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-end; /* Pushes content down slightly to see the car */
+            padding-bottom: 40px;
+            z-index: 10;
         }
-        .avatar-circle {
-            width: 160px; height: 160px;
-            border-radius: 50%;
-            border: 4px solid var(--military-green);
-            box-shadow: 0 0 40px rgba(75, 83, 32, 0.6);
-            background: rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 30px;
-            position: relative;
-            backdrop-filter: blur(4px);
-        }
-        .avatar-circle::before {
-            content: ''; position: absolute;
-            top: -12px; left: -12px; right: -12px; bottom: -12px;
-            border-radius: 50%; border: 2px dashed var(--military-green);
-            animation: spin 15s linear infinite;
-            opacity: 0.6;
-        }
+
         .game-title {
-            font-size: 56px; font-weight: 900; text-transform: uppercase;
-            letter-spacing: 8px; position: relative;
-            color: #fff;
-            text-shadow: 
-                0 0 10px var(--military-green),
-                3px 3px 0px #000;
-            margin-bottom: 10px;
+            font-size: 48px;
+            font-weight: 900;
+            font-style: italic;
+            text-transform: uppercase;
+            letter-spacing: -2px;
+            margin: 0;
+            text-shadow: 0 0 20px var(--neon-purple), 3px 3px 0px var(--neon-blue);
         }
-        .game-subtitle {
-            font-size: 18px; font-family: 'Poppins', sans-serif; font-weight: 600;
-            color: var(--neon-green); letter-spacing: 4px; opacity: 0.9;
+
+        /* Character Preview */
+        .char-preview {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(0,0,0,0.6);
+            padding: 10px 25px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
         }
-        /* Menu Buttons */
+
+        .nav-arrow {
+            background: none; border: none; color: white; cursor: pointer;
+        }
+
+        #mainIcon { font-size: 40px; }
+
+        /* Bottom Menu */
         .menu-container {
-            position: relative;
-            z-index: 2;
-            padding: 30px; display: flex; flex-direction: column;
-            gap: 15px; width: 100%; max-width: 450px; margin: 0 auto;
+            padding: 20px 30px 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            z-index: 10;
         }
-        .menu-btn {
-            background: rgba(30,30,30,0.7);
-            border: 1px solid var(--military-green);
-            padding: 18px; font-family: 'Orbitron', sans-serif;
-            font-size: 20px; color: white; text-transform: uppercase;
-            cursor: pointer; transform: skewX(-8deg);
-            transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 12px;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        .menu-btn.primary {
-            background: linear-gradient(135deg, var(--military-green), #2d3310);
+
+        .btn {
+            padding: 18px;
             border: none;
-            box-shadow: 0 0 30px rgba(75, 83, 32, 0.7);
-            font-weight: 800; font-size: 22px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            text-transform: uppercase;
+            font-weight: 900;
+            cursor: pointer;
+            transition: 0.2s;
+            clip-path: polygon(5% 0, 100% 0, 95% 100%, 0% 100%);
         }
-        .menu-btn:hover {
-            transform: skewX(-8deg) translateY(-3px);
-            box-shadow: 0 8px 25px rgba(75, 83, 32, 0.8);
+
+        .btn-play {
+            background: var(--neon-purple);
+            color: white;
+            box-shadow: 0 0 20px var(--neon-purple);
         }
-        .menu-btn:active { transform: skewX(-8deg) scale(0.95); }
-        /* CUSTOM ALERT MODAL */
+
+        .btn-play:active { transform: scale(0.95); filter: brightness(1.2); }
+
         #customAlert {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); backdrop-filter: blur(8px);
-            display: none; align-items: center; justify-content: center; z-index: 1000;
+            background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000;
         }
-        .alert-box {
-            background: #111; border: 2px solid var(--military-green);
-            padding: 30px; width: 80%; max-width: 320px; text-align: center;
-            box-shadow: 0 0 40px rgba(75, 83, 32, 0.5);
-        }
-        .alert-box p { font-family: 'Poppins', sans-serif; margin-bottom: 20px; font-size: 16px; }
-        .alert-close {
-            background: var(--military-green); color: white; border: none;
-            padding: 12px 30px; font-family: 'Orbitron', sans-serif;
-            font-weight: 700; cursor: pointer; font-size: 16px;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="overlay"></div>
+
     <div class="hud-top">
-        <div>ID: VYNIX</div>
-        <div class="currency">
-            <span class="material-symbols-rounded" style="font-size:16px;">military_tech</span>
-            <span>2,450</span>
-        </div>
+        <div>CORE: <span id="charID" style="color:var(--neon-blue)">VYNIX-01</span></div>
+        <div style="color: var(--neon-green)">● SYSTEM ONLINE</div>
     </div>
+
     <div class="hero-section">
-        <div class="avatar-circle">
-            <span class="material-symbols-rounded" style="font-size:90px; color: var(--military-green);">whatshot</span>
+        <h1 class="game-title">CYBER DRIFT</h1>
+        
+        <div class="char-preview">
+            <button class="nav-arrow" onclick="changeChar(-1)">
+                <span class="material-symbols-rounded">chevron_left</span>
+            </button>
+            <span class="material-symbols-rounded" id="mainIcon">rocket_launch</span>
+            <button class="nav-arrow" onclick="changeChar(1)">
+                <span class="material-symbols-rounded">chevron_right</span>
+            </button>
         </div>
-        <h1 class="game-title">CALL OF DUTY</h1>
-        <div class="game-subtitle">MODERN WARFARE</div>
+        <div id="nameLabel" style="margin-top: 10px; font-size: 12px; letter-spacing: 3px; color: var(--neon-purple)">INTERCEPTOR</div>
     </div>
+
     <div class="menu-container">
-        <button class="menu-btn primary" onclick="startGame()">
-            <span class="material-symbols-rounded">play_arrow</span>
-            DEPLOY
-        </button>
-       
-        <button class="menu-btn" onclick="showAlert('LOADOUT LOCKED')">
-            <span class="material-symbols-rounded">backpack</span>
-            LOADOUT
-        </button>
-       
-        <button class="menu-btn" onclick="showAlert('COMMAND CENTER OFFLINE')">
-            <span class="material-symbols-rounded">settings</span>
-            OPERATOR
-        </button>
+        <button class="btn btn-play" onclick="launchGame()">Initiate Run</button>
+        <button style="background:rgba(255,255,255,0.1); color:white; border: 1px solid rgba(255,255,255,0.2);" class="btn" onclick="openAlert()">Upgrades</button>
     </div>
-    <div id="customAlert">
-        <div class="alert-box">
-            <p id="alertMessage">ALERT</p>
-            <button class="alert-close" onclick="closeAlert()">CONFIRM</button>
+
+    <div id="customAlert" onclick="this.style.display='none'">
+        <div style="border: 1px solid var(--neon-purple); padding: 40px; text-align: center; background: #000;">
+            <div style="color: var(--neon-purple); margin-bottom: 15px; font-weight: 900;">ENCRYPTED</div>
+            <div style="font-size: 10px; font-family: 'Poppins'; color: #888;">COLLECT DATA POINTS TO UNLOCK</div>
         </div>
     </div>
+
     <script>
-        function startGame() {
-            const btn = document.querySelector('.primary');
-            btn.innerHTML = '<span class="material-symbols-rounded">play_arrow</span> DEPLOYING...';
-            btn.style.opacity = "0.8";
-           
-            setTimeout(() => {
-                window.location.href = 'gameplay.html';
-            }, 800);
+        const characters = [
+            { name: "Interceptor", icon: "rocket_launch", color: "#d946ef", id: "VYNIX-01" },
+            { name: "Ghost", icon: "visibility_off", color: "#3b82f6", id: "VYNIX-02" },
+            { name: "Pulse", icon: "Electric_Bolt", color: "#10b981", id: "VYNIX-03" }
+        ];
+
+        let currentIndex = 0;
+
+        function changeChar(dir) {
+            currentIndex += dir;
+            if (currentIndex < 0) currentIndex = characters.length - 1;
+            if (currentIndex >= characters.length) currentIndex = 0;
+            updateDisplay();
         }
-        function showAlert(msg) {
-            document.getElementById('alertMessage').innerText = msg;
+
+        function updateDisplay() {
+            const char = characters[currentIndex];
+            const icon = document.getElementById('mainIcon');
+            const label = document.getElementById('nameLabel');
+            
+            label.innerText = char.name;
+            label.style.color = char.color;
+            document.getElementById('charID').innerText = char.id;
+            document.getElementById('charID').style.color = char.color;
+            
+            icon.innerText = char.icon;
+            icon.style.color = char.color;
+            icon.style.textShadow = `0 0 15px ${char.color}`;
+            
+            localStorage.setItem('selectedIcon', char.icon);
+            localStorage.setItem('selectedColor', char.color);
+        }
+
+        function launchGame() {
+            window.location.href = 'gameplay.html';
+        }
+
+        function openAlert() {
             document.getElementById('customAlert').style.display = 'flex';
         }
-        function closeAlert() {
-            document.getElementById('customAlert').style.display = 'none';
-        }
-        // Prevent Right Click context menu
-        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        // Initialize
+        updateDisplay();
     </script>
 </body>
 </html>
