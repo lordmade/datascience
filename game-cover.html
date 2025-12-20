@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <title>Vynix: Character Select</title>
+    <title>Vynix: Main Menu</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
@@ -17,14 +17,12 @@
             --bg-dark: #050505;
         }
 
-        /* RESET & PREVENT SELECTION/ZOOM/HIGHLIGHT */
+        /* PREVENT HIGHLIGHT & SELECTION */
         * {
-            box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none; 
-            -webkit-user-select: none;   
-            user-select: none;
-            touch-action: manipulation; /* Prevents double-tap zoom */
+            -webkit-touch-callout: none; /* Prevents long-press menu */
+            user-select: none;           /* Prevents text selection */
+            -webkit-user-select: none;
         }
 
         body {
@@ -34,203 +32,171 @@
             width: 100vw;
             overflow: hidden;
             background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+            background-image: repeating-linear-gradient(
+                45deg,
+                #0a0a0a 0px, #0a0a0a 10px,
+                #0f0f0f 10px, #0f0f0f 20px
+            );
             font-family: 'Orbitron', sans-serif;
             color: white;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
         }
 
-        /* Top HUD */
+        /* HUD & Hero Styles remain same as your previous version */
         .hud-top {
             display: flex;
             justify-content: space-between;
             padding: 20px;
             font-size: 14px;
             color: #888;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
         }
+        .currency { color: var(--neon-green); display: flex; align-items: center; gap: 5px; }
 
-        /* CHARACTER SELECTOR AREA */
-        .character-vault {
+        .hero-section {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 30px;
         }
 
-        .display-container {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .avatar-frame {
-            width: 160px;
-            height: 160px;
-            border-radius: 20px;
-            border: 2px solid var(--neon-purple);
-            background: rgba(217, 70, 239, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 40px rgba(217, 70, 239, 0.2);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .avatar-frame span {
-            font-size: 90px;
-            text-shadow: 0 0 20px var(--neon-purple);
-        }
-
-        .nav-arrow {
-            background: none;
-            border: 1px solid #333;
-            color: white;
-            padding: 10px;
+        .avatar-circle {
+            width: 140px; height: 140px;
             border-radius: 50%;
-            cursor: pointer;
+            border: 4px solid var(--neon-purple);
+            box-shadow: 0 0 30px var(--neon-purple);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
         }
 
-        .nav-arrow:active {
-            background: var(--neon-green);
-            color: black;
+        .avatar-circle::before {
+            content: ''; position: absolute;
+            top: -10px; left: -10px; right: -10px; bottom: -10px;
+            border-radius: 50%; border: 2px dashed var(--neon-green);
+            animation: spin 10s linear infinite;
         }
 
-        .char-info {
-            text-align: center;
+        .game-title {
+            font-size: 42px; font-weight: 900; font-style: italic;
+            text-transform: uppercase; position: relative;
+            text-shadow: 2px 2px 0px var(--neon-blue);
         }
 
-        .char-name {
-            font-size: 24px;
-            color: var(--neon-green);
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-
-        /* MENU BUTTONS */
+        /* Menu Buttons */
         .menu-container {
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            max-width: 400px;
-            margin: 0 auto;
-            width: 100%;
+            padding: 30px; display: flex; flex-direction: column;
+            gap: 15px; width: 100%; max-width: 450px; margin: 0 auto;
         }
 
-        .btn {
-            padding: 18px;
-            border: none;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 18px;
-            text-transform: uppercase;
-            font-weight: 900;
-            clip-path: polygon(5% 0, 100% 0, 95% 100%, 0% 100%);
-            cursor: pointer;
-            transition: 0.2s;
+        .menu-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 18px; font-family: 'Orbitron', sans-serif;
+            font-size: 20px; color: white; text-transform: uppercase;
+            cursor: pointer; transform: skewX(-10deg);
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
 
-        .btn-play { background: var(--neon-purple); color: white; }
-        .btn-play:active { transform: scale(0.95); opacity: 0.8; }
+        .menu-btn.primary {
+            background: var(--neon-purple); border: none;
+            box-shadow: 0 0 20px rgba(217, 70, 239, 0.4); font-weight: 800;
+        }
 
-        /* CUSTOM ALERT */
+        .menu-btn:active { transform: skewX(-10deg) scale(0.95); }
+
+        /* CUSTOM ALERT MODAL */
         #customAlert {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000;
-        }
-        .alert-box {
-            border: 1px solid var(--neon-green); padding: 30px; text-align: center; background: #000;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
         }
 
+        .alert-box {
+            background: #111; border: 2px solid var(--neon-purple);
+            padding: 30px; width: 80%; max-width: 300px; text-align: center;
+            box-shadow: 0 0 30px var(--neon-purple);
+        }
+
+        .alert-box p { font-family: 'Poppins', sans-serif; margin-bottom: 20px; }
+
+        .alert-close {
+            background: var(--neon-green); color: black; border: none;
+            padding: 10px 20px; font-family: 'Orbitron', sans-serif;
+            font-weight: 700; cursor: pointer;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div class="hud-top">
-        <div>CORE: <span id="charID">VYNIX-01</span></div>
-        <div style="color: var(--neon-green)">● ONLINE</div>
+        <div>ID: VYNIX</div>
+        <div class="currency">
+            <span class="material-symbols-rounded" style="font-size:16px;">bolt</span>
+            <span>2,450</span>
+        </div>
     </div>
 
-    <div class="character-vault">
-        <div class="char-info">
-            <div class="char-name" id="nameLabel">Interceptor</div>
-            <div style="font-size: 10px; color: #555; letter-spacing: 3px;">SELECT CLASS</div>
+    <div class="hero-section">
+        <div class="avatar-circle">
+            <span class="material-symbols-rounded" style="font-size:80px;">rocket_launch</span>
         </div>
-
-        <div class="display-container">
-            <button class="nav-arrow" onclick="changeChar(-1)">
-                <span class="material-symbols-rounded">chevron_left</span>
-            </button>
-
-            <div class="avatar-frame" id="avatarFrame">
-                <span class="material-symbols-rounded" id="mainIcon">rocket_launch</span>
-            </div>
-
-            <button class="nav-arrow" onclick="changeChar(1)">
-                <span class="material-symbols-rounded">chevron_right</span>
-            </button>
-        </div>
+        <h1 class="game-title">CYBER DRIFT</h1>
     </div>
 
     <div class="menu-container">
-        <button class="btn btn-play" onclick="launchGame()">Initiate Run</button>
-        <button style="background:none; border: 1px solid #333; color: #555;" class="btn" onclick="openAlert()">Upgrades</button>
+        <button class="menu-btn primary" onclick="startGame()">
+            <span class="material-symbols-rounded">play_arrow</span>
+            INITIATE RUN
+        </button>
+        
+        <button class="menu-btn" onclick="showAlert('SHOP OFFLINE: ENCRYPTED')">
+            <span class="material-symbols-rounded">shopping_bag</span>
+            UPGRADES
+        </button>
+        
+        <button class="menu-btn" onclick="showAlert('SYSTEM RESTRICTED')">
+            <span class="material-symbols-rounded">settings</span>
+            SYSTEM
+        </button>
     </div>
 
-    <div id="customAlert" onclick="this.style.display='none'">
+    <div id="customAlert">
         <div class="alert-box">
-            <div style="color: var(--neon-green); margin-bottom: 15px;">ACCESS DENIED</div>
-            <div style="font-size: 12px;">INSUFFICIENT DATA PACKETS</div>
+            <p id="alertMessage">ALERT</p>
+            <button class="alert-close" onclick="closeAlert()">CONFIRM</button>
         </div>
     </div>
 
     <script>
-        const characters = [
-            { name: "Interceptor", icon: "rocket_launch", color: "#d946ef", id: "VYNIX-01" },
-            { name: "Ghost", icon: "visibility_off", color: "#3b82f6", id: "VYNIX-02" },
-            { name: "Pulse", icon: "Electric_Bolt", color: "#10b981", id: "VYNIX-03" }
-        ];
-
-        let currentIndex = 0;
-
-        function changeChar(dir) {
-            currentIndex += dir;
-            if (currentIndex < 0) currentIndex = characters.length - 1;
-            if (currentIndex >= characters.length) currentIndex = 0;
-            updateDisplay();
+        function startGame() {
+            const btn = document.querySelector('.primary');
+            btn.innerHTML = "LAUNCHING...";
+            btn.style.opacity = "0.7";
+            
+            // Redirect to gameplay.html after a short delay
+            setTimeout(() => {
+                window.location.href = 'gameplay.html';
+            }, 600);
         }
 
-        function updateDisplay() {
-            const char = characters[currentIndex];
-            const frame = document.getElementById('avatarFrame');
-            const icon = document.getElementById('mainIcon');
-            
-            document.getElementById('nameLabel').innerText = char.name;
-            document.getElementById('nameLabel').style.color = char.color;
-            document.getElementById('charID').innerText = char.id;
-            
-            icon.innerText = char.icon;
-            icon.style.textShadow = `0 0 20px ${char.color}`;
-            frame.style.borderColor = char.color;
-            frame.style.boxShadow = `0 0 40px ${char.color}33`;
-            
-            // Save selection for gameplay.html
-            localStorage.setItem('selectedIcon', char.icon);
-            localStorage.setItem('selectedColor', char.color);
-        }
-
-        function launchGame() {
-            window.location.href = 'gameplay.html';
-        }
-
-        function openAlert() {
+        function showAlert(msg) {
+            document.getElementById('alertMessage').innerText = msg;
             document.getElementById('customAlert').style.display = 'flex';
         }
 
-        // Final lock: block right click/long press
-        document.addEventListener('contextmenu', e => e.preventDefault());
+        function closeAlert() {
+            document.getElementById('customAlert').style.display = 'none';
+        }
+
+        // Prevent Right Click context menu
+        document.addEventListener('contextmenu', event => event.preventDefault());
     </script>
 </body>
 </html>
