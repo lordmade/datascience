@@ -139,53 +139,169 @@
             ctx.save();
             ctx.translate(x, y);
             
-            // Enhanced thermal signature with glow
-            const gradient = ctx.createRadialGradient(0, -30, 0, 0, -30, 50);
-            gradient.addColorStop(0, '#ff3300');
-            gradient.addColorStop(0.3, '#ff6600');
-            gradient.addColorStop(0.6, '#ff9900');
-            gradient.addColorStop(1, 'rgba(255, 69, 0, 0)');
+            // Full body thermal glow aura
+            ctx.shadowBlur = 45;
+            ctx.shadowColor = "#ff2200";
             
-            // Atmospheric glow
-            ctx.shadowBlur = 30;
-            ctx.shadowColor = "#ff4500";
+            // Intense body heat gradient (core to edges)
+            const bodyGrad = ctx.createRadialGradient(0, -25, 5, 0, -25, 35);
+            bodyGrad.addColorStop(0, '#ffffff');
+            bodyGrad.addColorStop(0.2, '#ffff00');
+            bodyGrad.addColorStop(0.4, '#ff3300');
+            bodyGrad.addColorStop(0.7, '#ff6600');
+            bodyGrad.addColorStop(1, '#ff9900');
             
-            // Head with thermal detail
-            ctx.fillStyle = gradient;
+            // HEAD - bright thermal signature
+            const headGrad = ctx.createRadialGradient(0, -48, 0, 0, -48, 18);
+            headGrad.addColorStop(0, '#ffff88');
+            headGrad.addColorStop(0.3, '#ffcc00');
+            headGrad.addColorStop(0.6, '#ff6600');
+            headGrad.addColorStop(1, '#ff3300');
+            
+            ctx.fillStyle = headGrad;
             ctx.beginPath();
-            ctx.ellipse(0, -45, 12, 14, 0, 0, Math.PI*2);
+            ctx.arc(0, -48, 13, 0, Math.PI * 2);
             ctx.fill();
             
-            // Neck
-            ctx.fillStyle = "#ff5500";
-            ctx.fillRect(-6, -32, 12, 8);
+            // Facial heat detail
+            ctx.fillStyle = '#ffff66';
+            ctx.beginPath();
+            ctx.arc(-4, -50, 3, 0, Math.PI * 2);
+            ctx.arc(4, -50, 3, 0, Math.PI * 2);
+            ctx.fill();
             
-            // Body/Torso with thermal hotspots
-            ctx.fillStyle = "#ff6a00";
-            ctx.fillRect(-14, -24, 28, 22);
+            // NECK
+            ctx.fillStyle = '#ffaa00';
+            ctx.fillRect(-5, -36, 10, 10);
             
-            // Arms
-            ctx.fillStyle = "#ff7700";
-            ctx.fillRect(-14, -22, 4, 18); // Left arm
-            ctx.fillRect(10, -22, 4, 18);  // Right arm
+            // TORSO/CHEST - hottest part
+            ctx.fillStyle = bodyGrad;
+            ctx.beginPath();
+            ctx.roundRect(-16, -26, 32, 28, 4);
+            ctx.fill();
             
-            // Weapon (rifle)
-            ctx.fillStyle = "#cc5500";
-            ctx.fillRect(10, -18, 35, 3);
-            ctx.fillRect(42, -20, 3, 7); // Barrel tip
+            // Core heat spots (heart/lungs area)
+            ctx.fillStyle = 'rgba(255, 255, 150, 0.6)';
+            ctx.beginPath();
+            ctx.arc(-5, -15, 6, 0, Math.PI * 2);
+            ctx.arc(5, -15, 6, 0, Math.PI * 2);
+            ctx.fill();
             
-            // Legs
-            ctx.fillStyle = "#ff8800";
-            ctx.fillRect(-10, -2, 8, 12);  // Left leg
-            ctx.fillRect(2, -2, 8, 12);    // Right leg
+            // ARMS - left arm
+            ctx.fillStyle = '#ff7700';
+            ctx.save();
+            ctx.translate(-16, -20);
+            ctx.rotate(-0.3);
+            ctx.fillRect(-4, 0, 5, 22);
+            // Forearm
+            ctx.translate(0, 22);
+            ctx.rotate(-0.2);
+            ctx.fillStyle = '#ff8844';
+            ctx.fillRect(-3, 0, 5, 18);
+            // Hand
+            ctx.fillStyle = '#ffaa66';
+            ctx.beginPath();
+            ctx.arc(0, 18, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
             
-            // Heat signature pulse
+            // ARMS - right arm (holding rifle)
+            ctx.fillStyle = '#ff7700';
+            ctx.save();
+            ctx.translate(16, -20);
+            ctx.rotate(0.5);
+            ctx.fillRect(-1, 0, 5, 20);
+            // Forearm
+            ctx.translate(2, 20);
+            ctx.rotate(0.3);
+            ctx.fillStyle = '#ff8844';
+            ctx.fillRect(-3, 0, 5, 16);
+            // Hand on weapon
+            ctx.fillStyle = '#ffaa66';
+            ctx.beginPath();
+            ctx.arc(0, 16, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            
+            // RIFLE - detailed weapon
+            ctx.save();
+            ctx.translate(12, -15);
+            ctx.rotate(0.1);
+            
+            // Rifle body (cooler - not body temp)
+            ctx.fillStyle = '#884400';
+            ctx.fillRect(0, -3, 45, 7);
+            
+            // Barrel
+            ctx.fillStyle = '#663300';
+            ctx.fillRect(35, -2, 18, 5);
+            
+            // Magazine
+            ctx.fillStyle = '#775500';
+            ctx.fillRect(8, 4, 8, 12);
+            
+            // Stock
+            ctx.fillStyle = '#995500';
+            ctx.fillRect(-8, -2, 10, 5);
+            
+            // Scope mount
+            ctx.fillStyle = '#444444';
+            ctx.fillRect(15, -6, 8, 3);
+            
+            ctx.restore();
+            
+            // LEGS
+            // Left leg
+            ctx.fillStyle = '#ff8800';
+            ctx.save();
+            ctx.translate(-8, 2);
+            ctx.fillRect(-4, 0, 7, 16);
+            // Lower leg
+            ctx.translate(0, 16);
+            ctx.fillStyle = '#ff9944';
+            ctx.fillRect(-3, 0, 6, 14);
+            // Boot
+            ctx.fillStyle = '#aa6633';
+            ctx.fillRect(-4, 14, 7, 5);
+            ctx.restore();
+            
+            // Right leg
+            ctx.fillStyle = '#ff8800';
+            ctx.save();
+            ctx.translate(8, 2);
+            ctx.fillRect(-3, 0, 7, 16);
+            // Lower leg
+            ctx.translate(0, 16);
+            ctx.fillStyle = '#ff9944';
+            ctx.fillRect(-3, 0, 6, 14);
+            // Boot
+            ctx.fillStyle = '#aa6633';
+            ctx.fillRect(-4, 14, 7, 5);
+            ctx.restore();
+            
+            // Tactical gear heat signature (vest/belt)
+            ctx.strokeStyle = '#664400';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-12, -24, 24, 20);
+            
+            // Breathing heat pulse around body
+            const pulse = Math.sin(Date.now() * 0.003) * 0.3 + 0.7;
+            ctx.strokeStyle = `rgba(255, 100, 0, ${pulse * 0.3})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(0, -20, 25, 40, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Heat signature pulse when aiming
             if (enemy.timer > 2) {
-                ctx.strokeStyle = `rgba(255, 69, 0, ${0.5 - (enemy.timer - 2) * 0.2})`;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(0, -30, 40 + (enemy.timer - 2) * 10, 0, Math.PI*2);
-                ctx.stroke();
+                const intensity = Math.max(0, 0.7 - (enemy.timer - 2) * 0.15);
+                ctx.strokeStyle = `rgba(255, 50, 0, ${intensity})`;
+                ctx.lineWidth = 3;
+                for(let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.arc(0, -20, 50 + (enemy.timer - 2) * 15 + i * 10, 0, Math.PI*2);
+                    ctx.stroke();
+                }
             }
             
             ctx.restore();
