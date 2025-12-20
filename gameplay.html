@@ -81,6 +81,8 @@
         let mouse = { x: 0, y: 0 }, recoilY = 0;
         let health = 100, isDead = false, canFire = true;
         let breathing = 0, damageFlash = 0;
+        let muzzleFlash = 0;
+        let particles = [];
 
         function resize() {
             cw = canvas.width = window.innerWidth;
@@ -136,13 +138,94 @@
         function drawSoldier(x, y) {
             ctx.save();
             ctx.translate(x, y);
-            ctx.shadowBlur = 15; ctx.shadowColor = "#ff4500";
+            
+            // Enhanced thermal signature with glow
+            const gradient = ctx.createRadialGradient(0, -30, 0, 0, -30, 50);
+            gradient.addColorStop(0, '#ff3300');
+            gradient.addColorStop(0.3, '#ff6600');
+            gradient.addColorStop(0.6, '#ff9900');
+            gradient.addColorStop(1, 'rgba(255, 69, 0, 0)');
+            
+            // Atmospheric glow
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = "#ff4500";
+            
+            // Head with thermal detail
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.ellipse(0, -45, 12, 14, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Neck
+            ctx.fillStyle = "#ff5500";
+            ctx.fillRect(-6, -32, 12, 8);
+            
+            // Body/Torso with thermal hotspots
             ctx.fillStyle = "#ff6a00";
-            ctx.beginPath(); ctx.ellipse(0, -45, 10, 8, 0, 0, Math.PI*2); ctx.fill(); // Head
-            ctx.fillRect(-12, -37, 24, 35); // Body
-            ctx.fillStyle = "#ffcc00";
-            ctx.fillRect(5, -20, 30, 4); // Gun
+            ctx.fillRect(-14, -24, 28, 22);
+            
+            // Arms
+            ctx.fillStyle = "#ff7700";
+            ctx.fillRect(-14, -22, 4, 18); // Left arm
+            ctx.fillRect(10, -22, 4, 18);  // Right arm
+            
+            // Weapon (rifle)
+            ctx.fillStyle = "#cc5500";
+            ctx.fillRect(10, -18, 35, 3);
+            ctx.fillRect(42, -20, 3, 7); // Barrel tip
+            
+            // Legs
+            ctx.fillStyle = "#ff8800";
+            ctx.fillRect(-10, -2, 8, 12);  // Left leg
+            ctx.fillRect(2, -2, 8, 12);    // Right leg
+            
+            // Heat signature pulse
+            if (enemy.timer > 2) {
+                ctx.strokeStyle = `rgba(255, 69, 0, ${0.5 - (enemy.timer - 2) * 0.2})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, -30, 40 + (enemy.timer - 2) * 10, 0, Math.PI*2);
+                ctx.stroke();
+            }
+            
             ctx.restore();
+        }
+
+        function createMuzzleFlash() {
+            muzzleFlash = 1;
+            for(let i=0; i<15; i++) {
+                particles.push({
+                    x: mouse.x + Math.sin(breathing) * 8,
+                    y: mouse.y + Math.cos(breathing * 0.5) * 6,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8 - 2,
+                    life: 1,
+                    size: Math.random() * 4 + 2
+                });
+            }
+        }
+
+        function updateParticles() {
+            particles = particles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.2; // Gravity
+                p.life -= 0.02;
+                return p.life > 0;
+            });
+        }
+
+        function drawParticles() {
+            particles.forEach(p => {
+                if (p.color === 'red') {
+                    ctx.fillStyle = `rgba(180, 0, 0, ${p.life / 1.5})`;
+                } else {
+                    ctx.fillStyle = `rgba(255, ${200 * p.life}, 0, ${p.life})`;
+                }
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * (p.life / 1.5), 0, Math.PI*2);
+                ctx.fill();
+            });
         }
 
         function loop() {
@@ -162,34 +245,115 @@
             ctx.save();
             ctx.beginPath(); ctx.arc(sx, sy, 180, 0, Math.PI*2); ctx.clip();
             
-            ctx.fillStyle = '#000022';
+            // Gradient background for depth
+            const bgGrad = ctx.createRadialGradient(cw/2, ch/2, 0, cw/2, ch/2, 800);
+            bgGrad.addColorStop(0, '#001a33');
+            bgGrad.addColorStop(1, '#000011');
+            ctx.fillStyle = bgGrad;
             ctx.fillRect(0, 0, cw, ch);
 
-            // Draw Building Silhouette
-            ctx.fillStyle = '#0a0a33';
+            // Draw Building with depth
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#0d1520';
+            ctx.fillRect(cw/2 - 310, ch/2 - 310, 620, 420);
+            
+            ctx.fillStyle = '#162030';
             ctx.fillRect(cw/2 - 300, ch/2 - 300, 600, 400);
             
-            // Draw Windows
+            // Draw Windows with glow effect
             windows.forEach(w => {
+                // Window interior shadow
                 ctx.fillStyle = '#000011';
                 ctx.fillRect(w.x, w.y, w.w, w.h);
+                
+                // Window frame with thermal leak
                 ctx.strokeStyle = '#1e3a8a';
+                ctx.lineWidth = 2;
                 ctx.strokeRect(w.x, w.y, w.w, w.h);
+                
+                // Subtle thermal leak glow
+                ctx.strokeStyle = 'rgba(100, 150, 255, 0.1)';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(w.x-2, w.y-2, w.w+4, w.h+4);
             });
 
             drawSoldier(enemy.x, enemy.y);
+            
+            // Muzzle flash from enemy when shooting
+            if (Date.now() - enemy.lastShot < 100) {
+                ctx.shadowBlur = 40;
+                ctx.shadowColor = "#ffaa00";
+                ctx.fillStyle = "#ffff00";
+                ctx.beginPath();
+                ctx.arc(enemy.x + 45, enemy.y - 18, 12, 0, Math.PI*2);
+                ctx.fill();
+            }
 
-            // Crosshair
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            // Draw particles (smoke, brass)
+            drawParticles();
+
+            // Enhanced Crosshair with rangefinder
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = 'rgba(0,255,100,0.8)';
+            ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.moveTo(sx-180, sy); ctx.lineTo(sx+180, sy);
-            ctx.moveTo(sx, sy-180); ctx.lineTo(sx, sy+180);
+            // Horizontal line
+            ctx.moveTo(sx-30, sy); ctx.lineTo(sx-10, sy);
+            ctx.moveTo(sx+10, sy); ctx.lineTo(sx+30, sy);
+            // Vertical line
+            ctx.moveTo(sx, sy-30); ctx.lineTo(sx, sy-10);
+            ctx.moveTo(sx, sy+10); ctx.lineTo(sx, sy+30);
             ctx.stroke();
+            
+            // Center dot
+            ctx.fillStyle = 'rgba(255,0,0,0.6)';
+            ctx.beginPath();
+            ctx.arc(sx, sy, 2, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Rangefinder circles
+            ctx.strokeStyle = 'rgba(0,255,100,0.3)';
+            ctx.lineWidth = 1;
+            [50, 100, 150].forEach(r => {
+                ctx.beginPath();
+                ctx.arc(sx, sy, r, 0, Math.PI*2);
+                ctx.stroke();
+            });
+            
             ctx.restore();
 
-            // Scope Ring
-            ctx.strokeStyle = '#111'; ctx.lineWidth = 20;
-            ctx.beginPath(); ctx.arc(sx, sy, 190, 0, Math.PI*2); ctx.stroke();
+            // Scope Ring with realistic lens edge
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#0a0a0a'; 
+            ctx.lineWidth = 25;
+            ctx.beginPath(); 
+            ctx.arc(sx, sy, 190, 0, Math.PI*2); 
+            ctx.stroke();
+            
+            // Inner lens reflection
+            ctx.strokeStyle = '#1a1a1a';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(sx, sy, 178, 0, Math.PI*2);
+            ctx.stroke();
+            
+            // Lens glare effect
+            const glare = ctx.createRadialGradient(sx-60, sy-60, 0, sx-60, sy-60, 40);
+            glare.addColorStop(0, 'rgba(255,255,255,0.1)');
+            glare.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = glare;
+            ctx.beginPath();
+            ctx.arc(sx, sy, 180, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Muzzle flash overlay
+            if (muzzleFlash > 0) {
+                ctx.fillStyle = `rgba(255, 200, 0, ${muzzleFlash * 0.3})`;
+                ctx.fillRect(0, 0, cw, ch);
+                muzzleFlash -= 0.1;
+            }
+            
+            updateParticles();
 
             // 3. Enemy Combat Logic
             enemy.timer += 0.016;
@@ -221,8 +385,9 @@
             if (!canFire || isDead) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
 
-            // Fire Logic
+            // Fire Logic with enhanced effects
             playSound(300, 0.5, 0.5);
+            createMuzzleFlash();
             recoilY = 150; // Huge kick up
             canFire = false;
             document.getElementById('recoil-warning').style.display = 'block';
@@ -235,6 +400,20 @@
             if (d < 35) {
                 score++;
                 document.getElementById('score').innerText = score;
+                
+                // Blood splatter effect
+                for(let i=0; i<20; i++) {
+                    particles.push({
+                        x: enemy.x,
+                        y: enemy.y - 30,
+                        vx: (Math.random() - 0.5) * 12,
+                        vy: (Math.random() - 0.5) * 12,
+                        life: 1.5,
+                        size: Math.random() * 3 + 1,
+                        color: 'red'
+                    });
+                }
+                
                 spawnEnemy();
             }
 
