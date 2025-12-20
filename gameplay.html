@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vine Shot: Hidden Strike</title>
+    <title>Vine Shot: Counter-Sniper</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@900&display=swap" rel="stylesheet">
 
@@ -26,47 +26,47 @@
 
         canvas { display: block; }
 
-        /* VIGNETTE SCOPE EFFECT */
         #scope-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.8) 70%, #000 100%);
+            background: radial-gradient(circle, transparent 25%, rgba(0,0,0,0.85) 60%, #000 100%);
             pointer-events: none;
             z-index: 20;
         }
 
-        /* WIND DATA HUD */
-        #wind-hud {
+        .reticle-v { position: absolute; top: 0; left: 50%; width: 1px; height: 100%; background: rgba(74, 222, 128, 0.3); z-index: 21; pointer-events: none; }
+        .reticle-h { position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(74, 222, 128, 0.3); z-index: 21; pointer-events: none; }
+
+        #ui-container {
             position: absolute;
-            bottom: 40px;
-            right: 40px;
-            color: #4ade80;
-            text-align: right;
+            width: 100%; height: 100%;
+            pointer-events: none;
             z-index: 30;
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
-            border-left: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 40px;
         }
 
-        #score-hud {
+        .status-msg {
             position: absolute;
-            top: 40px; left: 40px;
-            color: #4ade80;
-            font-size: 24px;
-            z-index: 30;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -150%);
+            font-size: 12px; letter-spacing: 4px;
+            color: #ef4444; display: none;
         }
     </style>
 </head>
 <body>
 
     <div id="scope-overlay"></div>
+    <div class="reticle-v"></div>
+    <div class="reticle-h"></div>
     
-    <div id="score-hud">KILLS: <span id="score">00</span></div>
-
-    <div id="wind-hud">
-        <div style="font-size: 10px; opacity: 0.6;">ENVIRONMENTAL DATA</div>
-        <div style="font-size: 20px;">WIND: <span id="wind-speed">2.4</span> m/s</div>
-        <div id="wind-dir" style="font-size: 12px;">DIRECTION: EAST/NORTH</div>
+    <div id="ui-container">
+        <div style="display:flex; justify-content: space-between;">
+            <div>SIGHT: THERMAL_V3<br>THREATS: <span id="score">0</span></div>
+            <div style="text-align: right;">WIND: <span id="wind">2.4</span> m/s<br>HUMIDITY: 88%</div>
+        </div>
+        <div id="target-lock" class="status-msg">TARGET ACQUIRED</div>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -74,119 +74,136 @@
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        let cw, ch, score = 0, targets = [], grassBlades = [];
-        let windTime = 0;
-        let shake = 0;
+        let cw, ch, score = 0, enemy = null, grassBlades = [];
+        let windTime = 0, shake = 0, breathing = 0;
+        let isDead = false;
 
         function resize() {
             cw = canvas.width = window.innerWidth;
             ch = canvas.height = window.innerHeight;
             initGrass();
+            spawnEnemy();
         }
-        window.addEventListener('resize', resize);
 
-        // Procedural Grass logic
         function initGrass() {
             grassBlades = [];
-            for(let i = 0; i < 80; i++) {
-                grassBlades.push({
-                    x: Math.random() * cw,
-                    baseY: ch,
-                    len: Math.random() * 150 + 200, // Long grass for the "hiding" look
-                    offset: Math.random() * Math.PI * 2,
-                    thickness: Math.random() * 4 + 2
-                });
+            for(let i = 0; i < 100; i++) {
+                grassBlades.push({ x: Math.random() * cw, baseY: ch, len: Math.random() * 200 + 150, offset: Math.random() * 10, thickness: Math.random() * 5 + 2 });
             }
         }
 
-        class Target {
-            constructor() {
-                this.x = Math.random() * (cw - 100) + 50;
-                this.y = -50;
-                this.r = 25;
-                this.speed = 2 + Math.random() * 2;
-            }
-            update() { this.y += this.speed; }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-                ctx.strokeStyle = '#ff0000';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-                // Reticle inside target
-                ctx.moveTo(this.x - 10, this.y); ctx.lineTo(this.x + 10, this.y);
-                ctx.moveTo(this.x, this.y - 10); ctx.lineTo(this.x, this.y + 10);
-                ctx.stroke();
-            }
+        function spawnEnemy() {
+            enemy = {
+                x: Math.random() * (cw - 200) + 100,
+                y: Math.random() * (ch - 300) + 100,
+                glintTimer: 0,
+                isVisible: false,
+                shootTimer: 0,
+                threatLevel: 0
+            };
         }
 
-        function drawGrass(windStrength) {
-            ctx.lineCap = 'round';
-            grassBlades.forEach(g => {
-                // Wind sway math
-                let sway = Math.sin(windTime + g.offset) * windStrength;
-                
-                ctx.beginPath();
-                ctx.moveTo(g.x, g.baseY);
-                // Quadratic curve for realistic bending
-                ctx.quadraticCurveTo(
-                    g.x + sway, g.baseY - g.len/2, 
-                    g.x + sway * 2, g.baseY - g.len
-                );
-                
-                ctx.strokeStyle = `rgb(10, ${40 + (g.len/10)}, 10)`;
-                ctx.lineWidth = g.thickness;
-                ctx.stroke();
-            });
+        // --- SOUND ENGINE ---
+        function playGunshot() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
         }
 
         function loop() {
+            if (isDead) return;
+
             ctx.save();
             
-            // Camera Shake
+            // Breathing Sway
+            breathing += 0.02;
+            let swayX = Math.sin(breathing) * 15;
+            let swayY = Math.cos(breathing * 0.5) * 10;
+            
+            // Recoil
             if (shake > 0) {
                 ctx.translate((Math.random()-0.5)*shake, (Math.random()-0.5)*shake);
-                shake *= 0.9;
+                shake *= 0.85;
+            }
+            ctx.translate(swayX, swayY);
+
+            // Background
+            ctx.fillStyle = '#010801';
+            ctx.fillRect(-100, -100, cw + 200, ch + 200);
+
+            // Enemy Logic
+            if (enemy) {
+                enemy.glintTimer += 0.016;
+                enemy.shootTimer += 0.016;
+
+                // Enemy "Glint" flashes every 2 seconds
+                if (Math.sin(enemy.glintTimer * 3) > 0.95) {
+                    ctx.shadowBlur = 30;
+                    ctx.shadowColor = '#fff';
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.arc(enemy.x, enemy.y, 4, 0, Math.PI*2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+
+                // If you take too long (5 seconds), they shoot you
+                if (enemy.shootTimer > 5.0) {
+                    isDead = true;
+                    playGunshot();
+                    alert("SNIPER DOWN. FINAL KILLS: " + score);
+                    location.reload();
+                }
             }
 
-            // Darker jungle floor
-            ctx.fillStyle = '#010801';
-            ctx.fillRect(0, 0, cw, ch);
-
-            // 1. Draw Targets (Behind some grass)
-            targets.forEach((t, i) => {
-                t.update();
-                t.draw();
-                if(t.y > ch) targets.splice(i, 1);
+            // Draw Wind-blown Grass (Foreground)
+            windTime += 0.03;
+            ctx.strokeStyle = '#0a320a';
+            ctx.lineCap = 'round';
+            grassBlades.forEach(g => {
+                let sway = Math.sin(windTime + g.offset) * 20;
+                ctx.beginPath();
+                ctx.lineWidth = g.thickness;
+                ctx.moveTo(g.x, g.baseY);
+                ctx.quadraticCurveTo(g.x + sway, g.baseY - g.len/2, g.x + sway*2, g.baseY - g.len);
+                ctx.stroke();
             });
 
-            // 2. Draw Swaying Grass (Foreground)
-            windTime += 0.03;
-            let currentWind = 2.4 + Math.sin(windTime * 0.5) * 0.5;
-            document.getElementById('wind-speed').innerText = currentWind.toFixed(1);
-            
-            // Pass the wind speed to the sway intensity
-            drawGrass(currentWind * 15);
-
             ctx.restore();
-
-            if (Math.random() < 0.02) targets.push(new Target());
             requestAnimationFrame(loop);
         }
 
         window.addEventListener('mousedown', (e) => {
-            shake = 20; // Recoil
-            targets.forEach((t, i) => {
-                let dist = Math.hypot(t.x - e.clientX, t.y - e.clientY);
-                if (dist < t.r + 10) {
-                    targets.splice(i, 1);
-                    score++;
-                    document.getElementById('score').innerText = score.toString().padStart(2, '0');
-                }
-            });
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            playGunshot();
+            shake = 40; // Recoil intensity
+
+            // Adjust click coordinates for scope sway
+            let swayX = Math.sin(breathing) * 15;
+            let swayY = Math.cos(breathing * 0.5) * 10;
+            let hitX = e.clientX - swayX;
+            let hitY = e.clientY - swayY;
+
+            let dist = Math.hypot(enemy.x - hitX, enemy.y - hitY);
+            if (dist < 40) {
+                score++;
+                document.getElementById('score').innerText = score;
+                spawnEnemy(); // Move to next target
+            }
         });
 
+        window.addEventListener('resize', resize);
         resize();
         loop();
     </script>
