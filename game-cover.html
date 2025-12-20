@@ -17,6 +17,14 @@
             --bg-dark: #050505;
         }
 
+        /* PREVENT HIGHLIGHT & SELECTION */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none; /* Prevents long-press menu */
+            user-select: none;           /* Prevents text selection */
+            -webkit-user-select: none;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -24,13 +32,10 @@
             width: 100vw;
             overflow: hidden;
             background-color: var(--bg-dark);
-            /* Angled Striped Background */
             background-image: repeating-linear-gradient(
                 45deg,
-                #0a0a0a 0px,
-                #0a0a0a 10px,
-                #0f0f0f 10px,
-                #0f0f0f 20px
+                #0a0a0a 0px, #0a0a0a 10px,
+                #0f0f0f 10px, #0f0f0f 20px
             );
             font-family: 'Orbitron', sans-serif;
             color: white;
@@ -39,7 +44,7 @@
             justify-content: space-between;
         }
 
-        /* Top HUD */
+        /* HUD & Hero Styles remain same as your previous version */
         .hud-top {
             display: flex;
             justify-content: space-between;
@@ -48,144 +53,90 @@
             color: #888;
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
-            z-index: 10;
         }
+        .currency { color: var(--neon-green); display: flex; align-items: center; gap: 5px; }
 
-        .currency {
-            color: var(--neon-green);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        /* Center Character/Title Area */
         .hero-section {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative;
         }
 
         .avatar-circle {
-            width: 140px;
-            height: 140px;
+            width: 140px; height: 140px;
             border-radius: 50%;
             border: 4px solid var(--neon-purple);
-            box-shadow: 0 0 30px var(--neon-purple), inset 0 0 20px var(--neon-purple);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.5);
+            box-shadow: 0 0 30px var(--neon-purple);
+            display: flex; align-items: center; justify-content: center;
             margin-bottom: 20px;
             position: relative;
         }
 
-        /* Rotating ring around avatar */
         .avatar-circle::before {
-            content: '';
-            position: absolute;
+            content: ''; position: absolute;
             top: -10px; left: -10px; right: -10px; bottom: -10px;
-            border-radius: 50%;
-            border: 2px dashed var(--neon-green);
+            border-radius: 50%; border: 2px dashed var(--neon-green);
             animation: spin 10s linear infinite;
         }
 
-        .avatar-icon {
-            font-size: 80px;
-            color: white;
-        }
-
         .game-title {
-            font-size: 42px;
-            font-weight: 900;
-            font-style: italic;
-            text-transform: uppercase;
-            position: relative;
+            font-size: 42px; font-weight: 900; font-style: italic;
+            text-transform: uppercase; position: relative;
             text-shadow: 2px 2px 0px var(--neon-blue);
-        }
-
-        /* Glitch Effect Layer */
-        .game-title::after {
-            content: "CYBER DRIFT";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.5;
-            color: var(--neon-purple);
-            z-index: -1;
-            animation: glitch 2s infinite;
         }
 
         /* Menu Buttons */
         .menu-container {
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 100%;
-            max-width: 450px;
-            margin: 0 auto;
-            z-index: 10;
+            padding: 30px; display: flex; flex-direction: column;
+            gap: 15px; width: 100%; max-width: 450px; margin: 0 auto;
         }
 
         .menu-btn {
-            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+            background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.2);
-            padding: 18px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 20px;
-            color: white;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            cursor: pointer;
-            position: relative;
-            transform: skewX(-10deg); /* Skew for speed look */
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            padding: 18px; font-family: 'Orbitron', sans-serif;
+            font-size: 20px; color: white; text-transform: uppercase;
+            cursor: pointer; transform: skewX(-10deg);
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
 
         .menu-btn.primary {
-            background: var(--neon-purple);
-            border: none;
-            box-shadow: 0 0 20px rgba(217, 70, 239, 0.4);
-            font-weight: 800;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            background: var(--neon-purple); border: none;
+            box-shadow: 0 0 20px rgba(217, 70, 239, 0.4); font-weight: 800;
         }
 
-        .menu-btn:active {
-            transform: skewX(-10deg) scale(0.95);
+        .menu-btn:active { transform: skewX(-10deg) scale(0.95); }
+
+        /* CUSTOM ALERT MODAL */
+        #customAlert {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
         }
 
-        .menu-btn.primary:active {
-            box-shadow: 0 0 40px var(--neon-purple);
+        .alert-box {
+            background: #111; border: 2px solid var(--neon-purple);
+            padding: 30px; width: 80%; max-width: 300px; text-align: center;
+            box-shadow: 0 0 30px var(--neon-purple);
         }
 
-        .btn-icon { font-size: 24px; }
+        .alert-box p { font-family: 'Poppins', sans-serif; margin-bottom: 20px; }
 
-        /* Animations */
+        .alert-close {
+            background: var(--neon-green); color: black; border: none;
+            padding: 10px 20px; font-family: 'Orbitron', sans-serif;
+            font-weight: 700; cursor: pointer;
+        }
+
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        @keyframes glitch {
-            0% { transform: translate(0, 0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-            100% { transform: translate(0, 0); }
-        }
     </style>
 </head>
 <body>
 
     <div class="hud-top">
-        <div class="user-id">ID: VYNIX</div>
+        <div>ID: VYNIX</div>
         <div class="currency">
             <span class="material-symbols-rounded" style="font-size:16px;">bolt</span>
             <span>2,450</span>
@@ -194,49 +145,58 @@
 
     <div class="hero-section">
         <div class="avatar-circle">
-            <span class="material-symbols-rounded avatar-icon">rocket_launch</span>
+            <span class="material-symbols-rounded" style="font-size:80px;">rocket_launch</span>
         </div>
         <h1 class="game-title">CYBER DRIFT</h1>
-        <div style="color: #666; font-size: 12px; letter-spacing: 2px; margin-top: 5px;">VER 1.0.4</div>
     </div>
 
     <div class="menu-container">
         <button class="menu-btn primary" onclick="startGame()">
-            <span class="material-symbols-rounded btn-icon">play_arrow</span>
+            <span class="material-symbols-rounded">play_arrow</span>
             INITIATE RUN
         </button>
         
-        <button class="menu-btn" onclick="openShop()">
-            <span class="material-symbols-rounded btn-icon">shopping_bag</span>
+        <button class="menu-btn" onclick="showAlert('SHOP OFFLINE: ENCRYPTED')">
+            <span class="material-symbols-rounded">shopping_bag</span>
             UPGRADES
         </button>
         
-        <button class="menu-btn" onclick="openSettings()">
-            <span class="material-symbols-rounded btn-icon">settings</span>
+        <button class="menu-btn" onclick="showAlert('SYSTEM RESTRICTED')">
+            <span class="material-symbols-rounded">settings</span>
             SYSTEM
         </button>
     </div>
 
+    <div id="customAlert">
+        <div class="alert-box">
+            <p id="alertMessage">ALERT</p>
+            <button class="alert-close" onclick="closeAlert()">CONFIRM</button>
+        </div>
+    </div>
+
     <script>
         function startGame() {
-            // Add sound effect logic here later
             const btn = document.querySelector('.primary');
             btn.innerHTML = "LAUNCHING...";
+            btn.style.opacity = "0.7";
             
+            // Redirect to gameplay.html after a short delay
             setTimeout(() => {
-                // Next step: Go to actual gameplay page
-                alert("This would link to gameplay.html!"); 
-                btn.innerHTML = '<span class="material-symbols-rounded btn-icon">play_arrow</span> INITIATE RUN';
-            }, 800);
+                window.location.href = 'gameplay.html';
+            }, 600);
         }
 
-        function openShop() {
-            alert("Upgrade Store Under Construction");
+        function showAlert(msg) {
+            document.getElementById('alertMessage').innerText = msg;
+            document.getElementById('customAlert').style.display = 'flex';
         }
 
-        function openSettings() {
-            alert("System Settings Locked");
+        function closeAlert() {
+            document.getElementById('customAlert').style.display = 'none';
         }
+
+        // Prevent Right Click context menu
+        document.addEventListener('contextmenu', event => event.preventDefault());
     </script>
 </body>
 </html>
