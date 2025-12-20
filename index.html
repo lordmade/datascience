@@ -1,904 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-touch-fullscreen" content="yes">
-  <title>Vynix - Empower Your Learning</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      --card-bg: rgba(255, 255, 255, 0.95);
-      --text-primary: #1a202c;
-      --text-secondary: #718096;
-      --border: rgba(226, 232, 240, 0.8);
-      --accent: #4299e1;
-      --accent-secondary: #48bb78;
-      --gradient: linear-gradient(135deg, #4299e1 0%, #48bb78 50%, #ed8936 100%);
-      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --shadow-md: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      --glass: rgba(255, 255, 255, 0.25);
-    }
-    body.dark {
-      --bg: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-      --card-bg: rgba(45, 55, 72, 0.95);
-      --text-primary: #f7fafc;
-      --text-secondary: #a0aec0;
-      --border: rgba(255, 255, 255, 0.1);
-      --accent: #63b3ed;
-      --accent-secondary: #68d391;
-      --gradient: linear-gradient(135deg, #63b3ed 0%, #68d391 50%, #f6ad55 100%);
-      --glass: rgba(255, 255, 255, 0.1);
-    }
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-      background: var(--bg);
-      color: var(--text-primary);
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-      line-height: 1.6;
-      min-height: 100vh;
-      position: relative;
-    }
-    body::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at 20% 80%, rgba(66, 153, 225, 0.1) 0%, transparent 50%), 
-                  radial-gradient(circle at 80% 20%, rgba(72, 187, 120, 0.1) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: -1;
-    }
-    .navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      z-index: 1000;
-      padding: 16px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: all 0.3s ease;
-    }
-    .navbar.scrolled {
-      background: var(--card-bg);
-      box-shadow: var(--shadow-sm);
-      padding: 12px 40px;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 24px;
-      font-weight: 800;
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-decoration: none;
-    }
-    .logo-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--gradient);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .nav-links {
-      display: flex;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      gap: 32px;
-      align-items: center;
-    }
-    .nav-links a {
-      color: var(--text-primary);
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-    .nav-links a:hover {
-      color: var(--accent);
-    }
-    .nav-links a::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--gradient);
-      transition: width 0.3s ease;
-    }
-    .nav-links a:hover::after {
-      width: 100%;
-    }
-    .cta-btn {
-      background: var(--gradient);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      box-shadow: var(--shadow-sm);
-    }
-    .cta-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-    .hero {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 0 40px;
-      text-align: center;
-      position: relative;
-    }
-    .hero-content {
-      max-width: 800px;
-      z-index: 1;
-    }
-    .hero-title {
-      font-size: 64px;
-      font-weight: 800;
-      margin-bottom: 24px;
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      line-height: 1.2;
-    }
-    .hero-subtitle {
-      font-size: 24px;
-      margin-bottom: 40px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-    .hero-cta {
-      display: inline-block;
-      background: var(--gradient);
-      color: white;
-      padding: 20px 40px;
-      border-radius: 16px;
-      font-size: 20px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      box-shadow: var(--shadow-md);
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-cta::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
-    .hero-cta:hover::before {
-      left: 100%;
-    }
-    .hero-cta:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 25px 50px -12px rgba(66, 153, 225, 0.25);
-    }
-    .features, .courses {
-      padding: 100px 40px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    .section-title {
-      text-align: center;
-      font-size: 48px;
-      font-weight: 800;
-      margin-bottom: 16px;
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .section-subtitle {
-      text-align: center;
-      font-size: 20px;
-      color: var(--text-secondary);
-      margin-bottom: 64px;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 32px;
-    }
-    .feature-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 40px 32px;
-      text-align: center;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: var(--shadow-sm);
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-      user-select: none;
-    }
-    .feature-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: var(--gradient);
-      border-radius: 24px 24px 0 0;
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
-    }
-    .feature-card:hover::before {
-      transform: scaleX(1);
-    }
-    .feature-card:hover {
-      transform: translateY(-12px) rotate(1deg);
-      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
-    }
-    .feature-card:active {
-      transform: translateY(-8px) scale(0.98);
-    }
-    .feature-icon {
-      width: 80px;
-      height: 80px;
-      background: var(--gradient);
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
-      font-size: 32px;
-      color: white;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.3s ease;
-      transform: rotate(0deg);
-    }
-    .feature-card:hover .feature-icon {
-      transform: rotate(360deg) scale(1.1);
-      box-shadow: 0 10px 25px rgba(66, 153, 225, 0.3);
-    }
-    .feature-title {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      color: var(--text-primary);
-      transition: color 0.3s ease;
-    }
-    .feature-card:hover .feature-title {
-      color: var(--accent);
-    }
-    .feature-desc {
-      color: var(--text-secondary);
-      font-size: 16px;
-      line-height: 1.6;
-      opacity: 0.9;
-      transition: opacity 0.3s ease;
-    }
-    .feature-card:hover .feature-desc {
-      opacity: 1;
-    }
-    .explore-btn {
-      margin-top: 24px;
-      background: transparent;
-      color: var(--accent);
-      border: 2px solid var(--accent);
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: inline-block;
-      text-decoration: none;
-    }
-    .feature-card:hover .explore-btn {
-      background: var(--accent);
-      color: white;
-      transform: translateY(-2px);
-    }
-    .course-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      overflow: hidden;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: var(--shadow-sm);
-      cursor: pointer;
-      user-select: none;
-      position: relative;
-    }
-    .course-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: var(--gradient);
-      border-radius: 24px 24px 0 0;
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
-      z-index: 1;
-    }
-    .course-card:hover::before {
-      transform: scaleX(1);
-    }
-    .course-card:hover {
-      transform: translateY(-12px) scale(1.02);
-      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
-    }
-    .course-card:active {
-      transform: translateY(-8px) scale(0.99);
-    }
-    .course-thumbnail {
-      height: 180px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 64px;
-      color: white;
-      position: relative;
-      overflow: hidden;
-    }
-    .course-card:hover .course-thumbnail {
-      transform: scale(1.05);
-      filter: brightness(1.1);
-    }
-    .course-content {
-      padding: 24px;
-    }
-    .course-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: var(--text-primary);
-      transition: color 0.3s ease;
-    }
-    .course-card:hover .course-title {
-      color: var(--accent);
-    }
-    .course-instructor {
-      color: var(--text-secondary);
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
-    .course-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-    .course-rating {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .stars {
-      color: #fbbf24;
-      font-size: 16px;
-    }
-    .enroll-btn {
-      width: 100%;
-      background: var(--gradient);
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-top: 8px;
-    }
-    .course-card:hover .enroll-btn {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 2000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(10px);
-      animation: fadeIn 0.3s ease;
-    }
-    .modal-content {
-      background: var(--card-bg);
-      margin: 5% auto;
-      padding: 40px;
-      border-radius: 24px;
-      width: 90%;
-      max-width: 800px;
-      max-height: 85vh;
-      overflow-y: auto;
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-md);
-      position: relative;
-      animation: slideIn 0.3s ease;
-    }
-    .close {
-      color: var(--text-secondary);
-      float: right;
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: color 0.3s ease;
-    }
-    .close:hover {
-      color: var(--text-primary);
-    }
-    .modal-title {
-      font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .modal-desc {
-      font-size: 16px;
-      line-height: 1.6;
-      color: var(--text-primary);
-      margin-bottom: 24px;
-    }
-    .syllabus {
-      background: var(--glass);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 24px;
-    }
-    .syllabus h4 {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--text-primary);
-    }
-    .syllabus ul {
-      list-style: none;
-      padding: 0;
-    }
-    .syllabus li {
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border);
-      color: var(--text-secondary);
-    }
-    .syllabus li:last-child {
-      border-bottom: none;
-    }
-    .modal-cta {
-      background: var(--gradient);
-      color: white;
-      padding: 16px 32px;
-      border-radius: 16px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      display: inline-block;
-    }
-    .modal-cta:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes slideIn {
-      from { transform: translateY(-50px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    .footer {
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid var(--border);
-      padding: 40px 40px 20px;
-      text-align: center;
-      color: var(--text-secondary);
-    }
-    .footer a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-    .dark-toggle {
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: var(--text-primary);
-      transition: color 0.3s ease;
-    }
-    .dark-toggle:hover {
-      color: var(--accent);
-    }
-    @media (max-width: 768px) {
-      .navbar { padding: 16px 20px; }
-      .nav-links { gap: 16px; }
-      .hero { padding: 0 20px; min-height: 80vh; }
-      .hero-title { font-size: 48px; }
-      .hero-subtitle { font-size: 20px; }
-      .features, .courses { padding: 80px 20px; }
-      .section-title { font-size: 36px; }
-      .cards-grid { grid-template-columns: 1fr; }
-      .modal-content { width: 95%; margin: 10% auto; padding: 24px; }
-      .course-thumbnail { height: 140px; font-size: 48px; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>Vynix: Cyber-Drift</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-purple: #d946ef;
+            --neon-green: #10b981;
+            --bg-dark: #050505;
+            --grid-color: rgba(217, 70, 239, 0.15);
+        }
+
+        *, *::before, *::after { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+            /* Cyberpunk Grid Background */
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center bottom;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            perspective: 500px;
+        }
+
+        /* Vignette effect */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle, transparent 40%, #000 90%);
+            pointer-events: none;
+        }
+
+        .game-container {
+            z-index: 2;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-icon {
+            font-size: 80px;
+            background: linear-gradient(180deg, #fff 0%, var(--neon-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px var(--neon-purple);
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .title {
+            font-size: 48px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0;
+            text-shadow: 0 0 10px var(--neon-purple);
+            font-style: italic;
+        }
+
+        .subtitle {
+            font-family: 'Poppins', sans-serif;
+            color: var(--neon-green);
+            font-size: 14px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 50px;
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+
+        /* Loading Bar Container */
+        .loader-container {
+            width: 80%;
+            height: 6px;
+            background: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+        }
+
+        /* Loading Bar Fill */
+        .loader-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-green));
+            box-shadow: 0 0 15px var(--neon-purple);
+            transition: width 0.2s linear;
+        }
+
+        .status-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+            color: #888;
+            min-height: 20px;
+        }
+
+        /* Press Start Button (Hidden initially) */
+        #playBtn {
+            margin-top: 20px;
+            background: transparent;
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 15px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+            animation: pulseBtn 1.5s infinite;
+            display: none; /* Hidden until loaded */
+        }
+
+        #playBtn:active {
+            background: var(--neon-green);
+            color: #000;
+            box-shadow: 0 0 30px var(--neon-green);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+        }
+
+        @keyframes pulseBtn {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .fade-out {
+            opacity: 0;
+            transform: scale(1.1);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+    </style>
 </head>
 <body>
-  <nav class="navbar" id="navbar">
-    <a href="#" class="logo">
-      <div class="logo-icon">V</div>
-      Vynix
-    </a>
-    <ul class="nav-links">
-      <li><a href="#home">Home</a></li>
-      <li><a href="#features">Features</a></li>
-      <li><a href="#courses">Courses</a></li>
-      <li><a href="#about">About</a></li>
-      <li><a href="#pricing">Pricing</a></li>
-      <li><a href="login.html">Login</a></li>
-      <li><a href="signup.html">Sign Up</a></li>
-      <button class="dark-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">🌙</button>
-    </ul>
-  </nav>
 
-  <section id="home" class="hero">
-    <div class="hero-content">
-      <h1 class="hero-title">Empower Your Learning Journey</h1>
-      <p class="hero-subtitle">Discover interactive courses, connect with expert instructors, and track your progress in a modern LMS designed for the future of education.</p>
-      <a href="login.html" class="hero-cta">Get Started Free</a>
-    </div>
-  </section>
+    <div class="game-container" id="splashScreen">
+        <span class="material-symbols-rounded logo-icon">gamepad</span>
+        <h1 class="title">VYNIX</h1>
+        <div class="subtitle">CYBER DRIFT</div>
 
-  <section id="features" class="features">
-    <h2 class="section-title">Why Choose Vynix?</h2>
-    <p class="section-subtitle">Our platform is built to make learning engaging, accessible, and effective for everyone—from students to professionals.</p>
-    <div class="cards-grid">
-      <div class="feature-card" data-modal="interactive">
-        <div class="feature-icon">📚</div>
-        <h3 class="feature-title">Interactive Courses</h3>
-        <p class="feature-desc">Dive into rich multimedia content, quizzes, and hands-on projects tailored to your pace and style.</p>
-        <a href="#" class="explore-btn">Explore →</a>
-      </div>
-      <div class="feature-card" data-modal="instructors">
-        <div class="feature-icon">👥</div>
-        <h3 class="feature-title">Expert Instructors</h3>
-        <p class="feature-desc">Learn from industry leaders and educators who bring real-world experience directly to your screen.</p>
-        <a href="#" class="explore-btn">Explore →</a>
-      </div>
-      <div class="feature-card" data-modal="tracking">
-        <div class="feature-icon">📊</div>
-        <h3 class="feature-title">Progress Tracking</h3>
-        <p class="feature-desc">Monitor your achievements with detailed analytics, certificates, and personalized recommendations.</p>
-        <a href="#" class="explore-btn">Explore →</a>
-      </div>
-      <div class="feature-card" data-modal="secure">
-        <div class="feature-icon">🔒</div>
-        <h3 class="feature-title">Secure & Accessible</h3>
-        <p class="feature-desc">Enjoy seamless access on any device with robust privacy and compliance features built-in.</p>
-        <a href="#" class="explore-btn">Explore →</a>
-      </div>
-    </div>
-  </section>
-
-  <section id="courses" class="courses">
-    <h2 class="section-title">Featured Courses</h2>
-    <p class="section-subtitle">Explore our top-rated courses and start your journey today. From coding to creative skills, there's something for everyone.</p>
-    <div class="cards-grid">
-      <div class="course-card" data-modal="python">
-        <div class="course-thumbnail">🐍</div>
-        <div class="course-content">
-          <h3 class="course-title">Python Basics for Beginners</h3>
-          <p class="course-instructor">By Prof. Alice Johnson</p>
-          <div class="course-meta">
-            <span>Beginner • 4 weeks</span>
-            <div class="course-rating">
-              <span class="stars">★★★★★</span> (4.9)
-            </div>
-          </div>
-          <button class="enroll-btn" onclick="openCourseModal('python')">Preview Course</button>
+        <div class="loader-container" id="loaderContainer">
+            <div class="loader-bar" id="loaderBar"></div>
         </div>
-      </div>
-      <div class="course-card" data-modal="javascript">
-        <div class="course-thumbnail">⚡</div>
-        <div class="course-content">
-          <h3 class="course-title">JavaScript Mastery</h3>
-          <p class="course-instructor">By Dev Guru Max</p>
-          <div class="course-meta">
-            <span>Intermediate • 6 weeks</span>
-            <div class="course-rating">
-              <span class="stars">★★★★☆</span> (4.7)
-            </div>
-          </div>
-          <button class="enroll-btn" onclick="openCourseModal('javascript')">Preview Course</button>
-        </div>
-      </div>
-      <div class="course-card" data-modal="design">
-        <div class="course-thumbnail">🎨</div>
-        <div class="course-content">
-          <h3 class="course-title">UI/UX Design Fundamentals</h3>
-          <p class="course-instructor">By Designer Sara Lee</p>
-          <div class="course-meta">
-            <span>Beginner • 5 weeks</span>
-            <div class="course-rating">
-              <span class="stars">★★★★★</span> (4.8)
-            </div>
-          </div>
-          <button class="enroll-btn" onclick="openCourseModal('design')">Preview Course</button>
-        </div>
-      </div>
-      <div class="course-card" data-modal="data">
-        <div class="course-thumbnail">📈</div>
-        <div class="course-content">
-          <h3 class="course-title">Data Science with Python</h3>
-          <p class="course-instructor">By Dr. Data Expert</p>
-          <div class="course-meta">
-            <span>Advanced • 8 weeks</span>
-            <div class="course-rating">
-              <span class="stars">★★★★★</span> (4.9)
-            </div>
-          </div>
-          <button class="enroll-btn" onclick="openCourseModal('data')">Preview Course</button>
-        </div>
-      </div>
-    </div>
-  </section>
+        <div class="status-text" id="statusText">INITIALIZING SYSTEM...</div>
 
-  <!-- Feature Modals -->
-  <div id="interactive" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal('interactive')">&times;</span>
-      <h2 class="modal-title">Interactive Courses</h2>
-      <p class="modal-desc">Our courses go beyond reading—engage with videos, interactive simulations, and collaborative forums. Whether you're a beginner or advanced learner, every module adapts to your needs for maximum retention and fun.</p>
-      <a href="signup.html" class="modal-cta">Start Learning Today</a>
+        <button id="playBtn">TAP TO START</button>
     </div>
-  </div>
-  <div id="instructors" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal('instructors')">&times;</span>
-      <h2 class="modal-title">Expert Instructors</h2>
-      <p class="modal-desc">Curated by top professionals from tech giants, academia, and creative industries. Get live Q&A sessions, personalized feedback, and insights that bridge theory to practice.</p>
-      <a href="signup.html" class="modal-cta">Meet the Experts</a>
-    </div>
-  </div>
-  <div id="tracking" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal('tracking')">&times;</span>
-      <h2 class="modal-title">Progress Tracking</h2>
-      <p class="modal-desc">Visual dashboards show your streak, skill mastery, and growth over time. Earn badges, share certificates on LinkedIn, and get AI-powered suggestions for your next course.</p>
-      <a href="signup.html" class="modal-cta">Track Your Progress</a>
-    </div>
-  </div>
-  <div id="secure" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal('secure')">&times;</span>
-      <h2 class="modal-title">Secure & Accessible</h2>
-      <p class="modal-desc">GDPR-compliant, with end-to-end encryption and offline mode. Works flawlessly on desktop, tablet, or mobile—your learning never stops.</p>
-      <a href="signup.html" class="modal-cta">Get Secure Access</a>
-    </div>
-  </div>
 
-  <!-- Course Modals -->
-  <div id="python" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal('python')">&times;</span>
-      <h2 class="modal-title">Python Basics for Beginners</h2>
-      <p class="modal-desc">Kickstart your programming journey with Python! This course covers fundamentals like variables, loops, functions, and more. Perfect for absolute beginners.</p>
-      <div class="syllabus">
-        <h4>Course Syllabus</h4>
-        <ul>
-          <li>Module 1: Introduction to Python</li>
-          <li>Module 2: Data Types & Variables</li>
-          <li>Module 3: Control Structures</li>
-          <li>Module 4: Functions & Modules</li>
-          <li>Module 5: Projects & Capstone</li>
-        </ul>
-      </div>
-      <a href="signup.html" class="modal-cta">Enroll Now - Free</a>
-    </div>
-  </div>
-  <div id="javascript" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal('javascript')">&times;</span>
-      <h2 class="modal-title">JavaScript Mastery</h2>
-      <p class="modal-desc">Level up your web development skills with advanced JavaScript. Dive into DOM manipulation, async programming, and modern frameworks.</p>
-      <div class="syllabus">
-        <h4>Course Syllabus</h4>
-        <ul>
-          <li>Module 1: ES6+ Features</li>
-          <li>Module 2: Asynchronous JS</li>
-          <li>Module 3: DOM & Events</li>
-          <li>Module 4: APIs & Fetch</li>
-          <li>Module 5: Build a Web App</li>
-        </ul>
-      </div>
-      <a href="signup.html" class="modal-cta">Enroll Now - R49</a>
-    </div>
-  </div>
-  <div id="design" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal('design')">&times;</span>
-      <h2 class="modal-title">UI/UX Design Fundamentals</h2>
-      <p class="modal-desc">Learn the principles of user-centered design. From wireframing to prototyping, create intuitive interfaces that delight users.</p>
-      <div class="syllabus">
-        <h4>Course Syllabus</h4>
-        <ul>
-          <li>Module 1: Design Thinking</li>
-          <li>Module 2: User Research</li>
-          <li>Module 3: Wireframing Tools</li>
-          <li>Module 4: Prototyping</li>
-          <li>Module 5: Portfolio Project</li>
-        </ul>
-      </div>
-      <a href="signup.html" class="modal-cta">Enroll Now - Free</a>
-    </div>
-  </div>
-  <div id="data" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal('data')">&times;</span>
-      <h2 class="modal-title">Data Science with Python</h2>
-      <p class="modal-desc">Unlock the power of data! Master libraries like Pandas, NumPy, and Scikit-Learn to analyze and visualize real-world datasets.</p>
-      <div class="syllabus">
-        <h4>Course Syllabus</h4>
-        <ul>
-          <li>Module 1: Data Manipulation</li>
-          <li>Module 2: Visualization</li>
-          <li>Module 3: Machine Learning Basics</li>
-          <li>Module 4: Model Evaluation</li>
-          <li>Module 5: End-to-End Project</li>
-        </ul>
-      </div>
-      <a href="signup.html" class="modal-cta">Enroll Now - R79</a>
-    </div>
-  </div>
+    <script>
+        const loaderBar = document.getElementById('loaderBar');
+        const statusText = document.getElementById('statusText');
+        const loaderContainer = document.getElementById('loaderContainer');
+        const playBtn = document.getElementById('playBtn');
+        const splashScreen = document.getElementById('splashScreen');
 
-  <footer class="footer">
-    <p>&copy; 2025 Vynix LMS. All rights reserved. | <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms of Service</a></p>
-  </footer>
+        // Simulated Game Loading Sequence
+        let progress = 0;
+        const loadingPhrases = [
+            "LOADING ASSETS...",
+            "CONNECTING TO SERVER...",
+            "SYNCHRONIZING AUDIO...",
+            "SYSTEM READY"
+        ];
 
-  <script>
-    // Navbar scroll effect
-    window.addEventListener('scroll', () => {
-      const navbar = document.getElementById('navbar');
-      if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
-      }
-    });
+        function simulateLoading() {
+            const interval = setInterval(() => {
+                progress += Math.floor(Math.random() * 5) + 1;
+                
+                if (progress > 100) progress = 100;
+                
+                // Update width
+                loaderBar.style.width = `${progress}%`;
 
-    // Smooth scrolling for nav links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Update text based on progress
+                if (progress < 30) statusText.innerText = loadingPhrases[0];
+                else if (progress < 60) statusText.innerText = loadingPhrases[1];
+                else if (progress < 90) statusText.innerText = loadingPhrases[2];
+                else statusText.innerText = loadingPhrases[3];
+
+                if (progress === 100) {
+                    clearInterval(interval);
+                    onLoadComplete();
+                }
+            }, 50); // Speed of loading
         }
-      });
-    });
 
-    // Dark mode toggle
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark');
-      const isDark = document.body.classList.contains('dark');
-      localStorage.setItem('darkMode', isDark);
-      document.querySelector('.dark-toggle').textContent = isDark ? '☀️' : '🌙';
-    }
+        function onLoadComplete() {
+            // Hide loader, show button
+            setTimeout(() => {
+                loaderContainer.style.display = 'none';
+                statusText.style.display = 'none';
+                playBtn.style.display = 'block';
+            }, 500);
+        }
 
-    // Load saved theme
-    if (localStorage.getItem('darkMode') === 'true') {
-      document.body.classList.add('dark');
-      document.querySelector('.dark-toggle').textContent = '☀️';
-    }
-
-    // Feature card interactions
-    const featureCards = document.querySelectorAll('.feature-card');
-    featureCards.forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('.explore-btn')) return;
-        const modalId = card.dataset.modal;
-        openModal(modalId);
-      });
-    });
-
-    // Course card interactions
-    const courseCards = document.querySelectorAll('.course-card');
-    courseCards.forEach(card => {
-      card.addEventListener('mouseenter', () => {
-        card.style.transform = 'translateY(-12px) scale(1.02)';
-      });
-      card.addEventListener('mouseleave', () => {
-        card.style.transform = 'translateY(0) scale(1)';
-      });
-    });
-
-    // Modal functionality
-    function openModal(id) {
-      document.getElementById(id).style.display = 'block';
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).style.display = 'none';
-      document.body.style.overflow = 'auto';
-    }
-
-    window.openCourseModal = openModal; // Expose for onclick
-
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-      const closeBtn = modal.querySelector('.close');
-      closeBtn.addEventListener('click', () => closeModal(modal.id));
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal(modal.id);
-      });
-    });
-
-    // Close modals on Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        modals.forEach(modal => {
-          if (modal.style.display === 'block') {
-            closeModal(modal.id);
-          }
+        // Handle Play Click
+        playBtn.addEventListener('click', () => {
+            // Visual feedback
+            splashScreen.classList.add('fade-out');
+            
+            // Redirect to Game Cover
+            setTimeout(() => {
+                window.location.href = 'game-cover.html'; 
+            }, 500);
         });
-      }
-    });
 
-    // Staggered animation on load
-    window.addEventListener('load', () => {
-      [...featureCards, ...courseCards].forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        setTimeout(() => {
-          card.style.transition = 'all 0.6s ease';
-          card.style.opacity = '1';
-          card.style.transform = 'translateY(0)';
-        }, index * 150);
-      });
-    });
-  </script>
+        // Start loading immediately
+        window.addEventListener('load', simulateLoading);
+
+        // Service Worker (Keep existing PWA functionality)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
 </body>
 </html>
