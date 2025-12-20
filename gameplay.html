@@ -4,27 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <title>Vynix: Cyber Drift - Levels</title>
+    <title>Vynix: Cyber Drift</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
 
     <style>
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-            touch-action: none; 
-        }
-
         body {
             margin: 0;
             overflow: hidden;
             background: #000;
             font-family: 'Orbitron', sans-serif;
-            transition: background-color 0.5s ease;
+            touch-action: none; /* Prevents zooming/scrolling on mobile */
         }
 
         #gameCanvas {
@@ -33,11 +24,14 @@
             height: 100vh;
         }
 
+        /* Heads Up Display (HUD) */
         #ui-layer {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Let touches pass through to canvas */
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -48,224 +42,432 @@
             display: flex;
             justify-content: space-between;
             color: #fff;
+            text-shadow: 0 0 10px #d946ef;
         }
 
-        /* Level Up Flash Effect */
-        #flashEffect {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: white;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 50;
+        .score-box {
+            font-size: 24px;
+            font-weight: 900;
         }
 
+        .high-score {
+            font-size: 14px;
+            color: #10b981;
+        }
+
+        /* Game Over Screen */
         #gameOverScreen {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            display: none;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             color: white;
             z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
         }
 
-        .level-tag {
-            font-size: 14px;
-            color: var(--level-color, #10b981);
-            text-transform: uppercase;
-            letter-spacing: 4px;
+        #gameOverScreen.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .go-title {
+            font-size: 40px;
+            color: #ef4444;
+            text-shadow: 0 0 20px red;
+            margin-bottom: 10px;
+        }
+
+        .final-score {
+            font-size: 60px;
+            margin-bottom: 30px;
         }
 
         .restart-btn {
-            background: #fff; border: none; padding: 15px 40px;
-            font-family: 'Orbitron', sans-serif; font-size: 18px;
-            font-weight: 900; cursor: pointer; margin-top: 20px;
+            background: #10b981;
+            border: none;
+            padding: 15px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            color: #000;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 0 20px #10b981;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
         }
+
+        .home-btn {
+            background: transparent;
+            border: 2px solid #555;
+            margin-top: 15px;
+            padding: 10px 30px;
+            color: #888;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+        }
+
+        /* Touch Zones Visuals (Optional debugging) */
+        .controls-hint {
+            position: absolute;
+            bottom: 50px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255,255,255,0.3);
+            font-size: 12px;
+            animation: blink 2s infinite;
+        }
+        
+        @keyframes blink { 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
-    <div id="flashEffect"></div>
     <canvas id="gameCanvas"></canvas>
 
     <div id="ui-layer">
         <div class="hud-top">
             <div>
-                <div style="font-size: 24px;" id="scoreDisplay">0</div>
-                <div class="level-tag" id="levelDisplay">Phase 01</div>
+                <div class="score-box" id="scoreDisplay">0</div>
+                <div class="high-score">BEST: <span id="highScoreDisplay">0</span></div>
             </div>
-            <div style="text-align: right">
-                <div style="font-size: 10px; color: #555;">SYSTEM STATUS</div>
-                <div id="statusDot" style="color: #10b981">STABLE</div>
-            </div>
+            <div style="color: #d946ef">VYNIX.SYS</div>
+        </div>
+        <div class="controls-hint" id="controlsHint">
+            TAP LEFT < | > TAP RIGHT
         </div>
     </div>
 
     <div id="gameOverScreen">
-        <div style="color: #ef4444; font-size: 24px; letter-spacing: 5px;">CONNECTION SEVERED</div>
-        <div id="finalScore" style="font-size: 80px; margin: 20px 0;">0</div>
-        <button class="restart-btn" onclick="location.reload()">RE-INITIALIZE</button>
-        <button style="background:none; color:#555; border:none; margin-top:20px; font-family:'Orbitron'" onclick="window.location.href='game-cover.html'">EXIT TO VAULT</button>
+        <div class="go-title">SYSTEM FAILURE</div>
+        <div style="color:#aaa; font-size: 14px;">DATA COLLECTED</div>
+        <div class="final-score" id="finalScore">0</div>
+        <button class="restart-btn" onclick="resetGame()">REBOOT SYSTEM</button>
+        <button class="home-btn" onclick="window.location.href='game-cover.html'">EXIT TO LOBBY</button>
     </div>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const flash = document.getElementById('flashEffect');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const highScoreDisplay = document.getElementById('highScoreDisplay');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScoreEl = document.getElementById('finalScore');
+        const controlsHint = document.getElementById('controlsHint');
 
-        // Setup
-        const selectedIcon = localStorage.getItem('selectedIcon') || 'rocket_launch';
-        const selectedColor = localStorage.getItem('selectedColor') || '#d946ef';
+        // Game State
+        let isGameOver = false;
+        let score = 0;
+        let highScore = localStorage.getItem('vynixHighScore') || 0;
+        let speed = 5;
+        let gameLoopId;
         
-        // Level Data
-        const levels = [
-            { score: 0, color: '#d946ef', name: "Phase 01", speed: 6 },
-            { score: 100, color: '#3b82f6', name: "Phase 02", speed: 9 },
-            { score: 250, color: '#10b981', name: "Phase 03", speed: 12 },
-            { score: 500, color: '#f59e0b', name: "Hyper Drive", speed: 16 },
-            { score: 1000, color: '#ef4444', name: "Void Runner", speed: 22 }
-        ];
-
-        let cw, ch, score = 0, isGameOver = false, currentLevelIdx = 0;
-        let obstacles = [];
-        let speed = levels[0].speed;
-        let accentColor = levels[0].color;
-
+        // Setup Scaling
+        let cw, ch;
         function resize() {
             cw = canvas.width = window.innerWidth;
             ch = canvas.height = window.innerHeight;
         }
         window.addEventListener('resize', resize);
         resize();
+        highScoreDisplay.innerText = highScore;
 
-        class Player {
+        // --- Game Objects ---
+
+        // The Grid (Background)
+        class Grid {
             constructor() {
-                this.lane = 1;
-                this.x = cw / 2;
-                this.y = ch - 150;
-                this.targetX = cw / 2;
+                this.yOffset = 0;
+                this.spacing = 60;
             }
             update() {
-                const laneWidth = cw / 3;
-                this.targetX = (this.lane * laneWidth) + (laneWidth / 2);
-                this.x += (this.targetX - this.x) * 0.2;
+                this.yOffset += speed;
+                if (this.yOffset >= this.spacing) this.yOffset = 0;
             }
             draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.shadowBlur = 25;
-                ctx.shadowColor = selectedColor;
-                ctx.fillStyle = selectedColor;
-                ctx.font = '44px "Material Symbols Rounded"';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(selectedIcon, 0, 0);
-                ctx.restore();
+                ctx.strokeStyle = 'rgba(217, 70, 239, 0.2)'; // Purple
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                
+                // Vertical lines (Perspective)
+                const horizonY = -100; // Vanishing point
+                const centerX = cw / 2;
+                
+                // Draw 3 main lanes visuals
+                for(let i = -2; i <= 2; i++) {
+                    let x = centerX + (i * (cw/3));
+                    // Simple vertical lines for now
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, ch);
+                }
+
+                // Horizontal moving lines
+                for (let y = this.yOffset; y < ch; y += this.spacing) {
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(cw, y);
+                }
+                ctx.stroke();
+                
+                // Glow effect at bottom
+                const gradient = ctx.createLinearGradient(0, ch/2, 0, ch);
+                gradient.addColorStop(0, "transparent");
+                gradient.addColorStop(1, "rgba(217, 70, 239, 0.1)");
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, ch/2, cw, ch/2);
             }
         }
 
+        // The Player
+        class Player {
+            constructor() {
+                this.width = 40;
+                this.height = 50;
+                this.lane = 1; // 0: Left, 1: Center, 2: Right
+                this.y = ch - 150;
+                this.targetX = cw / 2;
+                this.x = cw / 2;
+                this.color = '#10b981'; // Green
+            }
+
+            update() {
+                // Determine target X based on lane
+                const laneWidth = cw / 3;
+                if (this.lane === 0) this.targetX = laneWidth / 2;
+                if (this.lane === 1) this.targetX = cw / 2;
+                if (this.lane === 2) this.targetX = cw - (laneWidth / 2);
+
+                // Smooth movement (Lerp)
+                this.x += (this.targetX - this.x) * 0.2;
+            }
+
+            draw() {
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = this.color;
+                ctx.fillStyle = this.color;
+                
+                // Draw Triangle
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x - 20, this.y + 50);
+                ctx.lineTo(this.x + 20, this.y + 50);
+                ctx.closePath();
+                ctx.fill();
+                
+                // Engine flame
+                ctx.shadowBlur = 10;
+                ctx.fillStyle = '#00ffff';
+                ctx.beginPath();
+                ctx.moveTo(this.x - 10, this.y + 50);
+                ctx.lineTo(this.x + 10, this.y + 50);
+                ctx.lineTo(this.x, this.y + 50 + (Math.random() * 20 + 10));
+                ctx.fill();
+                
+                ctx.shadowBlur = 0; // Reset
+            }
+
+            move(dir) {
+                if (dir === 'left' && this.lane > 0) this.lane--;
+                if (dir === 'right' && this.lane < 2) this.lane++;
+            }
+        }
+
+        // Obstacles
         class Obstacle {
             constructor() {
                 this.lane = Math.floor(Math.random() * 3);
+                this.width = 60;
+                this.height = 60;
                 this.y = -100;
-                this.h = 40;
+                this.active = true;
             }
-            update() { this.y += speed; }
+
+            update() {
+                this.y += speed;
+                if (this.y > ch + 100) this.active = false;
+            }
+
             draw() {
                 const laneWidth = cw / 3;
-                const x = (this.lane * laneWidth) + (laneWidth / 2);
+                let x = 0;
+                if (this.lane === 0) x = laneWidth / 2;
+                if (this.lane === 1) x = cw / 2;
+                if (this.lane === 2) x = cw - (laneWidth / 2);
+
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ef4444';
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(x - 30, this.y, 60, 60);
+                
+                // Detail inside block
+                ctx.fillStyle = '#000';
+                ctx.fillRect(x - 20, this.y + 10, 40, 40);
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        // Particles (Explosion)
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 10;
+                this.vy = (Math.random() - 0.5) * 10;
+                this.life = 1.0;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= 0.05;
+            }
+            draw() {
+                ctx.globalAlpha = this.life;
                 ctx.fillStyle = '#fff';
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#fff';
-                ctx.fillRect(x - 25, this.y, 50, this.h);
+                ctx.fillRect(this.x, this.y, 4, 4);
+                ctx.globalAlpha = 1;
             }
         }
 
-        const p = new Player();
+        // --- Core Logic ---
 
-        function checkLevelUp() {
-            const nextLevel = levels[currentLevelIdx + 1];
-            if (nextLevel && Math.floor(score) >= nextLevel.score) {
-                currentLevelIdx++;
-                speed = levels[currentLevelIdx].speed;
-                accentColor = levels[currentLevelIdx].color;
-                
-                // UI Updates
-                document.getElementById('levelDisplay').innerText = levels[currentLevelIdx].name;
-                document.getElementById('levelDisplay').style.color = accentColor;
-                document.getElementById('statusDot').style.color = accentColor;
-                
-                // Visual Flash
-                flash.style.background = accentColor;
-                flash.style.opacity = '0.5';
-                setTimeout(() => flash.style.opacity = '0', 300);
+        const grid = new Grid();
+        const player = new Player();
+        let obstacles = [];
+        let particles = [];
+        let frameCount = 0;
+
+        function spawnObstacle() {
+            // Spawn rate increases with score
+            const rate = Math.max(20, 60 - Math.floor(score / 50)); 
+            if (frameCount % rate === 0) {
+                obstacles.push(new Obstacle());
             }
         }
 
-        function drawBackground() {
-            ctx.fillStyle = '#050505';
-            ctx.fillRect(0, 0, cw, ch);
+        function checkCollisions() {
+            const laneWidth = cw / 3;
+            
+            obstacles.forEach(obs => {
+                // Simple Hitbox: Check if in same lane and Y overlaps
+                // Player Y is roughly ch - 150 to ch - 100
+                // Obs Y is obs.y to obs.y + 60
+                
+                if (obs.lane === player.lane) {
+                    if (obs.y + 60 > player.y && obs.y < player.y + 50) {
+                        triggerGameOver();
+                    }
+                }
+            });
+        }
 
-            // Level-based Grid
-            ctx.strokeStyle = accentColor;
-            ctx.globalAlpha = 0.2;
-            ctx.lineWidth = 2;
+        function triggerGameOver() {
+            isGameOver = true;
+            // Explosion
+            for(let i=0; i<20; i++) particles.push(new Particle(player.x, player.y + 25));
             
-            // Vertical Lanes
-            ctx.beginPath();
-            ctx.moveTo(cw/3, 0); ctx.lineTo(cw/3, ch);
-            ctx.moveTo((cw/3)*2, 0); ctx.lineTo((cw/3)*2, ch);
-            ctx.stroke();
+            // Save High Score
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('vynixHighScore', highScore);
+            }
             
-            ctx.globalAlpha = 1.0;
+            // Show UI
+            finalScoreEl.innerText = score;
+            gameOverScreen.classList.add('visible');
+            controlsHint.style.display = 'none';
+        }
+
+        function resetGame() {
+            isGameOver = false;
+            score = 0;
+            speed = 5;
+            obstacles = [];
+            particles = [];
+            player.lane = 1;
+            player.x = cw / 2;
+            scoreDisplay.innerText = "0";
+            highScoreDisplay.innerText = highScore;
+            gameOverScreen.classList.remove('visible');
+            controlsHint.style.display = 'block';
+            loop();
         }
 
         function loop() {
-            if (isGameOver) return;
-
-            drawBackground();
-            checkLevelUp();
-
-            p.update();
-            p.draw();
-
-            // Dynamic Spawn Rate
-            if (Math.random() < 0.02 + (currentLevelIdx * 0.01)) {
-                obstacles.push(new Obstacle());
+            if (isGameOver) {
+                // Just draw explosion particles fading out
+                ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                ctx.fillRect(0, 0, cw, ch);
+                particles.forEach((p, index) => {
+                    p.update();
+                    p.draw();
+                    if(p.life <= 0) particles.splice(index, 1);
+                });
+                if(particles.length > 0) requestAnimationFrame(loop);
+                return;
             }
 
-            obstacles.forEach((o, i) => {
-                o.update();
-                o.draw();
+            // Clear
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, cw, ch);
 
-                if (o.lane === p.lane && o.y + o.h > p.y - 20 && o.y < p.y + 20) {
-                    isGameOver = true;
-                    document.getElementById('gameOverScreen').style.display = 'flex';
-                    document.getElementById('finalScore').innerText = Math.floor(score);
-                }
+            // Update
+            frameCount++;
+            score++;
+            scoreDisplay.innerText = Math.floor(score / 10);
+            
+            // Speed up over time
+            if (score % 500 === 0) speed += 0.5;
 
-                if (o.y > ch) obstacles.splice(i, 1);
+            grid.update();
+            grid.draw();
+
+            player.update();
+            player.draw();
+
+            spawnObstacle();
+            obstacles.forEach((obs, index) => {
+                obs.update();
+                obs.draw();
+                if (!obs.active) obstacles.splice(index, 1);
             });
 
-            score += 0.1;
-            document.getElementById('scoreDisplay').innerText = Math.floor(score);
+            checkCollisions();
 
-            requestAnimationFrame(loop);
+            gameLoopId = requestAnimationFrame(loop);
         }
 
-        window.addEventListener('touchstart', e => {
-            const tx = e.touches[0].clientX;
-            if (tx < cw / 2 && p.lane > 0) p.lane--;
-            else if (tx > cw / 2 && p.lane < 2) p.lane++;
+        // --- Input Handling ---
+        
+        // Touch
+        window.addEventListener('touchstart', (e) => {
+            if (isGameOver) return;
+            const touchX = e.touches[0].clientX;
+            if (touchX < cw / 2) player.move('left');
+            else player.move('right');
         });
 
-        document.addEventListener('contextmenu', e => e.preventDefault());
+        // Mouse (for testing on PC)
+        window.addEventListener('mousedown', (e) => {
+            if (isGameOver) return;
+            if (e.clientX < cw / 2) player.move('left');
+            else player.move('right');
+        });
 
+        // Keyboard
+        window.addEventListener('keydown', (e) => {
+            if (isGameOver) return;
+            if (e.key === 'ArrowLeft') player.move('left');
+            if (e.key === 'ArrowRight') player.move('right');
+        });
+
+        // Start
         loop();
+
     </script>
 </body>
 </html>
